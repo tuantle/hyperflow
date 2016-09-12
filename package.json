@@ -1,0 +1,87 @@
+{
+    "name": "hyperflow",
+    "version": "0.1.0-beta1",
+    "registry": "github",
+    "description": "A toolkit & library for developing universal app.",
+    "license": "MIT",
+    "homepage": "https://github.com/tuantle/hyperflow",
+    "main": "src/hyperflow.js",
+    "authors": [
+        "Tuan Le <tuan.t.lei@gmail.com> (https://github.com/tuantle)"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tuantle/hyperflow.git"
+    },
+    "bugs": {
+        "url": "https://github.com/tuantle/hyperflow/issues"
+    },
+    "directories": {
+        "lib": "src"
+    },
+    "babel": {
+        "only": [
+            "./src",
+            "./tests"
+        ],
+        "presets": [
+            "es2015",
+            "stage-0",
+            "stage-1",
+            "stage-2",
+            "stage-3",
+            "react"
+        ],
+        "plugins": [
+            "transform-strict-mode"
+        ]
+    },
+    "jspm": {
+      "dependencies": {
+        "rx": "npm:rx",
+        "tape": "npm:tape",
+        "transducers-js": "npm:transducers-js"
+      },
+      "devDependencies": {
+        "babel": "npm:babel-core",
+        "babel-runtime": "npm:babel-runtime",
+        "core-js": "npm:core-js"
+      }
+    },
+    "dependencies": {
+        "rx": "latest",
+        "transducers-js": "latest",
+        "tape": "latest"
+    },
+    "devDependencies": {
+        "babel-polyfill": "latest",
+        "babel-core": "latest",
+        "babel-preset-es2015": "latest",
+        "babel-preset-stage-0": "latest",
+        "babel-preset-stage-1": "latest",
+        "babel-preset-stage-2": "latest",
+        "babel-preset-stage-3": "latest",
+        "babel-preset-react": "latest",
+        "babel-plugin-transform-strict-mode": "latest",
+
+        "eslint": "latest",
+        "babel-eslint": "latest",
+        "eslint-plugin-react": "latest",
+        "eslint-plugin-react-native": "latest"
+    },
+    "devEngines": {
+       "node": "5.x",
+       "npm": "3.x"
+    },
+    "modulePathIgnorePatterns": [
+        "/node_modules/",
+        "/jspm_packages/"
+    ],
+    "testPathIgnorePatterns": [
+        "/tests/",
+        "/examples/"
+    ],
+    "scripts": {
+        "start-unit-tests": "node ./tests/test-suites"
+    }
+}
