@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Calculator Example</title>
+    <meta "charSet=UTF-8">
+</head>
+
+<body>
+    <!-- load system js -->
+    <script src="../jspm_packages/system.js"></script>
+    <script src="../config.js"></script>
+    <!-- calculator app -->
+    <div id="calculator"></div>
+    <script>
+        System.import("hyperflow").then(function (Hflow) {
+            Hflow.init({
+                TARGET: `client-web`,
+                DEVELOPMENT: true,
+                ENABLE_INFO_MESSAGE: true,
+                ENABLE_WARN_0_MESSAGE: false,
+                ENABLE_WARN_1_MESSAGE: true
+            });
+        }).then(function () {
+            System.import("calculator/app").then(function ({
+                app
+            }) {
+                app.run();
+            }).catch(console.error.bind(console));
+        });
+    </script>
+</body>
+
+</html>
