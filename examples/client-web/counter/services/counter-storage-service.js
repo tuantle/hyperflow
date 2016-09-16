@@ -11,6 +11,8 @@
 
 import { Hflow } from 'hyperflow';
 
+import event from '../events/counter-event';
+
 const CounterStorageService = Hflow.Service.augment({
     composites: [
         Hflow.Storage.WebStorageComposite
@@ -39,25 +41,25 @@ const CounterStorageService = Hflow.Service.augment({
     },
     setup: function setup (done) {
         const service = this;
-        service.incoming(`request-for-data-read`).handle(() => {
+        service.incoming(event.request.dataRead).handle(() => {
             service.fetch(
                 `counter`
             ).read().then((results) => {
-                service.outgoing(`response-to-data-read-success`).emit(() => results[0]);
+                service.outgoing(event.response.to.dataRead.ok).emit(() => results[0]);
             }).catch((error) => {
-                service.outgoing(`response-to-data-read-serror`).emit();
+                service.outgoing(event.response.to.dataRead.error).emit();
                 Hflow.log(`warn1`, `CounterStorageService - Unable to read from local storage. ${error.message}`);
             });
         });
-        service.incoming(`request-for-data-write`).handle((counter) => {
+        service.incoming(event.request.dataWrite).handle((counter) => {
             service.fetch(
                 `counter`
             ).write({
                 bundle: counter
             }).then(() => {
-                service.outgoing(`response-with-data-write-success`).emit();
+                service.outgoing(event.response.to.dataWrite.ok).emit();
             }).catch((error) => {
-                service.outgoing(`response-with-data-write-error`).emit();
+                service.outgoing(event.response.to.dataWrite.error).emit();
                 Hflow.log(`warn1`, `CounterStorageService - Unable to write from local storage. ${error.message}`);
             });
         });

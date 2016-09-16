@@ -13,6 +13,8 @@ import Hflow from 'hyperflow';
 
 import { IncreaseButtonInterface } from '../interfaces/counter-interface';
 
+import event from '../events/counter-event';
+
 /**
  * @description - Counter app increase button interface test fixture  module.
  *
@@ -29,9 +31,6 @@ const IncreaseButtonInterfaceTestFixture = Hflow.Fixture.augment({
                 name: `increase-button`
             })
         });
-    },
-    setup: function setup () {
-        const fixture = this;
     }
 });
 export { IncreaseButtonInterfaceTestFixture };

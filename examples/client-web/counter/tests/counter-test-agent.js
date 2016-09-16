@@ -15,6 +15,8 @@ import { CounterDomainTestFixture } from './counter-domain-test-fixture';
 
 // import { CounterStoreTestFixture } from './counter-store-test-fixture';
 
+import event from '../events/counter-event';
+
 /**
  * @description - Counter app test agent module.
  *
