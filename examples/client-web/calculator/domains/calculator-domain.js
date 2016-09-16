@@ -17,6 +17,8 @@ import { CalculatorService } from '../services/calculator-service';
 
 import { CalculatorInterface } from '../interfaces/calculator-interface';
 
+import event from '../events/calculator-event';
+
 const CalculatorDomain = Hflow.Domain.augment({
     $init: function $init () {
         const domain = this;
@@ -84,8 +86,8 @@ const CalculatorDomain = Hflow.Domain.augment({
     },
     setup: function setup (done) {
         const domain = this;
-        domain.incoming(`on-reset`).forward(`do-reset`);
-        domain.incoming(`on-update-operation`).handle((value) => {
+        domain.incoming(event.on.reset).forward(event.do.reset);
+        domain.incoming(event.on.updateOperation).handle((value) => {
             return function setOperation (state) {
                 if (!state.computeReady) {
                     return {
@@ -105,8 +107,8 @@ const CalculatorDomain = Hflow.Domain.augment({
                     }
                 };
             };
-        }).relay(`do-update-operation`);
-        domain.incoming(`on-negate-operand`).handle(() => {
+        }).relay(event.do.updateOperation);
+        domain.incoming(event.on.negateOperand).handle(() => {
             function negateOperand (operand) {
                 if (!Hflow.isEmpty(operand)) {
                     if (operand.charAt(0) === `-`) {
@@ -131,14 +133,14 @@ const CalculatorDomain = Hflow.Domain.augment({
                     }
                 };
             };
-        }).relay(`do-update-operand`);
+        }).relay(event.do.updateOperand);
 
-        domain.incoming(`on-update-operand`).handle((value) => {
+        domain.incoming(event.on.updateOperand).handle((value) => {
             function assignOperand (operand) {
                 if (value === `π`) {
                     return `3.14159265359`;
-                } else if (value === `.` && Hflow.isEmpty(operand)) {
-                    return `0`;
+                } else if (value === `.` && (Hflow.isEmpty(operand) || operand === `0`)) {
+                    return `0.`;
                 } else if (value === `0` && (Hflow.isEmpty(operand) || operand === `0`)) {
                     return `0`;
                 }
@@ -160,13 +162,13 @@ const CalculatorDomain = Hflow.Domain.augment({
                 };
             }
             return setOperand;
-        }).relay(`do-update-operand`);
-        domain.incoming(`as-state-mutated`).forward(`request-for-operand-from-buffer`);
-        domain.incoming(`response-with-operand-from-buffer`).handle((operand) => {
+        }).relay(event.do.updateOperand);
+        domain.incoming(event.as.stateMutated).forward(event.request.operandFromBuffer);
+        domain.incoming(event.response.with.operandFromBuffer).handle((operand) => {
             let result = 0;
             const xValue = !Hflow.isEmpty(operand.x) ? parseFloat(operand.x) : 0;
             const yValue = !Hflow.isEmpty(operand.y) ? parseFloat(operand.y) : 0;
-            domain.incoming(`on-compute`).handle(() => {
+            domain.incoming(event.on.compute).handle(() => {
                 return function updateAfterCompute (state) {
                     if (state.computeReady) {
                         if (state.operation === `+`) {
@@ -200,7 +202,7 @@ const CalculatorDomain = Hflow.Domain.augment({
                         }
                     }
                 };
-            }).relay(`do-update-after-compute`);
+            }).relay(event.do.updateAfterCompute);
 
             if (operand.current === `y` && yValue !== 0) {
                 result = yValue;
@@ -214,7 +216,7 @@ const CalculatorDomain = Hflow.Domain.augment({
                             `${result}`.replace(/(\d)(?=(\d{3})+\.)/g, `$1,`)
                 };
             };
-        }).relay(`do-update-display-result`);
+        }).relay(event.do.updateDisplayResult);
         done();
     }
 });

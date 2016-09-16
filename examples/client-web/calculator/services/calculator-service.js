@@ -11,6 +11,8 @@
 
 import { Hflow } from 'hyperflow';
 
+import event from '../events/calculator-event';
+
 const CalculatorService = Hflow.Service.augment({
     composites: [
         Hflow.State.ReducerComposite
@@ -35,7 +37,7 @@ const CalculatorService = Hflow.Service.augment({
     },
     setup: function setup (done) {
         const service = this;
-        service.incoming(`do-reset`).handle(() => {
+        service.incoming(event.do.reset).handle(() => {
             if (service.reduce({
                 computeReady: false,
                 operation: ``,
@@ -48,22 +50,22 @@ const CalculatorService = Hflow.Service.augment({
                 Hflow.log(`info`, `Calculator buffer service reset.`);
             }
         });
-        service.incoming(`do-update-operation`).handle((setOperation) => {
+        service.incoming(event.do.updateOperation).handle((setOperation) => {
             if (service.reduce(setOperation)) {
                 Hflow.log(`info`, `Calculator buffer service operation buffer updated.`);
             }
         });
-        service.incoming(`do-update-operand`).handle((setOperand) => {
+        service.incoming(event.do.updateOperand).handle((setOperand) => {
             if (service.reduce(setOperand)) {
                 Hflow.log(`info`, `Calculator buffer service operand buffer updated.`);
             }
         });
-        service.incoming(`do-update-after-compute`).handle((updateAfterCompute) => {
+        service.incoming(event.do.updateAfterCompute).handle((updateAfterCompute) => {
             if (service.reduce(updateAfterCompute)) {
                 Hflow.log(`info`, `Calculator buffer service result updated;`);
             }
         });
-        service.incoming(`request-for-operand-from-buffer`).handle(() => service.operand).relay(`response-with-operand-from-buffer`);
+        service.incoming(event.request.operandFromBuffer).handle(() => service.operand).relay(event.response.with.operandFromBuffer);
         done();
     }
 });
