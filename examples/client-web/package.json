@@ -39,6 +39,7 @@
     }
   },
   "dependencies": {
+    "hyperflow": "latest",
     "material-ui": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -66,8 +67,8 @@
     "url": "git+ssh://git@github.com/tuantle/hyperflow.git"
   },
   "scripts": {
-    "webpack-build-counter": "webpack --progress --colors --config webpack.config.js",
-    "webpack-start-counter": "webpack-dev-server --content-base --progress --colors build",
+    "webpack-build-counter": "webpack --progress --colors --config counter-webpack.config.js",
+    "webpack-start-counter": "webpack-dev-server --content-base --progress --colors counter/build",
     "jspm-start-counter": "live-server -q --open=counter/index.html",
     "jspm-start-calculator": "live-server -q --open=calculator/index.html"
   },
