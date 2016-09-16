@@ -437,9 +437,9 @@ export default CompositeElement({
             this.outgoing = function outgoing (...eventIds) {
                 const factory = this;
                 if (Hflow.isEmpty(eventIds)) {
-                    Hflow.log(`error`, `EventStreamComposite.outgoing - Input eventId array is empty.`);
+                    Hflow.log(`error`, `EventStreamComposite.outgoing - Factory:${factory.name} input eventId array is empty.`);
                 } else if (eventIds.some((eventId) => !Hflow.isString(eventId))) {
-                    Hflow.log(`error`, `EventStreamComposite.outgoing - Input event Id is invalid.`);
+                    Hflow.log(`error`, `EventStreamComposite.outgoing - Factory:${factory.name} input event Id is invalid.`);
                 } else {
                     eventIds = eventIds.filter((eventId) => {
                         if (_arbiter.hasOwnProperty(eventId)) {
@@ -591,9 +591,9 @@ export default CompositeElement({
             this.incoming = function incoming (...eventIds) {
                 const factory = this;
                 if (Hflow.isEmpty(eventIds)) {
-                    Hflow.log(`error`, `EventStreamComposite.incoming - Input eventId array is empty.`);
+                    Hflow.log(`error`, `EventStreamComposite.incoming - Factory:${factory.name} input eventId array is empty.`);
                 } else if (eventIds.some((eventId) => !Hflow.isString(eventId))) {
-                    Hflow.log(`error`, `EventStreamComposite.incoming - Input event Id is invalid.`);
+                    Hflow.log(`error`, `EventStreamComposite.incoming - Factory:${factory.name} input event Id is invalid.`);
                 } else {
                     eventIds = eventIds.filter((eventId) => {
                         if (_arbiter.hasOwnProperty(eventId)) {
@@ -739,7 +739,7 @@ export default CompositeElement({
                          */
                         handle: function handle (handler) {
                             if (!Hflow.isFunction(handler)) {
-                                Hflow.log(`error`, `EventStreamComposite.incoming.handle - Input handler is invalid.`);
+                                Hflow.log(`error`, `EventStreamComposite.incoming.handle - Factory:${factory.name} input handler is invalid.`);
                             } else {
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
@@ -766,9 +766,9 @@ export default CompositeElement({
                                      */
                                     relay: function relay (...relayEventIds) {
                                         if (Hflow.isEmpty(relayEventIds)) {
-                                            Hflow.log(`error`, `EventStreamComposite.incoming.handle.relay - Input event Id array is empty.`);
+                                            Hflow.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id array is empty.`);
                                         } else if (relayEventIds.some((relayEventId) => !Hflow.isString(relayEventId))) {
-                                            Hflow.log(`error`, `EventStreamComposite.incoming.handle.relay - Input event Id is invalid.`);
+                                            Hflow.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id is invalid.`);
                                         } else {
                                             relayEventIds = relayEventIds.filter((relayEventId) => {
                                                 if (eventIds.some((eventId) => eventId === relayEventId)) {
@@ -841,9 +841,9 @@ export default CompositeElement({
                          */
                         forward: function forward (...forwardEventIds) {
                             if (Hflow.isEmpty(forwardEventIds)) {
-                                Hflow.log(`error`, `EventStreamComposite.incoming.forward - Input eventId array is empty.`);
+                                Hflow.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input eventId array is empty.`);
                             } else if (forwardEventIds.some((forwardEventId) => !Hflow.isString(forwardEventId))) {
-                                Hflow.log(`error`, `EventStreamComposite.incoming.forward - Input event Id is invalid.`);
+                                Hflow.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input event Id is invalid.`);
                             } else {
                                 forwardEventIds = forwardEventIds.filter((forwardEventId) => {
                                     if (eventIds.some((eventId) => eventId === forwardEventId)) {
@@ -946,14 +946,14 @@ export default CompositeElement({
             this.observe = function observe (...sources) {
                 const factory = this;
                 if (Hflow.isEmpty(sources)) {
-                    Hflow.log(`error`, `EventStreamComposite.observe - Input source array is empty.`);
+                    Hflow.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source array is empty.`);
                 } else if (sources.some((source) => {
                     return !Hflow.isSchema({
                         name: `string`,
                         getStream: `function`
                     }).of(source);
                 })) {
-                    Hflow.log(`error`, `EventStreamComposite.observe - Input source objects are invalid.`);
+                    Hflow.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
                 } else {
                     /* merge all external incoming event streams into one */
                     _incomingStream = Rx.Observable.merge(sources.map((source) => {
