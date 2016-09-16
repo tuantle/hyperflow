@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta1",
+    "version": "0.1.0-beta2",
     "registry": "github",
     "description": "A toolkit & library for developing universal app.",
     "license": "MIT",
@@ -20,6 +20,7 @@
         "lib": "src"
     },
     "babel": {
+        "babelrc": false,
         "only": [
             "./src",
             "./tests"
