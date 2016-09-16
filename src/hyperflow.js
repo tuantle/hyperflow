@@ -104,7 +104,7 @@ const init = function init ({
             enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
         });
         const HflowProperty = {
-            VERSION: `0.1.0-beta1`,
+            VERSION: `0.1.0-beta2`,
             ENV: TARGET === `server` ? process.env : {}, // eslint-disable-line
             TARGET,
             DEVELOPMENT,
@@ -113,6 +113,101 @@ const init = function init ({
             /* set data and composite element namespaces */
             Data: DataElement,
             Composite: CompositeElement,
+            /* set factory event stream Ids creator */
+            Event: {
+                /**
+                 * @description - Function to contruct an event Id structure for factory event stream.
+                 *
+                 * @function create
+                 * @param {object} eventIdObj - Event Id contructor object
+                 * @returns {object}
+                 */
+                create: function create (sourceEventMap) {
+                    if (!common.isSchema({
+                        as: `array|undefined`,
+                        on: `array|undefined`,
+                        do: `array|undefined`,
+                        request: `array|undefined`
+                    }).of(sourceEventMap)) {
+                        common.log(`error`, `Event.create - Input event map is invalid.`);
+                    } else {
+                        /* helper function to convert camel case to dash */
+                        const camelcaseToDash = function camelcaseToDash (str) {
+                            return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => {
+                                return `-${word.toLowerCase()}`;
+                            }).replace(/^_/, ``);
+                        };
+                        const targetEventMap = common.merge(sourceEventMap).with({
+                            as: [
+                                `stateMutated`
+                            ],
+                            on: [
+                                `componentWillMount`,
+                                `componentDidMount`,
+                                `componentWillUpdate`,
+                                `componentDidUpdate`,
+                                `componentWillUnmount`
+                            ]
+                        });
+                        return Object.keys(targetEventMap).reduce((outputEventMap, key) => {
+                            if (key === `as`) {
+                                if (targetEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = targetEventMap[key].reduce((asEventMap, _key) => {
+                                        asEventMap[_key] = `as-${camelcaseToDash(_key)}`;
+                                        return asEventMap;
+                                    }, {});
+                                } else {
+                                    common.log(`error`, `Event.create - Input 'as' event keys are invalid.`);
+                                }
+                            }
+                            if (key === `on`) {
+                                if (targetEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = targetEventMap[key].reduce((onEventMap, _key) => {
+                                        onEventMap[_key] = `on-${camelcaseToDash(_key)}`;
+                                        return onEventMap;
+                                    }, {});
+                                } else {
+                                    common.log(`error`, `Event.create - Input 'on' event keys are invalid.`);
+                                }
+                            }
+                            if (key === `do`) {
+                                if (targetEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = targetEventMap[key].reduce((doEventMap, _key) => {
+                                        doEventMap[_key] = `do-${camelcaseToDash(_key)}`;
+                                        return doEventMap;
+                                    }, {});
+                                } else {
+                                    common.log(`error`, `Event.create - Input 'do' event keys are invalid.`);
+                                }
+                            }
+                            if (key === `request`) {
+                                if (targetEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = targetEventMap[key].reduce((requestForEventMap, _key) => {
+                                        requestForEventMap[_key] = `request-for-${camelcaseToDash(_key)}`;
+                                        return requestForEventMap;
+                                    }, {});
+                                    outputEventMap[`response`] = {
+                                        with: targetEventMap[key].reduce((responseToEventMap, _key) => {
+                                            responseToEventMap[_key] = `response-with-${camelcaseToDash(_key)}`;
+                                            return responseToEventMap;
+                                        }, {}),
+                                        to: targetEventMap[key].reduce((responseToEventMap, _key) => {
+                                            responseToEventMap[_key] = {
+                                                ok: `response-to-${camelcaseToDash(_key)}-ok`,
+                                                error: `response-to-${camelcaseToDash(_key)}-error`
+                                            };
+                                            return responseToEventMap;
+                                        }, {})
+                                    };
+                                } else {
+                                    common.log(`error`, `Event.create - Input 'request-for' event keys are invalid.`);
+                                }
+                            }
+                            return outputEventMap;
+                        }, {});
+                    }
+                }
+            },
             /* set store, interface, domain, and service factory namespaces */
             Domain: DomainFactory,
             Store: StoreFactory,
