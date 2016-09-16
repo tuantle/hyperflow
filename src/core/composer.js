@@ -44,26 +44,27 @@ const ComposerPrototype = Object.create({}).prototype = {
      * @method getState
      * @returns {object}
      */
-     // TODO: To be removed if find no use case.
-    getState: function getState () {
-        const composer = this;
-        return Hflow.clone(composer._state);
-    },
+    // TODO: To be removed if find no use case.
+    // getState: function getState () {
+    //     const composer = this;
+    //     return Hflow.clone(composer._state);
+    // },
     /**
      * @description - Get composer composite.
      *
      * @method getComposite
      * @returns {object}
      */
-    getComposite: function getComposite () {
-        const composer = this;
-        const compositeDefinition = {
-            exclusion: composer._composite.getExclusion(),
-            enclosure: composer._composite.getEnclosure(),
-            template: composer._composite.getTemplate()
-        };
-        return CompositeElement(compositeDefinition);
-    },
+    // TODO: To be removed if find no use case.
+    // getComposite: function getComposite () {
+    //     const composer = this;
+    //     const compositeDefinition = {
+    //         exclusion: composer._composite.getExclusion(),
+    //         enclosure: composer._composite.getEnclosure(),
+    //         template: composer._composite.getTemplate()
+    //     };
+    //     return CompositeElement(compositeDefinition);
+    // },
     /**
      * @description - Create a new composer factory by augmentation.
      *

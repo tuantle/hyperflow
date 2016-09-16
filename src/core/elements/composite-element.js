@@ -325,9 +325,10 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @method getStateAccessor
                      * @return {object}
                      */
-                    getStateAccessor: function getStateAccessor () {
-                        return product._cursor.getAccessor();
-                    },
+                    // TODO: Remove if find no use case.
+                    // getStateAccessor: function getStateAccessor () {
+                    //     return product._cursor.getAccessor();
+                    // },
                     /**
                      * @description - Get product state schema.
                      *
