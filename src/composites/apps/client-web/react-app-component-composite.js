@@ -55,6 +55,17 @@ export default CompositeElement({
             }
         },
         /**
+         * @description - Wrap and convert app to a standalone component.
+         *
+         * @method toStandaloneComponent
+         * @param {object} property
+         * @param {object} option
+         * @return {object}
+         */
+        toStandaloneComponent: function toStandaloneComponent (property, option = {}) { // eslint-disable-line
+            // TODO: Does not have implementation yet.
+        },
+        /**
          * @description - Get the composed app top interface component from domain interface.
          *
          * @method getTopComponent
