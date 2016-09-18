@@ -119,6 +119,90 @@ export default Composer({
             }
         };
         /**
+         * @description - Handle logic at component premounting stage.
+         *
+         * @method preMountStage
+         * @param {function} handler
+         * @return void
+         */
+        this.preMountStage = function preMountStage (handler) {
+            if (!Hflow.isFunction(handler)) {
+                Hflow.log(`error`, `InterfaceFactory.preMountStage - Input handler function is invalid.`);
+            } else {
+                Hflow.log(`warn0`, `InterfaceFactory.preMountStage - Method is not implemented by default.`);
+            }
+        };
+        /**
+         * @description - Handle logic at component postmounting stage.
+         *
+         * @method postMountStage
+         * @param {function} handler
+         * @return void
+         */
+        this.postMountStage = function postMountStage (handler) {
+            if (!Hflow.isFunction(handler)) {
+                Hflow.log(`error`, `InterfaceFactory.postMountStage - Input handler function is invalid.`);
+            } else {
+                Hflow.log(`warn0`, `InterfaceFactory.postMountStage - Method is not implemented by default.`);
+            }
+        };
+        /**
+         * @description - Handle logic at component predismounting stage.
+         *
+         * @method preDismountStage
+         * @param {function} handler
+         * @return void
+         */
+        this.preDismountStage = function preDismountStage (handler) {
+            if (!Hflow.isFunction(handler)) {
+                Hflow.log(`error`, `InterfaceFactory.preDismountStage - Input handler function is invalid.`);
+            } else {
+                Hflow.log(`warn0`, `InterfaceFactory.preDismountStage - Method is not implemented by default.`);
+            }
+        };
+        /**
+         * @description - Handle logic at component postdismounting stage.
+         *
+         * @method postDismountStage
+         * @param {function} handler
+         * @return void
+         */
+        this.postDismountStage = function postDismountStage (handler) {
+            if (!Hflow.isFunction(handler)) {
+                Hflow.log(`error`, `InterfaceFactory.postDismountStage - Input handler function is invalid.`);
+            } else {
+                Hflow.log(`warn0`, `InterfaceFactory.postDismountStage - Method is not implemented by default.`);
+            }
+        };
+        /**
+         * @description - Handle logic at component prepare to update stage.
+         *
+         * @method preUpdateStage
+         * @param {function} handler
+         * @return void
+         */
+        this.preUpdateStage = function preUpdateStage (handler) {
+            if (!Hflow.isFunction(handler)) {
+                Hflow.log(`error`, `InterfaceFactory.preUpdateStage - Input handler function is invalid.`);
+            } else {
+                Hflow.log(`warn0`, `InterfaceFactory.preUpdateStage - Method is not implemented by default.`);
+            }
+        };
+        /**
+         * @description - Handle logic at component after updating stage.
+         *
+         * @method postUpdateStage
+         * @param {function} handler
+         * @return void
+         */
+        this.postUpdateStage = function postUpdateStage (handler) {
+            if (!Hflow.isFunction(handler)) {
+                Hflow.log(`error`, `InterfaceFactory.postUpdateStage - Input handler function is invalid.`);
+            } else {
+                Hflow.log(`warn0`, `InterfaceFactory.postUpdateStage - Method is not implemented by default.`);
+            }
+        };
+        /**
          * @description - Check if interface is pure or stateless.
          *
          * @method isStateless
