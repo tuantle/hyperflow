@@ -133,6 +133,138 @@ export default CompositeElement({
                 }
             };
             /**
+             * @description - Handle logic at component premounting stage.
+             *
+             * @method preMountStage
+             * @param {function} handler
+             * @return void
+             */
+            this.preMountStage = function preMountStage (handler) {
+                const intf = this;
+                if (!Hflow.isFunction(handler)) {
+                    Hflow.log(`error`, `ReactComponentComposite.preMountStage - Input handler function is invalid.`);
+                } else {
+                    // intf.incoming(`on-component-will-mount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+                    //     handler(component);
+                    // });
+                    intf.incoming(`on-component-will-mount`).handle((component) => {
+                        if (component.props.fId === intf.fId) {
+                            handler(component);
+                        }
+                    });
+                }
+            };
+            /**
+             * @description - Handle logic at component postmounting stage.
+             *
+             * @method postMountStage
+             * @param {function} handler
+             * @return void
+             */
+            this.postMountStage = function postMountStage (handler) {
+                const intf = this;
+                if (!Hflow.isFunction(handler)) {
+                    Hflow.log(`error`, `ReactComponentComposite.postMountStage - Input handler function is invalid.`);
+                } else {
+                    // intf.incoming(`on-component-did-mount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+                    //     handler(component);
+                    // });
+                    intf.incoming(`on-component-did-mount`).handle((component) => {
+                        if (component.props.fId === intf.fId) {
+                            handler(component);
+                        }
+                    });
+                }
+            };
+            /**
+             * @description - Handle logic at component predismounting stage.
+             *
+             * @method preDismountStage
+             * @param {function} handler
+             * @return void
+             */
+            this.preDismountStage = function preDismountStage (handler) {
+                const intf = this;
+                if (!Hflow.isFunction(handler)) {
+                    Hflow.log(`error`, `ReactComponentComposite.preDismountStage - Input handler function is invalid.`);
+                } else {
+                    // intf.incoming(`on-component-will-unmount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+                    //     handler(component);
+                    // });
+                    intf.incoming(`on-component-will-unmount`).handle((component) => {
+                        if (component.props.fId === intf.fId) {
+                            handler(component);
+                        }
+                    });
+                }
+            };
+            /**
+             * @description - Handle logic at component postdismounting stage.
+             *
+             * @method postDismountStage
+             * @param {function} handler
+             * @return void
+             */
+            this.postDismountStage = function postDismountStage (handler) {
+                const intf = this;
+                if (!Hflow.isFunction(handler)) {
+                    Hflow.log(`error`, `ReactComponentComposite.postDismountStage - Input handler function is invalid.`);
+                } else {
+                    // intf.incoming(`on-component-did-unmount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+                    //     handler(component);
+                    // });
+                    intf.incoming(`on-component-did-unmount`).handle((component) => {
+                        if (component.props.fId === intf.fId) {
+                            handler(component);
+                        }
+                    });
+                }
+            };
+            /**
+             * @description - Handle logic at component prepare to update stage.
+             *
+             * @method preUpdateStage
+             * @param {function} handler
+             * @return void
+             */
+            this.preUpdateStage = function preUpdateStage (handler) {
+                const intf = this;
+                if (!Hflow.isFunction(handler)) {
+                    Hflow.log(`error`, `ReactComponentComposite.preUpdateStage - Input handler function is invalid.`);
+                } else {
+                    // intf.incoming(`on-component-will-update`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+                    //     handler(component);
+                    // });
+                    intf.incoming(`on-component-will-update`).handle((component) => {
+                        if (component.props.fId === intf.fId) {
+                            handler(component);
+                        }
+                    });
+                }
+            };
+            /**
+             * @description - Handle logic at component after updating stage.
+             *
+             * @method postUpdateStage
+             * @param {function} handler
+             * @return void
+             */
+            this.postUpdateStage = function postUpdateStage (handler) {
+                const intf = this;
+                if (!Hflow.isFunction(handler)) {
+                    Hflow.log(`error`, `ReactComponentComposite.postUpdateStage - Input handler function is invalid.`);
+                } else {
+                    // intf.incoming(`on-component-did-update`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+                    //     handler(component);
+                    // });
+                    intf.incoming(`on-component-did-update`).handle((component) => {
+                        if (component.props.fId === intf.fId) {
+                            handler(component);
+                        }
+                    });
+                }
+            };
+            /**
              * @description - Convert composite to a renderable component.
              *
              * @method toComponent
