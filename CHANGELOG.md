@@ -22,3 +22,11 @@ Breaking Changes:
 Improvements:
 Bug fixes:
 ```
+**Development Beta Version 0.1.0-beta3 (9/*/2016)**
+```
+Notes:
+New Features:
+Breaking Changes:
+Improvements:
+Bug fixes:
+```

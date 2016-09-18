@@ -71,17 +71,6 @@ export default Composer({
             Hflow.log(`warn0`, `AppFactory.renderToTarget - Method is not implemented by default.`);
         };
         /**
-         * @description - Wrap and convert app to a standalone component.
-         *
-         * @method toStandaloneComponent
-         * @param {object} option
-         * @return {object}
-         */
-        this.toStandaloneComponent = function toStandaloneComponent (option = {}) { // eslint-disable-line
-            // TODO: Does not have implementation yet.
-            Hflow.log(`warn0`, `AppFactory.toStandaloneComponent - Method is not implemented by default.`);
-        };
-        /**
          * @description - Get the composed app top interface component from top level domain.
          *
          * @method getTopComponent
