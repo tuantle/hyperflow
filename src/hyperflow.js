@@ -104,7 +104,7 @@ const init = function init ({
             enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
         });
         const HflowProperty = {
-            VERSION: `0.1.0-beta2`,
+            VERSION: `0.1.0-beta3`,
             ENV: TARGET === `server` ? process.env : {}, // eslint-disable-line
             TARGET,
             DEVELOPMENT,
@@ -118,7 +118,7 @@ const init = function init ({
                 /**
                  * @description - Function to contruct an event Id structure for factory event stream.
                  *
-                 * @function create
+                 * @function eventIdCreate
                  * @param {object} eventIdObj - Event Id contructor object
                  * @returns {object}
                  */
@@ -127,7 +127,8 @@ const init = function init ({
                         as: `array|undefined`,
                         on: `array|undefined`,
                         do: `array|undefined`,
-                        request: `array|undefined`
+                        request: `array|undefined`,
+                        broadcast: `array|undefined`
                     }).of(sourceEventMap)) {
                         common.log(`error`, `Event.create - Input event map is invalid.`);
                     } else {
@@ -137,22 +138,10 @@ const init = function init ({
                                 return `-${word.toLowerCase()}`;
                             }).replace(/^_/, ``);
                         };
-                        const targetEventMap = common.merge(sourceEventMap).with({
-                            as: [
-                                `stateMutated`
-                            ],
-                            on: [
-                                `componentWillMount`,
-                                `componentDidMount`,
-                                `componentWillUpdate`,
-                                `componentDidUpdate`,
-                                `componentWillUnmount`
-                            ]
-                        });
-                        return Object.keys(targetEventMap).reduce((outputEventMap, key) => {
+                        return Object.keys(sourceEventMap).reduce((outputEventMap, key) => {
                             if (key === `as`) {
-                                if (targetEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[key] = targetEventMap[key].reduce((asEventMap, _key) => {
+                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = sourceEventMap[key].reduce((asEventMap, _key) => {
                                         asEventMap[_key] = `as-${camelcaseToDash(_key)}`;
                                         return asEventMap;
                                     }, {});
@@ -161,8 +150,8 @@ const init = function init ({
                                 }
                             }
                             if (key === `on`) {
-                                if (targetEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[key] = targetEventMap[key].reduce((onEventMap, _key) => {
+                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = sourceEventMap[key].reduce((onEventMap, _key) => {
                                         onEventMap[_key] = `on-${camelcaseToDash(_key)}`;
                                         return onEventMap;
                                     }, {});
@@ -171,8 +160,8 @@ const init = function init ({
                                 }
                             }
                             if (key === `do`) {
-                                if (targetEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[key] = targetEventMap[key].reduce((doEventMap, _key) => {
+                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = sourceEventMap[key].reduce((doEventMap, _key) => {
                                         doEventMap[_key] = `do-${camelcaseToDash(_key)}`;
                                         return doEventMap;
                                     }, {});
@@ -180,18 +169,28 @@ const init = function init ({
                                     common.log(`error`, `Event.create - Input 'do' event keys are invalid.`);
                                 }
                             }
+                            if (key === `broadcast`) {
+                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = sourceEventMap[key].reduce((doEventMap, _key) => {
+                                        doEventMap[_key] = `broadcast-${camelcaseToDash(_key)}`;
+                                        return doEventMap;
+                                    }, {});
+                                } else {
+                                    common.log(`error`, `Event.create - Input 'broadcast' event keys are invalid.`);
+                                }
+                            }
                             if (key === `request`) {
-                                if (targetEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[key] = targetEventMap[key].reduce((requestForEventMap, _key) => {
+                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                    outputEventMap[key] = sourceEventMap[key].reduce((requestForEventMap, _key) => {
                                         requestForEventMap[_key] = `request-for-${camelcaseToDash(_key)}`;
                                         return requestForEventMap;
                                     }, {});
                                     outputEventMap[`response`] = {
-                                        with: targetEventMap[key].reduce((responseToEventMap, _key) => {
+                                        with: sourceEventMap[key].reduce((responseToEventMap, _key) => {
                                             responseToEventMap[_key] = `response-with-${camelcaseToDash(_key)}`;
                                             return responseToEventMap;
                                         }, {}),
-                                        to: targetEventMap[key].reduce((responseToEventMap, _key) => {
+                                        to: sourceEventMap[key].reduce((responseToEventMap, _key) => {
                                             responseToEventMap[_key] = {
                                                 ok: `response-to-${camelcaseToDash(_key)}-ok`,
                                                 error: `response-to-${camelcaseToDash(_key)}-error`
