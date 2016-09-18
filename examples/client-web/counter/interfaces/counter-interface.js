@@ -226,16 +226,12 @@ const CounterInterface = Hflow.Interface.augment({
     },
     setup: function setup (done) {
         const intf = this;
-        intf.incoming(event.on.componentDidMount).handle((component) => {
-            if (component.props.fId === intf.fId) {
-                intf.incoming(event.on.offsetInputEnter).forward(event.on.changeOffset);
-                intf.incoming(event.on.undoButtonPress).forward(event.on.undo);
-                intf.incoming(
-                    event.on.increaseButtonPress,
-                    event.on.decreaseButtonPress
-                ).forward(event.on.count);
-            }
-        });
+        intf.incoming(event.on.offsetInputEnter).forward(event.on.changeOffset);
+        intf.incoming(event.on.undoButtonPress).forward(event.on.undo);
+        intf.incoming(
+            event.on.increaseButtonPress,
+            event.on.decreaseButtonPress
+        ).forward(event.on.count);
         done();
     },
     render: function render () {

@@ -163,7 +163,11 @@ const CalculatorDomain = Hflow.Domain.augment({
             }
             return setOperand;
         }).relay(event.do.updateOperand);
-        domain.incoming(event.as.stateMutated).forward(event.request.operandFromBuffer);
+        domain.incoming(
+            event.as.operandUpdated,
+            event.as.operationUpdated,
+            event.as.updatedAfterCompute
+        ).forward(event.request.operandFromBuffer);
         domain.incoming(event.response.with.operandFromBuffer).handle((operand) => {
             let result = 0;
             const xValue = !Hflow.isEmpty(operand.x) ? parseFloat(operand.x) : 0;

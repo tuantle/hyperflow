@@ -12,6 +12,11 @@
 import { Hflow } from 'hyperflow';
 
 export default Hflow.Event.create({
+    as: [
+        `operandUpdated`,
+        `operationUpdated`,
+        `updatedAfterCompute`
+    ],
     on: [
         `reset`,
         `compute`,

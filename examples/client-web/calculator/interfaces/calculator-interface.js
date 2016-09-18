@@ -97,21 +97,17 @@ const KeypadInterface = Hflow.Interface.augment({
     },
     setup: function setup (done) {
         const intf = this;
-        intf.incoming(event.on.componentDidMount).handle((component) => {
-            if (component.props.fId === intf.fId) {
-                intf.incoming(event.on.keypadButtonPress).handle((label) => {
-                    if (label === `C`) {
-                        intf.outgoing(event.on.clearKeyButtonPress).emit();
-                    } else if (label === `÷` || label === `×` || label === `+` || label === `-`) {
-                        intf.outgoing(event.on.operationKeyButtonPress).emit(() => label);
-                    } else if (Hflow.isNumeric(label) || label === `.` || label === `π`) {
-                        intf.outgoing(event.on.digitKeyButtonPress).emit(() => label);
-                    } else if (label === `±`) {
-                        intf.outgoing(event.on.negateKeyButtonPress).emit();
-                    } else if (label === `=`) {
-                        intf.outgoing(event.on.equalKeyButtonPress).emit();
-                    }
-                });
+        intf.incoming(event.on.keypadButtonPress).handle((label) => {
+            if (label === `C`) {
+                intf.outgoing(event.on.clearKeyButtonPress).emit();
+            } else if (label === `÷` || label === `×` || label === `+` || label === `-`) {
+                intf.outgoing(event.on.operationKeyButtonPress).emit(() => label);
+            } else if (Hflow.isNumeric(label) || label === `.` || label === `π`) {
+                intf.outgoing(event.on.digitKeyButtonPress).emit(() => label);
+            } else if (label === `±`) {
+                intf.outgoing(event.on.negateKeyButtonPress).emit();
+            } else if (label === `=`) {
+                intf.outgoing(event.on.equalKeyButtonPress).emit();
             }
         });
         done();
@@ -161,15 +157,11 @@ const CalculatorInterface = Hflow.Interface.augment({
     },
     setup: function setup (done) {
         const intf = this;
-        intf.incoming(event.on.componentDidMount).handle((component) => {
-            if (component.props.fId === intf.fId) {
-                intf.incoming(event.on.clearKeyButtonPress).forward(event.on.reset);
-                intf.incoming(event.on.digitKeyButtonPress).forward(event.on.updateOperand);
-                intf.incoming(event.on.negateKeyButtonPress).forward(event.on.negateOperand);
-                intf.incoming(event.on.operationKeyButtonPress).forward(event.on.updateOperation);
-                intf.incoming(event.on.equalKeyButtonPress).forward(event.on.compute);
-            }
-        });
+        intf.incoming(event.on.clearKeyButtonPress).forward(event.on.reset);
+        intf.incoming(event.on.digitKeyButtonPress).forward(event.on.updateOperand);
+        intf.incoming(event.on.negateKeyButtonPress).forward(event.on.negateOperand);
+        intf.incoming(event.on.operationKeyButtonPress).forward(event.on.updateOperation);
+        intf.incoming(event.on.equalKeyButtonPress).forward(event.on.compute);
         done();
     },
     render: function render () {
@@ -186,7 +178,7 @@ const CalculatorInterface = Hflow.Interface.augment({
                     <div style = { component.props.style.display }>
                         <h2 style = { component.props.style.displayText }>{ component.state.result }</h2>
                     </div>
-                    <h1 style = { component.props.style.h1 }>v0.2</h1>
+                    <h1 style = { component.props.style.h1 }>v0.3</h1>
                     <Keypad/>
                 </div>
             </MuiThemeProvider>

@@ -52,16 +52,19 @@ const CalculatorService = Hflow.Service.augment({
         });
         service.incoming(event.do.updateOperation).handle((setOperation) => {
             if (service.reduce(setOperation)) {
+                service.outgoing(event.as.operationUpdated).emit();
                 Hflow.log(`info`, `Calculator buffer service operation buffer updated.`);
             }
         });
         service.incoming(event.do.updateOperand).handle((setOperand) => {
             if (service.reduce(setOperand)) {
+                service.outgoing(event.as.operandUpdated).emit();
                 Hflow.log(`info`, `Calculator buffer service operand buffer updated.`);
             }
         });
         service.incoming(event.do.updateAfterCompute).handle((updateAfterCompute) => {
             if (service.reduce(updateAfterCompute)) {
+                service.outgoing(event.as.updateAfterCompute).emit();
                 Hflow.log(`info`, `Calculator buffer service result updated;`);
             }
         });
