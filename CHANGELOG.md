@@ -25,7 +25,15 @@ Bug fixes:
 **Development Beta Version 0.1.0-beta3 (9/*/2016)**
 ```
 Notes:
+    - Removed toStandaloneComponent method from AppFactory. And moved it to ReactAppComponentComposite for client web & native.
 New Features:
+    - Implemented mounting, dismounting, and update life cycle handler methods to InterfaceFactory and ReactComponentComposite.
+        preMountStage
+        postMountStage
+        preDismountStage
+        postDismountStage
+        preUpdateStage
+        postUpdateStage
 Breaking Changes:
 Improvements:
 Bug fixes:
