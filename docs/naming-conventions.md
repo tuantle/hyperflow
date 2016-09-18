@@ -1,6 +1,6 @@
-# DataStream EventId Naming
+# Event Stream Id Naming
 
----- 
+----
 
 # Interface:
 For incoming and outgoing events, use the prefix _on-\*_. Use present tense verb for action. See the example below.  
@@ -19,7 +19,7 @@ For situations where request/response type messaging is needed. The prefixes are
 
 When the response event has success or error type. Use postfix _\*-success_ or _\*-error_. See the example below.
 > **Outgoing**: _request-for-data-write_  
-> **Incoming**: _response-to-data-write-success_  
+> **Incoming**: _response-to-data-write-ok  
 > **Incoming**: _response-to-data-write-error_
 
 Use present tense verb for action for request and response types.  
