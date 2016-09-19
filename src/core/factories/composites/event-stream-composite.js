@@ -646,10 +646,25 @@ export default CompositeElement({
                          */
                         asPromised: function asPromised () {
                             if (eventIds.length === 1) {
+                                // return new Promise((resolve) => {
+                                //     incomingOperator.handle((value) => {
+                                //         resolve(value);
+                                //     });
+                                // });
+                                const eventId = eventIds[0];
                                 return new Promise((resolve) => {
-                                    incomingOperator.handle((value) => {
-                                        resolve(value);
-                                    });
+                                    if (_arbiter.hasOwnProperty(eventId)) {
+                                        _arbiter[eventId].handler = (value) => resolve(value);
+                                        if (_arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
+                                            _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
+                                        }
+                                    } else {
+                                        _arbiter[eventId] = {
+                                            eventDirectionalState: INCOMING_EVENT,
+                                            handler: (value) => resolve(value),
+                                            relayer: null
+                                        };
+                                    }
                                 });
                             }
                             return eventIds.map((eventId) => {
