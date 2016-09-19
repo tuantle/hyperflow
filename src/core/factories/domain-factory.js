@@ -39,11 +39,11 @@ import {
     INTERFACE_FACTORY_CODE
 } from './factory-code';
 
-/* delay all data stream from store by 200ms as default */
-// const DELAY_STORE_IN_MS = 200;
+/* delay all data stream from store by 10ms as default */
+const DELAY_STORE_IN_MS = 10;
 
 /* delay all data stream from service by 10ms as default */
-// const DELAY_SERVICE_IN_MS = 10;
+const DELAY_SERVICE_IN_MS = 10;
 
 /* delay all data stream from interface by 10ms as default */
 const DEBOUNCE_INTERFACE_IN_MS = 10;
@@ -250,7 +250,7 @@ export default Composer({
                         } else {
                             _store = store;
                             /* setup event stream observation duplex between domain and store */
-                            domain.observe(_store);
+                            domain.observe(_store).debounce(DELAY_STORE_IN_MS);
                             _store.observe(domain);
                             Hflow.log(`info`, `Domain:${domain.name} registered store:${store.name}.`);
                         }
@@ -289,7 +289,7 @@ export default Composer({
                             return true;
                         }));
                         /* setup event stream observation duplex between domain and servies */
-                        domain.observe(..._services);
+                        domain.observe(..._services).debounce(DELAY_SERVICE_IN_MS);
                         _services.forEach((service) => service.observe(domain));
                     }
                 }
@@ -381,6 +381,7 @@ export default Composer({
         this.start = function start (option = {}, done) {
             const domain = this;
 
+            // FIXME: Need to rethink the start up sequence as delay is needed after domain observes services or store.
             // TODO: Implement use case for domain start option.
             option = Hflow.isObject(option) ? option : {};
 
