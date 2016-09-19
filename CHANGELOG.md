@@ -48,3 +48,14 @@ Improvements:
 Bug fixes:
     - Added 10ms delay to event stream from domain to services and store for DomainFactory. This is a temp fix.
 ```
+**Development Beta Version 0.1.0-beta5 (9/19/2016)**
+```
+Notes:
+New Features:
+Breaking Changes:
+Improvements:
+    - Minor tweak to Hflow.Event.create method return object. Property key names are uppercased.
+    - Clean up asPromised method in EventStreamComposite.
+Bug fixes:
+    - Added correct delay instead of debounce method to event stream from domain to services and store for DomainFactory.
+```
