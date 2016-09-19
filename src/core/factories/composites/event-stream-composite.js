@@ -631,7 +631,7 @@ export default CompositeElement({
                                 }, _arbiter);
                             }
                             return {
-                                toPromises: incomingOperator.toPromises,
+                                asPromised: incomingOperator.asPromised,
                                 await: incomingOperator.await,
                                 handle: incomingOperator.handle,
                                 forward: incomingOperator.forward,
@@ -641,11 +641,18 @@ export default CompositeElement({
                         /**
                          * @description - At all events, return a promise or an array promises of the payloads.
                          *
-                         * @method incoming.toPromises
-                         * @return {array}
+                         * @method incoming.asPromised
+                         * @return {object|array}
                          */
-                        toPromises: function toPromises () {
-                            const promises = eventIds.map((eventId) => {
+                        asPromised: function asPromised () {
+                            if (eventIds.length === 1) {
+                                return new Promise((resolve) => {
+                                    incomingOperator.handle((value) => {
+                                        resolve(value);
+                                    });
+                                });
+                            }
+                            return eventIds.map((eventId) => {
                                 return new Promise((resolve) => {
                                     if (_arbiter.hasOwnProperty(eventId)) {
                                         _arbiter[eventId].handler = (value) => resolve(value);
@@ -661,7 +668,6 @@ export default CompositeElement({
                                     }
                                 });
                             });
-                            return promises;
                         },
                         /**
                          * @description - Wait for all events to arrive...
