@@ -43,8 +43,8 @@ Bug fixes:
 Notes:
 New Features:
 Breaking Changes:
-    - Renamed toPromises to asPromised for EventStreamComposite.
+    - Renamed method toPromises to asPromised for EventStreamComposite.
 Improvements:
 Bug fixes:
-    - Added 10ms delay to event stream from domain to services and store. This is a temp fix.
+    - Added 10ms delay to event stream from domain to services and store for DomainFactory. This is a temp fix.
 ```
