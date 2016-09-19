@@ -11,7 +11,7 @@
 
 import { Hflow } from 'hyperflow';
 
-import event from '../events/counter-event';
+import EVENT from '../events/counter-event';
 
 const CounterStore = Hflow.Store.augment({
     composites: [
@@ -34,7 +34,7 @@ const CounterStore = Hflow.Store.augment({
     },
     setup: function setup (done) {
         const store = this;
-        store.incoming(event.do.init).handle((value) => {
+        store.incoming(EVENT.DO.INIT).handle((value) => {
             if (store.reduce({
                 count: value.count,
                 offset: value.offset
@@ -42,19 +42,19 @@ const CounterStore = Hflow.Store.augment({
                 Hflow.log(`info`, `Store initialized.`);
             }
         });
-        store.incoming(event.do.offsetMutation).handle((value) => {
+        store.incoming(EVENT.DO.OFFSET_MUTATION).handle((value) => {
             if (store.reduce({
                 offset: value
             })) {
-                store.outgoing(event.as.offsetMutated).emit(() => {
+                store.outgoing(EVENT.AS.OFFSET_MUTATED).emit(() => {
                     return { offset: store.offset };
                 });
                 Hflow.log(`info`, `Store mutated`);
             }
         });
-        store.incoming(event.do.countMutation).handle((modifyCount) => {
+        store.incoming(EVENT.DO.COUNT_MUTATION).handle((modifyCount) => {
             if (store.reduce(modifyCount)) {
-                store.outgoing(event.as.countMutated).emit(() => {
+                store.outgoing(EVENT.AS.COUNT_MUTATED).emit(() => {
                     return {
                         count: store.count
                     };
@@ -62,9 +62,8 @@ const CounterStore = Hflow.Store.augment({
                 Hflow.log(`info`, `Store mutated.`);
             }
         });
-        store.incoming(event.do.undoLastCountMutation).handle(() => {
+        store.incoming(EVENT.DO.UNDO_LAST_COUNT_MUTATION).handle(() => {
             store.timeTraverse(`count`, -1);
-            // Hflow.log(`info`, JSON.stringify(store.recallAll(`count`), null, `\t`));
         });
         done();
     }

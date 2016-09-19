@@ -17,7 +17,7 @@ import { CounterStorageService } from '../services/counter-storage-service';
 
 import { CounterInterface } from '../interfaces/counter-interface';
 
-import event from '../events/counter-event';
+import EVENT from '../events/counter-event';
 
 /**
  * @description - Counter app domain module.
@@ -58,22 +58,22 @@ const CounterDomain = Hflow.Domain.augment({
     },
     setup: function setup (done) {
         const domain = this;
-        domain.outgoing(event.request.dataRead).emit();
-        domain.incoming(event.response.to.dataRead.ok).forward(event.do.init);
-        domain.incoming(event.on.count).handle((multiplier) => {
+        domain.outgoing(EVENT.REQUEST.DATAREAD).emit();
+        domain.incoming(EVENT.RESPONSE.TO.DATAREAD.OK).forward(EVENT.DO.INIT);
+        domain.incoming(EVENT.ON.COUNT).handle((multiplier) => {
             return function modifyCount (state) {
                 const newCount = state.count + multiplier * state.offset;
                 return {
                     count: newCount >= 0 ? newCount : 0
                 };
             };
-        }).relay(event.do.countMutation);
-        domain.incoming(event.on.undo).forward(event.do.undoLastCountMutation);
-        domain.incoming(event.on.changeOffset).forward(event.do.offsetMutation);
+        }).relay(EVENT.DO.COUNT_MUTATION);
+        domain.incoming(EVENT.ON.UNDO).forward(EVENT.DO.UNDO_LAST_COUNT_MUTATION);
+        domain.incoming(EVENT.ON.CHANGE_OFFSET).forward(EVENT.DO.OFFSET_MUTATION);
         domain.incoming(
-            event.as.countMutated,
-            event.as.offsetMutated
-        ).forward(event.request.dataWrite);
+            EVENT.AS.COUNT_MUTATED,
+            EVENT.AS.OFFSET_MUTATED
+        ).forward(EVENT.REQUEST.DATAWRITE);
         done();
     }
 });

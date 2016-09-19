@@ -17,7 +17,7 @@ import { CalculatorService } from '../services/calculator-service';
 
 import { CalculatorInterface } from '../interfaces/calculator-interface';
 
-import event from '../events/calculator-event';
+import EVENT from '../events/calculator-event';
 
 const CalculatorDomain = Hflow.Domain.augment({
     $init: function $init () {
@@ -86,8 +86,8 @@ const CalculatorDomain = Hflow.Domain.augment({
     },
     setup: function setup (done) {
         const domain = this;
-        domain.incoming(event.on.reset).forward(event.do.reset);
-        domain.incoming(event.on.updateOperation).handle((value) => {
+        domain.incoming(EVENT.ON.RESET).forward(EVENT.DO.RESET);
+        domain.incoming(EVENT.ON.UPDATE_OPERATION).handle((value) => {
             return function setOperation (state) {
                 if (!state.computeReady) {
                     return {
@@ -107,8 +107,8 @@ const CalculatorDomain = Hflow.Domain.augment({
                     }
                 };
             };
-        }).relay(event.do.updateOperation);
-        domain.incoming(event.on.negateOperand).handle(() => {
+        }).relay(EVENT.DO.UPDATE_OPERATION);
+        domain.incoming(EVENT.ON.NEGATE_OPERAND).handle(() => {
             function negateOperand (operand) {
                 if (!Hflow.isEmpty(operand)) {
                     if (operand.charAt(0) === `-`) {
@@ -133,9 +133,9 @@ const CalculatorDomain = Hflow.Domain.augment({
                     }
                 };
             };
-        }).relay(event.do.updateOperand);
+        }).relay(EVENT.DO.UPDATE_OPERAND);
 
-        domain.incoming(event.on.updateOperand).handle((value) => {
+        domain.incoming(EVENT.ON.UPDATE_OPERAND).handle((value) => {
             function assignOperand (operand) {
                 if (value === `π`) {
                     return `3.14159265359`;
@@ -162,17 +162,17 @@ const CalculatorDomain = Hflow.Domain.augment({
                 };
             }
             return setOperand;
-        }).relay(event.do.updateOperand);
+        }).relay(EVENT.DO.UPDATE_OPERAND);
         domain.incoming(
-            event.as.operandUpdated,
-            event.as.operationUpdated,
-            event.as.updatedAfterCompute
-        ).forward(event.request.operandFromBuffer);
-        domain.incoming(event.response.with.operandFromBuffer).handle((operand) => {
+            EVENT.AS.OPERAND_UPDATED,
+            EVENT.AS.OPERATION_UPDATED,
+            EVENT.AS.UPDATED_AFTER_COMPUTE
+        ).forward(EVENT.REQUEST.OPERAND_FROM_BUFFER);
+        domain.incoming(EVENT.RESPONSE.WITH.OPERAND_FROM_BUFFER).handle((operand) => {
             let result = 0;
             const xValue = !Hflow.isEmpty(operand.x) ? parseFloat(operand.x) : 0;
             const yValue = !Hflow.isEmpty(operand.y) ? parseFloat(operand.y) : 0;
-            domain.incoming(event.on.compute).handle(() => {
+            domain.incoming(EVENT.ON.COMPUTE).handle(() => {
                 return function updateAfterCompute (state) {
                     if (state.computeReady) {
                         if (state.operation === `+`) {
@@ -206,7 +206,7 @@ const CalculatorDomain = Hflow.Domain.augment({
                         }
                     }
                 };
-            }).relay(event.do.updateAfterCompute);
+            }).relay(EVENT.DO.UPDATE_AFTER_COMPUTE);
 
             if (operand.current === `y` && yValue !== 0) {
                 result = yValue;
@@ -220,7 +220,7 @@ const CalculatorDomain = Hflow.Domain.augment({
                             `${result}`.replace(/(\d)(?=(\d{3})+\.)/g, `$1,`)
                 };
             };
-        }).relay(event.do.updateDisplayResult);
+        }).relay(EVENT.DO.UPDATE_DISPLAY_RESULT);
         done();
     }
 });

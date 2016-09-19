@@ -11,7 +11,7 @@
 
 import { Hflow } from 'hyperflow';
 
-import event from '../events/calculator-event';
+import EVENT from '../events/calculator-event';
 
 const CalculatorService = Hflow.Service.augment({
     composites: [
@@ -37,7 +37,7 @@ const CalculatorService = Hflow.Service.augment({
     },
     setup: function setup (done) {
         const service = this;
-        service.incoming(event.do.reset).handle(() => {
+        service.incoming(EVENT.DO.RESET).handle(() => {
             if (service.reduce({
                 computeReady: false,
                 operation: ``,
@@ -50,25 +50,25 @@ const CalculatorService = Hflow.Service.augment({
                 Hflow.log(`info`, `Calculator buffer service reset.`);
             }
         });
-        service.incoming(event.do.updateOperation).handle((setOperation) => {
+        service.incoming(EVENT.DO.UPDATE_OPERATION).handle((setOperation) => {
             if (service.reduce(setOperation)) {
-                service.outgoing(event.as.operationUpdated).emit();
+                service.outgoing(EVENT.AS.OPERATION_UPDATED).emit();
                 Hflow.log(`info`, `Calculator buffer service operation buffer updated.`);
             }
         });
-        service.incoming(event.do.updateOperand).handle((setOperand) => {
+        service.incoming(EVENT.DO.UPDATE_OPERAND).handle((setOperand) => {
             if (service.reduce(setOperand)) {
-                service.outgoing(event.as.operandUpdated).emit();
+                service.outgoing(EVENT.AS.OPERAND_UPDATED).emit();
                 Hflow.log(`info`, `Calculator buffer service operand buffer updated.`);
             }
         });
-        service.incoming(event.do.updateAfterCompute).handle((updateAfterCompute) => {
+        service.incoming(EVENT.DO.UPDATE_AFTER_COMPUTE).handle((updateAfterCompute) => {
             if (service.reduce(updateAfterCompute)) {
-                service.outgoing(event.as.updateAfterCompute).emit();
+                service.outgoing(EVENT.AS.UPDATED_AFTER_COMPUTE).emit();
                 Hflow.log(`info`, `Calculator buffer service result updated;`);
             }
         });
-        service.incoming(event.request.operandFromBuffer).handle(() => service.operand).relay(event.response.with.operandFromBuffer);
+        service.incoming(EVENT.REQUEST.OPERAND_FROM_BUFFER).handle(() => service.operand).relay(EVENT.RESPONSE.WITH.OPERAND_FROM_BUFFER);
         done();
     }
 });

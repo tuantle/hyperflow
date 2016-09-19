@@ -11,7 +11,7 @@
 
 import { Hflow } from 'hyperflow';
 
-import event from '../events/calculator-event';
+import EVENT from '../events/calculator-event';
 
 const CalculatorStore = Hflow.Store.augment({
     state: {
@@ -22,14 +22,14 @@ const CalculatorStore = Hflow.Store.augment({
     },
     setup: function setup (done) {
         const store = this;
-        store.incoming(event.do.reset).handle(() => {
+        store.incoming(EVENT.DO.RESET).handle(() => {
             if (store.reduce({
                 result: `0`
             })) {
                 Hflow.log(`info`, `Store reset.`);
             }
         });
-        store.incoming(event.do.updateDisplayResult).handle((updateResult) => {
+        store.incoming(EVENT.DO.UPDATE_DISPLAY_RESULT).handle((updateResult) => {
             if (store.reduce(updateResult)) {
                 Hflow.log(`info`, `Store updated.`);
             }

@@ -17,7 +17,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
-import event from '../events/calculator-event';
+import EVENT from '../events/calculator-event';
 
 const muiTheme = getMuiTheme({
     palette: {
@@ -47,7 +47,7 @@ const KeypadButtonInterface = Hflow.Interface.augment({
     onClick: function onClick () {
         const component = this;
         const intf = component.getInterface();
-        intf.outgoing(event.on.keypadButtonPress).emit(() => component.props.label);
+        intf.outgoing(EVENT.ON.KEYPAD_BUTTON_PRESS).emit(() => component.props.label);
     },
     render: function render () {
         const component = this;
@@ -97,17 +97,17 @@ const KeypadInterface = Hflow.Interface.augment({
     },
     setup: function setup (done) {
         const intf = this;
-        intf.incoming(event.on.keypadButtonPress).handle((label) => {
+        intf.incoming(EVENT.ON.KEYPAD_BUTTON_PRESS).handle((label) => {
             if (label === `C`) {
-                intf.outgoing(event.on.clearKeyButtonPress).emit();
+                intf.outgoing(EVENT.ON.CLEAR_KEY_BUTTON_PRESS).emit();
             } else if (label === `÷` || label === `×` || label === `+` || label === `-`) {
-                intf.outgoing(event.on.operationKeyButtonPress).emit(() => label);
+                intf.outgoing(EVENT.ON.OPERATION_KEY_BUTTON_PRESS).emit(() => label);
             } else if (Hflow.isNumeric(label) || label === `.` || label === `π`) {
-                intf.outgoing(event.on.digitKeyButtonPress).emit(() => label);
+                intf.outgoing(EVENT.ON.DIGIT_KEY_BUTTON_PRESS).emit(() => label);
             } else if (label === `±`) {
-                intf.outgoing(event.on.negateKeyButtonPress).emit();
+                intf.outgoing(EVENT.ON.NEGATE_KEY_BUTTON_PRESS).emit();
             } else if (label === `=`) {
-                intf.outgoing(event.on.equalKeyButtonPress).emit();
+                intf.outgoing(EVENT.ON.EQUAL_KEY_BUTTON_PRESS).emit();
             }
         });
         done();
@@ -157,11 +157,11 @@ const CalculatorInterface = Hflow.Interface.augment({
     },
     setup: function setup (done) {
         const intf = this;
-        intf.incoming(event.on.clearKeyButtonPress).forward(event.on.reset);
-        intf.incoming(event.on.digitKeyButtonPress).forward(event.on.updateOperand);
-        intf.incoming(event.on.negateKeyButtonPress).forward(event.on.negateOperand);
-        intf.incoming(event.on.operationKeyButtonPress).forward(event.on.updateOperation);
-        intf.incoming(event.on.equalKeyButtonPress).forward(event.on.compute);
+        intf.incoming(EVENT.ON.CLEAR_KEY_BUTTON_PRESS).forward(EVENT.ON.RESET);
+        intf.incoming(EVENT.ON.DIGIT_KEY_BUTTON_PRESS).forward(EVENT.ON.UPDATE_OPERAND);
+        intf.incoming(EVENT.ON.NEGATE_KEY_BUTTON_PRESS).forward(EVENT.ON.NEGATE_OPERAND);
+        intf.incoming(EVENT.ON.OPERATION_KEY_BUTTON_PRESS).forward(EVENT.ON.UPDATE_OPERATION);
+        intf.incoming(EVENT.ON.EQUAL_KEY_BUTTON_PRESS).forward(EVENT.ON.COMPUTE);
         done();
     },
     render: function render () {
@@ -178,7 +178,7 @@ const CalculatorInterface = Hflow.Interface.augment({
                     <div style = { component.props.style.display }>
                         <h2 style = { component.props.style.displayText }>{ component.state.result }</h2>
                     </div>
-                    <h1 style = { component.props.style.h1 }>v0.3</h1>
+                    <h1 style = { component.props.style.h1 }>v0.4</h1>
                     <Keypad/>
                 </div>
             </MuiThemeProvider>

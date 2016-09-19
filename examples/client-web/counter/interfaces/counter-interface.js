@@ -23,7 +23,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
-import event from '../events/counter-event';
+import EVENT from '../events/counter-event';
 
 injectTapEventPlugin();
 
@@ -50,7 +50,7 @@ const UndoButtonInterface = Hflow.Interface.augment({
     onClick: function onClick () {
         const component = this;
         const intf = component.getInterface();
-        intf.outgoing(event.on.undoButtonPress).emit();
+        intf.outgoing(EVENT.ON.UNDO_BUTTON_PRESS).emit();
     },
     render: function render () {
         const component = this;
@@ -93,7 +93,7 @@ const DecreaseButtonInterface = Hflow.Interface.augment({
     onClick: function onClick () {
         const component = this;
         const intf = component.getInterface();
-        intf.outgoing(event.on.decreaseButtonPress).emit(() => -1);
+        intf.outgoing(EVENT.ON.DECREASE_BUTTON_PRESS).emit(() => -1);
     },
     render: function render () {
         const component = this;
@@ -136,7 +136,7 @@ const IncreaseButtonInterface = Hflow.Interface.augment({
     onClick: function onClick () {
         const component = this;
         const intf = component.getInterface();
-        intf.outgoing(event.on.increaseButtonPress).emit(() => 1);
+        intf.outgoing(EVENT.ON.INCREASE_BUTTON_PRESS).emit(() => 1);
     },
     render: function render () {
         const component = this;
@@ -175,7 +175,7 @@ const OffsetInputInterface = Hflow.Interface.augment({
     onChange: function onChange (_event) {
         const component = this;
         const intf = component.getInterface();
-        intf.outgoing(event.on.offsetInputEnter).emit(() => parseInt(_event.target.value, 10));
+        intf.outgoing(EVENT.ON.OFFSET_INPUT_ENTER).emit(() => parseInt(_event.target.value, 10));
     },
     render: function render () {
         const component = this;
@@ -226,12 +226,12 @@ const CounterInterface = Hflow.Interface.augment({
     },
     setup: function setup (done) {
         const intf = this;
-        intf.incoming(event.on.offsetInputEnter).forward(event.on.changeOffset);
-        intf.incoming(event.on.undoButtonPress).forward(event.on.undo);
+        intf.incoming(EVENT.ON.OFFSET_INPUT_ENTER).forward(EVENT.ON.CHANGE_OFFSET);
+        intf.incoming(EVENT.ON.UNDO_BUTTON_PRESS).forward(EVENT.ON.UNDO);
         intf.incoming(
-            event.on.increaseButtonPress,
-            event.on.decreaseButtonPress
-        ).forward(event.on.count);
+            EVENT.ON.INCREASE_BUTTON_PRESS,
+            EVENT.ON.DECREASE_BUTTON_PRESS
+        ).forward(EVENT.ON.COUNT);
         done();
     },
     render: function render () {
@@ -283,7 +283,7 @@ const CounterInterface = Hflow.Interface.augment({
                         <UndoButton/>
                     </div>
                     <h2 style = { style.h2 }>Count = { count }</h2>
-                    <h1 style = { style.h1 }>v0.2</h1>
+                    <h1 style = { style.h1 }>v0.3</h1>
                     <OffsetInput offset = { offset }/>
                 </div>
             </MuiThemeProvider>

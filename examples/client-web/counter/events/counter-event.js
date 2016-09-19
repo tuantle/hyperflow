@@ -32,7 +32,7 @@ export default Hflow.Event.create({
         `offsetMutation`
     ],
     request: [
-        `dataRead`,
-        `dataWrite`
+        `dataread`,
+        `datawrite`
     ]
 });
