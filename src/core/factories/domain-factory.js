@@ -250,7 +250,7 @@ export default Composer({
                         } else {
                             _store = store;
                             /* setup event stream observation duplex between domain and store */
-                            domain.observe(_store).debounce(DELAY_STORE_IN_MS);
+                            domain.observe(_store).delay(DELAY_STORE_IN_MS);
                             _store.observe(domain);
                             Hflow.log(`info`, `Domain:${domain.name} registered store:${store.name}.`);
                         }
@@ -289,7 +289,7 @@ export default Composer({
                             return true;
                         }));
                         /* setup event stream observation duplex between domain and servies */
-                        domain.observe(..._services).debounce(DELAY_SERVICE_IN_MS);
+                        domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
                         _services.forEach((service) => service.observe(domain));
                     }
                 }
