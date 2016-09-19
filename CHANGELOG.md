@@ -22,7 +22,7 @@ Breaking Changes:
 Improvements:
 Bug fixes:
 ```
-**Development Beta Version 0.1.0-beta3 (9/*/2016)**
+**Development Beta Version 0.1.0-beta3 (9/17/2016)**
 ```
 Notes:
     - Removed toStandaloneComponent method from AppFactory. And moved it to ReactAppComponentComposite for client web & native.
@@ -37,4 +37,14 @@ New Features:
 Breaking Changes:
 Improvements:
 Bug fixes:
+```
+**Development Beta Version 0.1.0-beta4 (9/18/2016)**
+```
+Notes:
+New Features:
+Breaking Changes:
+    - Renamed toPromises to asPromised for EventStreamComposite.
+Improvements:
+Bug fixes:
+    - Added 10ms delay to event stream from domain to services and store. This is a temp fix.
 ```

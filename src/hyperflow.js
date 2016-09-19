@@ -104,7 +104,7 @@ const init = function init ({
             enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
         });
         const HflowProperty = {
-            VERSION: `0.1.0-beta3`,
+            VERSION: `0.1.0-beta4`,
             ENV: TARGET === `server` ? process.env : {}, // eslint-disable-line
             TARGET,
             DEVELOPMENT,
@@ -193,6 +193,8 @@ const init = function init ({
                                         to: sourceEventMap[key].reduce((responseToEventMap, _key) => {
                                             responseToEventMap[_key] = {
                                                 ok: `response-to-${camelcaseToDash(_key)}-ok`,
+                                                notFound: `response-to-${camelcaseToDash(_key)}-not-found`,
+                                                conflict: `response-to-${camelcaseToDash(_key)}-conflict`,
                                                 error: `response-to-${camelcaseToDash(_key)}-error`
                                             };
                                             return responseToEventMap;
