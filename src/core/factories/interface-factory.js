@@ -240,8 +240,9 @@ export default Composer({
          * @returns {object}
          */
         this.getComponentLib = function getComponentLib () {
+            const intf = this;
             if (!Hflow.isObject(_componentLib)) {
-                Hflow.log(`error`, `InterfaceFactory.getComponentLib - Interface component library is not registered.`);
+                Hflow.log(`error`, `InterfaceFactory.getComponentLib - Interface:${intf.name} component library is not registered.`);
             }
             return _componentLib;
         };
