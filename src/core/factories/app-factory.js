@@ -48,8 +48,7 @@ export default Composer({
     },
     AppFactory: function AppFactory () {
         /* ----- Private Variables ------------- */
-        let _componentLib;
-        let _componentRenderer;
+        let _renderer;
         let _domain;
         /* ----- Public Functions -------------- */
         /**
@@ -69,6 +68,20 @@ export default Composer({
          */
         this.renderToTarget = function renderToTarget () {
             Hflow.log(`warn0`, `AppFactory.renderToTarget - Method is not implemented by default.`);
+        };
+        /**
+         * @description - Get app renderer.
+         *
+         * @method getRenderer
+         * @return {object}
+         */
+        this.getRenderer = function getRenderer () {
+            const app = this;
+            if (!Hflow.isObject(_renderer)) {
+                Hflow.log(`error`, `AppFactory.getRenderer - App:${app.name} is not registered with a component renderer.`);
+            } else {
+                return _renderer;
+            }
         };
         /**
          * @description - Get the composed app top interface component from top level domain.
@@ -94,34 +107,6 @@ export default Composer({
             }
         };
         /**
-         * @description - Get app component renderer.
-         *
-         * @method getComponentRenderer
-         * @return {object}
-         */
-        this.getComponentRenderer = function getComponentRenderer () {
-            const app = this;
-            if (!Hflow.isObject(_componentRenderer)) {
-                Hflow.log(`error`, `AppFactory.getComponentRenderer - App:${app.name} is not registered with a component renderer.`);
-            } else {
-                return _componentRenderer;
-            }
-        };
-        /**
-         * @description - Get app component toolkit or library for building & rendering interfaces.
-         *
-         * @method getComponentLib
-         * @return {object}
-         */
-        this.getComponentLib = function getComponentLib () {
-            const app = this;
-            if (!Hflow.isObject(_componentLib)) {
-                Hflow.log(`error`, `AppFactory.getComponentLib - App:${app.name} is not registered with a component library.`);
-            } else {
-                return _componentLib;
-            }
-        };
-        /**
          * @description - Register app domain, renderer, and app environment target.
          *
          * @method register
@@ -143,12 +128,11 @@ export default Composer({
                     domain,
                     component
                 } = definition;
-                _componentLib = component.library;
-                _componentRenderer = component.renderer;
                 if (!Hflow.isSchema({
                     fId: `string`,
                     name: `string`,
                     hasStarted: `function`,
+                    getInterface: `function`,
                     start: `function`,
                     restart: `function`
                 }).of(domain) || domain.fId.substr(0, DOMAIN_FACTORY_CODE.length) !== DOMAIN_FACTORY_CODE) {
@@ -157,6 +141,17 @@ export default Composer({
                     Hflow.log(`warn1`, `AppFactory.register - App:${app.name} registered domain:${domain.name}.`);
                 } else {
                     _domain = domain;
+                    _renderer = component.renderer;
+
+                    const intf = domain.getInterface();
+                    if (!Hflow.isSchema({
+                        registerComponentLib: `function`
+                    }).of(intf)) {
+                        Hflow.log(`error`, `AppFactory.register - App top domain:${domain.name} interface is invalid.`);
+                    } else {
+                        intf.registerComponentLib(component.library);
+                    }
+
                     Hflow.log(`info`, `App:${app.name} registered domain:${domain.name}.`);
                 }
             }
