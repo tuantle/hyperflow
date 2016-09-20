@@ -15,8 +15,8 @@
  *
  *------------------------------------------------------------------------
  *
- * @module ReactRendererComposite
- * @description - A React renderer composite for client environment.
+ * @module ReactAppRendererComposite
+ * @description - A React app renderer composite for server environment.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
@@ -29,9 +29,9 @@ import CompositeElement from '../../../core/elements/composite-element';
 import { Hflow } from 'hyperflow';
 
 /**
- * @description - A React client renderer composite module.
+ * @description - A React server app renderer composite module.
  *
- * @module ReactRendererComposite
+ * @module ReactAppRendererComposite
  * @return {object}
  */
 export default CompositeElement({
@@ -39,18 +39,18 @@ export default CompositeElement({
         /**
          * @description - Initialized and check that factory is valid for this composite.
          *
-         * @method $initReactRendererComposite
+         * @method $initReactAppRendererComposite
          * @return void
          */
-        $initReactRendererComposite: function $initReactRendererComposite () {
+        $initReactAppRendererComposite: function $initReactAppRendererComposite () {
             const app = this;
             if (Hflow.DEVELOPMENT) {
                 if (!Hflow.isSchema({
-                    name: `string`,
-                    getTopComponent: `function`,
-                    getComponentRenderer: `function`
+                    getTopDomain: `function`,
+                    getRenderer: `function`,
+                    getTopComponent: `function`
                 }).of(app)) {
-                    Hflow.log(`error`, `ReactRendererComposite.$init - App is invalid. Cannot apply composite.`);
+                    Hflow.log(`error`, `ReactAppRendererComposite.$init - App is invalid. Cannot apply composite.`);
                 }
             }
         },
@@ -64,16 +64,27 @@ export default CompositeElement({
             const app = this;
             const appComponent = app.getTopComponent();
             if (!(Hflow.isObject(appComponent) || Hflow.isFunction(appComponent))) {
-                Hflow.log(`error`, `ReactRendererComposite.renderToTarget - React component is invalid.`);
+                Hflow.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
             } else {
-                const elId = app.name;
-                const ReactDOMRenderer = app.getComponentRenderer();
+                const ReactDOMRenderer = app.getRenderer();
                 if (!Hflow.isSchema({
-                    render: `function`
+                    renderToString: `function`
                 }).of(ReactDOMRenderer)) {
-                    Hflow.log(`error`, `ReactRendererComposite.renderToTarget - React renderer is invalid.`);
+                    Hflow.log(`error`, `ReactAppRendererComposite.renderToTarget - React renderer is invalid.`);
                 } else {
-                    ReactDOMRenderer.render(appComponent, document.getElementById(elId));
+                    const domain = app.getTopDomain();
+                    if (!Hflow.isSchema({
+                        outgoing: `function`
+                    }).of(domain)) {
+                        Hflow.log(`error`, `ReactAppRendererComposite.renderToTarget - App:${app.name} domain is invalid.`);
+                    } else {
+                        const renderedMarkup = ReactDOMRenderer.renderToString(appComponent);
+                        if (Hflow.isString(renderedMarkup) && !Hflow.isEmpty(renderedMarkup)) {
+                            domain.outgoing(`on-render-markup-to-string`).emit(() => renderedMarkup);
+                        } else {
+                            Hflow.log(`warn1`, `ReactAppRendererComposite.renderToTarget - React rendered markup is invalid.`);
+                        }
+                    }
                 }
             }
         }
