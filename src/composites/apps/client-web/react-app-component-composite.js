@@ -47,8 +47,7 @@ export default CompositeElement({
             if (Hflow.DEVELOPMENT) {
                 if (!Hflow.isSchema({
                     name: `string`,
-                    getTopDomain: `function`,
-                    getComponentLib: `function`
+                    getTopDomain: `function`
                 }).of(app)) {
                     Hflow.log(`error`, `ReactAppComponentComposite.$init - App is invalid. Cannot apply composite.`);
                 }
@@ -75,30 +74,26 @@ export default CompositeElement({
             const app = this;
             const domain = app.getTopDomain();
             if (!Hflow.isSchema({
+                name: `string`,
                 getInterface: `function`
             }).of(domain)) {
-                Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App domain is invalid.`);
+                Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} domain is invalid.`);
             } else {
-                const {
-                    React
-                } = app.getComponentLib();
+                const intf = domain.getInterface();
                 if (!Hflow.isSchema({
-                    PropTypes: `object`,
-                    createClass: `function`,
-                    createElement: `function`
-                }).of(React)) {
-                    Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
+                    toComponent: `function`,
+                    getComponentLib: `function`
+                }).of(intf)) {
+                    Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} top domain:${domain.name} interface is invalid.`);
                 } else {
-                    const intf = domain.getInterface();
+                    const {
+                        React
+                    } = intf.getComponentLib();
                     if (!Hflow.isSchema({
-                        toComponent: `function`,
-                        registerComponentLib: `function`
-                    }).of(intf)) {
-                        Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App top domain interface is invalid.`);
+                        createElement: `function`
+                    }).of(React)) {
+                        Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
                     } else {
-                        intf.registerComponentLib({
-                            React
-                        });
                         const topComponent = intf.toComponent();
                         if (!Hflow.isFunction(topComponent)) {
                             Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);

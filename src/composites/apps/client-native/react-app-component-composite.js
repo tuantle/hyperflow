@@ -46,8 +46,8 @@ export default CompositeElement({
             const app = this;
             if (Hflow.DEVELOPMENT) {
                 if (!Hflow.isSchema({
-                    getTopDomain: `function`,
-                    getComponentLib: `function`
+                    name: `string`,
+                    getTopDomain: `function`
                 }).of(app)) {
                     Hflow.log(`error`, `ReactAppComponentComposite.$init - App is invalid. Cannot apply composite.`);
                 }
@@ -74,31 +74,26 @@ export default CompositeElement({
             const app = this;
             const domain = app.getTopDomain();
             if (!Hflow.isSchema({
+                name: `string`,
                 getInterface: `function`
             }).of(domain)) {
-                Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App domain is invalid.`);
+                Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} domain is invalid.`);
             } else {
                 const intf = domain.getInterface();
                 if (!Hflow.isSchema({
-                    name: `string`,
-                    toComponent: `function`,
-                    registerComponentLib: `function`
+                    getComponentLib: `function`,
+                    toComponent: `function`
                 }).of(intf)) {
-                    Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App top domain interface is invalid.`);
+                    Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} top domain:${domain.name} interface is invalid.`);
                 } else {
                     const {
-                        React,
-                        ReactNative
-                    } = app.getComponentLib();
+                        React
+                    } = intf.getComponentLib();
                     if (!Hflow.isSchema({
                         createClass: `function`
                     }).of(React)) {
                         Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
                     } else {
-                        intf.registerComponentLib({
-                            React,
-                            ReactNative
-                        });
                         const Component = intf.toComponent(); // eslint-disable-line
                         const topComponent = React.createClass({
                             render: function render () {
