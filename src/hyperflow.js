@@ -72,9 +72,9 @@ import ReactComponentComposite from './composites/interfaces/react-component-com
 import ReactClientNativeAppComponentComposite from './composites/apps/client-native/react-app-component-composite';
 import ReactClientWebAppComponentComposite from './composites/apps/client-web/react-app-component-composite';
 import ReactServerAppComponentComposite from './composites/apps/server/react-app-component-composite';
-import ReactClientWebRendererComposite from './composites/apps/client-web/react-renderer-composite';
-import ReactClientNativeRendererComposite from './composites/apps/client-native/react-renderer-composite';
-import ReactServerRendererComposite from './composites/apps/server/react-renderer-composite';
+import ReactClientWebAppRendererComposite from './composites/apps/client-web/react-app-renderer-composite';
+import ReactClientNativeAppRendererComposite from './composites/apps/client-native/react-app-renderer-composite';
+import ReactServerAppRendererComposite from './composites/apps/server/react-app-renderer-composite';
 
 /* load service library */
 import WebStorageComposite from './composites/services/client-web/web-storage-composite';
@@ -105,7 +105,7 @@ const init = function init ({
             enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
         });
         const HflowProperty = {
-            VERSION: `0.1.0-beta5`,
+            VERSION: `0.1.0-beta6`,
             ENV: TARGET === `server` ? process.env : {}, // eslint-disable-line
             TARGET,
             DEVELOPMENT,
@@ -260,14 +260,14 @@ const init = function init ({
                         return ReactServerAppComponentComposite;
                     }
                 })(),
-                RendererComposite: (() => {
+                AppRendererComposite: (() => {
                     switch (TARGET) { // eslint-disable-line
                     case `client-native`:
-                        return ReactClientNativeRendererComposite;
+                        return ReactClientNativeAppRendererComposite;
                     case `client-web`:
-                        return ReactClientWebRendererComposite;
+                        return ReactClientWebAppRendererComposite;
                     case `server`:
-                        return ReactServerRendererComposite;
+                        return ReactServerAppRendererComposite;
                     }
                 })()
             },

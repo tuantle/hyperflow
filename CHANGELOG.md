@@ -59,3 +59,17 @@ Improvements:
 Bug fixes:
     - Added correct delay instead of debounce method to event stream from domain to services and store for DomainFactory.
 ```
+**Development Beta Version 0.1.0-beta6 (9/20/2016)**
+```
+Notes:
+New Features:
+Breaking Changes:
+    - Rename ReactRendererComposite to ReactAppRendererComposite.
+    - Rename method getTopComponentRenderer to getRenderer and removed getComponentLib method in AppFactory.
+    - Interface will register component library during app registration in AppFactory.
+Improvements:
+    - Clean up renderToTarget method for ReactRender
+    - Updated getTopComponent method in ReactAppComponentComposite to match changes in AppFactory.
+    - Updated renderToTarget method in ReactAppRendererComposite to match changes in AppFactory.
+Bug fixes:
+```
