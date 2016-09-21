@@ -133,19 +133,20 @@ const init = function init ({
                     }).of(sourceEventMap)) {
                         common.log(`error`, `Event.create - Input event map is invalid.`);
                     } else {
-                        /* helper function to convert camel case to dash */
-                        const camelcaseToDash = function camelcaseToDash (str) {
-                            return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => {
-                                return `-${word.toLowerCase()}`;
-                            }).replace(/^_/, ``);
+                        /* helper function to convert dash to uppercase underscore */
+                        const dashToUpperCaseUnderscore = function dashToUpperCaseUnderscore (str) {
+                            return str.replace(/-([a-z])/g, (match, word) => {
+                                return `_${word}`;
+                            }).toUpperCase();
                         };
-                        return Object.keys(sourceEventMap).reduce((outputEventMap, key) => {
+
+                        const outputEventMap = Object.keys(sourceEventMap).reduce((_outputEventMap, key) => {
                             if (key === `as`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[`AS`] = sourceEventMap[key].reduce((asEventMap, _key) => {
+                                    _outputEventMap[`AS`] = sourceEventMap[key].reduce((asEventMap, _key) => {
                                         asEventMap[
-                                            common.camelcaseToUnderscore(_key).toUpperCase()
-                                        ] = `as-${camelcaseToDash(_key)}`;
+                                            dashToUpperCaseUnderscore(_key)
+                                        ] = `as-${_key}`;
                                         return asEventMap;
                                     }, {});
                                 } else {
@@ -154,10 +155,10 @@ const init = function init ({
                             }
                             if (key === `on`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[`ON`] = sourceEventMap[key].reduce((onEventMap, _key) => {
+                                    _outputEventMap[`ON`] = sourceEventMap[key].reduce((onEventMap, _key) => {
                                         onEventMap[
-                                            common.camelcaseToUnderscore(_key).toUpperCase()
-                                        ] = `on-${camelcaseToDash(_key)}`;
+                                            dashToUpperCaseUnderscore(_key)
+                                        ] = `on-${_key}`;
                                         return onEventMap;
                                     }, {});
                                 } else {
@@ -166,10 +167,10 @@ const init = function init ({
                             }
                             if (key === `do`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[`DO`] = sourceEventMap[key].reduce((doEventMap, _key) => {
+                                    _outputEventMap[`DO`] = sourceEventMap[key].reduce((doEventMap, _key) => {
                                         doEventMap[
-                                            common.camelcaseToUnderscore(_key).toUpperCase()
-                                        ] = `do-${camelcaseToDash(_key)}`;
+                                            dashToUpperCaseUnderscore(_key)
+                                        ] = `do-${_key}`;
                                         return doEventMap;
                                     }, {});
                                 } else {
@@ -178,10 +179,10 @@ const init = function init ({
                             }
                             if (key === `broadcast`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[`BROADCAST`] = sourceEventMap[key].reduce((broadcastEventMap, _key) => {
+                                    _outputEventMap[`BROADCAST`] = sourceEventMap[key].reduce((broadcastEventMap, _key) => {
                                         broadcastEventMap[
-                                            common.camelcaseToUnderscore(_key).toUpperCase()
-                                        ] = `broadcast-${camelcaseToDash(_key)}`;
+                                            dashToUpperCaseUnderscore(_key)
+                                        ] = `broadcast-${_key}`;
                                         return broadcastEventMap;
                                     }, {});
                                 } else {
@@ -190,27 +191,28 @@ const init = function init ({
                             }
                             if (key === `request`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
-                                    outputEventMap[`REQUEST`] = sourceEventMap[key].reduce((requestForEventMap, _key) => {
+                                    _outputEventMap[`REQUEST`] = sourceEventMap[key].reduce((requestForEventMap, _key) => {
                                         requestForEventMap[
-                                            common.camelcaseToUnderscore(_key).toUpperCase()
-                                        ] = `request-for-${camelcaseToDash(_key)}`;
+                                            dashToUpperCaseUnderscore(_key)
+                                        ] = `request-for-${_key}`;
                                         return requestForEventMap;
                                     }, {});
-                                    outputEventMap[`RESPONSE`] = {
+                                    _outputEventMap[`RESPONSE`] = {
                                         WITH: sourceEventMap[key].reduce((responseToEventMap, _key) => {
                                             responseToEventMap[
-                                                common.camelcaseToUnderscore(_key).toUpperCase()
-                                            ] = `response-with-${camelcaseToDash(_key)}`;
+                                                dashToUpperCaseUnderscore(_key)
+                                            ] = `response-with-${_key}`;
                                             return responseToEventMap;
                                         }, {}),
                                         TO: sourceEventMap[key].reduce((responseToEventMap, _key) => {
                                             responseToEventMap[
-                                                common.camelcaseToUnderscore(_key).toUpperCase()
+                                                dashToUpperCaseUnderscore(_key)
                                             ] = {
-                                                OK: `response-to-${camelcaseToDash(_key)}-ok`,
-                                                NOT_FOUND: `response-to-${camelcaseToDash(_key)}-not-found`,
-                                                CONFLICT: `response-to-${camelcaseToDash(_key)}-conflict`,
-                                                ERROR: `response-to-${camelcaseToDash(_key)}-error`
+                                                OK: `response-to-${_key}-ok`,
+                                                UNAUTHORIZED: `response-to-${_key}-unauthorized`,
+                                                NOT_FOUND: `response-to-${_key}-not-found`,
+                                                CONFLICT: `response-to-${_key}-conflict`,
+                                                ERROR: `response-to-${key}-error`
                                             };
                                             return responseToEventMap;
                                         }, {})
@@ -219,8 +221,9 @@ const init = function init ({
                                     common.log(`error`, `Event.create - Input 'request-for' event keys are invalid.`);
                                 }
                             }
-                            return outputEventMap;
+                            return _outputEventMap;
                         }, {});
+                        return Object.freeze(outputEventMap);
                     }
                 }
             },
