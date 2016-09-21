@@ -72,4 +72,15 @@ Improvements:
     - Updated getTopComponent method in ReactAppComponentComposite to match changes in AppFactory.
     - Updated renderToTarget method in ReactAppRendererComposite to match changes in AppFactory.
 Bug fixes:
+    - Fixed repeat method in EventStreamComposite. The method only repeat once for first event. It is now fixed and will repeat for all incoming events.
+```
+**Development Beta Version 0.1.0-beta7 (9/21/2016)**
+```
+Notes:
+New Features:
+Breaking Changes:
+    - Changed how Hflow.Event.create method read in event name.
+Improvements:
+Bug fixes:
+    - Fixed repeat method in EventStreamComposite. The method only repeat once for first event. It is now fixed and will repeat for all incoming events.
 ```
