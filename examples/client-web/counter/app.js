@@ -19,7 +19,7 @@ import { CounterDomain } from './domains/counter-domain';
 
 const counter = Hflow.App.augment({
     composites: [
-        Hflow.React.RendererComposite,
+        Hflow.React.AppRendererComposite,
         Hflow.React.AppComponentComposite
     ],
     $init: function $init () {

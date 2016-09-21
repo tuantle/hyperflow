@@ -13,23 +13,21 @@ import { Hflow } from 'hyperflow';
 
 export default Hflow.Event.create({
     as: [
-        `countMutated`,
-        `offsetMutated`
+        `count-mutated`,
+        `offset-mutated`
     ],
     on: [
         `undo`,
         `count`,
-        `changeOffset`,
-        `offsetInputEnter`,
-        `undoButtonPress`,
-        `increaseButtonPress`,
-        `decreaseButtonPress`
+        `change-offset`,
+        `increase`,
+        `decrease`
     ],
     do: [
         `init`,
-        `undoLastCountMutation`,
-        `countMutation`,
-        `offsetMutation`
+        `undo-last-count-mutation`,
+        `count-mutation`,
+        `offset-mutation`
     ],
     request: [
         `dataread`,

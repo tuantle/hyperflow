@@ -19,7 +19,7 @@ import { CalculatorDomain } from './domains/calculator-domain';
 
 const calculator = Hflow.App.augment({
     composites: [
-        Hflow.React.RendererComposite,
+        Hflow.React.AppRendererComposite,
         Hflow.React.AppComponentComposite
     ],
     /**

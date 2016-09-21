@@ -47,7 +47,7 @@ const KeypadButtonInterface = Hflow.Interface.augment({
     onClick: function onClick () {
         const component = this;
         const intf = component.getInterface();
-        intf.outgoing(EVENT.ON.KEYPAD_BUTTON_PRESS).emit(() => component.props.label);
+        intf.outgoing(EVENT.ON.KEYPAD).emit(() => component.props.label);
     },
     render: function render () {
         const component = this;
@@ -97,17 +97,17 @@ const KeypadInterface = Hflow.Interface.augment({
     },
     setup: function setup (done) {
         const intf = this;
-        intf.incoming(EVENT.ON.KEYPAD_BUTTON_PRESS).handle((label) => {
+        intf.incoming(EVENT.ON.KEYPAD).handle((label) => {
             if (label === `C`) {
-                intf.outgoing(EVENT.ON.CLEAR_KEY_BUTTON_PRESS).emit();
+                intf.outgoing(EVENT.ON.RESET).emit();
             } else if (label === `÷` || label === `×` || label === `+` || label === `-`) {
-                intf.outgoing(EVENT.ON.OPERATION_KEY_BUTTON_PRESS).emit(() => label);
+                intf.outgoing(EVENT.ON.UPDATE_OPERATION).emit(() => label);
             } else if (Hflow.isNumeric(label) || label === `.` || label === `π`) {
-                intf.outgoing(EVENT.ON.DIGIT_KEY_BUTTON_PRESS).emit(() => label);
+                intf.outgoing(EVENT.ON.UPDATE_OPERAND).emit(() => label);
             } else if (label === `±`) {
-                intf.outgoing(EVENT.ON.NEGATE_KEY_BUTTON_PRESS).emit();
+                intf.outgoing(EVENT.ON.NEGATE_OPERAND).emit();
             } else if (label === `=`) {
-                intf.outgoing(EVENT.ON.EQUAL_KEY_BUTTON_PRESS).emit();
+                intf.outgoing(EVENT.ON.COMPUTE).emit();
             }
         });
         done();
@@ -157,11 +157,11 @@ const CalculatorInterface = Hflow.Interface.augment({
     },
     setup: function setup (done) {
         const intf = this;
-        intf.incoming(EVENT.ON.CLEAR_KEY_BUTTON_PRESS).forward(EVENT.ON.RESET);
-        intf.incoming(EVENT.ON.DIGIT_KEY_BUTTON_PRESS).forward(EVENT.ON.UPDATE_OPERAND);
-        intf.incoming(EVENT.ON.NEGATE_KEY_BUTTON_PRESS).forward(EVENT.ON.NEGATE_OPERAND);
-        intf.incoming(EVENT.ON.OPERATION_KEY_BUTTON_PRESS).forward(EVENT.ON.UPDATE_OPERATION);
-        intf.incoming(EVENT.ON.EQUAL_KEY_BUTTON_PRESS).forward(EVENT.ON.COMPUTE);
+        intf.incoming(EVENT.ON.RESET).repeat();
+        intf.incoming(EVENT.ON.UPDATE_OPERAND).repeat();
+        intf.incoming(EVENT.ON.NEGATE_OPERAND).repeat();
+        intf.incoming(EVENT.ON.UPDATE_OPERATION).repeat();
+        intf.incoming(EVENT.ON.COMPUTE).repeat();
         done();
     },
     render: function render () {
@@ -178,7 +178,7 @@ const CalculatorInterface = Hflow.Interface.augment({
                     <div style = { component.props.style.display }>
                         <h2 style = { component.props.style.displayText }>{ component.state.result }</h2>
                     </div>
-                    <h1 style = { component.props.style.h1 }>v0.4</h1>
+                    <h1 style = { component.props.style.h1 }>v0.5</h1>
                     <Keypad/>
                 </div>
             </MuiThemeProvider>

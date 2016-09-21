@@ -13,32 +13,26 @@ import { Hflow } from 'hyperflow';
 
 export default Hflow.Event.create({
     as: [
-        `operandUpdated`,
-        `operationUpdated`,
-        `updatedAfterCompute`
+        `operand-updated`,
+        `operation-updated`,
+        `updated-after-compute`
     ],
     on: [
         `reset`,
         `compute`,
-        `updateOperation`,
-        `updateOperand`,
-        `negateOperand`,
-
-        `keypadButtonPress`,
-        `clearKeyButtonPress`,
-        `operationKeyButtonPress`,
-        `digitKeyButtonPress`,
-        `negateKeyButtonPress`,
-        `equalKeyButtonPress`
+        `keypad`,
+        `update-operation`,
+        `update-operand`,
+        `negate-operand`
     ],
     do: [
         `reset`,
-        `updateOperation`,
-        `updateOperand`,
-        `updateAfterCompute`,
-        `updateDisplayResult`
+        `update-operation`,
+        `update-operand`,
+        `update-after-compute`,
+        `update-display-result`
     ],
     request: [
-        `operandFromBuffer`
+        `operand-from-buffer`
     ]
 });
