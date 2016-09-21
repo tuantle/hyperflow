@@ -377,6 +377,8 @@ export default CompositeElement({
                                         delete _arbiter[eventId];
                                     }
                                 }
+                            } else {
+                                _arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
                             }
                         }
                     } else {
@@ -837,16 +839,16 @@ export default CompositeElement({
                                     arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
                                     arbiter[eventId].handler = (value) => value;
                                     arbiter[eventId].relayer = (handledValue) => {
-                                        factory.outgoing(...eventIds).emit(() => handledValue);
-                                        Hflow.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventIds}].`);
+                                        factory.outgoing(eventId).emit(() => handledValue);
+                                        Hflow.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
                                     };
                                 } else {
                                     arbiter[eventId] = {
                                         eventDirectionalState: REPEATING_EVENT,
                                         handler: (value) => value,
                                         relayer: (handledValue) => {
-                                            factory.outgoing(...eventIds).emit(() => handledValue);
-                                            Hflow.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventIds}].`);
+                                            factory.outgoing(eventId).emit(() => handledValue);
+                                            Hflow.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
                                         }
                                     };
                                 }
