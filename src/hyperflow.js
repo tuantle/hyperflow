@@ -105,7 +105,7 @@ const init = function init ({
             enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
         });
         const HflowProperty = {
-            VERSION: `0.1.0-beta6`,
+            VERSION: `0.1.0-beta7`,
             ENV: TARGET === `server` ? process.env : {}, // eslint-disable-line
             TARGET,
             DEVELOPMENT,
