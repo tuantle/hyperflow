@@ -79,8 +79,18 @@ Bug fixes:
 Notes:
 New Features:
 Breaking Changes:
-    - Changed how Hflow.Event.create method read in event name.
+    - Changed how Hflow.Event.create method read in event map object.
 Improvements:
 Bug fixes:
     - Fixed repeat method in EventStreamComposite. The method only repeat once for first event. It is now fixed and will repeat for all incoming events.
+```
+**Development Beta Version 0.1.0-beta8 (9/22/2016)**
+```
+Notes:
+New Features:
+Breaking Changes:
+    - Changed how Hflow.Event.create method read in event map object.
+Improvements:
+Bug fixes:
+    - Fixed Hflow.Event.create method. Incorrectly generate event Ids for RESPONSE.TO.*.ERROR.
 ```
