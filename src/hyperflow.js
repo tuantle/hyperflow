@@ -105,7 +105,7 @@ const init = function init ({
             enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
         });
         const HflowProperty = {
-            VERSION: `0.1.0-beta7`,
+            VERSION: `0.1.0-beta8`,
             ENV: TARGET === `server` ? process.env : {}, // eslint-disable-line
             TARGET,
             DEVELOPMENT,
@@ -125,11 +125,11 @@ const init = function init ({
                  */
                 create: function create (sourceEventMap) {
                     if (!common.isSchema({
-                        as: `array|undefined`,
-                        on: `array|undefined`,
-                        do: `array|undefined`,
-                        request: `array|undefined`,
-                        broadcast: `array|undefined`
+                        asEvents: `array|undefined`,
+                        onEvents: `array|undefined`,
+                        doEvents: `array|undefined`,
+                        requestEvents: `array|undefined`,
+                        broadcastEvents: `array|undefined`
                     }).of(sourceEventMap)) {
                         common.log(`error`, `Event.create - Input event map is invalid.`);
                     } else {
@@ -141,7 +141,7 @@ const init = function init ({
                         };
 
                         const outputEventMap = Object.keys(sourceEventMap).reduce((_outputEventMap, key) => {
-                            if (key === `as`) {
+                            if (key === `asEvents`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
                                     _outputEventMap[`AS`] = sourceEventMap[key].reduce((asEventMap, _key) => {
                                         asEventMap[
@@ -153,7 +153,7 @@ const init = function init ({
                                     common.log(`error`, `Event.create - Input 'as' event keys are invalid.`);
                                 }
                             }
-                            if (key === `on`) {
+                            if (key === `onEvents`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
                                     _outputEventMap[`ON`] = sourceEventMap[key].reduce((onEventMap, _key) => {
                                         onEventMap[
@@ -165,7 +165,7 @@ const init = function init ({
                                     common.log(`error`, `Event.create - Input 'on' event keys are invalid.`);
                                 }
                             }
-                            if (key === `do`) {
+                            if (key === `doEvents`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
                                     _outputEventMap[`DO`] = sourceEventMap[key].reduce((doEventMap, _key) => {
                                         doEventMap[
@@ -177,7 +177,7 @@ const init = function init ({
                                     common.log(`error`, `Event.create - Input 'do' event keys are invalid.`);
                                 }
                             }
-                            if (key === `broadcast`) {
+                            if (key === `broadcastEvents`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
                                     _outputEventMap[`BROADCAST`] = sourceEventMap[key].reduce((broadcastEventMap, _key) => {
                                         broadcastEventMap[
@@ -189,7 +189,7 @@ const init = function init ({
                                     common.log(`error`, `Event.create - Input 'broadcast' event keys are invalid.`);
                                 }
                             }
-                            if (key === `request`) {
+                            if (key === `requestEvents`) {
                                 if (sourceEventMap[key].every((_key) => common.isString(_key))) {
                                     _outputEventMap[`REQUEST`] = sourceEventMap[key].reduce((requestForEventMap, _key) => {
                                         requestForEventMap[
@@ -209,10 +209,10 @@ const init = function init ({
                                                 dashToUpperCaseUnderscore(_key)
                                             ] = {
                                                 OK: `response-to-${_key}-ok`,
+                                                ERROR: `response-to-${_key}-error`,
                                                 UNAUTHORIZED: `response-to-${_key}-unauthorized`,
                                                 NOT_FOUND: `response-to-${_key}-not-found`,
-                                                CONFLICT: `response-to-${_key}-conflict`,
-                                                ERROR: `response-to-${key}-error`
+                                                CONFLICT: `response-to-${_key}-conflict`
                                             };
                                             return responseToEventMap;
                                         }, {})
@@ -223,7 +223,8 @@ const init = function init ({
                             }
                             return _outputEventMap;
                         }, {});
-                        return Object.freeze(outputEventMap);
+                        // return Object.freeze(outputEventMap);
+                        return outputEventMap;
                     }
                 }
             },
