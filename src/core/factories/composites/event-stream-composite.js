@@ -30,8 +30,11 @@ import Transducer from 'transducers-js';
 
 import CompositeElement from '../../elements/composite-element';
 
-/* load Hflow */
-import { Hflow } from 'hyperflow';
+/* load CommonElement */
+import CommonElement from '../../elements/common-element';
+
+/* create CommonElement as Hflow object */
+const Hflow = CommonElement();
 
 /* factory Ids */
 import {
@@ -92,238 +95,13 @@ export default CompositeElement({
 
             let _incomingSubscription;
             let _outgoingSubscription;
-            /* creating factory incoming and outgoing event stream. */
+            /* creating factory event stream emitter */
+            let _streamEmitter = new Rx.Subject();
+            /* creating factory incoming and outgoing event stream */
             let _incomingStream = Rx.Observable.never();
-            let _outgoingStream = new Rx.Subject();
-            const _operator = {
-                /**
-                 * @description - At observable stream, operates delay.
-                 *
-                 * @method delay
-                 * @param {number} ms - Time in millisecond
-                 * @return {object}
-                 */
-                delay: function delay (ms) {
-                    if (!Hflow.isInteger(ms)) {
-                        Hflow.log(`error`, `EventStreamComposite.delay - Input delay time is invalid.`);
-                    } else {
-                        _incomingStream = _incomingStream.delay(ms);
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates debounce.
-                 *
-                 * @method debounce
-                 * @param {number} ms - Time in millisecond
-                 * @return {object}
-                 */
-                debounce: function debounce (ms) {
-                    if (!Hflow.isInteger(ms)) {
-                        Hflow.log(`error`, `EventStreamComposite.debounce - Input debounce time is invalid.`);
-                    } else {
-                        _incomingStream = _incomingStream.debounce(ms);
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates filter.
-                 *
-                 * @method filter
-                 * @param {function} predicate
-                 * @return {object}
-                 */
-                filter: function filter (predicate) {
-                    if (!Hflow.isFunction(predicate)) {
-                        Hflow.log(`error`, `EventStreamComposite.filter - Input filter predicate function is invalid.`);
-                    } else {
-                        _incomingStream = _incomingStream.filter(predicate);
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates map.
-                 *
-                 * @method map
-                 * @param {function} selector
-                 * @return {object}
-                 */
-                map: function map (selector) {
-                    if (!Hflow.isFunction(selector)) {
-                        Hflow.log(`error`, `EventStreamComposite.map - Input map selector function is invalid.`);
-                    } else {
-                        _incomingStream = _incomingStream.select(selector);
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates flatten and map.
-                 *
-                 * @method flatMap
-                 * @param {function} selector
-                 * @return {object}
-                 */
-                flatMap: function flatMap (selector) {
-                    if (!Hflow.isFunction(selector)) {
-                        Hflow.log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
-                    } else {
-                        _incomingStream = _incomingStream.selectMany(selector);
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates reduce.
-                 *
-                 * @method reduce
-                 * @param {function} accumulator
-                 * @param {object|undefined} defaultPayload
-                 * @return {object}
-                 */
-                reduce: function reduce (accumulator, defaultPayload) {
-                    if (!Hflow.isFunction(accumulator)) {
-                        Hflow.log(`error`, `EventStreamComposite.reduce - Input reduce accumulator function is invalid.`);
-                    } else {
-                        if (Hflow.isObject(defaultPayload)) {
-                            if (Hflow.isSchema({
-                                eventId: `string`
-                            }).of(defaultPayload)) {
-                                Hflow.log(`error`, `EventStreamComposite.reduce - Payload event Id is invalid.`);
-                            } else {
-                                _incomingStream = _incomingStream.reduce(accumulator, defaultPayload);
-                            }
-                        } else {
-                            _incomingStream = _incomingStream.reduce(accumulator);
-                        }
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates a transducer on the entire stream.
-                 *
-                 * @method transduce
-                 * @param {function} selector
-                 * @param {function} predicate
-                 * @return {object}
-                 */
-                transduce: function transduce (selector, predicate) {
-                    if (!Hflow.isFunction(selector)) {
-                        Hflow.log(`error`, `EventStreamComposite.transduce - Input map selector function is invalid.`);
-                    } else if (!Hflow.isFunction(predicate)) {
-                        Hflow.log(`error`, `EventStreamComposite.transduce - Input filter predicate function is invalid.`);
-                    } else {
-                        _incomingStream = _incomingStream.transduce(Transducer.comp(
-                            Transducer.map(selector),
-                            Transducer.filter(predicate)
-                        ));
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates a start with on the entire stream.
-                 *
-                 * @method startWith
-                 * @param {array} payloads
-                 * @return {object}
-                 */
-                startWith: function startWith (...payloads) {
-                    // FIXME: startWith method not working? Needs testings.
-                    if (payloads.every((payload) => {
-                        if (!Hflow.isSchema({
-                            eventId: `string`
-                        }).of(payload)) {
-                            Hflow.log(`error`, `EventStreamComposite.startWith - Payload event Id is invalid.`);
-                            return false;
-                        }
-                        return true;
-                    })) {
-                        _incomingStream = _incomingStream.startWith(...payloads);
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates take last.
-                 *
-                 * @method takeLast
-                 * @param {number} count
-                 * @return {object}
-                 */
-                takeLast: function takeLast (count) {
-                    if (!Hflow.isInteger(count)) {
-                        Hflow.log(`error`, `EventStreamComposite.takeLast - Input count number is invalid.`);
-                    } else {
-                        _incomingStream = _incomingStream.takeLast(count);
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates a timeout on the entire stream.
-                 *
-                 * @method timeout
-                 * @param {object} timeoutPayload
-                 * @param {numeric} ms
-                 * @return {object}
-                 */
-                timeout: function timeout (timeoutPayload, ms) {
-                    if (!Hflow.isSchema({
-                        eventId: `string`
-                    }).of(timeoutPayload)) {
-                        Hflow.log(`error`, `EventStreamComposite.timeout - Input timeout payload is invalid.`);
-                    } else if (!Hflow.isInteger(ms)) {
-                        Hflow.log(`error`, `EventStreamComposite.timeout - Input timeout is invalid.`);
-                    } else {
-                        _incomingStream = _incomingStream.timeout(ms, Rx.Observable.just(timeoutPayload));
-                    }
-                    return _operator;
-                },
-                /**
-                 * @description - At observable stream, operates a monitor on the entire stream.
-                 *
-                 * @method monitor
-                 * @param {object} logger
-                 * @return {object}
-                 */
-                monitor: function monitor (logger = {}) {
-                    if (!Hflow.isSchema({
-                        logOnNext: `function`
-                    }).of(logger)) {
-                        Hflow.log(`error`, `EventStreamComposite.monitor - Input logger object is invalid.`);
-                    } else {
-                        const {
-                            logOnNext,
-                            logOnError,
-                            logOnComplete
-                        } = Hflow.fallback({
-                            /**
-                             * @description - On subscription to error...
-                             *
-                             * @method logOnError
-                             * @param {string} error
-                             * @return void
-                             */
-                            logOnError: function logOnError (error) {
-                                Hflow.log(`error`, `EventStreamComposite.monitor.logOnError - ${error.message}`);
-                            },
-                            /**
-                             * @description - On subscription to completion...
-                             *
-                             * @method logOnComplete
-                             * @return void
-                             */
-                            logOnComplete: function logOnComplete () {
-                                Hflow.log(`info`, `Complete side subscription.`);
-                            }
-                        }).of(logger);
-                        /* using a side observer for monitoring */
-                        const sideObserver = Rx.Observer.create(
-                            logOnNext,
-                            logOnError,
-                            logOnComplete
-                        );
-                        _incomingStream = _incomingStream.do(sideObserver);
-                    }
-                    return _operator;
-                }
-            };
+            /* converting event stream emitter as a subject to an observable */
+            let _outgoingStream = _streamEmitter.asObservable();
+
             /* creating factory event stream observer */
             const _observer = Rx.Observer.create(
                 /**
@@ -408,6 +186,339 @@ export default CompositeElement({
 
             /* a queue for payloads emitted before activation */
             let _unemitPayloads = [];
+
+            /* ----- Private FUnctions ------------- */
+            /**
+             * @description - Helper function to create stream operator object.
+             *
+             * @method _createStreamOperatorFor
+             * @param {string} direction
+             * @return {object}
+             */
+            function _createStreamOperatorFor (direction) {
+                if (!Hflow.isString(direction)) {
+                    Hflow.log(`error`, `EventStreamComposite._createStreamOperatorFor - Input event stream direction is invalid.`);
+                } else {
+                    const operator = {
+                        /**
+                         * @description - At observable stream, operates delay.
+                         *
+                         * @method delay
+                         * @param {number} ms - Time in millisecond
+                         * @return {object}
+                         */
+                        delay: function delay (ms) {
+                            if (!Hflow.isInteger(ms)) {
+                                Hflow.log(`error`, `EventStreamComposite.delay - Input delay time is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.delay(ms).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.delay(ms).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates debounce.
+                         *
+                         * @method debounce
+                         * @param {number} ms - Time in millisecond
+                         * @return {object}
+                         */
+                        debounce: function debounce (ms) {
+                            if (!Hflow.isInteger(ms)) {
+                                Hflow.log(`error`, `EventStreamComposite.debounce - Input debounce time is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.debounce(ms).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.debounce(ms).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates filter.
+                         *
+                         * @method filter
+                         * @param {function} predicate
+                         * @return {object}
+                         */
+                        filter: function filter (predicate) {
+                            if (!Hflow.isFunction(predicate)) {
+                                Hflow.log(`error`, `EventStreamComposite.filter - Input filter predicate function is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.filter(predicate).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.filter(predicate).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates map.
+                         *
+                         * @method map
+                         * @param {function} selector
+                         * @return {object}
+                         */
+                        map: function map (selector) {
+                            if (!Hflow.isFunction(selector)) {
+                                Hflow.log(`error`, `EventStreamComposite.map - Input map selector function is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.select(selector).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.select(selector).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates flatten and map.
+                         *
+                         * @method flatMap
+                         * @param {function} selector
+                         * @return {object}
+                         */
+                        flatMap: function flatMap (selector) {
+                            if (!Hflow.isFunction(selector)) {
+                                Hflow.log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.selectMany(selector).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.selectMany(selector).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates reduce.
+                         *
+                         * @method reduce
+                         * @param {function} accumulator
+                         * @param {object|undefined} defaultPayload
+                         * @return {object}
+                         */
+                        reduce: function reduce (accumulator, defaultPayload) {
+                            if (!Hflow.isFunction(accumulator)) {
+                                Hflow.log(`error`, `EventStreamComposite.reduce - Input reduce accumulator function is invalid.`);
+                            } else {
+                                if (Hflow.isObject(defaultPayload)) {
+                                    if (Hflow.isSchema({
+                                        eventId: `string`
+                                    }).of(defaultPayload)) {
+                                        Hflow.log(`error`, `EventStreamComposite.reduce - Payload event Id is invalid.`);
+                                    } else {
+                                        switch (direction) { // eslint-disable-line
+                                        case `incoming`:
+                                            _incomingStream = _incomingStream.reduce(accumulator, defaultPayload).share();
+                                            break;
+                                        case `outgoing`:
+                                            _outgoingStream = _outgoingStream.reduce(accumulator, defaultPayload).share();
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    switch (direction) { // eslint-disable-line
+                                    case `incoming`:
+                                        _incomingStream = _incomingStream.reduce(accumulator).share();
+                                        break;
+                                    case `outgoing`:
+                                        _outgoingStream = _outgoingStream.reduce(accumulator).share();
+                                        break;
+                                    }
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates a transducer on the entire stream.
+                         *
+                         * @method transduce
+                         * @param {function} selector
+                         * @param {function} predicate
+                         * @return {object}
+                         */
+                        transduce: function transduce (selector, predicate) {
+                            if (!Hflow.isFunction(selector)) {
+                                Hflow.log(`error`, `EventStreamComposite.transduce - Input map selector function is invalid.`);
+                            } else if (!Hflow.isFunction(predicate)) {
+                                Hflow.log(`error`, `EventStreamComposite.transduce - Input filter predicate function is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.transduce(Transducer.comp(
+                                        Transducer.map(selector),
+                                        Transducer.filter(predicate)
+                                    )).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.transduce(Transducer.comp(
+                                        Transducer.map(selector),
+                                        Transducer.filter(predicate)
+                                    )).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates a start with on the entire stream.
+                         *
+                         * @method startWith
+                         * @param {array} payloads
+                         * @return {object}
+                         */
+                        startWith: function startWith (...payloads) {
+                            // FIXME: startWith method not working? Needs testings.
+                            if (payloads.every((payload) => {
+                                if (!Hflow.isSchema({
+                                    eventId: `string`
+                                }).of(payload)) {
+                                    Hflow.log(`error`, `EventStreamComposite.startWith - Payload event Id is invalid.`);
+                                    return false;
+                                }
+                                return true;
+                            })) {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.startWith(...payloads).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.startWith(...payloads).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates take last.
+                         *
+                         * @method takeLast
+                         * @param {number} count
+                         * @return {object}
+                         */
+                        takeLast: function takeLast (count) {
+                            if (!Hflow.isInteger(count)) {
+                                Hflow.log(`error`, `EventStreamComposite.takeLast - Input count number is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.takeLast(count).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.takeLast(count).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates a timeout on the entire stream.
+                         *
+                         * @method timeout
+                         * @param {object} timeoutPayload
+                         * @param {numeric} ms
+                         * @return {object}
+                         */
+                        timeout: function timeout (timeoutPayload, ms) {
+                            if (!Hflow.isSchema({
+                                eventId: `string`
+                            }).of(timeoutPayload)) {
+                                Hflow.log(`error`, `EventStreamComposite.timeout - Input timeout payload is invalid.`);
+                            } else if (!Hflow.isInteger(ms)) {
+                                Hflow.log(`error`, `EventStreamComposite.timeout - Input timeout is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
+                         * @description - At observable stream, operates a monitor on the entire stream.
+                         *
+                         * @method monitor
+                         * @param {object} logger
+                         * @return {object}
+                         */
+                        monitor: function monitor (logger = {}) {
+                            if (!Hflow.isSchema({
+                                logOnNext: `function`
+                            }).of(logger)) {
+                                Hflow.log(`error`, `EventStreamComposite.monitor - Input logger object is invalid.`);
+                            } else {
+                                const {
+                                    logOnNext,
+                                    logOnError,
+                                    logOnComplete
+                                } = Hflow.fallback({
+                                    /**
+                                     * @description - On subscription to error...
+                                     *
+                                     * @method logOnError
+                                     * @param {string} error
+                                     * @return void
+                                     */
+                                    logOnError: function logOnError (error) {
+                                        Hflow.log(`error`, `EventStreamComposite.monitor.logOnError - ${error.message}`);
+                                    },
+                                    /**
+                                     * @description - On subscription to completion...
+                                     *
+                                     * @method logOnComplete
+                                     * @return void
+                                     */
+                                    logOnComplete: function logOnComplete () {
+                                        Hflow.log(`info`, `Complete side subscription.`);
+                                    }
+                                }).of(logger);
+                                /* using a side observer for monitoring */
+                                const sideObserver = Rx.Observer.create(
+                                    logOnNext,
+                                    logOnError,
+                                    logOnComplete
+                                );
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.tap(sideObserver).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.tap(sideObserver).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        }
+                    };
+                    return operator;
+                }
+            }
+
             /* ----- Public Functions -------------- */
             /**
              * @description - Get factory outgoing event stream.
@@ -416,18 +527,27 @@ export default CompositeElement({
              * @return {object}
              */
             this.getStream = function getStream () {
-                /* converting outgoing event stream as a subject to an observable */
-                return _outgoingStream.asObservable();
+                return _outgoingStream;
             };
             /**
              * @description - Apply incoming event stream operators.
              *
-             * @method operateStream
+             * @method operateIncomingStream
              * @param {object} - operator
              * @return void
              */
-            this.operateStream = function operateStream (operator) { // eslint-disable-line
-                Hflow.log(`warn0`, `EventStreamComposite.operateStream - Method is not implemented by default. Ignore this warning if intended.`);
+            this.operateIncomingStream = function operateIncomingStream (operator) { // eslint-disable-line
+                Hflow.log(`warn0`, `EventStreamComposite.operateIncomingStream - Method is not implemented by default. Ignore this warning if intended.`);
+            };
+            /**
+             * @description - Apply outgoing event stream operators.
+             *
+             * @method operateOutgoingStream
+             * @param {object} - operator
+             * @return void
+             */
+            this.operateOutgoingStream = function operateOutgoingStream (operator) { // eslint-disable-line
+                Hflow.log(`warn0`, `EventStreamComposite.operateOutgoingStream - Method is not implemented by default. Ignore this warning if intended.`);
             };
             /**
              * @description - When there is an outgoing event...
@@ -553,19 +673,19 @@ export default CompositeElement({
                                         if (waitTime > 0 && intervalPeriod > 0) {
                                             setTimeout(() => {
                                                 setInterval(() => {
-                                                    _outgoingStream.onNext(payload);
+                                                    _streamEmitter.onNext(payload);
                                                 }, intervalPeriod);
                                             }, waitTime);
                                         } else if (waitTime > 0 && intervalPeriod <= 0) {
                                             setTimeout(() => {
-                                                _outgoingStream.onNext(payload);
+                                                _streamEmitter.onNext(payload);
                                             }, waitTime);
                                         } else if (waitTime <= 0 && intervalPeriod > 0) {
                                             setInterval(() => {
-                                                _outgoingStream.onNext(payload);
+                                                _streamEmitter.onNext(payload);
                                             }, intervalPeriod);
                                         } else {
-                                            _outgoingStream.onNext(payload);
+                                            _streamEmitter.onNext(payload);
                                         }
                                     } else {
                                         _arbiter[eventId] = {
@@ -573,7 +693,7 @@ export default CompositeElement({
                                             handler: null,
                                             relayer: null
                                         };
-                                        _outgoingStream.onNext(payload);
+                                        _streamEmitter.onNext(payload);
                                     }
                                     Hflow.log(`info`, `Factory:${factory.name} is emitting eventIds:[${eventIds}].`);
                                 }
@@ -695,7 +815,6 @@ export default CompositeElement({
                         await: function await () {
                             if (eventIds.length > 1) {
                                 let sideSubscription;
-                                let sideStream;
                                 const awaitedEventId = eventIds.reduce((_awaitedEventId, eventId) => {
                                     return Hflow.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId}-&-${eventId}`;
                                 }, ``);
@@ -734,13 +853,12 @@ export default CompositeElement({
                                         Hflow.log(`info`, `Side subscription completed.`);
                                     }
                                 );
-                                sideStream = _incomingStream.filter((_payload) => {
-                                    return eventIds.some((eventId) => eventId === _payload.eventId);
-                                }).scan((payloadBundle, _payload) => {
-                                    payloadBundle[_payload.eventId] = _payload.value;
+                                sideSubscription = _incomingStream.filter((payload) => {
+                                    return eventIds.some((eventId) => eventId === payload.eventId);
+                                }).scan((payloadBundle, payload) => {
+                                    payloadBundle[payload.eventId] = payload.value;
                                     return payloadBundle;
-                                }, {});
-                                sideSubscription = sideStream.subscribe(sideObserver);
+                                }, {}).share().subscribe(sideObserver);
 
                                 return {
                                     handle: incomingAWaitOperator.handle,
@@ -834,6 +952,7 @@ export default CompositeElement({
                          * @return {object}
                          */
                         repeat: function repeat () {
+                            // TODO: use Rx.Observable.repeat?
                             _arbiter = eventIds.reduce((arbiter, eventId) => {
                                 if (arbiter.hasOwnProperty(eventId)) {
                                     arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
@@ -893,9 +1012,10 @@ export default CompositeElement({
                 const factory = this;
                 if (!_incomingStreamActivated) {
                     /* first do operations on the incoming event stream */
-                    factory.operateStream(_operator);
-                    /* then do event stream subscriptions */
+                    factory.operateIncomingStream(_createStreamOperatorFor(`incoming`));
+                    /* then do incoming event stream subscriptions */
                     _incomingSubscription = _incomingStream.subscribe(_observer);
+
                     _incomingStreamActivated = true;
                 } else {
                     Hflow.log(`warn0`, `EventStreamComposite.activateIncomingStream - Incoming event stream subscription is already activated.`);
@@ -910,7 +1030,9 @@ export default CompositeElement({
             this.activateOutgoingStream = function activateOutgoingStream () {
                 const factory = this;
                 if (!_outgoingStreamActivated) {
-                    /* then do event stream subscriptions */
+                    /* first do operations on the outgoing event stream */
+                    factory.operateOutgoingStream(_createStreamOperatorFor(`outgoing`));
+                    /* then do outgoing event stream subscriptions */
                     _outgoingSubscription = _outgoingStream.subscribe(_observer);
 
                     _outgoingStreamActivated = true;
@@ -951,7 +1073,7 @@ export default CompositeElement({
              */
             this.deactivateOutgoingStream = function deactivateOutgoingStream () {
                 if (_outgoingStreamActivated) {
-                    _outgoingStream.onCompleted();
+                    _streamEmitter.onCompleted();
                     _outgoingSubscription.dispose();
                     _outgoingSubscription = undefined;
                     _outgoingStreamActivated = false;
@@ -981,12 +1103,12 @@ export default CompositeElement({
                     /* merge all external incoming event streams into one */
                     _incomingStream = Rx.Observable.merge(sources.map((source) => {
                         Hflow.log(`info`, `Factory:${factory.name} is observing source:${source.name}.`);
+                        // TODO: undefine check for returning stream from getStream?
                         return source.getStream();
                     }).concat([
                         _incomingStream
                     ]));
-
-                    return _operator;
+                    return _createStreamOperatorFor(`incoming`);
                 }
             };
         }
