@@ -28,8 +28,11 @@ import EventStreamComposite from './composites/event-stream-composite';
 /* load Composer */
 import Composer from '../composer';
 
-/* load Hflow */
-import { Hflow } from 'hyperflow';
+/* load CommonElement */
+import CommonElement from '../elements/common-element';
+
+/* create CommonElement as Hflow object */
+const Hflow = CommonElement();
 
 /* factory Ids */
 import {
@@ -351,9 +354,10 @@ export default Composer({
          *
          * @method registerComponentLib
          * @param {object} componentLib
-         * @returns void
+         * @returns {object}
          */
         this.registerComponentLib = function registerComponentLib (componentLib) {
+            const intf = this;
             if (!Hflow.isObject(componentLib)) {
                 Hflow.log(`error`, `InterfaceFactory.registerComponentLib - Input component library is invalid.`);
             } else {
@@ -373,6 +377,7 @@ export default Composer({
                         return compositeBundle;
                     }, _compositeCache);
                 }
+                return intf;
             }
         };
         /**
@@ -380,7 +385,7 @@ export default Composer({
          *
          * @method composedOf
          * @param {array} compositeIntfs
-         * @return void
+         * @return {object}
          */
         this.composedOf = function composedOf (...compositeIntfs) {
             const intf = this;
@@ -422,6 +427,13 @@ export default Composer({
                 }
             }
         };
+        /**
+         * @description - Set state connection/reflection to a store.
+         *
+         * @method reflectStateOf
+         * @param {object} store
+         * @return {object}
+         */
         this.reflectStateOf = function reflectStateOf (store) {
             if (!Hflow.isSchema({
                 fId: `string`,
@@ -449,6 +461,7 @@ export default Composer({
                 } else {
                     Hflow.log(`warn1`, `InterfaceFactory.reflectStateOf - Interface:${intf.name} is already has its state mirrored with a store.`);
                 }
+                return intf;
             }
         };
     }
