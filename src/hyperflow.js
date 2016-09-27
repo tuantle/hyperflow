@@ -105,7 +105,7 @@ const init = function init ({
             enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
         });
         const HflowProperty = {
-            VERSION: `0.1.0-beta8`,
+            VERSION: `0.1.0-beta9`,
             ENV: TARGET === `server` ? process.env : {}, // eslint-disable-line
             TARGET,
             DEVELOPMENT,
@@ -210,9 +210,10 @@ const init = function init ({
                                             ] = {
                                                 OK: `response-to-${_key}-ok`,
                                                 ERROR: `response-to-${_key}-error`,
-                                                UNAUTHORIZED: `response-to-${_key}-unauthorized`,
+                                                CONFLICT: `response-to-${_key}-conflict`,
                                                 NOT_FOUND: `response-to-${_key}-not-found`,
-                                                CONFLICT: `response-to-${_key}-conflict`
+                                                NOT_MODIFIED: `response-to-${_key}-not-modified`,
+                                                UNAUTHORIZED: `response-to-${_key}-unauthorized`
                                             };
                                             return responseToEventMap;
                                         }, {})
