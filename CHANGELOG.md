@@ -94,3 +94,16 @@ Improvements:
 Bug fixes:
     - Fixed Hflow.Event.create method. Incorrectly generate event Ids for RESPONSE.TO.*.ERROR.
 ```
+**Development Beta Version 0.1.0-beta9 (9/26/2016)**
+```
+Notes:
+New Features:
+Breaking Changes:
+Improvements:
+    - Added NOT_MODIFIED response in Hflow.Event.create method.
+    - Methods registerComponentLib and reflectStateOf now return an instance of the interface in InterfaceFactory.
+    - Reimplemented how Hflow object is imported.
+    - Reimplemented how operators are apply to event stream for EventStreamComposite. This new implementation prevents operator methods from executing twice.
+Bug fixes:
+    - Fixed props mutation calls in methods componentWillMount, componentDidMount, and componentWillReceiveProps. The fix was to allow fallback to current props of the new props mutator.
+```
