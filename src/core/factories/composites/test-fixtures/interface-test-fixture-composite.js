@@ -25,8 +25,11 @@
 /* load CompositeElement */
 import CompositeElement from '../../../elements/composite-element';
 
-/* load Hflow */
-import { Hflow } from 'hyperflow';
+/* load CommonElement */
+import CommonElement from '../../../elements/common-element';
+
+/* create CommonElement as Hflow object */
+const Hflow = CommonElement();
 
 /* factory Ids */
 import {
@@ -77,7 +80,6 @@ export default CompositeElement({
             let _started = false;
             /* interface test subject */
             let _intf;
-            let _componentLib;
             let _componentRenderer;
             /* ----- Public Functions -------------- */
             /**
@@ -118,29 +120,16 @@ export default CompositeElement({
                 Hflow.log(`warn0`, `InterfaceTestFixtureComposite.renderToTarget - Method is not implemented by default.`);
             };
             /**
-             * @description - Get test fixture component renderer.
+             * @description - Get test fixture renderer.
              *
-             * @method getComponentRenderer
+             * @method getRenderer
              * @return {object}
              */
-            this.getComponentRenderer = function getComponentRenderer () {
+            this.getRenderer = function getRenderer () {
                 if (!Hflow.isObject(_componentRenderer)) {
-                    Hflow.log(`error`, `InterfaceTestFixtureComposite.getComponentRenderer - Test fixture is not registered with a component renderer.`);
+                    Hflow.log(`error`, `InterfaceTestFixtureComposite.getRenderer - Test fixture is not registered with a component renderer.`);
                 } else {
                     return _componentRenderer;
-                }
-            };
-            /**
-             * @description - Get test fixture component toolkit or library for building & rendering interfaces.
-             *
-             * @method getComponentLib
-             * @return {object}
-             */
-            this.getComponentLib = function getComponentLib () {
-                if (!Hflow.isObject(_componentLib)) {
-                    Hflow.log(`error`, `InterfaceTestFixtureComposite.getComponentLib - Test fixture is not registered with a component library.`);
-                } else {
-                    return _componentLib;
                 }
             };
             /**
@@ -154,18 +143,18 @@ export default CompositeElement({
                 const fixture = this;
                 if (!Hflow.isSchema({
                     testSubject: `object`,
-                    componentLib: `object`,
-                    componentRenderer: `object`
+                    component: {
+                        library: `object`,
+                        renderer: `object`
+                    }
                 }).of(definition)) {
                     Hflow.log(`error`, `InterfaceTestFixtureComposite.register - Input definition object is invalid.`);
                 } else {
                     const {
                         testSubject: intf,
-                        componentLib,
-                        componentRenderer
+                        component
                     } = definition;
-                    _componentLib = componentLib;
-                    _componentRenderer = componentRenderer;
+                    _componentRenderer = component.renderer;
                     if (Hflow.isObject(intf)) {
                         if (!Hflow.isSchema({
                             fId: `string`,

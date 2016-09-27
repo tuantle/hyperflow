@@ -28,7 +28,7 @@ import CompositeElement from './elements/composite-element';
 /* load CommonElement */
 import CommonElement from './elements/common-element';
 
-/* create Hflow object */
+/* create CommonElement as Hflow object */
 const Hflow = CommonElement();
 
 /**

@@ -29,7 +29,7 @@ import Rx from 'rx';
 /* load CommonElement */
 import CommonElement from '../common-element';
 
-/* create Hflow object */
+/* create CommonElement as Hflow object */
 const Hflow = CommonElement();
 
 /**
@@ -263,7 +263,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                             observable._description.proxy = target;
                             observable._description.orgDesc = Object.getOwnPropertyDescriptor(target, key);
 
-                            observable._stream = Rx.Observable.create((observer) => {
+                            observable._stream = Rx.Observable.create((streamEmitter) => {
                                 /* create the condition property for the assigned object */
                                 Object.defineProperty(observable._description.proxy, key, {
                                     get: function get () {
@@ -281,12 +281,12 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
 
                                         try {
                                             if (observable._description.orgDesc.hasOwnProperty(`get`)) {
-                                                observer.onNext(observable._description.orgDesc.get());
+                                                streamEmitter.onNext(observable._description.orgDesc.get());
                                             } else {
-                                                observer.onNext(value);
+                                                streamEmitter.onNext(value);
                                             }
                                         } catch (error) {
-                                            observer.onError(error);
+                                            streamEmitter.onError(error);
                                         }
                                     },
                                     configurable: true,

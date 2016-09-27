@@ -28,8 +28,11 @@ import EventStreamComposite from './composites/event-stream-composite';
 /* load Composer */
 import Composer from '../composer';
 
-/* load Hflow */
-import { Hflow } from 'hyperflow';
+/* load CommonElement */
+import CommonElement from '../elements/common-element';
+
+/* create CommonElement as Hflow object */
+const Hflow = CommonElement();
 
 /* factory Ids */
 import {
@@ -426,6 +429,7 @@ export default Composer({
                             /* helper function to activate all child interfaces event stream */
                             const deepInterfaceActivateStream = function deepInterfaceActivateStream (intf) {
                                 if (Hflow.isObject(intf)) {
+                                    // TODO: compositeIntf does not need to activate incoming event stream.
                                     intf.activateIncomingStream();
                                     intf.setup(() => {
                                         intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceActivateStream(compositeIntf));
@@ -489,6 +493,7 @@ export default Composer({
                                 if (Hflow.isObject(intf)) {
                                     intf.teardown(() => {
                                         intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceDeactivateStream(compositeIntf));
+                                        // TODO: compositeIntf does not or should not have incoming event stream activated.
                                         intf.deactivateIncomingStream();
                                         intf.deactivateOutgoingStream();
                                         // TODO: Un-reflect state from store?

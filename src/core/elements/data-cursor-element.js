@@ -32,7 +32,7 @@ import stronglyTyped from './descriptors/presets/strongly-typed-descriptor';
 /* load CommonElement */
 import CommonElement from './common-element';
 
-/* create Hflow object */
+/* create CommonElement as Hflow object */
 const Hflow = CommonElement();
 
 /**

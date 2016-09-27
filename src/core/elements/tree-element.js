@@ -28,7 +28,7 @@ import TreeNodeElement from './tree-node-element';
 /* load CommonElement */
 import CommonElement from './common-element';
 
-/* create Hflow object */
+/* create CommonElement as Hflow object */
 const Hflow = CommonElement();
 
 /**

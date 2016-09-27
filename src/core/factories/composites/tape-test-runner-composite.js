@@ -27,8 +27,11 @@ import tape from 'tape';
 /* load CompositeElement */
 import CompositeElement from '../../elements/composite-element';
 
-/* load Hflow */
-import { Hflow } from 'hyperflow';
+/* load CommonElement */
+import CommonElement from '../../elements/common-element';
+
+/* create CommonElement as Hflow object */
+const Hflow = CommonElement();
 
 /* factory Ids */
 import {

@@ -25,8 +25,11 @@
 /* load CompositeElement */
 import CompositeElement from '../../../core/elements/composite-element';
 
-/* load Hflow */
-import { Hflow } from 'hyperflow';
+/* load CommonElement */
+import CommonElement from '../../../core/elements/common-element';
+
+/* create CommonElement as Hflow object */
+const Hflow = CommonElement();
 
 /**
  * @description - A React client app renderer composite module.

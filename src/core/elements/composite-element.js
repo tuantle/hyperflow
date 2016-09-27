@@ -28,7 +28,7 @@ import DataElement from './data-element';
 /* load CommonElement */
 import CommonElement from './common-element';
 
-/* create Hflow object */
+/* create CommonElement as Hflow object */
 const Hflow = CommonElement();
 
 const PRIVATE_PREFIX = `_`;

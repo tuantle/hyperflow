@@ -28,8 +28,11 @@ import EventStreamComposite from './composites/event-stream-composite';
 /* load Composer */
 import Composer from '../composer';
 
-/* load Hflow */
-import { Hflow } from 'hyperflow';
+/* load CommonElement */
+import CommonElement from '../elements/common-element';
+
+/* create CommonElement as Hflow object */
+const Hflow = CommonElement();
 
 /* factory Ids */
 import {
