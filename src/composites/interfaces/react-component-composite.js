@@ -25,8 +25,11 @@
 /* load CompositeElement */
 import CompositeElement from '../../core/elements/composite-element';
 
-/* load Hflow */
-import { Hflow } from 'hyperflow';
+/* load CommonElement */
+import CommonElement from '../../core/elements/common-element';
+
+/* create CommonElement as Hflow object */
+const Hflow = CommonElement();
 
 const EXCEPTION_KEYS = [
     /* react specific methods and properties */
@@ -341,7 +344,7 @@ export default CompositeElement({
                                     // }
                                     /* needs to sync up interface state and component props before mounting.
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
-                                    if (intf.mutateState(component.props)) {
+                                    if (intf.mutateState(Hflow.fallback(defaultProperty).of(component.props))) {
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
                                         Hflow.log(`info`, `Props mutated for component:${component.props.name}.`);
@@ -359,7 +362,8 @@ export default CompositeElement({
                                     const component = this;
                                     /* The interface tracks new props mutation when component receive new props.
                                        This will do necessary mutation on interface state. */
-                                    if (intf.mutateState(nextProps)) {
+                                    const currentProperty = intf.getStateAsObject();
+                                    if (intf.mutateState(Hflow.fallback(currentProperty).of(nextProps))) {
                                         /* The interface will detect mutation when component gets new props and update accordingly */
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
@@ -384,7 +388,8 @@ export default CompositeElement({
                                             }
                                         });
                                     }
-                                    if (intf.mutateState(component.props)) {
+                                    const currentProperty = intf.getStateAsObject();
+                                    if (intf.mutateState(Hflow.fallback(currentProperty).of(component.props))) {
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
                                         Hflow.log(`info`, `Props mutated for component:${component.props.name}.`);
