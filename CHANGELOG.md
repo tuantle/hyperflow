@@ -103,7 +103,7 @@ Improvements:
     - Added NOT_MODIFIED response in Hflow.Event.create method.
     - Methods registerComponentLib and reflectStateOf now return an instance of the interface in InterfaceFactory.
     - Reimplemented how Hflow object is imported.
-    - Reimplemented how operators are apply to event stream for EventStreamComposite. This new implementation prevents operator methods from executing twice.
+    - Reimplemented how operators are applied to event stream for EventStreamComposite. This new implementation prevents operator methods from executing twice.
 Bug fixes:
-    - Fixed props mutation calls in methods componentWillMount, componentDidMount, and componentWillReceiveProps fro ReactComponentComposite. The fix was to allow fallback to current props of the new props mutator.
+    - Fixed props mutation calls in methods componentWillMount, componentDidMount, and componentWillReceiveProps for ReactComponentComposite. The fix was to allow fallback to current props of the new props mutator.
 ```
