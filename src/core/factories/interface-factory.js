@@ -58,11 +58,6 @@ export default Composer({
             stronglyTyped: true,
             required: true
         },
-        style: {
-            value: null,
-            stronglyTyped: false,
-            required: false
-        },
         fId: {
             computable: {
                 contexts: [
