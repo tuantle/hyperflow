@@ -107,3 +107,14 @@ Improvements:
 Bug fixes:
     - Fixed props mutation calls in methods componentWillMount, componentDidMount, and componentWillReceiveProps for ReactComponentComposite. The fix was to allow fallback to current props of the new props mutator.
 ```
+**Development Beta Version 0.1.0-beta10 (10/03/2016)**
+```
+Notes:
+New Features:
+Breaking Changes:
+    - Removed default style state object from InterfaceFactory.
+    - Removed method getComponentLib from exception key for ReactComponentComposite. Component will not have access to interface's getComponentLib method.
+    - Added methods incoming & outgoing to exception key for ReactComponentComposite. Component will have access to interface's event stream incoming & outgoing methods.
+Improvements:
+Bug fixes:
+```
