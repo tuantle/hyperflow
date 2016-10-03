@@ -46,12 +46,10 @@ const EXCEPTION_KEYS = [
     `componentWillUnmount`,
     `shouldComponentUpdate`,
     /* interface specific methods and properties */
-    // `outgoing`,
-    // `incoming`,
-    `getInterface`,
+    `outgoing`,
+    `incoming`,
     `assignComponentRef`,
     `lookupComponentRefs`,
-    `getComponentLib`,
     `getComponentComposites`
 ];
 
@@ -314,15 +312,6 @@ export default CompositeElement({
                                         _mutationOccurred = true;
                                         return intf.getInitialReflectedState();
                                     }
-                                };
-                                /**
-                                 * @description - Get this component's interface.
-                                 *
-                                 * @method getInterface
-                                 * @return {object}
-                                 */
-                                this.getInterface = function getInterface () {
-                                    return intf;
                                 };
                                 /**
                                  * @description - React method for setting up component before mounting.
