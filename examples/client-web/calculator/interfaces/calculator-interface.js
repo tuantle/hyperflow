@@ -11,6 +11,8 @@
 
 import { Hflow } from 'hyperflow';
 
+import React from 'react';
+
 import RaisedButton from 'material-ui/RaisedButton';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -46,14 +48,10 @@ const KeypadButtonInterface = Hflow.Interface.augment({
     },
     onClick: function onClick () {
         const component = this;
-        const intf = component.getInterface();
-        intf.outgoing(EVENT.ON.KEYPAD).emit(() => component.props.label);
+        component.outgoing(EVENT.ON.KEYPAD).emit(() => component.props.label);
     },
     render: function render () {
         const component = this;
-        const {
-            React
-        } = component.getComponentLib();
         if (Hflow.isNumeric(component.props.label) || component.props.label === `.`) {
             return (
                 <RaisedButton
@@ -114,19 +112,30 @@ const KeypadInterface = Hflow.Interface.augment({
     },
     render: function render () {
         const component = this;
-        const {
-            React
-        } = component.getComponentLib();
         const buttons = component.getComponentComposites(...keypadButtonNames);
         return (
-            <div className = { component.props.name } style = { component.props.style.keypadGridStyle }>{
+            <div className = { component.props.name } style = {{
+                display: `flex`,
+                flexDirection: `row`,
+                flexWrap: `wrap`,
+                justifyContent: `space-around`,
+                alignContent: `center`,
+                alignItems: `stretch`,
+                paddingRight: 300,
+                paddingLeft: 300
+            }}>{
                 keypadLabels.map((cells, col) => {
                     return (
                         <div key = { col }>{
                             cells.map((cell, row) => {
                                 const Button = buttons[col + row];
                                 return (
-                                    <div key = { cell } style = { component.props.style.keypadCellStyle }>
+                                    <div key = { cell } style = {{
+                                        flex: [ 1, 1, `auto` ],
+                                        alignSelf: `center`,
+                                        width: 55,
+                                        margin: 10
+                                    }}>
                                         <Button label = { cell }/>
                                     </div>
                                 );
@@ -147,11 +156,7 @@ const CalculatorInterface = Hflow.Interface.augment({
         const intf = this;
         intf.composedOf(
             KeypadInterface({
-                name: `keypad-view`,
-                style: {
-                    keypadGridStyle: intf.style.keypadGridStyle,
-                    keypadCellStyle: intf.style.keypadCellStyle
-                }
+                name: `keypad-view`
             })
         );
     },
@@ -166,23 +171,47 @@ const CalculatorInterface = Hflow.Interface.augment({
     },
     render: function render () {
         const component = this;
-        const {
-            React
-        } = component.getComponentLib();
         const [
             Keypad
         ] = component.getComponentComposites(`keypad-view`);
         return (
             <MuiThemeProvider muiTheme={muiTheme}>
                 <div className = { component.props.name }>
-                    <div style = { component.props.style.display }>
-                        <h2 style = { component.props.style.displayText }>{ component.state.result }</h2>
+                    <div style = {{
+                        display: `flex`,
+                        flexDirection: `row`,
+                        justifyContent: `center`,
+                        alignContent: `center`,
+                        paddingLeft: 350,
+                        paddingRight: 310
+                    }}>
+                        <h2 style = {{
+                            color: `#388E3C`,
+                            background: `whitesmkoke`,
+                            border: 1,
+                            borderStyle: `solid`,
+                            borderRadius: 2,
+                            fontFamily: `helvetica`,
+                            fontSize: 32,
+                            fontWeight: `bold`,
+                            textAlign: `right`,
+                            textIndent: -10,
+                            paddingRight: 5,
+                            paddingLeft: 5,
+                            width: `100%`
+                        }}>{ component.state.result }</h2>
                     </div>
-                    <h1 style = { component.props.style.h1 }>v0.5</h1>
+                    <h1 style = {{
+                        color: `gray`,
+                        fontFamily: `helvetica`,
+                        fontSize: 12,
+                        textAlign: `right`,
+                        paddingRight: 310
+                    }}>v0.5</h1>
                     <Keypad/>
                 </div>
             </MuiThemeProvider>
         );
     }
 });
-export { CalculatorInterface };
+export default CalculatorInterface;

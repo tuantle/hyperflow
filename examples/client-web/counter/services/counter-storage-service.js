@@ -66,4 +66,4 @@ const CounterStorageService = Hflow.Service.augment({
         done();
     }
 });
-export { CounterStorageService };
+export default CounterStorageService;

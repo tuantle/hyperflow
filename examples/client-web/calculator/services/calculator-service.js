@@ -72,4 +72,4 @@ const CalculatorService = Hflow.Service.augment({
         done();
     }
 });
-export { CalculatorService };
+export default CalculatorService;

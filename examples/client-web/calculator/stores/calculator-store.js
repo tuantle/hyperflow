@@ -37,4 +37,4 @@ const CalculatorStore = Hflow.Store.augment({
         done();
     }
 });
-export { CalculatorStore };
+export default CalculatorStore;

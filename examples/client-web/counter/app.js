@@ -15,7 +15,7 @@ import React from 'react';
 
 import ReactDOM from 'react-dom';
 
-import { CounterDomain } from './domains/counter-domain';
+import CounterDomain from './domains/counter-domain';
 
 const counter = Hflow.App.augment({
     composites: [

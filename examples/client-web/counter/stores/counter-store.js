@@ -68,4 +68,4 @@ const CounterStore = Hflow.Store.augment({
         done();
     }
 });
-export { CounterStore };
+export default CounterStore;

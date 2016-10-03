@@ -11,11 +11,11 @@
 
 import { Hflow } from 'hyperflow';
 
-import { CounterStore } from '../stores/counter-store';
+import CounterStore from '../stores/counter-store';
 
-import { CounterStorageService } from '../services/counter-storage-service';
+import CounterStorageService from '../services/counter-storage-service';
 
-import { CounterInterface } from '../interfaces/counter-interface';
+import CounterInterface from '../interfaces/counter-interface';
 
 import EVENT from '../events/counter-event';
 
@@ -32,22 +32,7 @@ const CounterDomain = Hflow.Domain.augment({
                 name: `${domain.name}-store`
             }),
             intf: CounterInterface({
-                name: `${domain.name}-view`,
-                style: {
-                    h1: {
-                        color: `gray`,
-                        fontFamily: `helvetica`,
-                        fontSize: 12,
-                        textAlign: `left`,
-                        paddingRight: 175
-                    },
-                    h2: {
-                        color: `gray`,
-                        fontFamily: `helvetica`,
-                        fontSize: 32,
-                        textAlign: `left`
-                    }
-                }
+                name: `${domain.name}-view`
             }),
             services: [
                 CounterStorageService({
@@ -77,4 +62,4 @@ const CounterDomain = Hflow.Domain.augment({
         done();
     }
 });
-export { CounterDomain };
+export default CounterDomain;

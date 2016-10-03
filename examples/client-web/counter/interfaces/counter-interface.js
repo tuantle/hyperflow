@@ -11,6 +11,8 @@
 
 import { Hflow } from 'hyperflow';
 
+import React from 'react';
+
 import FlatButton from 'material-ui/FlatButton';
 
 import RaisedButton from 'material-ui/RaisedButton';
@@ -49,14 +51,10 @@ const UndoButtonInterface = Hflow.Interface.augment({
     },
     onClick: function onClick () {
         const component = this;
-        const intf = component.getInterface();
-        intf.outgoing(EVENT.ON.UNDO).emit();
+        component.outgoing(EVENT.ON.UNDO).emit();
     },
     render: function render () {
         const component = this;
-        const {
-            React
-        } = component.getComponentLib();
         const {
             label,
             disabled
@@ -92,14 +90,10 @@ const DecreaseButtonInterface = Hflow.Interface.augment({
     },
     onClick: function onClick () {
         const component = this;
-        const intf = component.getInterface();
-        intf.outgoing(EVENT.ON.DECREASE).emit(() => -1);
+        component.outgoing(EVENT.ON.DECREASE).emit(() => -1);
     },
     render: function render () {
         const component = this;
-        const {
-            React
-        } = component.getComponentLib();
         const {
             label,
             disabled
@@ -135,14 +129,10 @@ const IncreaseButtonInterface = Hflow.Interface.augment({
     },
     onClick: function onClick () {
         const component = this;
-        const intf = component.getInterface();
-        intf.outgoing(EVENT.ON.INCREASE).emit(() => 1);
+        component.outgoing(EVENT.ON.INCREASE).emit(() => 1);
     },
     render: function render () {
         const component = this;
-        const {
-            React
-        } = component.getComponentLib();
         const {
             label,
             disabled
@@ -174,14 +164,10 @@ const OffsetInputInterface = Hflow.Interface.augment({
     },
     onChange: function onChange (_event) {
         const component = this;
-        const intf = component.getInterface();
-        intf.outgoing(EVENT.ON.CHANGE_OFFSET).emit(() => parseInt(_event.target.value, 10));
+        component.outgoing(EVENT.ON.CHANGE_OFFSET).emit(() => parseInt(_event.target.value, 10));
     },
     render: function render () {
         const component = this;
-        const {
-            React
-        } = component.getComponentLib();
         const {
             offset
         } = component.props;
@@ -236,9 +222,6 @@ const CounterInterface = Hflow.Interface.augment({
     },
     render: function render () {
         const component = this;
-        const {
-            React
-        } = component.getComponentLib();
         const [
             IncreaseButton,
             DecreaseButton,
@@ -251,13 +234,13 @@ const CounterInterface = Hflow.Interface.augment({
             `offset-input`
         );
         const {
-            name,
-            style
+            name
         } = component.props;
         const {
             count,
             offset
         } = component.state;
+
         return (
             <MuiThemeProvider muiTheme = { muiTheme }>
                 <div
@@ -282,12 +265,23 @@ const CounterInterface = Hflow.Interface.augment({
                     >
                         <UndoButton/>
                     </div>
-                    <h2 style = { style.h2 }>Count = { count }</h2>
-                    <h1 style = { style.h1 }>v0.4</h1>
+                    <h2 style = {{
+                        color: `gray`,
+                        fontFamily: `helvetica`,
+                        fontSize: 12,
+                        textAlign: `left`,
+                        paddingRight: 175
+                    }}>Count = { count }</h2>
+                    <h1 style = {{
+                        color: `gray`,
+                        fontFamily: `helvetica`,
+                        fontSize: 32,
+                        textAlign: `left`
+                    }}>v0.4</h1>
                     <OffsetInput offset = { offset }/>
                 </div>
             </MuiThemeProvider>
         );
     }
 });
-export { CounterInterface };
+export default CounterInterface;

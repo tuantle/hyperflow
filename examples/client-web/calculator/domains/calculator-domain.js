@@ -11,11 +11,11 @@
 
 import { Hflow } from 'hyperflow';
 
-import { CalculatorStore } from '../stores/calculator-store';
+import CalculatorStore from '../stores/calculator-store';
 
-import { CalculatorService } from '../services/calculator-service';
+import CalculatorService from '../services/calculator-service';
 
-import { CalculatorInterface } from '../interfaces/calculator-interface';
+import CalculatorInterface from '../interfaces/calculator-interface';
 
 import EVENT from '../events/calculator-event';
 
@@ -32,55 +32,7 @@ const CalculatorDomain = Hflow.Domain.augment({
                 name: `${domain.name}-store`
             }),
             intf: CalculatorInterface({
-                name: `${domain.name}-view`,
-                style: {
-                    h1: {
-                        color: `gray`,
-                        fontFamily: `helvetica`,
-                        fontSize: 12,
-                        textAlign: `right`,
-                        paddingRight: 310
-                    },
-                    displayText: {
-                        color: `#388E3C`,
-                        background: `whitesmkoke`,
-                        border: 1,
-                        borderStyle: `solid`,
-                        borderRadius: 2,
-                        fontFamily: `helvetica`,
-                        fontSize: 32,
-                        fontWeight: `bold`,
-                        textAlign: `right`,
-                        textIndent: -10,
-                        paddingRight: 5,
-                        paddingLeft: 5,
-                        width: `100%`
-                    },
-                    display: {
-                        display: `flex`,
-                        flexDirection: `row`,
-                        justifyContent: `center`,
-                        alignContent: `center`,
-                        paddingLeft: 350,
-                        paddingRight: 310
-                    },
-                    keypadGridStyle: {
-                        display: `flex`,
-                        flexDirection: `row`,
-                        flexWrap: `wrap`,
-                        justifyContent: `space-around`,
-                        alignContent: `center`,
-                        alignItems: `stretch`,
-                        paddingRight: 300,
-                        paddingLeft: 300
-                    },
-                    keypadCellStyle: {
-                        flex: [ 1, 1, `auto` ],
-                        alignSelf: `center`,
-                        width: 55,
-                        margin: 10
-                    }
-                }
+                name: `${domain.name}-view`
             })
         });
     },
@@ -224,4 +176,4 @@ const CalculatorDomain = Hflow.Domain.augment({
         done();
     }
 });
-export { CalculatorDomain };
+export default CalculatorDomain;
