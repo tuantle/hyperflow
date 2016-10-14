@@ -31,35 +31,40 @@ const Hflow = CommonElement();
 /**
  * @description - Create a constrainable descriptor for the one of types.
  *
- * @method oneOfTypes
+ * @method oneOfTypesPreset
  * @param {array} types
  * @return {object}
  */
-const oneOfTypes = function oneOfTypes (types) {
-    if (!Hflow.isArray(types) || Hflow.isEmpty(types)) {
+const oneOfTypesPreset = function oneOfTypesPreset (_types) {
+    if (!Hflow.isArray(_types) || Hflow.isEmpty(_types)) {
         Hflow.log(`error`, `oneTypeOf - Input types are invalid.`);
-    } else if (!types.every((type) => Hflow.isString(type))) {
+    } else if (!_types.every((type) => Hflow.isString(type))) {
         Hflow.log(`error`, `oneTypeOf - Type value must be string.`);
     } else {
-        /**
-         * @description - Ensures value is one of types.
-         *
-         * @method oneTypeOf
-         * @return {object}
-         */
-        return function oneTypeOf () {
-            const context = this;
-            const oldValueType = Hflow.typeOf(context.oldValue);
-            const newValueType = Hflow.typeOf(context.newValue);
-            const result = {
-                verified: true,
-                reject: function reject () {
-                    Hflow.log(`warn1`, `oneTypeOf - Property key:${context.key} value is not one type of ${types}`);
+        return {
+            oneTypeOf: {
+                condition: _types,
+                /**
+                 * @description - Ensures value is one of types.
+                 *
+                 * @method oneTypeOf
+                 * @return {object}
+                 */
+                constrainer: function oneTypeOf (types) {
+                    const context = this;
+                    const oldValueType = Hflow.typeOf(context.oldValue);
+                    const newValueType = Hflow.typeOf(context.newValue);
+                    const result = {
+                        verified: true,
+                        reject: function reject () {
+                            Hflow.log(`warn1`, `oneTypeOf - Property key:${context.key} value is not one type of ${types}`);
+                        }
+                    };
+                    result.verified = types.some((type) => (oldValueType === type)) && types.some((type) => (newValueType === type));
+                    return result;
                 }
-            };
-            result.verified = types.some((type) => (oldValueType === type)) && types.some((type) => (newValueType === type));
-            return result;
+            }
         };
     }
 };
-export default oneOfTypes;
+export default oneOfTypesPreset;
