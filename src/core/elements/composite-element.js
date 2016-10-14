@@ -299,6 +299,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                         }
                     }
                 };
+                // FIXME: error thrown in collect method when enclosure is empty.
                 product = composite.mixin(...Hflow.collect(enclosure, ...Object.keys(enclosure))).mixin({
                     /**
                      * @description - Check if product state has muated.
@@ -442,6 +443,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                     return productState;
                 }, product);
             } else {
+                // FIXME: error thrown in collect method when enclosure is empty.
                 product = composite.mixin(...Hflow.collect(enclosure, ...Object.keys(enclosure))).getTemplate();
             }
             let revealedProduct = Hflow.reveal(product, {
