@@ -601,7 +601,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                  * @param {string|array} pathId - Path of the property to retrieve.
                  * @returns {object}
                  */
-                atPathWith: function _with (target, pathId) {
+                atPathWith: function atPathWith (target, pathId) {
                     pathId = common.isString(pathId) ? common.stringToArray(pathId, `.`) : pathId;
                     if (!common.isObject(target)) {
                         common.log(`error`, `CommonElement.merge.atPathWith - Input target is invalid.`);
