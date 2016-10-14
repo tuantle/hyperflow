@@ -113,8 +113,20 @@ Notes:
 New Features:
 Breaking Changes:
     - Removed default style state object from InterfaceFactory.
-    - Removed method getComponentLib from exception key for ReactComponentComposite. Component will not have access to interface's getComponentLib method.
-    - Added methods incoming & outgoing to exception key for ReactComponentComposite. Component will have access to interface's event stream incoming & outgoing methods.
+    - Removed method getComponentLib from exception keys for ReactComponentComposite. Component will not have access to interface's getComponentLib method.
+    - Added methods incoming & outgoing to exception keys for ReactComponentComposite. Component will have access to interface's event stream incoming & outgoing methods.
 Improvements:
+Bug fixes:
+```
+**Development Beta Version 0.1.0-beta11 (10/14/2016)**
+```
+Notes:
+New Features:
+    - Added toPureComponent method for ReactComponentComposite.
+    - Added oneOf and oneOfType React PropTypes checking.
+Breaking Changes:
+    - Removed methods incoming & outgoing from exception keys for ReactComponentComposite. Component will NOT have access to interface's event stream incoming & outgoing methods.
+Improvements:
+    - Refactored DataElement descriptors and presets. 
 Bug fixes:
 ```
