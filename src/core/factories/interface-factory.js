@@ -228,6 +228,15 @@ export default Composer({
          * @method toComponent
          * @return {object}
          */
+        this.toPureComponent = function toPureComponent () {
+            Hflow.log(`error`, `InterfaceFactory.toPureComponent - Method is not implemented by default. Implementation required.`);
+        };
+        /**
+         * @description - Convert interface to a component.
+         *
+         * @method toComponent
+         * @return {object}
+         */
         this.toComponent = function toComponent () {
             Hflow.log(`error`, `InterfaceFactory.toComponent - Method is not implemented by default. Implementation required.`);
         };
