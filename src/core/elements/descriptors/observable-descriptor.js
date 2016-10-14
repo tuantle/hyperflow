@@ -167,14 +167,14 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @description - Assign an observable description.
      *
      * @method assign
-     * @param {object} descObj - A descriptor setup object.
+     * @param {object} descPreset - A descriptor preset object.
      * @return {object}
      */
-    assign: function assign (descObj) {
+    assign: function assign (descPreset) {
         if (!Hflow.isSchema({
             key: `string|number`
-        }).of(descObj)) {
-            Hflow.log(`error`, `ObservableDescriptor.assign - Input descriptor setup object is invalid.`);
+        }).of(descPreset)) {
+            Hflow.log(`error`, `ObservableDescriptor.assign - Input descriptor preset object is invalid.`);
         } else {
             const observable = this;
             const {
@@ -184,7 +184,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
             } = Hflow.fallback({
                 condition: {},
                 subscriber: {}
-            }).of(descObj);
+            }).of(descPreset);
 
             if (observable._description.assigned) {
                 observable.unassign();

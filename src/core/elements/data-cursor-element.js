@@ -23,11 +23,11 @@
 'use strict'; // eslint-disable-line
 
 /* load default constrainable descriptor presets */
-import required from './descriptors/presets/required-descriptor';
-import boundedWithin from './descriptors/presets/bounded-within-descriptor';
-import oneOfValues from './descriptors/presets/one-of-values-descriptor';
-import oneOfTypes from './descriptors/presets/one-of-types-descriptor';
-import stronglyTyped from './descriptors/presets/strongly-typed-descriptor';
+import requiredPreset from './descriptors/presets/required-constrainable-preset';
+import boundedPreset from './descriptors/presets/bounded-constrainable-preset';
+import oneOfValuesPreset from './descriptors/presets/one-of-values-constrainable-preset';
+import oneOfTypesPreset from './descriptors/presets/one-of-types-constrainable-preset';
+import stronglyTypedPreset from './descriptors/presets/strongly-typed-constrainable-preset';
 
 /* load CommonElement */
 import CommonElement from './common-element';
@@ -96,6 +96,40 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
             const pathId = `${cursor._pathId}.${key}`;
 
             return cursor._descriptor.select(`constrainable`).getDescription(pathId).hasConstraint(`stronglyTyped`);
+        }
+        return false;
+    },
+    /**
+     * @description - At cursor, check that data item is one of values.
+     *
+     * @method isItemOneOfValues
+     * @param {string|number} key
+     * @return {boolean}
+     */
+    isItemOneOfValues: function isItemRequired (key) {
+        const cursor = this;
+
+        if (cursor.isItemConstrainable(key)) {
+            const pathId = `${cursor._pathId}.${key}`;
+
+            return cursor._descriptor.select(`constrainable`).getDescription(pathId).hasConstraint(`oneOf`);
+        }
+        return false;
+    },
+    /**
+     * @description - At cursor, check that data item is one of types.
+     *
+     * @method isItemOneOfTypes
+     * @param {string|number} key
+     * @return {boolean}
+     */
+    isItemOneOfTypes: function isItemRequired (key) {
+        const cursor = this;
+
+        if (cursor.isItemConstrainable(key)) {
+            const pathId = `${cursor._pathId}.${key}`;
+
+            return cursor._descriptor.select(`constrainable`).getDescription(pathId).hasConstraint(`oneTypeOf`);
         }
         return false;
     },
@@ -523,30 +557,33 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 /**
                  * @description - Describe item with a one of values constraint.
                  *
-                 * @method describeItem.asOneOf
+                 * @method describeItem.asOneOfValues
                  * @param {array} values
                  * @return {object}
                  */
-                asOneOf: function asOneOf (values) {
+                asOneOfValues: function asOneOfValues (values) {
                     if (!Hflow.isArray(values) || Hflow.isEmpty(values)) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOf - Input values are invalid.`);
+                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Input values are invalid.`);
                     } else if (!values.every((value) => Hflow.isString(value) || Hflow.isNumeric(value))) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOf - Value must be either numeric or string.`);
+                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Value must be either numeric or string.`);
                     } else {
                         if (computableItem) {
-                            Hflow.log(`error`, `DataCursorElement.describeItem.asOneOf - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                            Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`constrainable`);
-                            const descObj = {
-                                key,
-                                constraint: {
-                                    oneOf: oneOfValues(values)
-                                }
-                            };
+                            const constraint = oneOfValuesPreset(values);
                             if (!descriptor.hasDescription(pathId)) {
-                                descriptor.addDescription(pathId).assign(descObj).to(cursor._content);
+                                const descPreset = {
+                                    key,
+                                    constraint
+                                };
+                                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                             } else {
-                                descriptor.getDescription(pathId).addConstraint(descObj.constraint.oneOf, `oneOf`);
+                                descriptor.getDescription(pathId).addConstraint(
+                                    constraint.oneOf.constrainer,
+                                    constraint.oneOf.condition,
+                                    `oneOf`
+                                );
                             }
                         }
                     }
@@ -555,30 +592,33 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 /**
                  * @description - Describe item with a one of types constraint.
                  *
-                 * @method describeItem.asOneTypeOf
+                 * @method describeItem.asOneOfTypes
                  * @param {array} types
                  * @return {object}
                  */
-                asOneTypeOf: function asOneTypeOf (types) {
+                asOneOfTypes: function asOneOfTypes (types) {
                     if (!Hflow.isArray(types) || Hflow.isEmpty(types)) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneTypeOf - Input types are invalid.`);
+                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Input types are invalid.`);
                     } else if (!types.every((type) => Hflow.isString(type))) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneTypeOf - Type value must be string.`);
+                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Type value must be string.`);
                     } else {
                         if (computableItem) {
-                            Hflow.log(`error`, `DataCursorElement.describeItem.asOneTypeOf - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                            Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`constrainable`);
-                            const descObj = {
-                                key,
-                                constraint: {
-                                    oneTypeOf: oneOfTypes(types)
-                                }
-                            };
+                            const constraint = oneOfTypesPreset(types);
                             if (!descriptor.hasDescription(pathId)) {
-                                descriptor.addDescription(pathId).assign(descObj).to(cursor._content);
+                                const descPreset = {
+                                    key,
+                                    constraint
+                                };
+                                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                             } else {
-                                descriptor.getDescription(pathId).addConstraint(descObj.constraint.oneOf, `oneTypeOf`);
+                                descriptor.getDescription(pathId).addConstraint(
+                                    constraint.oneTypeOf.constrainer,
+                                    constraint.oneTypeOf.condition,
+                                    `oneTypeOf`
+                                );
                             }
                         }
                     }
@@ -593,17 +633,19 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 asRequired: function asRequired () {
                     function deepAssignDescription (_pathId, _content, _key) {
                         const descriptor = cursor._descriptor.select(`constrainable`);
-                        const descObj = {
-                            key: _key,
-                            constraint: {
-                                required
-                            }
-                        };
-
+                        const constraint = requiredPreset();
                         if (!descriptor.hasDescription(_pathId)) {
-                            descriptor.addDescription(_pathId).assign(descObj).to(_content);
+                            const descPreset = {
+                                key: _key,
+                                constraint
+                            };
+                            descriptor.addDescription(_pathId).assign(descPreset).to(_content);
                         } else {
-                            descriptor.getDescription(_pathId).addConstraint(descObj.constraint.required, `required`);
+                            descriptor.getDescription(_pathId).addConstraint(
+                                constraint.required.constrainer,
+                                null,
+                                `required`
+                            );
                         }
 
                         /* recursively set requirable description to nested objects */
@@ -630,17 +672,18 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 asStronglyTyped: function asStronglyTyped () {
                     function deepAssignDescription (_pathId, _content, _key) {
                         const descriptor = cursor._descriptor.select(`constrainable`);
-                        const descObj = {
-                            key: _key,
-                            constraint: {
-                                stronglyTyped
-                            }
-                        };
-
+                        const constraint = stronglyTypedPreset();
                         if (!descriptor.hasDescription(_pathId)) {
-                            descriptor.addDescription(_pathId).assign(descObj).to(_content);
+                            const descPreset = {
+                                key: _key,
+                                constraint
+                            };
+                            descriptor.addDescription(_pathId).assign(descPreset).to(_content);
                         } else {
-                            descriptor.getDescription(_pathId).addConstraint(descObj.constraint.stronglyTyped, `stronglyTyped`);
+                            descriptor.getDescription(_pathId).addConstraint(
+                                constraint.stronglyTyped.constrainer,
+                                null,
+                                `stronglyTyped`);
                         }
 
                         /* recursively set strongly typed description to nested objects */
@@ -674,17 +717,18 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                             Hflow.log(`error`, `DataCursorElement.describeItem.asBounded - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`constrainable`);
-                            const descObj = {
-                                key,
-                                constraint: {
-                                    bounded: boundedWithin(lowerBound, upperBound)
-                                }
-                            };
-
+                            const constraint = boundedPreset(lowerBound, upperBound);
                             if (!descriptor.hasDescription(pathId)) {
-                                descriptor.addDescription(pathId).assign(descObj).to(cursor._content);
+                                const descPreset = {
+                                    key,
+                                    constraint
+                                };
+                                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                             } else {
-                                descriptor.getDescription(pathId).addConstraint(descObj.constraint.bounded, `bounded`);
+                                descriptor.getDescription(pathId).addConstraint(
+                                    constraint.bounded.constrainer,
+                                    constraint.bounded.condition,
+                                    `bounded`);
                             }
                         }
                     }
@@ -698,23 +742,31 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 asConstrainable: function asConstrainable (constraint) {
-                    if (!Hflow.isObject(constraint)) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asConstrainable - Input constraint object is invalid.`);
+                    if (!Hflow.isObject(constraint) && Object.key(constraint).forEach((constraintKey) => {
+                        return Hflow.isSchema({
+                            constrainer: `function`
+                        }).of(constraint[constraintKey]);
+                    })) {
+                        Hflow.log(`error`, `DataCursorElement.describeItem.asConstrainable - Input constraint is invalid.`);
                     } else {
                         if (computableItem) {
                             Hflow.log(`error`, `DataCursorElement.describeItem.asConstrainable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`constrainable`);
-                            const descObj = {
-                                key,
-                                constraint
-                            };
 
                             if (!descriptor.hasDescription(pathId)) {
-                                descriptor.addDescription(pathId).assign(descObj).to(cursor._content);
+                                const descPreset = {
+                                    key,
+                                    constraint
+                                };
+                                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                             } else {
-                                Hflow.forEach(constraint, (constraintObj, constraintKey) => {
-                                    descriptor.getDescription(pathId).addConstraint(constraintObj, constraintKey);
+                                Object.keys(constraint).forEach((constraintKey) => {
+                                    descriptor.getDescription(pathId).addConstraint(
+                                        constraint[constraintKey].contrainer,
+                                        constraint[constraintKey].condition,
+                                        constraintKey
+                                    );
                                 });
                             }
                         }
@@ -737,14 +789,14 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                         subscriber = Hflow.isObject(subscriber) ? subscriber : {};
 
                         const descriptor = cursor._descriptor.select(`observable`);
-                        const descObj = {
+                        const descPreset = {
                             key,
                             condition,
                             subscriber
                         };
 
                         if (!descriptor.hasDescription(pathId)) {
-                            descriptor.addDescription(pathId).assign(descObj).to(cursor._content);
+                            descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                         } else {
                             Hflow.forEach(condition, (trigger, conditionKey) => {
                                 descriptor.getDescription(pathId).addCondition(trigger, conditionKey);
@@ -774,7 +826,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                             Hflow.log(`error`, `DataCursorElement.describeItem.asComputable - Cannot redescribe computable to data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`computable`);
-                            const descObj = {
+                            const descPreset = {
                                 key,
                                 contexts,
                                 compute
@@ -783,7 +835,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                             if (descriptor.hasDescription(pathId)) {
                                 descriptor.removeDescription(pathId);
                             }
-                            descriptor.addDescription(pathId).assign(descObj).to(cursor._content);
+                            descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                         }
                     }
                     return this;
@@ -914,26 +966,28 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
     toObject: function toObject () {
         const cursor = this;
         /* helper function to deep clone data item as plain object. */
-        const deepValueClone = function deepValueClone (source) {
-            if (!(Hflow.isObject(source) || Hflow.isArray(source))) {
-                Hflow.log(`error`, `DataCursorElement.deepValueClone - Input is not an object or array type.`);
-            } else {
-                let result;
-                if (Hflow.isObject(source)) {
-                    result = Object.keys(source).reduce((_result, key) => {
-                        const value = source[key];
-                        _result[key] = Hflow.isObject(value) || Hflow.isArray(value) ? Hflow.clone(value) : value;
-                        return _result;
-                    }, {});
-                } else if (Hflow.isArray(source)) {
-                    result = source.map((value) => {
-                        return Hflow.isObject(value) || Hflow.isArray(value) ? Hflow.clone(value) : value;
-                    }).slice(0);
-                }
-                return result;
-            }
-        };
-        return deepValueClone(cursor._content);
+        // TODO: this deepValueClone is not working. Tobe removed.
+        // const deepValueClone = function deepValueClone (source) {
+        //     if (!(Hflow.isObject(source) || Hflow.isArray(source))) {
+        //         Hflow.log(`error`, `DataCursorElement.deepValueClone - Input is not an object or array type.`);
+        //     } else {
+        //         let result;
+        //         if (Hflow.isObject(source)) {
+        //             result = Object.keys(source).reduce((_result, key) => {
+        //                 const value = source[key];
+        //                 _result[key] = Hflow.isObject(value) || Hflow.isArray(value) ? Hflow.clone(value) : value;
+        //                 return _result;
+        //             }, {});
+        //         } else if (Hflow.isArray(source)) {
+        //             result = source.map((value) => {
+        //                 return Hflow.isObject(value) || Hflow.isArray(value) ? Hflow.clone(value) : value;
+        //             }).slice(0);
+        //         }
+        //         return result;
+        //     }
+        // };
+        // return deepValueClone(cursor._content);
+        return Hflow.clone(cursor._content);
     },
     /**
      * @description - At cursor, return data item as a JSON string.

@@ -228,8 +228,8 @@ const DataElementPrototype = Object.create({}).prototype = {
             const {
                 required,
                 stronglyTyped,
-                oneOfTypes,
-                oneOfValues,
+                oneTypeOf: oneOfTypes,
+                oneOf: oneOfValues,
                 boundarydValues,
                 constrainable,
                 observable,
@@ -246,11 +246,11 @@ const DataElementPrototype = Object.create({}).prototype = {
             }
             /* description for one of types item */
             if (Hflow.isArray(oneOfTypes)) {
-                cursor.describeItem(bundleKey).asOneTypeOf(oneOfTypes);
+                cursor.describeItem(bundleKey).asOneOfTypes(oneOfTypes);
             }
             /* description for one of values item */
             if (Hflow.isArray(oneOfValues)) {
-                cursor.describeItem(bundleKey).asOneOf(oneOfValues);
+                cursor.describeItem(bundleKey).asOneOfValues(oneOfValues);
             }
             /* description for bounded item */
             if (Hflow.isArray(boundarydValues)) {

@@ -40,24 +40,24 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
      * @description - Assign a computable description.
      *
      * @method assign
-     * @param {object} descObj - A descriptor setup object.
-     *                           Contains computable name, context keys, and computable callback.
+     * @param {object} descPreset - A descriptor preset object.
+     *                              Contains computable name, context keys, and computable callback.
      * @return {object}
      */
-    assign: function assign (descObj) {
+    assign: function assign (descPreset) {
         if (!Hflow.isSchema({
             key: `string|number`,
             contexts: `array`,
             compute: `function`
-        }).of(descObj)) {
-            Hflow.log(`error`, `ComputableDescriptor.assign - Input descriptor setup object is invalid.`);
+        }).of(descPreset)) {
+            Hflow.log(`error`, `ComputableDescriptor.assign - Input descriptor preset object is invalid.`);
         } else {
             const computable = this;
             const {
                 key: fnName,
                 contexts: contextPathIds,
                 compute
-            } = descObj;
+            } = descPreset;
 
             if (computable._description.assigned) {
                 computable.unassign();

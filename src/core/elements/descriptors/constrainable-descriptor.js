@@ -48,14 +48,33 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
         return constrainable._description.constraint.hasOwnProperty(constraintKey);
     },
     /**
+     * @description - Get constraint from constraint set.
+     *
+     * @method getConstraint
+     * @param {string} constraintKey
+     * @return {object}
+     */
+    getConstraint: function getConstraint (constraintKey) {
+        if (!Hflow.isString(constraintKey)) {
+            Hflow.log(`error`, `ConstrainableDescriptor.getConstraint - Input constraint key is invalid.`);
+        } else {
+            const constrainable = this;
+            if (!constrainable.hasConstraint(constraintKey)) {
+                Hflow.log(`warn1`, `ConstrainableDescriptor.getConstraint - Constraint key:${constraintKey} is not found.`);
+            }
+            return constrainable._description.constraint[constraintKey];
+        }
+    },
+    /**
      * @description - Add a new constraint to constraint set.
      *
      * @method addConstraint
      * @param {function} constrainer - Constraint callback function.
+     * @param {*} condition
      * @param {string} constraintKey
      * @return void
      */
-    addConstraint: function addConstraint (constrainer, constraintKey) {
+    addConstraint: function addConstraint (constrainer, condition, constraintKey) {
         if (!Hflow.isFunction(constrainer)) {
             Hflow.log(`error`, `ConstrainableDescriptor.addConstraint - Input constrainer function is invalid.`);
         } else if (!Hflow.isString(constraintKey)) {
@@ -63,10 +82,13 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
         } else {
             const constrainable = this;
 
-            if (!constrainable.hasConstraint(constraintKey)) {
-                constrainable._description.constraint[constraintKey] = constrainer;
+            if (constrainable.hasConstraint(constraintKey)) {
+                Hflow.log(`warn0`, `ConstrainableDescriptor.addConstraint - Overwriting constraint key:${constraintKey}.`);
             }
-
+            constrainable._description.constraint[constraintKey] = {
+                constrainer,
+                condition
+            };
             if (constrainable._description.assigned) {
                 const key = constrainable._description.key;
                 /* set the original value to the newly contrained object */
@@ -97,22 +119,28 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @description - Assign a constrainable description.
      *
      * @method assign
-     * @param {object} descObj - A descriptor setup object.
-     *                           Contains target property key and constraint set object.
+     * @param {object} descPreset - A descriptor preset object.
+     *                              Contains target property key and constraint set object.
      * @return {object}
      */
-    assign: function assign (descObj) {
+    assign: function assign (descPreset) {
         if (!Hflow.isSchema({
             key: `string|number`,
             constraint: `object`
-        }).of(descObj)) {
-            Hflow.log(`error`, `ConstrainableDescriptor.assign - Input descriptor setup object is invalid.`);
+        }).of(descPreset)) {
+            Hflow.log(`error`, `ConstrainableDescriptor.assign - Input descriptor preset object is invalid.`);
+        } else if (Object.keys(descPreset.constraint).forEach((constraintKey) => {
+            return Hflow.isSchema({
+                constrainer: `function`
+            }).of(descPreset.constraint[constraintKey]);
+        })) {
+            Hflow.log(`error`, `ConstrainableDescriptor.assign - Input descriptor constraint is invalid.`);
         } else {
             const constrainable = this;
             const {
                 key,
                 constraint
-            } = descObj;
+            } = descPreset;
 
             if (constrainable._description.assigned) {
                 constrainable.unassign();
@@ -173,13 +201,16 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                                         enumerable: true
                                     });
                                     results = Object.keys(constrainable._description.constraint).map((constraintKey) => {
-                                        const constrainer = constrainable._description.constraint[constraintKey];
+                                        const {
+                                            constrainer,
+                                            condition
+                                        } = constrainable._description.constraint[constraintKey];
                                         return Hflow.fallback({
                                             verified: true,
                                             reject: function reject () {}
                                         }, (_key) => {
                                             Hflow.log(`error`, `ConstrainableDescriptor.assign.to - Constraint callback returns invalid result object key${_key}.`);
-                                        }).of(constrainer.call(context));
+                                        }).of(constrainer.call(context, condition));
                                     });
                                     results.forEach((result) => {
                                         if (result.verified) {
@@ -197,8 +228,12 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                                 enumerable: true
                             });
                             /* add new constraints to constraint set */
-                            Hflow.forEach(constraint, (constrainer, constraintKey) => {
-                                constrainable.addConstraint(constrainer, constraintKey);
+                            Object.keys(constraint).forEach((constraintKey) => {
+                                const {
+                                    constrainer,
+                                    condition
+                                } = constraint[constraintKey];
+                                constrainable.addConstraint(constrainer, condition, constraintKey);
                             });
                         } else {
                             Hflow.log(`error`, `ConstrainableDescriptor.assign.to - Property key:${key} is not defined.`);
