@@ -1,8 +1,8 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta11",
+    "version": "0.1.0-beta12",
     "registry": "github",
-    "description": "A toolkit & library for developing universal app.",
+    "description": "Hyperflow (Hf) - A toolkit & library for developing universal app.",
     "license": "MIT",
     "homepage": "https://github.com/tuantle/hyperflow",
     "main": "src/hyperflow.js",
