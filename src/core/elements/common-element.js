@@ -17,10 +17,11 @@
  *
  * @module CommonElement
  * @description - Common element module which provides common methods that will be used
- * throughout Hflow toolkit.
+ * throughout Hf toolkit.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 const PRIVATE_PREFIX = `_`;
@@ -28,7 +29,7 @@ const PRIVATE_PREFIX = `_`;
 /* this flag indicates develeopment or production status of the project */
 let DEVELOPMENT = true;
 
-/* this flag enables console log of debug messages when calling method Hflow.log(`info`, `a debug message.`) */
+/* this flag enables console log of debug messages when calling method Hf.log(`info`, `a debug message.`) */
 let CONSOLE_LOG_DEBUG = {
     ENABLE_INFO_MESSAGE: true,
     ENABLE_WARN_LVL0_MESSAGE: false,
@@ -42,6 +43,373 @@ let CONSOLE_LOG_DEBUG = {
  */
 const CommonElementPrototype = Object.create({}).prototype = {
     /* ----- Common Prototype Definitions --------------------- */
+    /**
+     * @description - Helper function to compare and verify object schema.
+     *
+     * @method _deepCompareSchema
+     * @param {object} schema - Predefined schema.
+     * @param {object} target - Predefined schema.
+     * @returns {object}
+     */
+    _deepCompareSchema: function _deepCompareSchema (schema, target) {
+        const common = this;
+        let verified = true;
+        if (common.isObject(schema) && common.isObject(target)) {
+            common.forEach(schema, (schemaItem, key) => {
+                if (verified) {
+                    let itemTypes = [];
+                    if (target.hasOwnProperty(key) || Object.getPrototypeOf(target).hasOwnProperty(key)) {
+                        const targetItem = target[key];
+                        if ((common.isObject(targetItem) && common.isObject(schemaItem)) || (common.isArray(targetItem) && common.isArray(schemaItem))) {
+                            verified = common._deepCompareSchema(schemaItem, targetItem);
+                        } else if (common.isString(schemaItem)) {
+                            itemTypes = common.stringToArray(schemaItem, `|`);
+                            verified = itemTypes.some((itemType) => {
+                                if (itemType === `defined`) {
+                                    return common.isDefined(targetItem);
+                                }
+                                return common.typeOf(targetItem) === itemType;
+                            });
+                        } else {
+                            verified = false;
+                        }
+                    } else {
+                        if (common.isString(schemaItem)) {
+                            itemTypes = common.stringToArray(schemaItem, `|`);
+                            verified = itemTypes.indexOf(`undefined`) !== -1;
+                        } else {
+                            verified = false;
+                        }
+                    }
+                }
+            });
+        } else if (common.isArray(schema) && common.isArray(target)) {
+            if (schema.length === 1) {
+                const schemaItem = schema[0];
+                verified = target.reduce((_verified, targetItem) => {
+                    let itemTypes = [];
+                    if ((common.isObject(targetItem) && common.isObject(schemaItem)) || (common.isArray(targetItem) && common.isArray(schemaItem))) {
+                        _verified = common._deepCompareSchema(schemaItem, targetItem);
+                    } else if (common.isString(schemaItem)) {
+                        itemTypes = common.stringToArray(schemaItem, `|`);
+                        _verified = itemTypes.some((itemType) => {
+                            if (itemType === `defined`) {
+                                return common.isDefined(targetItem);
+                            }
+                            return common.typeOf(targetItem) === itemType;
+                        });
+                    } else {
+                        _verified = false;
+                    }
+                    return _verified;
+                }, verified);
+            } else {
+                common.log(`warn1`, `CommonElement._deepCompareSchema - Predefined schema test array must have a length of 1.`);
+                verified = false;
+            }
+        } else {
+            verified = false;
+        }
+        return verified;
+    },
+    /**
+     * @description - Helper function to return a new object that was deep mutated from source by reference target mutator object.
+     *
+     * @method _deepMutation
+     * @param {object} source - Target source object.
+     * @param {object} mutator - Mutator object.
+     * @param {array} pathId - Mutation path Id.
+     * @returns {object}
+     */
+    _deepMutation: function _deepMutation (source, mutator, pathId = []) {
+        const common = this;
+        if (!(common.isArray(pathId))) {
+            common.log(`error`, `CommonElement._deepMutation - Input pathId is invalid.`);
+        } else {
+            let result;
+            if (common.isEmpty(pathId)) {
+                if (common.isObject(source) && common.isObject(mutator)) {
+                    result = Object.assign({}, source);
+                    Object.keys(source).filter((key) => {
+                        if (!mutator.hasOwnProperty(key)) {
+                            common.log(`warn0`, `CommonElement._deepMutation - Source key:${key} is not defined in mutator.`);
+                            return false;
+                        } else if (common.isFunction(source[key])) {
+                            common.log(`warn0`, `CommonElement._deepMutation - Ignore mutation of function key:${key}.`);
+                            return false;
+                        }
+                        return true;
+                    }).forEach((key) => {
+                        const sourceItem = source[key];
+                        const mutatorItem = mutator[key];
+                        if ((common.isObject(sourceItem) && common.isObject(mutatorItem)) ||
+                            (common.isArray(sourceItem) && common.isArray(mutatorItem))) {
+                            result[key] = common._deepMutation(sourceItem, mutatorItem);
+                        } else {
+                            result[key] = mutatorItem;
+                        }
+                    });
+                } else if (common.isArray(source) && common.isArray(mutator)) {
+                    result = source.slice(0);
+                    if (source.length < mutator.length) {
+                        common.log(`warn0`, `CommonElement._deepMutation - Target mutator array length is greater than what is defined in source.`);
+                    }
+                    source.filter((sourceItem, key) => {
+                        if (common.isFunction(sourceItem)) {
+                            common.log(`warn0`, `CommonElement._deepMutation - Ignore mutation of function key:${key}.`);
+                            return false;
+                        }
+                        return key < mutator.length;
+                    }).forEach((sourceItem, key) => {
+                        const mutatorItem = mutator[key];
+                        if ((common.isObject(sourceItem) && common.isObject(mutatorItem)) ||
+                            (common.isArray(sourceItem) && common.isArray(mutatorItem))) {
+                            result[key] = common._deepMutation(sourceItem, mutatorItem);
+                        } else {
+                            result[key] = mutatorItem;
+                        }
+                    });
+                } else {
+                    common.log(`error`, `CommonElement._deepMutation - Input source or target mutator is invalid.`);
+                }
+            } else {
+                const key = pathId.shift();
+                if (common.isObject(source) && source.hasOwnProperty(key)) {
+                    result = Object.assign({}, source);
+                    if (common.isEmpty(pathId)) {
+                        if (common.isObject(mutator) && mutator.hasOwnProperty(key)) {
+                            result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
+                        }
+                        // } else {
+                        //     common.log(`warn1`, `CommonElement._deepMutation - Target mutator key:${key} is not defined in source.`);
+                        // }
+                    } else {
+                        result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
+                    }
+                } else if (common.isArray(source) && common.isInteger(key) && key < source.length) {
+                    result = source.slice(0);
+                    if (common.isEmpty(pathId)) {
+                        if (common.isArray(mutator) && key < mutator.length) {
+                            result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
+                        }
+                        // } else {
+                        //     common.log(`warn1`, `CommonElement._deepMutation - Target mutator array length is greater than what is defined in source.`);
+                        // }
+                    } else {
+                        result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
+                    }
+                } else {
+                    common.log(`error`, `CommonElement._deepMutation - Path ends at property key:${key}.`);
+                }
+            }
+            return result;
+        }
+    },
+    /**
+     * @description - Helper function to deep merge source with target and return result.
+     *
+     * @method _deepMerge
+     * @param {object} source - Source object.
+     * @param {object} target - Target object.
+     * @param {array} pathId - Merge at path Id.
+     * @returns {object}
+     */
+    _deepMerge: function _deepMerge (source, target, pathId = []) {
+        const common = this;
+        let result;
+        pathId = common.isArray(pathId) ? pathId : [];
+        if (common.isEmpty(pathId)) {
+            if ((common.isObject(source) || common.isArray(source)) &&
+                (common.isObject(target) || common.isArray(target))) {
+                if (common.isArray(source) && common.isArray(target)) {
+                    result = source.slice(0);
+                    target.forEach((item, key) => {
+                        if (!common.isDefined(result[key])) {
+                            result[key] = item;
+                        } else if (common.isObject(item)) {
+                            result[key] = common._deepMerge(source[key], item);
+                        } else {
+                            if (source.indexOf(item) === -1) {
+                                result.push(item);
+                            }
+                        }
+                    });
+                } else {
+                    if (common.isObject(source)) {
+                        result = Object.assign({}, source);
+                    }
+                    Object.keys(target).forEach((key) => {
+                        if (common.isObject(target[key]) || common.isArray(target[key])) {
+                            if (!common.isDefined(source[key])) {
+                                result[key] = target[key];
+                            } else {
+                                result[key] = common._deepMerge(source[key], target[key]);
+                            }
+                        } else {
+                            result[key] = target[key];
+                        }
+                    });
+                }
+            } else {
+                common.log(`error`, `CommonElement._deepMerge - Input source or mutation is invalid.`);
+            }
+        } else {
+            const key = pathId.shift();
+            if (common.isObject(source) && source.hasOwnProperty(key)) {
+                result = Object.assign({}, source);
+                if (common.isEmpty(pathId)) {
+                    if (common.isObject(target) && target.hasOwnProperty(key)) {
+                        result[key] = common._deepMerge(source[key], target[key], pathId.slice(0));
+                    }
+                } else {
+                    result[key] = common._deepMerge(source[key], target, pathId.slice(0));
+                }
+            } else if (common.isArray(source) && common.isInteger(key) && key < source.length) {
+                result = source.slice(0);
+                if (common.isEmpty(pathId)) {
+                    if (common.isArray(target) && key < target.length) {
+                        result[key] = common._deepMerge(source[key], target[key], pathId.slice(0));
+                    }
+                } else {
+                    result[key] = common._deepMerge(source[key], target, pathId.slice(0));
+                }
+            } else {
+                common.log(`error`, `CommonElement._deepMerge - Path ends at property key:${key}.`);
+            }
+        }
+        return result;
+    },
+    /**
+     * @description - Helper function to do compare and fallback if mismatched.
+     *
+     * @method _deepCompareAndFallback
+     * @param {object} source - Source object.
+     * @param {object} target - Target object.
+     * @param {function} notify - Optional notification callback when a fallback occurs.
+     * @returns {object}
+     */
+    _deepCompareAndFallback: function _deepCompareAndFallback (source, target, notify) {
+        const common = this;
+        let result;
+        if (common.isObject(source) && common.isObject(target)) {
+            result = {};
+            /* shallow copy target to result object */
+            Object.keys(target).forEach((key) => {
+                const targetItemDesc = Object.getOwnPropertyDescriptor(target, key);
+                Object.defineProperty(result, key, {
+                    get: function get () {
+                        if (targetItemDesc.hasOwnProperty(`get`)) {
+                            return targetItemDesc.get();
+                        }
+                        return targetItemDesc.value;
+                    },
+                    set: function set (value) {
+                        if (targetItemDesc.hasOwnProperty(`set`)) {
+                            targetItemDesc.set(value);
+                        } else {
+                            targetItemDesc.value = value;
+                        }
+                    },
+                    configurable: true,
+                    enumerable: true
+                });
+            });
+            common.forEach(source, (sourceItem, key) => {
+                if (target.hasOwnProperty(key)) {
+                    const targetItem = target[key];
+                    if ((common.isObject(targetItem) && common.isObject(sourceItem)) || (common.isArray(targetItem) && common.isArray(sourceItem))) {
+                        result[key] = common._deepCompareAndFallback(sourceItem, targetItem, notify);
+                    } else {
+                        if (common.typeOf(targetItem) !== common.typeOf(sourceItem)) {
+                            result[key] = sourceItem;
+                            if (common.isFunction(notify)) {
+                                notify(key);
+                            }
+                        }
+                    }
+                } else {
+                    result[key] = sourceItem;
+                    if (common.isFunction(notify)) {
+                        notify(key);
+                    }
+                }
+            });
+        } else if (common.isArray(source) && common.isArray(target)) {
+            result = target.slice(0);
+            common.forEach(source, (sourceItem, key) => {
+                if (key >= 0 && key < target.length) {
+                    const targetItem = target[key];
+                    if ((common.isObject(targetItem) && common.isObject(sourceItem)) || (common.isArray(targetItem) && common.isArray(sourceItem))) {
+                        result[key] = common._deepCompareAndFallback(sourceItem, targetItem, notify);
+                    } else {
+                        if (common.typeOf(targetItem) !== common.typeOf(sourceItem)) {
+                            result[key] = sourceItem;
+                            if (common.isFunction(notify)) {
+                                notify(key);
+                            }
+                        }
+                    }
+                } else {
+                    result.push(sourceItem);
+                    if (common.isFunction(notify)) {
+                        notify(key);
+                    }
+                }
+            });
+        } else {
+            common.log(`error`, `CommonElement._deepCompareAndFallback - Input source or target object is invalid.`);
+        }
+        return result;
+    },
+    /**
+     * @description - Helper function to recursively parsing through and retrieve an object property at pathId.
+     *
+     * @method _deepRetrieval
+     * @param {object} target - Target object to retrieve property.
+     * @param {array} pathId - Retrival path Id.
+     * @param {boolean} asNestedObject
+     * @returns {object}
+     */
+    _deepRetrieval: function _deepRetrieval (target, pathId, asNestedObject) {
+        const common = this;
+        if (!(common.isObject(target) || common.isArray(target))) {
+            common.log(`error`, `CommonElement._deepRetrieval - Input target object or array is invalid.`);
+        } else if (!(common.isArray(pathId))) {
+            common.log(`error`, `CommonElement._deepRetrieval - Input pathId is invalid.`);
+        } else {
+            if (!common.isEmpty(pathId)) {
+                const key = pathId.shift();
+                let resultAtPath = common.isObject(target) ? {} : Array(key).fill(null);
+                let propertyAtPath;
+
+                if (common.isObject(target) && target.hasOwnProperty(key)) {
+                    if (!common.isEmpty(pathId)) {
+                        propertyAtPath = common._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
+                        resultAtPath[key] = propertyAtPath;
+                    } else {
+                        propertyAtPath = target[key];
+                        resultAtPath[key] = propertyAtPath;
+                    }
+                } else if (common.isArray(target) && common.isInteger(key) && key < target.length) {
+                    if (!common.isEmpty(pathId)) {
+                        propertyAtPath = common._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
+                        resultAtPath.push(propertyAtPath);
+                    } else {
+                        propertyAtPath = target[key];
+                        resultAtPath.push(propertyAtPath);
+                    }
+                }
+
+                if (!common.isDefined(propertyAtPath) && !common.isEmpty(pathId)) {
+                    common.log(`error`, `CommonElement._deepRetrieval - Path ends at property key:${key}.`);
+                } else {
+                    return asNestedObject ? resultAtPath : propertyAtPath;
+                }
+            } else {
+                common.log(`error`, `CommonElement._deepRetrieval - No property is defined.`);
+            }
+        }
+    },
     /**
      * @description - Check if value is an integer.
      *
@@ -191,68 +559,6 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     isSchema: function isSchema (schema) {
         const common = this;
-        /* helper function to compare and verify object schema */
-        const deepCompareSchema = function deepCompareSchema (_schema, _target) {
-            let verified = true;
-
-            if (common.isObject(_schema) && common.isObject(_target)) {
-                common.forEach(_schema, (schemaItem, key) => {
-                    if (verified) {
-                        let itemTypes = [];
-                        if (_target.hasOwnProperty(key) || Object.getPrototypeOf(_target).hasOwnProperty(key)) {
-                            const targetItem = _target[key];
-                            if ((common.isObject(targetItem) && common.isObject(schemaItem)) || (common.isArray(targetItem) && common.isArray(schemaItem))) {
-                                verified = deepCompareSchema(schemaItem, targetItem);
-                            } else if (common.isString(schemaItem)) {
-                                itemTypes = common.stringToArray(schemaItem, `|`);
-                                verified = itemTypes.some((itemType) => {
-                                    if (itemType === `defined`) {
-                                        return common.isDefined(targetItem);
-                                    }
-                                    return common.typeOf(targetItem) === itemType;
-                                });
-                            } else {
-                                verified = false;
-                            }
-                        } else {
-                            if (common.isString(schemaItem)) {
-                                itemTypes = common.stringToArray(schemaItem, `|`);
-                                verified = itemTypes.indexOf(`undefined`) !== -1;
-                            } else {
-                                verified = false;
-                            }
-                        }
-                    }
-                });
-            } else if (common.isArray(_schema) && common.isArray(_target)) {
-                if (_schema.length === 1) {
-                    const schemaItem = _schema[0];
-                    verified = _target.reduce((_verified, targetItem) => {
-                        let itemTypes = [];
-                        if ((common.isObject(targetItem) && common.isObject(schemaItem)) || (common.isArray(targetItem) && common.isArray(schemaItem))) {
-                            _verified = deepCompareSchema(schemaItem, targetItem);
-                        } else if (common.isString(schemaItem)) {
-                            itemTypes = common.stringToArray(schemaItem, `|`);
-                            _verified = itemTypes.some((itemType) => {
-                                if (itemType === `defined`) {
-                                    return common.isDefined(targetItem);
-                                }
-                                return common.typeOf(targetItem) === itemType;
-                            });
-                        } else {
-                            _verified = false;
-                        }
-                        return _verified;
-                    }, verified);
-                } else {
-                    common.log(`warn1`, `CommonElement.deepCompareSchema - Predefined schema test array must have a length of 1.`);
-                    verified = false;
-                }
-            } else {
-                verified = false;
-            }
-            return verified;
-        };
         return {
             /**
              * @description - Compare schema of the target object...
@@ -262,7 +568,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @returns {boolean}
              */
             of: function of (target) {
-                return deepCompareSchema(schema, target);
+                return common._deepCompareSchema(schema, target);
             }
         };
     },
@@ -295,7 +601,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
             /**
              * @description - A composed function of two or more functions.
              *
-             * @method mutate.atPathBy
+             * @method composed
              * @param {*} value
              * @returns {function}
              */
@@ -376,8 +682,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     return common.isObject(value) || common.isArray(value) ? common.clone(value) : value;
                 }).slice(0);
             }
-            return result;
-            // return Object.isFrozen(source) ? Object.freeze(result) : result;
+            return Object.isFrozen(source) ? Object.freeze(result) : result;
         }
     },
     /**
@@ -390,90 +695,6 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     mutate: function mutate (source) {
         const common = this;
-        /* helper function to return a new object that was deep mutated from source by reference target mutator object. */
-        const deepMutation = function deepMutation (_source, _mutator, _pathId = []) {
-            if (!(common.isArray(_pathId))) {
-                common.log(`error`, `CommonElement.deepMutation - Input pathId is invalid.`);
-            } else {
-                let result;
-                if (common.isEmpty(_pathId)) {
-                    if (common.isObject(_source) && common.isObject(_mutator)) {
-                        result = Object.assign({}, _source);
-                        Object.keys(_source).filter((key) => {
-                            if (!_mutator.hasOwnProperty(key)) {
-                                common.log(`warn0`, `CommonElement.deepMutation - Source key:${key} is not defined in mutator.`);
-                                return false;
-                            } else if (common.isFunction(_source[key])) {
-                                common.log(`warn0`, `CommonElement.deepMutation - Ignore mutation of function key:${key}.`);
-                                return false;
-                            }
-                            return true;
-                        }).forEach((key) => {
-                            const sourceItem = _source[key];
-                            const mutatorItem = _mutator[key];
-                            if ((common.isObject(sourceItem) && common.isObject(mutatorItem)) ||
-                                (common.isArray(sourceItem) && common.isArray(mutatorItem))) {
-                                result[key] = deepMutation(sourceItem, mutatorItem);
-                            } else {
-                                result[key] = mutatorItem;
-                            }
-                        });
-                    } else if (common.isArray(_source) && common.isArray(_mutator)) {
-                        result = _source.slice(0);
-                        if (_source.length < _mutator.length) {
-                            common.log(`warn0`, `CommonElement.deepMutation - Target mutator array length is greater than what is defined in source.`);
-                        }
-                        _source.filter((sourceItem, key) => {
-                            if (common.isFunction(sourceItem)) {
-                                common.log(`warn0`, `CommonElement.deepMutation - Ignore mutation of function key:${key}.`);
-                                return false;
-                            }
-                            return key < _mutator.length;
-                        }).forEach((sourceItem, key) => {
-                            const mutatorItem = _mutator[key];
-                            if ((common.isObject(sourceItem) && common.isObject(mutatorItem)) ||
-                                (common.isArray(sourceItem) && common.isArray(mutatorItem))) {
-                                result[key] = deepMutation(sourceItem, mutatorItem);
-                            } else {
-                                result[key] = mutatorItem;
-                            }
-                        });
-                    } else {
-                        common.log(`error`, `CommonElement.deepMutation - Input source or target mutator is invalid.`);
-                    }
-                } else {
-                    const key = _pathId.shift();
-                    if (common.isObject(_source) && _source.hasOwnProperty(key)) {
-                        result = Object.assign({}, _source);
-                        if (common.isEmpty(_pathId)) {
-                            if (common.isObject(_mutator) && _mutator.hasOwnProperty(key)) {
-                                result[key] = deepMutation(_source[key], _mutator[key], _pathId.slice(0));
-                            }
-                            // } else {
-                            //     common.log(`warn1`, `CommonElement.deepMutation - Target mutator key:${key} is not defined in source.`);
-                            // }
-                        } else {
-                            result[key] = deepMutation(_source[key], _mutator, _pathId.slice(0));
-                        }
-                    } else if (common.isArray(_source) && common.isInteger(key) && key < _source.length) {
-                        result = _source.slice(0);
-                        if (common.isEmpty(_pathId)) {
-                            if (common.isArray(_mutator) && key < _mutator.length) {
-                                result[key] = deepMutation(_source[key], _mutator[key], _pathId.slice(0));
-                            }
-                            // } else {
-                            //     common.log(`warn1`, `CommonElement.deepMutation - Target mutator array length is greater than what is defined in source.`);
-                            // }
-                        } else {
-                            result[key] = deepMutation(_source[key], _mutator, _pathId.slice(0));
-                        }
-                    } else {
-                        common.log(`error`, `CommonElement.deepMutation - Path ends at property key:${key}.`);
-                    }
-                }
-                return result;
-            }
-        };
         if (!common.isObject(source)) {
             common.log(`error`, `CommonElement.mutate - Input source is invalid.`);
         } else {
@@ -493,7 +714,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     } else if (!(common.isArray(pathId) && !common.isEmpty(pathId))) {
                         common.log(`error`, `CommonElement.mutate.atPathBy - Input pathId is invalid.`);
                     } else {
-                        return deepMutation(source, mutator, pathId.slice(0));
+                        return common._deepMutation(source, mutator, pathId.slice(0));
                     }
                 },
                 /**
@@ -507,7 +728,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     if (!common.isObject(mutator)) {
                         common.log(`error`, `CommonElement.mutate.by - Input mutator is invalid.`);
                     } else {
-                        return deepMutation(source, mutator);
+                        return common._deepMutation(source, mutator);
                     }
                 }
             };
@@ -522,73 +743,6 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     merge: function merge (source) {
         const common = this;
-        /* helper function to deep merge source with target and return result. */
-        const deepMerge = function deepMerge (_source, _target, _pathId = []) {
-            let result;
-
-            _pathId = common.isArray(_pathId) ? _pathId : [];
-
-            if (common.isEmpty(_pathId)) {
-                if ((common.isObject(_source) || common.isArray(_source)) &&
-                    (common.isObject(_target) || common.isArray(_target))) {
-                    if (common.isArray(_source) && common.isArray(_target)) {
-                        result = _source.slice(0);
-                        _target.forEach((item, key) => {
-                            if (!common.isDefined(result[key])) {
-                                result[key] = item;
-                            } else if (common.isObject(item)) {
-                                result[key] = deepMerge(_source[key], item);
-                            } else {
-                                if (_source.indexOf(item) === -1) {
-                                    result.push(item);
-                                }
-                            }
-                        });
-                    } else {
-                        if (common.isObject(_source)) {
-                            result = Object.assign({}, _source);
-                        }
-                        Object.keys(_target).forEach((key) => {
-                            if (common.isObject(_target[key]) || common.isArray(_target[key])) {
-                                if (!common.isDefined(_source[key])) {
-                                    result[key] = _target[key];
-                                } else {
-                                    result[key] = deepMerge(_source[key], _target[key]);
-                                }
-                            } else {
-                                result[key] = _target[key];
-                            }
-                        });
-                    }
-                } else {
-                    common.log(`error`, `CommonElement.deepMerge - Input source or mutation is invalid.`);
-                }
-            } else {
-                const key = _pathId.shift();
-                if (common.isObject(_source) && _source.hasOwnProperty(key)) {
-                    result = Object.assign({}, _source);
-                    if (common.isEmpty(_pathId)) {
-                        if (common.isObject(_target) && _target.hasOwnProperty(key)) {
-                            result[key] = deepMerge(_source[key], _target[key], _pathId.slice(0));
-                        }
-                    } else {
-                        result[key] = deepMerge(_source[key], _target, _pathId.slice(0));
-                    }
-                } else if (common.isArray(_source) && common.isInteger(key) && key < _source.length) {
-                    result = _source.slice(0);
-                    if (common.isEmpty(_pathId)) {
-                        if (common.isArray(_target) && key < _target.length) {
-                            result[key] = deepMerge(_source[key], _target[key], _pathId.slice(0));
-                        }
-                    } else {
-                        result[key] = deepMerge(_source[key], _target, _pathId.slice(0));
-                    }
-                } else {
-                    common.log(`error`, `CommonElement.deepMerge - Path ends at property key:${key}.`);
-                }
-            }
-            return result;
-        };
         if (!common.isObject(source)) {
             common.log(`error`, `CommonElement.merge - Input source is invalid.`);
         } else {
@@ -608,7 +762,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     } else if (!(common.isArray(pathId) && !common.isEmpty(pathId))) {
                         common.log(`error`, `CommonElement.merge.atPathWith - Input pathId is invalid.`);
                     } else {
-                        return deepMerge(source, target, pathId.slice(0));
+                        return common._deepMerge(source, target, pathId.slice(0));
                     }
                 },
                 /**
@@ -622,7 +776,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     if (!common.isObject(target)) {
                         common.log(`error`, `CommonElement.merge.with - Input target is invalid.`);
                     } else {
-                        return deepMerge(source, target);
+                        return common._deepMerge(source, target);
                     }
                 }
             };
@@ -641,80 +795,6 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     fallback: function fallback (source, notify) {
         const common = this;
-        /* helper function to do compare and fallback if mismatched */
-        const deepCompareAndFallback = function deepCompareAndFallback (_source, _target) {
-            let result;
-            if (common.isObject(_source) && common.isObject(_target)) {
-                result = {};
-                /* shallow copy target to result object */
-                Object.keys(_target).forEach((key) => {
-                    const targetItemDesc = Object.getOwnPropertyDescriptor(_target, key);
-                    Object.defineProperty(result, key, {
-                        get: function get () {
-                            if (targetItemDesc.hasOwnProperty(`get`)) {
-                                return targetItemDesc.get();
-                            }
-                            return targetItemDesc.value;
-                        },
-                        set: function set (value) {
-                            if (targetItemDesc.hasOwnProperty(`set`)) {
-                                targetItemDesc.set(value);
-                            } else {
-                                targetItemDesc.value = value;
-                            }
-                        },
-                        configurable: true,
-                        enumerable: true
-                    });
-                });
-                common.forEach(_source, (sourceItem, key) => {
-                    if (_target.hasOwnProperty(key)) {
-                        const targetItem = _target[key];
-                        if ((common.isObject(targetItem) && common.isObject(sourceItem)) || (common.isArray(targetItem) && common.isArray(sourceItem))) {
-                            result[key] = deepCompareAndFallback(sourceItem, targetItem);
-                        } else {
-                            if (common.typeOf(targetItem) !== common.typeOf(sourceItem)) {
-                                result[key] = sourceItem;
-                                if (common.isFunction(notify)) {
-                                    notify(key);
-                                }
-                            }
-                        }
-                    } else {
-                        result[key] = sourceItem;
-                        if (common.isFunction(notify)) {
-                            notify(key);
-                        }
-                    }
-                });
-            } else if (common.isArray(_source) && common.isArray(_target)) {
-                result = _target.slice(0);
-                common.forEach(_source, (sourceItem, key) => {
-                    if (key >= 0 && key < _target.length) {
-                        const targetItem = _target[key];
-                        if ((common.isObject(targetItem) && common.isObject(sourceItem)) || (common.isArray(targetItem) && common.isArray(sourceItem))) {
-                            result[key] = deepCompareAndFallback(sourceItem, targetItem);
-                        } else {
-                            if (common.typeOf(targetItem) !== common.typeOf(sourceItem)) {
-                                result[key] = sourceItem;
-                                if (common.isFunction(notify)) {
-                                    notify(key);
-                                }
-                            }
-                        }
-                    } else {
-                        result.push(sourceItem);
-                        if (common.isFunction(notify)) {
-                            notify(key);
-                        }
-                    }
-                });
-            } else {
-                common.log(`error`, `CommonElement.deepCompareAndFallback - Input source or target object is invalid.`);
-            }
-            return result;
-        };
-
         if (!(common.isObject(source) || common.isArray(source))) {
             common.log(`error`, `CommonElement.fallback - Input source object is invalid.`);
         } else {
@@ -730,7 +810,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     if ((common.isObject(source) && !common.isObject(target)) || common.isArray(source) && !common.isArray(target)) {
                         common.log(`error`, `CommonElement.fallback.of - Input target object is invalid.`);
                     } else {
-                        return deepCompareAndFallback(source, target);
+                        return common._deepCompareAndFallback(source, target, notify);
                     }
                 }
             };
@@ -774,6 +854,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
         /* helper function to filter out key in the exclusion list. */
         const isIncluded = function isIncluded (key) {
             let included = false;
+
             if (common.isString(key)) {
                 const prefixExcepted = !common.isEmpty(exclusion.exception.prefixes) ? exclusion.exception.prefixes.some((prefix) => {
                     return key.substr(0, prefix.length) === prefix;
@@ -1011,49 +1092,6 @@ const CommonElementPrototype = Object.create({}).prototype = {
         const common = this;
 
         asNestedObject = common.isBoolean(asNestedObject) ? asNestedObject : false;
-        /* helper function to recursively parsing through and retrieve an object property at pathId */
-        const deepRetrieval = function deepRetrieval (_target, _pathId) {
-            if (!(common.isObject(_target) || common.isArray(_target))) {
-                common.log(`error`, `CommonElement.deepRetrieval - Input target object or array is invalid.`);
-            } else if (!(common.isArray(_pathId))) {
-                common.log(`error`, `CommonElement.deepRetrieval - Input pathId is invalid.`);
-            } else {
-                if (!common.isEmpty(_pathId)) {
-                    const key = _pathId.shift();
-                    let resultAtPath = common.isObject(_target) ? {} : Array(key).fill(null);
-                    let propertyAtPath;
-
-                    if (common.isObject(_target) && _target.hasOwnProperty(key)) {
-                        if (!common.isEmpty(_pathId)) {
-                            propertyAtPath = deepRetrieval(_target[key], _pathId.slice(0));
-                            resultAtPath[key] = propertyAtPath;
-                        } else {
-                            propertyAtPath = _target[key];
-                            resultAtPath[key] = propertyAtPath;
-                        }
-                    } else if (common.isArray(_target) && common.isInteger(key) && key < _target.length) {
-                        if (!common.isEmpty(_pathId)) {
-                            propertyAtPath = deepRetrieval(_target[key], _pathId.slice(0));
-                            resultAtPath.push(propertyAtPath);
-                        } else {
-                            propertyAtPath = _target[key];
-                            resultAtPath.push(propertyAtPath);
-                        }
-                    }
-
-                    if (!common.isDefined(propertyAtPath) && !common.isEmpty(_pathId)) {
-                        common.log(`error`, `CommonElement.deepRetrieval - Path ends at property key:${key}.`);
-                    } else {
-                        if (asNestedObject) {
-                            return resultAtPath;
-                        }
-                        return propertyAtPath;
-                    }
-                } else {
-                    common.log(`error`, `CommonElement.deepRetrieval - No property is defined.`);
-                }
-            }
-        };
 
         if (!(common.isString(pathId) || common.isArray(pathId))) {
             common.log(`error`, `CommonElement.retrieve - Input pathId is invalid.`);
@@ -1073,7 +1111,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     if (!common.isObject(target)) {
                         common.log(`error`, `CommonElement.retrieve.from - Input target object is invalid.`);
                     } else {
-                        return deepRetrieval(target, pathId.slice(0));
+                        return common._deepRetrieval(target, pathId.slice(0), asNestedObject);
                     }
                 }
             };
