@@ -15,8 +15,8 @@
  *
  *------------------------------------------------------------------------
  *
- * @module Hyperflow (Hflow) (A toolkit & library for developing universal app)
- * @description - Hflow namespace setup. Initialize Hflow, adding core modules, and apply settings.
+ * @module Hyperflow (Hf) (A toolkit & library for developing universal app)
+ * @description - Hf namespace setup. Initialize Hf, adding core modules, and apply settings.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
@@ -81,13 +81,14 @@ import WebStorageComposite from './composites/services/client-web/web-storage-co
 import ASyncStorageComposite from './composites/services/client-native/async-storage-composite';
 import PGComposite from './composites/services/server/pg-composite';
 
-let Hflow = null;
+/* hyperflow global object */
+let Hf = null;
 
 /**
- * @description - Setup and initialize modules & dependencies for Hflow`s namespaces.
+ * @description - Setup and initialize modules & dependencies for Hf`s namespaces.
  *
  * @function init
- * @param {object} setting - Hflow's global settings.
+ * @param {object} setting - Hf's global settings.
  * @returns {object}
  */
 const init = function init ({
@@ -97,15 +98,15 @@ const init = function init ({
     ENABLE_WARN_LVL0_MESSAGE = false,
     ENABLE_WARN_LVL1_MESSAGE = true
 } = {}) {
-    if (Hflow === null) {
+    if (Hf === null) {
         const common = CommonElement({
             devleopment: DEVELOPMENT,
             enableInfoMessage: ENABLE_INFO_MESSAGE,
             enableWarn0Message: ENABLE_WARN_LVL0_MESSAGE,
             enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
         });
-        const HflowProperty = {
-            VERSION: `0.1.0-beta11`,
+        const HfProperty = {
+            VERSION: `0.1.0-beta12`,
             ENV: TARGET === `server` ? process.env : {}, // eslint-disable-line
             TARGET,
             DEVELOPMENT,
@@ -294,20 +295,20 @@ const init = function init ({
             })()
         };
 
-        /* create an initialized Hflow object */
-        Hflow = Object.freeze(common.mix(common, {
+        /* create an initialized Hf object */
+        Hf = Object.freeze(common.mix(common, {
             exclusion: {
                 /* hide reveal method, reveal is for internal use only */
                 keys: [
                     `reveal`
                 ]
             }
-        }).with(HflowProperty));
+        }).with(HfProperty));
     }
-    return Hflow;
+    return Hf;
 };
 
 export {
-    Hflow,
+    Hf,
     init
 };
