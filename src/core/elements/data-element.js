@@ -21,6 +21,7 @@
  * @author Tuan Le (tuan.t.lei@gmail.com)
  * @version 0.0
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load descriptor element */
@@ -35,8 +36,8 @@ import TreeElement from './tree-element';
 /* load CommonElement */
 import CommonElement from './common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* the max number mutations to persist in mutation map before roll-over */
 const DEFAULT_MUTATION_HISTORY_DEPTH = 20;
@@ -59,17 +60,17 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _getAccessor: function _getAccessor (pathId) {
-        pathId = Hflow.isString(pathId) ? Hflow.stringToArray(pathId, `.`) : pathId;
-        if (!(Hflow.isArray(pathId) && !Hflow.isEmpty(pathId))) {
-            Hflow.log(`error`, `DataElement._getAccessor - Input pathId is invalid.`);
+        pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
+        if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+            Hf.log(`error`, `DataElement._getAccessor - Input pathId is invalid.`);
         } else {
             const data = this;
             const rootKey = pathId[0];
             const mRecords = data._mutation.records;
             const immutableRootKeys = data._mutation.immutableRootKeys;
-            if (immutableRootKeys.indexOf(rootKey) !== -1 && !Hflow.isEmpty(mRecords)) {
+            if (immutableRootKeys.indexOf(rootKey) !== -1 && !Hf.isEmpty(mRecords)) {
                 data._updateMMap(rootKey);
-                Hflow.clear(data._mutation.records);
+                Hf.clear(data._mutation.records);
             }
             return data._mutation.mMap.select(pathId).getContent();
         }
@@ -83,9 +84,9 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _recordMutation: function _recordMutation (pathId) {
-        pathId = Hflow.isString(pathId) ? Hflow.stringToArray(pathId, `.`) : pathId;
-        if (!(Hflow.isArray(pathId) && !Hflow.isEmpty(pathId))) {
-            Hflow.log(`error`, `DataElement._recordMutation - Input pathId is invalid.`);
+        pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
+        if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+            Hf.log(`error`, `DataElement._recordMutation - Input pathId is invalid.`);
         } else {
             const data = this;
             const rootKey = pathId[0];
@@ -109,6 +110,68 @@ const DataElementPrototype = Object.create({}).prototype = {
         }
     },
     /**
+     * @description - Helper function to update mutation map for a nested accessor object .
+     *
+     * @method _deepUpdateMMap
+     * @param {object} _node
+     * @param {string} _pathId
+     * @param {array} _records
+     * @return void
+     * @private
+     */
+    _deepUpdateMMap: function _deepUpdateMMap (node, pathId, records) {
+        const data = this;
+        if (!Hf.isObject(node)) {
+            Hf.log(`error`, `DataElement._deepUpdateMMap - Input node is invalid.`);
+        } else if (!Hf.isString(pathId)) {
+            Hf.log(`error`, `DataElement._deepUpdateMMap - Input pathId is invalid.`);
+        } else if (!Hf.isArray(records)) {
+            Hf.log(`error`, `DataElement._deepUpdateMMap - Input records is invalid.`);
+        } else {
+            const cursor = data.select(pathId);
+            let accessor = cursor.getContentType() === `object` ? {} : [];
+            let mutatedKeys = !Hf.isEmpty(records) ? records[0] : [];
+
+            cursor.forEach((item, key) => {
+                if (Hf.isObject(item) || Hf.isArray(item)) {
+                    if (!cursor.isImmutable() || (cursor.isImmutable() && mutatedKeys.indexOf(key) !== -1)) {
+                        data._deepUpdateMMap(node.branch(key), `${pathId}.${key}`, records.slice(1));
+                    }
+                } else {
+                    if (cursor.isItemComputable(key)) {
+                        Object.defineProperty(accessor, key, {
+                            get: function get () {
+                                return cursor.getContentItem(key);
+                            },
+                            configurable: true,
+                            enumerable: true
+                        });
+                    // } else if (cursor.isItemObservable(key)) {
+                    // TODO: handle for case where key is an observable.
+                    //
+                    } else {
+                        const cachedItem = item;
+
+                        Object.defineProperty(accessor, key, {
+                            get: function get () {
+                                if (cursor.isImmutable()) {
+                                    return cachedItem;
+                                }
+                                return cursor.getContentItem(key);
+                            },
+                            set: function set (value) {
+                                cursor.setContentItem(value, key);
+                            },
+                            configurable: true,
+                            enumerable: true
+                        });
+                    }
+                }
+            });
+            node.setContent(accessor);
+        }
+    },
+    /**
      * @description - Update the mutation map for a root content.
      *
      * @method _updateMMap
@@ -118,71 +181,21 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     _updateMMap: function _updateMMap (rootKey) {
         const data = this;
-        /* helper function to update mutation map for a nested accessor object . */
-        const _deepUpdateMMap = function _deepUpdateMMap (_node, _pathId, _records) {
-            if (!Hflow.isObject(_node)) {
-                Hflow.log(`error`, `DataElement._deepUpdateMMap - Input node is invalid.`);
-            } else if (!Hflow.isString(_pathId)) {
-                Hflow.log(`error`, `DataElement._deepUpdateMMap - Input pathId is invalid.`);
-            } else {
-                const cursor = data.select(_pathId);
-                let accessor = cursor.getContentType() === `object` ? {} : [];
-                let mutatedKeys = !Hflow.isEmpty(_records) ? _records[0] : [];
-
-                cursor.forEach((item, key) => {
-                    if (Hflow.isObject(item) || Hflow.isArray(item)) {
-                        if (!cursor.isImmutable() || (cursor.isImmutable() && mutatedKeys.indexOf(key) !== -1)) {
-                            _deepUpdateMMap(_node.branch(key), `${_pathId}.${key}`, _records.slice(1));
-                        }
-                    } else {
-                        if (cursor.isItemComputable(key)) {
-                            Object.defineProperty(accessor, key, {
-                                get: function get () {
-                                    return cursor.getContentItem(key);
-                                },
-                                configurable: true,
-                                enumerable: true
-                            });
-                        // } else if (cursor.isItemObservable(key)) {
-                        // TODO: handle for case where key is an observable.
-                        //
-                        } else {
-                            const cachedItem = item;
-
-                            Object.defineProperty(accessor, key, {
-                                get: function get () {
-                                    if (cursor.isImmutable()) {
-                                        return cachedItem;
-                                    }
-                                    return cursor.getContentItem(key);
-                                },
-                                set: function set (value) {
-                                    cursor.setContentItem(value, key);
-                                },
-                                configurable: true,
-                                enumerable: true
-                            });
-                        }
-                    }
-                });
-                _node.setContent(accessor);
-            }
-        };
         const mMap = data._mutation.mMap;
         const mutationHistoryDepth = data._mutation.mutationHistoryDepth;
         const rootContent = data._rootContent;
         const pathId = rootKey;
 
-        if (Hflow.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
+        if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
             const immutableRootKeys = data._mutation.immutableRootKeys;
 
             if (immutableRootKeys.indexOf(rootKey) !== -1) {
                 const mRecords = data._mutation.records;
                 const oldRootNode = mMap.select(pathId).rekey(`${rootKey}${data._mutation.timeIndex[rootKey]}`);
                 const newRootNode = mMap.sproutRoot(rootKey);
-                const referenceNonmutationsInMMap = Hflow.compose(oldRootNode.getPathId, newRootNode.refer);
+                const referenceNonmutationsInMMap = Hf.compose(oldRootNode.getPathId, newRootNode.refer);
 
-                _deepUpdateMMap(newRootNode, pathId, mRecords.slice(1));
+                data._deepUpdateMMap(newRootNode, pathId, mRecords.slice(1));
                 referenceNonmutationsInMMap();
                 newRootNode.freezeContent();
                 data._mutation.timeIndex[rootKey]++;
@@ -199,11 +212,11 @@ const DataElementPrototype = Object.create({}).prototype = {
             } else {
                 const rootNode = mMap.sproutRoot(rootKey);
 
-                _deepUpdateMMap(rootNode, pathId, []);
+                data._deepUpdateMMap(rootNode, pathId, []);
                 rootNode.freezeContent();
             }
         } else {
-            Hflow.log(`error`, `DataElement._updateMMap - Root data content key:${rootKey} is undefined.`);
+            Hf.log(`error`, `DataElement._updateMMap - Root data content key:${rootKey} is undefined.`);
         }
     },
     /**
@@ -217,12 +230,12 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _assignDescription: function _assignDescription (cursor, bundleItem, bundleKey) {
-        if (!Hflow.isObject(cursor)) {
-            Hflow.log(`error`, `DataElement._assignDescription - Input cursor object is invalid.`);
-        } else if (!Hflow.isObject(bundleItem)) {
-            Hflow.log(`error`, `DataElement._assignDescription - Input bundle item object is invalid.`);
-        } else if (!Hflow.isString(bundleKey)) {
-            Hflow.log(`error`, `DataElement._assignDescription - Input bundle key is invalid.`);
+        if (!Hf.isObject(cursor)) {
+            Hf.log(`error`, `DataElement._assignDescription - Input cursor object is invalid.`);
+        } else if (!Hf.isObject(bundleItem)) {
+            Hf.log(`error`, `DataElement._assignDescription - Input bundle item object is invalid.`);
+        } else if (!Hf.isString(bundleKey)) {
+            Hf.log(`error`, `DataElement._assignDescription - Input bundle key is invalid.`);
         } else {
             const data = this;
             const {
@@ -245,15 +258,15 @@ const DataElementPrototype = Object.create({}).prototype = {
                 cursor.describeItem(bundleKey).asStronglyTyped();
             }
             /* description for one of types item */
-            if (Hflow.isArray(oneOfTypes)) {
+            if (Hf.isArray(oneOfTypes)) {
                 cursor.describeItem(bundleKey).asOneOfTypes(oneOfTypes);
             }
             /* description for one of values item */
-            if (Hflow.isArray(oneOfValues)) {
+            if (Hf.isArray(oneOfValues)) {
                 cursor.describeItem(bundleKey).asOneOfValues(oneOfValues);
             }
             /* description for bounded item */
-            if (Hflow.isArray(boundarydValues)) {
+            if (Hf.isArray(boundarydValues)) {
                 const [
                     lowerBound,
                     upperBound
@@ -261,22 +274,22 @@ const DataElementPrototype = Object.create({}).prototype = {
                 cursor.describeItem(bundleKey).asBounded(lowerBound, upperBound);
             }
             /* description for constrainable item */
-            if (Hflow.isObject(constrainable)) {
+            if (Hf.isObject(constrainable)) {
                 const {
                     constraint,
                     target
                 } = constrainable;
 
-                if (!Hflow.isEmpty(target)) {
+                if (!Hf.isEmpty(target)) {
                     Object.keys(target).filter((constraintKey) => constraint.hasOwnProperty(constraintKey)).reduce((targetPaths, constraintKey) => {
                         return targetPaths.concat(target[constraintKey]);
                     }, []).filter((targetPath) => {
-                        return Hflow.isString(targetPath) || Hflow.isArray(targetPath);
+                        return Hf.isString(targetPath) || Hf.isArray(targetPath);
                     }).map((targetPath) => {
-                        return Hflow.isString(targetPath) ? Hflow.stringToArray(targetPath, `.`) : targetPath;
+                        return Hf.isString(targetPath) ? Hf.stringToArray(targetPath, `.`) : targetPath;
                     }).forEach((targetPath) => {
                         const targetKey = targetPath.pop();
-                        const pathId = `${cursor.pathId}.${bundleKey}.${Hflow.arrayToString(targetPath, `.`)}`;
+                        const pathId = `${cursor.pathId}.${bundleKey}.${Hf.arrayToString(targetPath, `.`)}`;
 
                         data.select(pathId).describeItem(targetKey).asConstrainable(constraint);
                     });
@@ -285,10 +298,10 @@ const DataElementPrototype = Object.create({}).prototype = {
                 }
             }
             /* description for observable item */
-            if (Hflow.isObject(observable)) {
-                if (Hflow.isBoolean(observable) && observable) {
+            if (Hf.isObject(observable)) {
+                if (Hf.isBoolean(observable) && observable) {
                     cursor.describeItem(bundleKey).asObservable();
-                } else if (Hflow.isObject(observable)) {
+                } else if (Hf.isObject(observable)) {
                     const {
                         condition,
                         subscriber
@@ -298,7 +311,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                 }
             }
             /* description for computable item */
-            if (Hflow.isObject(computable)) {
+            if (Hf.isObject(computable)) {
                 const computeName = bundleKey;
                 const {
                     contexts,
@@ -318,17 +331,17 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return {boolean}
      */
     hasCursor: function hasCursor (pathId) {
-        if (!(Hflow.isString(pathId) || Hflow.isArray(pathId))) {
+        if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
             return false;
         }
         const data = this;
 
         /* convert pathId from array format to string format */
-        pathId = Hflow.isArray(pathId) ? Hflow.arrayToString(pathId, `.`) : pathId;
+        pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
 
-        const content = Hflow.retrieve(pathId, `.`).from(data._rootContent);
+        const content = Hf.retrieve(pathId, `.`).from(data._rootContent);
 
-        return Hflow.isObject(content);
+        return Hf.isObject(content);
     },
     /**
      * @description - Set the cursor at rootKey to be immutable.
@@ -343,9 +356,9 @@ const DataElementPrototype = Object.create({}).prototype = {
         const rootContent = data._rootContent;
         let immutableRootKeys = data._mutation.immutableRootKeys;
 
-        immutable = Hflow.isBoolean(immutable) ? immutable : true;
+        immutable = Hf.isBoolean(immutable) ? immutable : true;
 
-        if (Hflow.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
+        if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
             if (immutable) {
                 if (immutableRootKeys.indexOf(rootKey) === -1) {
                     immutableRootKeys.push(rootKey);
@@ -365,7 +378,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                 }
             }
         } else {
-            Hflow.log(`error`, `DataElement.setImmutability - Root data content key:${rootKey} is undefined.`);
+            Hf.log(`error`, `DataElement.setImmutability - Root data content key:${rootKey} is undefined.`);
         }
     },
     /**
@@ -379,7 +392,7 @@ const DataElementPrototype = Object.create({}).prototype = {
         const data = this;
         const rootContent = data._rootContent;
 
-        if (Hflow.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
+        if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
             const mMap = data._mutation.mMap;
             const immutableRootKeys = data._mutation.immutableRootKeys;
 
@@ -393,7 +406,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                 data._mutation.timestamp[rootKey] = [ (new Date()).getTime() - INITIAL_TIMESTAMP_REF_IN_MS ];
             }
         } else {
-            Hflow.log(`warn0`, `DataElement.flush - Root data content key:${rootKey} is undefined.`);
+            Hf.log(`warn0`, `DataElement.flush - Root data content key:${rootKey} is undefined.`);
         }
     },
     /**
@@ -404,17 +417,17 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     select: function select (pathId) {
-        pathId = Hflow.isString(pathId) ? Hflow.stringToArray(pathId, `.`) : pathId;
-        if (!(Hflow.isArray(pathId) && !Hflow.isEmpty(pathId))) {
-            Hflow.log(`error`, `DataElement.select - Input pathId is invalid.`);
+        pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
+        if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+            Hf.log(`error`, `DataElement.select - Input pathId is invalid.`);
         } else {
             const data = this;
             const cursor = DataCursorElement(data, pathId);
 
-            if (!Hflow.isObject(cursor)) {
-                Hflow.log(`error`, `DataElement.select - Unable to create a data content cursor instance.`);
+            if (!Hf.isObject(cursor)) {
+                Hf.log(`error`, `DataElement.select - Unable to create a data content cursor instance.`);
             } else {
-                const revealFrozen = Hflow.compose(Object.freeze, Hflow.reveal);
+                const revealFrozen = Hf.compose(Object.freeze, Hf.reveal);
                 /* reveal only the public properties and functions */
                 return revealFrozen(cursor);
             }
@@ -428,71 +441,71 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     format: function format (bundle) {
-        if (!Hflow.isObject(bundle)) {
-            Hflow.log(`error`, `DataElement.format - Input bundle object is invalid.`);
+        if (!Hf.isObject(bundle)) {
+            Hf.log(`error`, `DataElement.format - Input bundle object is invalid.`);
         } else {
             let formatedBundle = {};
             let formatedBundleItem;
 
-            formatedBundle.mutable = Hflow.isSchema({
+            formatedBundle.mutable = Hf.isSchema({
                 mutable: `boolean`
             }).of(bundle) ? bundle.mutable : false;
 
-            Hflow.forEach(bundle, (bundleItem, bundleKey) => {
-                if (Hflow.isDefined(bundleItem)) {
+            Hf.forEach(bundle, (bundleItem, bundleKey) => {
+                if (Hf.isDefined(bundleItem)) {
                     if (bundleKey !== `mutable`) {
                         formatedBundle[bundleKey] = {};
                         formatedBundleItem = formatedBundle[bundleKey];
 
-                        if (Hflow.isSchema({
+                        if (Hf.isSchema({
                             value: `defined`
                         }).of(bundleItem)) {
                             if (bundleItem.hasOwnProperty(`required`)) {
-                                if (Hflow.isBoolean(bundleItem.required)) {
+                                if (Hf.isBoolean(bundleItem.required)) {
                                     formatedBundleItem.required = bundleItem.required;
                                 } else {
-                                    Hflow.log(`error`, `DataElement.format - Bundle constrainable required for key:${bundleKey} is invalid.`);
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable required for key:${bundleKey} is invalid.`);
                                 }
                             }
                             if (bundleItem.hasOwnProperty(`stronglyTyped`)) {
-                                if (Hflow.isBoolean(bundleItem.stronglyTyped)) {
+                                if (Hf.isBoolean(bundleItem.stronglyTyped)) {
                                     formatedBundleItem.stronglyTyped = bundleItem.stronglyTyped;
                                 } else {
-                                    Hflow.log(`error`, `DataElement.format - Bundle constrainable strongly typed for key:${bundleKey} is invalid.`);
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable strongly typed for key:${bundleKey} is invalid.`);
                                 }
                             }
                             if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
-                                if (Hflow.isSchema({
+                                if (Hf.isSchema({
                                     oneTypeOf: [
                                         `string`
                                     ]
                                 }).of(bundleItem)) {
-                                    if (!Hflow.isEmpty(bundleItem.oneTypeOf)) {
+                                    if (!Hf.isEmpty(bundleItem.oneTypeOf)) {
                                         formatedBundleItem.oneOfTypes = bundleItem.oneTypeOf;
                                     } else {
-                                        Hflow.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is empty.`);
+                                        Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is empty.`);
                                     }
                                 } else {
-                                    Hflow.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is invalid.`);
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is invalid.`);
                                 }
                             }
                             if (bundleItem.hasOwnProperty(`oneOf`)) {
-                                if (Hflow.isSchema({
+                                if (Hf.isSchema({
                                     oneOf: [
                                         `number|string`
                                     ]
                                 }).of(bundleItem)) {
-                                    if (!Hflow.isEmpty(bundleItem.oneOf)) {
+                                    if (!Hf.isEmpty(bundleItem.oneOf)) {
                                         formatedBundleItem.oneOfValues = bundleItem.oneOf;
                                     } else {
-                                        Hflow.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is empty.`);
+                                        Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is empty.`);
                                     }
                                 } else {
-                                    Hflow.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is invalid.`);
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is invalid.`);
                                 }
                             }
                             if (bundleItem.hasOwnProperty(`bounded`)) {
-                                if (Hflow.isSchema({
+                                if (Hf.isSchema({
                                     bounded: [
                                         `number`
                                     ]
@@ -500,14 +513,14 @@ const DataElementPrototype = Object.create({}).prototype = {
                                     if (bundleItem.bounded.length === 2) {
                                         formatedBundleItem.boundarydValues = bundleItem.bounded;
                                     } else {
-                                        Hflow.log(`error`, `DataElement.format - Bundle constrainable bounding range for key:${bundleKey} is invalid.`);
+                                        Hf.log(`error`, `DataElement.format - Bundle constrainable bounding range for key:${bundleKey} is invalid.`);
                                     }
                                 } else {
-                                    Hflow.log(`error`, `DataElement.format - Bundle constrainable bounded range for key:${bundleKey} is invalid.`);
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable bounded range for key:${bundleKey} is invalid.`);
                                 }
                             }
                             if (bundleItem.hasOwnProperty(`constrainable`)) {
-                                if (Hflow.isSchema({
+                                if (Hf.isSchema({
                                     constrainable: {
                                         constraint: `object`,
                                         target: `object`
@@ -515,11 +528,11 @@ const DataElementPrototype = Object.create({}).prototype = {
                                 }).of(bundleItem)) {
                                     formatedBundleItem.constrainable = bundleItem.constrainable;
                                 } else {
-                                    Hflow.log(`error`, `DataElement.format - Bundle constrainable for key:${bundleKey} is invalid.`);
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable for key:${bundleKey} is invalid.`);
                                 }
                             }
                             if (bundleItem.hasOwnProperty(`observable`)) {
-                                if (Hflow.isSchema({
+                                if (Hf.isSchema({
                                     observable: {
                                         condition: `object`,
                                         subscriber: `object`
@@ -527,12 +540,12 @@ const DataElementPrototype = Object.create({}).prototype = {
                                 }).of(bundleItem)) {
                                     formatedBundleItem.observable = bundleItem.observable;
                                 } else {
-                                    Hflow.log(`error`, `DataElement.format - Bundle observable for key:${bundleKey} is invalid.`);
+                                    Hf.log(`error`, `DataElement.format - Bundle observable for key:${bundleKey} is invalid.`);
                                 }
                             }
                             formatedBundleItem.value = bundleItem.value;
-                        } else if (Hflow.isObject(bundleItem) && bundleItem.hasOwnProperty(`computable`)) {
-                            if (Hflow.isSchema({
+                        } else if (Hf.isObject(bundleItem) && bundleItem.hasOwnProperty(`computable`)) {
+                            if (Hf.isSchema({
                                 computable: {
                                     contexts: `array`,
                                     compute: `function`
@@ -540,15 +553,15 @@ const DataElementPrototype = Object.create({}).prototype = {
                             }).of(bundleItem)) {
                                 formatedBundleItem.computable = bundleItem.computable;
                             } else {
-                                Hflow.log(`error`, `DataElement.format - Bundle computable for key:${bundleKey} is invalid.`);
+                                Hf.log(`error`, `DataElement.format - Bundle computable for key:${bundleKey} is invalid.`);
                             }
                         } else {
                             formatedBundleItem.value = bundleItem;
-                            // if (Hflow.isObject(bundleItem)) {
-                            //     if (!Hflow.isEmpty(bundleItem)) {
+                            // if (Hf.isObject(bundleItem)) {
+                            //     if (!Hf.isEmpty(bundleItem)) {
                             //         formatedBundleItem.value = bundleItem;
                             //     } else {
-                            //         Hflow.log(`error`, `DataElement.format - Bundle key:${bundleKey} is empty.`);
+                            //         Hf.log(`error`, `DataElement.format - Bundle key:${bundleKey} is empty.`);
                             //     }
                             // } else {
                             //     formatedBundleItem.value = bundleItem;
@@ -556,7 +569,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                         }
                     }
                 } else {
-                    Hflow.log(`error`, `DataElement.format - Bundle key:${bundleKey} is invalid.`);
+                    Hf.log(`error`, `DataElement.format - Bundle key:${bundleKey} is invalid.`);
                 }
             });
 
@@ -575,10 +588,10 @@ const DataElementPrototype = Object.create({}).prototype = {
         // FIXME: Crash occurs when bundle object has circular reference.
         const data = this;
 
-        if (!Hflow.isObject(bundle)) {
-            Hflow.log(`error`, `DataElement.read - Input data content bundle is invalid.`);
-        } else if (!Hflow.isString(bundleName)) {
-            Hflow.log(`error`, `DataElement.read - Input data content bundle name is invalid.`);
+        if (!Hf.isObject(bundle)) {
+            Hf.log(`error`, `DataElement.read - Input data content bundle is invalid.`);
+        } else if (!Hf.isString(bundleName)) {
+            Hf.log(`error`, `DataElement.read - Input data content bundle name is invalid.`);
         } else {
             const pathId = bundleName;
             const rootKey = bundleName;
@@ -592,22 +605,22 @@ const DataElementPrototype = Object.create({}).prototype = {
             cursor = data.select(pathId);
 
             /* read bundle and assign descriptors */
-            Hflow.forEach(formatedBundle, (bundleItem, bundleKey) => {
+            Hf.forEach(formatedBundle, (bundleItem, bundleKey) => {
                 if (bundleKey !== `mutable`) {
                     if (bundleItem.hasOwnProperty(`value`)) {
                         const value = bundleItem.value;
-                        if (Hflow.isDefined(value)) {
+                        if (Hf.isDefined(value)) {
                             cursor.setContentItem(value, bundleKey);
                         } else {
-                            Hflow.log(`error`, `DataElement.read - Cannot set undefined data bundle item key:${bundleKey}.`);
+                            Hf.log(`error`, `DataElement.read - Cannot set undefined data bundle item key:${bundleKey}.`);
                         }
                     }
                     data._assignDescription(cursor, bundleItem, bundleKey);
                 }
             });
 
-            if (Hflow.isEmpty(data._rootContent[bundleName])) {
-                Hflow.log(`error`, `DataElement.read - Root data content item name:${bundleName} is empty.`);
+            if (Hf.isEmpty(data._rootContent[bundleName])) {
+                Hf.log(`error`, `DataElement.read - Root data content item name:${bundleName} is empty.`);
             } else {
                 data._updateMMap(rootKey);
                 if (!mutable) {
@@ -628,7 +641,7 @@ const DataElementPrototype = Object.create({}).prototype = {
     // DEBUG_LOG: function DEBUG_LOG () {
     //     const data = this;
     //     data._mutation.mMap.DEBUG_LOG();
-    //     Hflow.log(`info`, JSON.stringify(data._mutation.records, null, `\t`));
+    //     Hf.log(`info`, JSON.stringify(data._mutation.records, null, `\t`));
     // }
 };
 
@@ -640,7 +653,7 @@ const DataElementPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function DataElement (mutationHistoryDepth = DEFAULT_MUTATION_HISTORY_DEPTH) {
-    mutationHistoryDepth = Hflow.isInteger(mutationHistoryDepth) ? mutationHistoryDepth : DEFAULT_MUTATION_HISTORY_DEPTH;
+    mutationHistoryDepth = Hf.isInteger(mutationHistoryDepth) ? mutationHistoryDepth : DEFAULT_MUTATION_HISTORY_DEPTH;
     const element = Object.create(DataElementPrototype, {
         _descriptor: {
             value: DescriptorElement(),
@@ -669,10 +682,10 @@ export default function DataElement (mutationHistoryDepth = DEFAULT_MUTATION_HIS
         }
     });
 
-    if (!Hflow.isObject(element)) {
-        Hflow.log(`error`, `DataElement - Unable to create a data element instance.`);
+    if (!Hf.isObject(element)) {
+        Hf.log(`error`, `DataElement - Unable to create a data element instance.`);
     } else {
-        const revealFrozen = Hflow.compose(Hflow.reveal, Object.freeze);
+        const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
         /* reveal only the public properties and functions */
         return revealFrozen(element);
     }
