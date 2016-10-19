@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import React from 'react';
 
@@ -17,10 +17,10 @@ import ReactDOM from 'react-dom';
 
 import CalculatorDomain from './domains/calculator-domain';
 
-const calculator = Hflow.App.augment({
+const calculator = Hf.App.augment({
     composites: [
-        Hflow.React.AppRendererComposite,
-        Hflow.React.AppComponentComposite
+        Hf.React.AppRendererComposite,
+        Hf.React.AppComponentComposite
     ],
     /**
      * @description - Bootstrap calculator app.

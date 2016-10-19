@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import Hflow from 'hyperflow';
+import Hf from 'hyperflow';
 
 import { CounterDomain } from '../domains/counter-domain';
 
@@ -20,10 +20,10 @@ import event from '../events/counter-event';
  *
  * @module CounterDomainTestFixture
  */
-const CounterDomainTestFixture = Hflow.Fixture.augment({
+const CounterDomainTestFixture = Hf.Fixture.augment({
     composites: [
-        Hflow.Test.DomainFixtureComposite,
-        Hflow.Test.TapeRunnerComposite
+        Hf.Test.DomainFixtureComposite,
+        Hf.Test.TapeRunnerComposite
     ],
     $init: function $init () {
         const fixture = this;

@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import React from 'react';
 
@@ -35,9 +35,9 @@ const muiTheme = getMuiTheme({
     }
 });
 
-const UndoButtonInterface = Hflow.Interface.augment({
+const UndoButtonInterface = Hf.Interface.augment({
     composites: [
-        Hflow.React.ComponentComposite
+        Hf.React.ComponentComposite
     ],
     state: {
         disabled: {
@@ -51,7 +51,7 @@ const UndoButtonInterface = Hflow.Interface.augment({
     },
     onClick: function onClick () {
         const component = this;
-        component.outgoing(EVENT.ON.UNDO).emit();
+        component.getInterface().outgoing(EVENT.ON.UNDO).emit();
     },
     render: function render () {
         const component = this;
@@ -74,9 +74,9 @@ const UndoButtonInterface = Hflow.Interface.augment({
     }
 });
 
-const DecreaseButtonInterface = Hflow.Interface.augment({
+const DecreaseButtonInterface = Hf.Interface.augment({
     composites: [
-        Hflow.React.ComponentComposite
+        Hf.React.ComponentComposite
     ],
     state: {
         disabled: {
@@ -90,7 +90,7 @@ const DecreaseButtonInterface = Hflow.Interface.augment({
     },
     onClick: function onClick () {
         const component = this;
-        component.outgoing(EVENT.ON.DECREASE).emit(() => -1);
+        component.getInterface().outgoing(EVENT.ON.DECREASE).emit(() => -1);
     },
     render: function render () {
         const component = this;
@@ -113,9 +113,9 @@ const DecreaseButtonInterface = Hflow.Interface.augment({
     }
 });
 
-const IncreaseButtonInterface = Hflow.Interface.augment({
+const IncreaseButtonInterface = Hf.Interface.augment({
     composites: [
-        Hflow.React.ComponentComposite
+        Hf.React.ComponentComposite
     ],
     state: {
         disabled: {
@@ -129,7 +129,7 @@ const IncreaseButtonInterface = Hflow.Interface.augment({
     },
     onClick: function onClick () {
         const component = this;
-        component.outgoing(EVENT.ON.INCREASE).emit(() => 1);
+        component.getInterface().outgoing(EVENT.ON.INCREASE).emit(() => 1);
     },
     render: function render () {
         const component = this;
@@ -152,9 +152,9 @@ const IncreaseButtonInterface = Hflow.Interface.augment({
     }
 });
 
-const OffsetInputInterface = Hflow.Interface.augment({
+const OffsetInputInterface = Hf.Interface.augment({
     composites: [
-        Hflow.React.ComponentComposite
+        Hf.React.ComponentComposite
     ],
     state: {
         offset: {
@@ -164,7 +164,7 @@ const OffsetInputInterface = Hflow.Interface.augment({
     },
     onChange: function onChange (_event) {
         const component = this;
-        component.outgoing(EVENT.ON.CHANGE_OFFSET).emit(() => parseInt(_event.target.value, 10));
+        component.getInterface().outgoing(EVENT.ON.CHANGE_OFFSET).emit(() => parseInt(_event.target.value, 10));
     },
     render: function render () {
         const component = this;
@@ -183,9 +183,9 @@ const OffsetInputInterface = Hflow.Interface.augment({
     }
 });
 
-const CounterInterface = Hflow.Interface.augment({
+const CounterInterface = Hf.Interface.augment({
     composites: [
-        Hflow.React.ComponentComposite
+        Hf.React.ComponentComposite
     ],
     $init: function $init () {
         const intf = this;
@@ -265,19 +265,19 @@ const CounterInterface = Hflow.Interface.augment({
                     >
                         <UndoButton/>
                     </div>
+                    <h1 style = {{
+                        color: `gray`,
+                        fontFamily: `helvetica`,
+                        fontSize: 32,
+                        textAlign: `left`
+                    }}>Count = { count }</h1>
                     <h2 style = {{
                         color: `gray`,
                         fontFamily: `helvetica`,
                         fontSize: 12,
                         textAlign: `left`,
                         paddingRight: 175
-                    }}>Count = { count }</h2>
-                    <h1 style = {{
-                        color: `gray`,
-                        fontFamily: `helvetica`,
-                        fontSize: 32,
-                        textAlign: `left`
-                    }}>v0.4</h1>
+                    }}>v0.4</h2>
                     <OffsetInput offset = { offset }/>
                 </div>
             </MuiThemeProvider>

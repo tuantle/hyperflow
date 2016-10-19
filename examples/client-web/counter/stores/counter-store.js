@@ -9,13 +9,13 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import EVENT from '../events/counter-event';
 
-const CounterStore = Hflow.Store.augment({
+const CounterStore = Hf.Store.augment({
     composites: [
-        Hflow.State.TimeTraversalComposite
+        Hf.State.TimeTraversalComposite
     ],
     state: {
         undoable: {
@@ -39,7 +39,7 @@ const CounterStore = Hflow.Store.augment({
                 count: value.count,
                 offset: value.offset
             })) {
-                Hflow.log(`info`, `Store initialized.`);
+                Hf.log(`info`, `Store initialized.`);
             }
         });
         store.incoming(EVENT.DO.OFFSET_MUTATION).handle((value) => {
@@ -49,7 +49,7 @@ const CounterStore = Hflow.Store.augment({
                 store.outgoing(EVENT.AS.OFFSET_MUTATED).emit(() => {
                     return { offset: store.offset };
                 });
-                Hflow.log(`info`, `Store mutated`);
+                Hf.log(`info`, `Store mutated`);
             }
         });
         store.incoming(EVENT.DO.COUNT_MUTATION).handle((modifyCount) => {
@@ -59,7 +59,7 @@ const CounterStore = Hflow.Store.augment({
                         count: store.count
                     };
                 });
-                Hflow.log(`info`, `Store mutated.`);
+                Hf.log(`info`, `Store mutated.`);
             }
         });
         store.incoming(EVENT.DO.UNDO_LAST_COUNT_MUTATION).handle(() => {

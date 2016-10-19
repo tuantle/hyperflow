@@ -9,15 +9,15 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
-export default Hflow.Event.create({
-    as: [
+export default Hf.Event.create({
+    asEvents: [
         `operand-updated`,
         `operation-updated`,
         `updated-after-compute`
     ],
-    on: [
+    onEvents: [
         `reset`,
         `compute`,
         `keypad`,
@@ -25,14 +25,14 @@ export default Hflow.Event.create({
         `update-operand`,
         `negate-operand`
     ],
-    do: [
+    doEvents: [
         `reset`,
         `update-operation`,
         `update-operand`,
         `update-after-compute`,
         `update-display-result`
     ],
-    request: [
+    requestEvents: [
         `operand-from-buffer`
     ]
 });

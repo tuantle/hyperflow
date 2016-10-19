@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import Hflow from 'hyperflow';
+import Hf from 'hyperflow';
 
 import { CounterDomainTestFixture } from './counter-domain-test-fixture';
 
@@ -22,7 +22,7 @@ import event from '../events/counter-event';
  *
  * @module CounterTestAgent
  */
-const CounterTestAgent = Hflow.Agent.augment({
+const CounterTestAgent = Hf.Agent.augment({
     $init: function $init () {
         const agent = this;
         agent.register({

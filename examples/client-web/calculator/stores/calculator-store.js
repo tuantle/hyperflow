@@ -9,11 +9,11 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import EVENT from '../events/calculator-event';
 
-const CalculatorStore = Hflow.Store.augment({
+const CalculatorStore = Hf.Store.augment({
     state: {
         result: {
             value: `0`,
@@ -26,12 +26,12 @@ const CalculatorStore = Hflow.Store.augment({
             if (store.reduce({
                 result: `0`
             })) {
-                Hflow.log(`info`, `Store reset.`);
+                Hf.log(`info`, `Store reset.`);
             }
         });
         store.incoming(EVENT.DO.UPDATE_DISPLAY_RESULT).handle((updateResult) => {
             if (store.reduce(updateResult)) {
-                Hflow.log(`info`, `Store updated.`);
+                Hf.log(`info`, `Store updated.`);
             }
         });
         done();

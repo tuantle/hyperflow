@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import CalculatorStore from '../stores/calculator-store';
 
@@ -19,7 +19,7 @@ import CalculatorInterface from '../interfaces/calculator-interface';
 
 import EVENT from '../events/calculator-event';
 
-const CalculatorDomain = Hflow.Domain.augment({
+const CalculatorDomain = Hf.Domain.augment({
     $init: function $init () {
         const domain = this;
         domain.register({
@@ -62,7 +62,7 @@ const CalculatorDomain = Hflow.Domain.augment({
         }).relay(EVENT.DO.UPDATE_OPERATION);
         domain.incoming(EVENT.ON.NEGATE_OPERAND).handle(() => {
             function negateOperand (operand) {
-                if (!Hflow.isEmpty(operand)) {
+                if (!Hf.isEmpty(operand)) {
                     if (operand.charAt(0) === `-`) {
                         return operand.slice(1);
                     }
@@ -91,9 +91,9 @@ const CalculatorDomain = Hflow.Domain.augment({
             function assignOperand (operand) {
                 if (value === `π`) {
                     return `3.14159265359`;
-                } else if (value === `.` && (Hflow.isEmpty(operand) || operand === `0`)) {
+                } else if (value === `.` && (Hf.isEmpty(operand) || operand === `0`)) {
                     return `0.`;
-                } else if (value === `0` && (Hflow.isEmpty(operand) || operand === `0`)) {
+                } else if (value === `0` && (Hf.isEmpty(operand) || operand === `0`)) {
                     return `0`;
                 }
                 return `${operand}${value}`;
@@ -122,8 +122,8 @@ const CalculatorDomain = Hflow.Domain.augment({
         ).forward(EVENT.REQUEST.OPERAND_FROM_BUFFER);
         domain.incoming(EVENT.RESPONSE.WITH.OPERAND_FROM_BUFFER).handle((operand) => {
             let result = 0;
-            const xValue = !Hflow.isEmpty(operand.x) ? parseFloat(operand.x) : 0;
-            const yValue = !Hflow.isEmpty(operand.y) ? parseFloat(operand.y) : 0;
+            const xValue = !Hf.isEmpty(operand.x) ? parseFloat(operand.x) : 0;
+            const yValue = !Hf.isEmpty(operand.y) ? parseFloat(operand.y) : 0;
             domain.incoming(EVENT.ON.COMPUTE).handle(() => {
                 return function updateAfterCompute (state) {
                     if (state.computeReady) {
@@ -167,7 +167,7 @@ const CalculatorDomain = Hflow.Domain.augment({
             }
             return function updateResult () {
                 return {
-                    result: Hflow.isInteger(result) ?
+                    result: Hf.isInteger(result) ?
                             `${result}`.replace(/(\d)(?=(\d{3})+(?!\d))/g, `$1,`) :
                             `${result}`.replace(/(\d)(?=(\d{3})+\.)/g, `$1,`)
                 };

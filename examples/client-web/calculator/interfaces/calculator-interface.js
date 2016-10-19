@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import React from 'react';
 
@@ -36,9 +36,9 @@ const keypadLabels = [
 
 let keypadButtonNames;
 
-const KeypadButtonInterface = Hflow.Interface.augment({
+const KeypadButtonInterface = Hf.Interface.augment({
     composites: [
-        Hflow.React.ComponentComposite
+        Hf.React.ComponentComposite
     ],
     state: {
         label: {
@@ -48,11 +48,11 @@ const KeypadButtonInterface = Hflow.Interface.augment({
     },
     onClick: function onClick () {
         const component = this;
-        component.outgoing(EVENT.ON.KEYPAD).emit(() => component.props.label);
+        component.getInterface().outgoing(EVENT.ON.KEYPAD).emit(() => component.props.label);
     },
     render: function render () {
         const component = this;
-        if (Hflow.isNumeric(component.props.label) || component.props.label === `.`) {
+        if (Hf.isNumeric(component.props.label) || component.props.label === `.`) {
             return (
                 <RaisedButton
                     style = {{
@@ -79,9 +79,9 @@ const KeypadButtonInterface = Hflow.Interface.augment({
     }
 });
 
-const KeypadInterface = Hflow.Interface.augment({
+const KeypadInterface = Hf.Interface.augment({
     composites: [
-        Hflow.React.ComponentComposite
+        Hf.React.ComponentComposite
     ],
     $init: function $init () {
         const intf = this;
@@ -100,7 +100,7 @@ const KeypadInterface = Hflow.Interface.augment({
                 intf.outgoing(EVENT.ON.RESET).emit();
             } else if (label === `÷` || label === `×` || label === `+` || label === `-`) {
                 intf.outgoing(EVENT.ON.UPDATE_OPERATION).emit(() => label);
-            } else if (Hflow.isNumeric(label) || label === `.` || label === `π`) {
+            } else if (Hf.isNumeric(label) || label === `.` || label === `π`) {
                 intf.outgoing(EVENT.ON.UPDATE_OPERAND).emit(() => label);
             } else if (label === `±`) {
                 intf.outgoing(EVENT.ON.NEGATE_OPERAND).emit();
@@ -148,9 +148,9 @@ const KeypadInterface = Hflow.Interface.augment({
     }
 });
 
-const CalculatorInterface = Hflow.Interface.augment({
+const CalculatorInterface = Hf.Interface.augment({
     composites: [
-        Hflow.React.ComponentComposite
+        Hf.React.ComponentComposite
     ],
     $init: function $init () {
         const intf = this;
@@ -175,7 +175,7 @@ const CalculatorInterface = Hflow.Interface.augment({
             Keypad
         ] = component.getComponentComposites(`keypad-view`);
         return (
-            <MuiThemeProvider muiTheme={muiTheme}>
+            <MuiThemeProvider muiTheme = { muiTheme } >
                 <div className = { component.props.name }>
                     <div style = {{
                         display: `flex`,

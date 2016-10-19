@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import Hflow from 'hyperflow';
+import Hf from 'hyperflow';
 
 import { IncreaseButtonInterface } from '../interfaces/counter-interface';
 
@@ -20,9 +20,9 @@ import event from '../events/counter-event';
  *
  * @module IncreaseButtonInterfaceTestFixture
  */
-const IncreaseButtonInterfaceTestFixture = Hflow.Fixture.augment({
+const IncreaseButtonInterfaceTestFixture = Hf.Fixture.augment({
     composites: [
-        Hflow.Test.InterfaceFixtureComposite
+        Hf.Test.InterfaceFixtureComposite
     ],
     $init: function $init () {
         const fixture = this;

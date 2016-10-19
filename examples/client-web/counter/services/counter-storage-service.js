@@ -9,13 +9,13 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import EVENT from '../events/counter-event';
 
-const CounterStorageService = Hflow.Service.augment({
+const CounterStorageService = Hf.Service.augment({
     composites: [
-        Hflow.Storage.WebStorageComposite
+        Hf.Storage.WebStorageComposite
     ],
     $init: function $init () {
         const service = this;
@@ -33,7 +33,7 @@ const CounterStorageService = Hflow.Service.augment({
     },
     getProvider: function getProvider () {
         if (!(`localStorage` in window && window[`localStorage`] !== null)) {
-            Hflow.log(`error`, `CounterStorageService.getProvider - Local storage feature is not unsupported.`);
+            Hf.log(`error`, `CounterStorageService.getProvider - Local storage feature is not unsupported.`);
         }
         return {
             storage: window.localStorage
@@ -48,7 +48,7 @@ const CounterStorageService = Hflow.Service.augment({
                 service.outgoing(EVENT.RESPONSE.TO.DATAREAD.OK).emit(() => results[0]);
             }).catch((error) => {
                 service.outgoing(EVENT.RESPONSE.TO.DATAREAD.ERROR).emit();
-                Hflow.log(`warn1`, `CounterStorageService - Unable to read from local storage. ${error.message}`);
+                Hf.log(`warn1`, `CounterStorageService - Unable to read from local storage. ${error.message}`);
             });
         });
         service.incoming(EVENT.REQUEST.DATAWRITE).handle((counter) => {
@@ -60,7 +60,7 @@ const CounterStorageService = Hflow.Service.augment({
                 service.outgoing(EVENT.RESPONSE.TO.DATAWRITE.OK).emit();
             }).catch((error) => {
                 service.outgoing(EVENT.RESPONSE.TO.DATAWRITE.ERROR).emit();
-                Hflow.log(`warn1`, `CounterStorageService - Unable to write from local storage. ${error.message}`);
+                Hf.log(`warn1`, `CounterStorageService - Unable to write from local storage. ${error.message}`);
             });
         });
         done();

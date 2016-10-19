@@ -9,13 +9,13 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import EVENT from '../events/calculator-event';
 
-const CalculatorService = Hflow.Service.augment({
+const CalculatorService = Hf.Service.augment({
     composites: [
-        Hflow.State.ReducerComposite
+        Hf.State.ReducerComposite
     ],
     state: {
         computeReady: {
@@ -47,25 +47,25 @@ const CalculatorService = Hflow.Service.augment({
                     y: ``
                 }
             })) {
-                Hflow.log(`info`, `Calculator buffer service reset.`);
+                Hf.log(`info`, `Calculator buffer service reset.`);
             }
         });
         service.incoming(EVENT.DO.UPDATE_OPERATION).handle((setOperation) => {
             if (service.reduce(setOperation)) {
                 service.outgoing(EVENT.AS.OPERATION_UPDATED).emit();
-                Hflow.log(`info`, `Calculator buffer service operation buffer updated.`);
+                Hf.log(`info`, `Calculator buffer service operation buffer updated.`);
             }
         });
         service.incoming(EVENT.DO.UPDATE_OPERAND).handle((setOperand) => {
             if (service.reduce(setOperand)) {
                 service.outgoing(EVENT.AS.OPERAND_UPDATED).emit();
-                Hflow.log(`info`, `Calculator buffer service operand buffer updated.`);
+                Hf.log(`info`, `Calculator buffer service operand buffer updated.`);
             }
         });
         service.incoming(EVENT.DO.UPDATE_AFTER_COMPUTE).handle((updateAfterCompute) => {
             if (service.reduce(updateAfterCompute)) {
                 service.outgoing(EVENT.AS.UPDATED_AFTER_COMPUTE).emit();
-                Hflow.log(`info`, `Calculator buffer service result updated;`);
+                Hf.log(`info`, `Calculator buffer service result updated;`);
             }
         });
         service.incoming(EVENT.REQUEST.OPERAND_FROM_BUFFER).handle(() => service.operand).relay(EVENT.RESPONSE.WITH.OPERAND_FROM_BUFFER);

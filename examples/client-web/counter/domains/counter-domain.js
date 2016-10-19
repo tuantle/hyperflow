@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
 import CounterStore from '../stores/counter-store';
 
@@ -24,7 +24,7 @@ import EVENT from '../events/counter-event';
  *
  * @module CounterDomain
  */
-const CounterDomain = Hflow.Domain.augment({
+const CounterDomain = Hf.Domain.augment({
     $init: function $init () {
         const domain = this;
         domain.register({

@@ -17,17 +17,17 @@ System.config({
     "babel": "npm:babel-core@5.8.38",
     "babel-runtime": "npm:babel-runtime@5.8.38",
     "core-js": "npm:core-js@1.2.7",
-    "hyperflow": "github:hyperflow@0.1.0-beta6",
+    "hyperflow": "github:hyperflow@0.1.0-beta12",
     "material-ui": "npm:material-ui@0.15.4",
-    "moment": "npm:moment@2.15.0",
-    "react": "npm:react@15.3.1",
-    "react-dom": "npm:react-dom@15.3.1",
-    "react-router": "npm:react-router@2.8.0",
+    "moment": "npm:moment@2.15.1",
+    "react": "npm:react@15.3.2",
+    "react-dom": "npm:react-dom@15.3.2",
+    "react-router": "npm:react-router@2.8.1",
     "react-tap-event-plugin": "npm:react-tap-event-plugin@1.0.0",
     "rx": "npm:rx@4.1.0",
     "tape": "npm:tape@4.6.0",
     "transducers-js": "npm:transducers-js@0.4.174",
-    "github:hyperflow@0.1.0-beta6": {
+    "github:hyperflow@0.1.0-beta12": {
       "rx": "npm:rx@4.1.0",
       "tape": "npm:tape@4.6.0",
       "transducers-js": "npm:transducers-js@0.4.174"
@@ -79,7 +79,7 @@ System.config({
     "github:jspm/nodelibs-zlib@0.1.0": {
       "browserify-zlib": "npm:browserify-zlib@0.1.4"
     },
-    "npm:asap@2.0.4": {
+    "npm:asap@2.0.5": {
       "domain": "github:jspm/nodelibs-domain@0.1.0",
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
@@ -111,7 +111,7 @@ System.config({
       "base64-js": "npm:base64-js@0.0.8",
       "child_process": "github:jspm/nodelibs-child_process@0.1.0",
       "fs": "github:jspm/nodelibs-fs@0.1.2",
-      "ieee754": "npm:ieee754@1.1.6",
+      "ieee754": "npm:ieee754@1.1.8",
       "isarray": "npm:isarray@1.0.0",
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
@@ -152,7 +152,7 @@ System.config({
       "promise": "npm:promise@7.1.1",
       "whatwg-fetch": "npm:whatwg-fetch@0.9.0"
     },
-    "npm:fbjs@0.8.4": {
+    "npm:fbjs@0.8.5": {
       "core-js": "npm:core-js@1.2.7",
       "immutable": "npm:immutable@3.8.1",
       "isomorphic-fetch": "npm:isomorphic-fetch@2.2.1",
@@ -209,8 +209,8 @@ System.config({
     "npm:inherits@2.0.1": {
       "util": "github:jspm/nodelibs-util@0.1.0"
     },
-    "npm:inline-style-prefixer@2.0.1": {
-      "bowser": "npm:bowser@1.4.5",
+    "npm:inline-style-prefixer@2.0.4": {
+      "bowser": "npm:bowser@1.4.6",
       "hyphenate-style-name": "npm:hyphenate-style-name@1.0.1"
     },
     "npm:invariant@2.2.1": {
@@ -218,7 +218,7 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:isomorphic-fetch@2.2.1": {
-      "node-fetch": "npm:node-fetch@1.6.1",
+      "node-fetch": "npm:node-fetch@1.6.3",
       "whatwg-fetch": "npm:whatwg-fetch@0.9.0"
     },
     "npm:loose-envify@1.2.0": {
@@ -229,14 +229,14 @@ System.config({
       "util": "github:jspm/nodelibs-util@0.1.0"
     },
     "npm:material-ui@0.15.4": {
-      "inline-style-prefixer": "npm:inline-style-prefixer@2.0.1",
-      "keycode": "npm:keycode@2.1.4",
-      "lodash": "npm:lodash@4.15.0",
+      "inline-style-prefixer": "npm:inline-style-prefixer@2.0.4",
+      "keycode": "npm:keycode@2.1.7",
+      "lodash": "npm:lodash@4.16.4",
       "process": "github:jspm/nodelibs-process@0.1.2",
-      "react": "npm:react@15.3.1",
-      "react-addons-create-fragment": "npm:react-addons-create-fragment@15.3.1",
-      "react-addons-transition-group": "npm:react-addons-transition-group@15.3.1",
-      "react-dom": "npm:react-dom@15.3.1",
+      "react": "npm:react@15.3.2",
+      "react-addons-create-fragment": "npm:react-addons-create-fragment@15.3.2",
+      "react-addons-transition-group": "npm:react-addons-transition-group@15.3.2",
+      "react-dom": "npm:react-dom@15.3.2",
       "react-event-listener": "npm:react-event-listener@0.2.1",
       "react-tap-event-plugin": "npm:react-tap-event-plugin@1.0.0",
       "recompose": "npm:recompose@0.20.2",
@@ -247,7 +247,7 @@ System.config({
       "brace-expansion": "npm:brace-expansion@1.1.6",
       "path": "github:jspm/nodelibs-path@0.1.0"
     },
-    "npm:node-fetch@1.6.1": {
+    "npm:node-fetch@1.6.3": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "encoding": "npm:encoding@0.1.12",
       "http": "github:jspm/nodelibs-http@1.7.1",
@@ -280,7 +280,7 @@ System.config({
       "vm": "github:jspm/nodelibs-vm@0.1.0"
     },
     "npm:promise@7.1.1": {
-      "asap": "npm:asap@2.0.4",
+      "asap": "npm:asap@2.0.5",
       "fs": "github:jspm/nodelibs-fs@0.1.2"
     },
     "npm:punycode@1.3.2": {
@@ -289,34 +289,34 @@ System.config({
     "npm:query-string@3.0.3": {
       "strict-uri-encode": "npm:strict-uri-encode@1.1.0"
     },
-    "npm:react-addons-create-fragment@15.3.1": {
-      "react": "npm:react@15.3.1"
+    "npm:react-addons-create-fragment@15.3.2": {
+      "react": "npm:react@15.3.2"
     },
-    "npm:react-addons-transition-group@15.3.1": {
-      "react": "npm:react@15.3.1"
+    "npm:react-addons-transition-group@15.3.2": {
+      "react": "npm:react@15.3.2"
     },
-    "npm:react-dom@15.3.1": {
-      "react": "npm:react@15.3.1"
+    "npm:react-dom@15.3.2": {
+      "react": "npm:react@15.3.2"
     },
     "npm:react-event-listener@0.2.1": {
-      "fbjs": "npm:fbjs@0.8.4"
+      "fbjs": "npm:fbjs@0.8.5"
     },
-    "npm:react-router@2.8.0": {
+    "npm:react-router@2.8.1": {
       "history": "npm:history@2.1.2",
       "hoist-non-react-statics": "npm:hoist-non-react-statics@1.2.0",
       "invariant": "npm:invariant@2.2.1",
       "loose-envify": "npm:loose-envify@1.2.0",
       "process": "github:jspm/nodelibs-process@0.1.2",
-      "react": "npm:react@15.3.1",
+      "react": "npm:react@15.3.2",
       "warning": "npm:warning@3.0.0"
     },
     "npm:react-tap-event-plugin@1.0.0": {
       "fbjs": "npm:fbjs@0.2.1",
       "process": "github:jspm/nodelibs-process@0.1.2",
-      "react": "npm:react@15.3.1"
+      "react": "npm:react@15.3.2"
     },
-    "npm:react@15.3.1": {
-      "fbjs": "npm:fbjs@0.8.4",
+    "npm:react@15.3.2": {
+      "fbjs": "npm:fbjs@0.8.5",
       "loose-envify": "npm:loose-envify@1.2.0",
       "object-assign": "npm:object-assign@4.1.0",
       "process": "github:jspm/nodelibs-process@0.1.2"
@@ -345,10 +345,10 @@ System.config({
     },
     "npm:recompose@0.20.2": {
       "change-emitter": "npm:change-emitter@0.1.2",
-      "fbjs": "npm:fbjs@0.8.4",
+      "fbjs": "npm:fbjs@0.8.5",
       "hoist-non-react-statics": "npm:hoist-non-react-statics@1.2.0",
       "process": "github:jspm/nodelibs-process@0.1.2",
-      "react": "npm:react@15.3.1",
+      "react": "npm:react@15.3.2",
       "symbol-observable": "npm:symbol-observable@0.2.4"
     },
     "npm:resolve@1.1.7": {

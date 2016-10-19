@@ -9,27 +9,27 @@
  */
 'use strict'; // eslint-disable-line
 
-import { Hflow } from 'hyperflow';
+import { Hf } from 'hyperflow';
 
-export default Hflow.Event.create({
-    as: [
+export default Hf.Event.create({
+    asEvents: [
         `count-mutated`,
         `offset-mutated`
     ],
-    on: [
+    onEvents: [
         `undo`,
         `count`,
         `change-offset`,
         `increase`,
         `decrease`
     ],
-    do: [
+    doEvents: [
         `init`,
         `undo-last-count-mutation`,
         `count-mutation`,
         `offset-mutation`
     ],
-    request: [
+    requestEvents: [
         `dataread`,
         `datawrite`
     ]
