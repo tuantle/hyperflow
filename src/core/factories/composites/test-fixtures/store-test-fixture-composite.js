@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -56,8 +57,8 @@ export default CompositeElement({
          */
         $initStoreTestFixtureComposite: function $initStoreTestFixtureComposite () {
             const fixture = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     fId: `string`,
                     name: `string`,
                     setup: `function`,
@@ -68,7 +69,7 @@ export default CompositeElement({
                     deactivateIncomingStream: `function`,
                     deactivateOutgoingStream: `function`
                 }).of(fixture) || fixture.fId.substr(0, FIXTURE_FACTORY_CODE.length) !== FIXTURE_FACTORY_CODE) {
-                    Hflow.log(`error`, `StoreTestFixtureComposite.$init - Fixture is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `StoreTestFixtureComposite.$init - Fixture is invalid. Cannot apply composite.`);
                 }
             }
         }
@@ -99,16 +100,16 @@ export default CompositeElement({
              */
             this.register = function register (definition) {
                 const fixture = this;
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     testSubject: `object`
                 }).of(definition)) {
-                    Hflow.log(`error`, `StoreTestFixtureComposite.register - Input definition object is invalid.`);
+                    Hf.log(`error`, `StoreTestFixtureComposite.register - Input definition object is invalid.`);
                 } else {
                     const {
                         testSubject: store
                     } = definition;
-                    if (Hflow.isObject(store)) {
-                        if (!Hflow.isSchema({
+                    if (Hf.isObject(store)) {
+                        if (!Hf.isSchema({
                             fId: `string`,
                             name: `string`,
                             setup: `function`,
@@ -119,15 +120,15 @@ export default CompositeElement({
                             deactivateIncomingStream: `function`,
                             deactivateOutgoingStream: `function`
                         }).of(store) || store.fId.substr(0, STORE_FACTORY_CODE.length) !== STORE_FACTORY_CODE) {
-                            Hflow.log(`error`, `StoreTestFixtureComposite.register - Input store is invalid.`);
-                        } else if (Hflow.isObject(_store)) {
-                            Hflow.log(`warn1`, `StoreTestFixtureComposite.register - Test fixture:${fixture.name} registered store:${store.name}.`);
+                            Hf.log(`error`, `StoreTestFixtureComposite.register - Input store is invalid.`);
+                        } else if (Hf.isObject(_store)) {
+                            Hf.log(`warn1`, `StoreTestFixtureComposite.register - Test fixture:${fixture.name} registered store:${store.name}.`);
                         } else {
                             _store = store;
                             /* setup event stream observation duplex between store and test fixture */
                             _store.observe(fixture);
                             fixture.observe(_store).delay(DELAY_STORE_IN_MS);
-                            Hflow.log(`info`, `Test fixture:${fixture.name} registered store:${store.name}.`);
+                            Hf.log(`info`, `Test fixture:${fixture.name} registered store:${store.name}.`);
                         }
                     }
                 }
@@ -144,21 +145,21 @@ export default CompositeElement({
                 const fixture = this;
 
                 // TODO: Implement use case for fixture start option.
-                option = Hflow.isObject(option) ? option : {};
+                option = Hf.isObject(option) ? option : {};
 
-                if (!Hflow.isFunction(done)) {
-                    Hflow.log(`error`, `StoreTestFixtureComposite.start - Input done function is invalid.`);
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `StoreTestFixtureComposite.start - Input done function is invalid.`);
                 } else {
                     if (!_started) {
                         fixture.activateIncomingStream();
                         fixture.setup(() => {
-                            if (!Hflow.isObject(_store)) {
-                                Hflow.log(`error`, `StoreTestFixtureComposite.start - Test fixture:${fixture.name} is not registered with a store.`);
+                            if (!Hf.isObject(_store)) {
+                                Hf.log(`error`, `StoreTestFixtureComposite.start - Test fixture:${fixture.name} is not registered with a store.`);
                             } else {
                                 _store.activateIncomingStream();
                                 _store.setup(() => {
                                     _store.activateOutgoingStream();
-                                    Hflow.log(`info`, `Test fixture:${fixture.name} activated store:${_store.name}.`);
+                                    Hf.log(`info`, `Test fixture:${fixture.name} activated store:${_store.name}.`);
                                 });
                             }
                             fixture.activateOutgoingStream();
@@ -167,7 +168,7 @@ export default CompositeElement({
                         });
                     } else {
                         fixture.restart(option);
-                        Hflow.log(`warn1`, `StoreTestFixtureComposite.start - Test fixture:${fixture.name} is already started. Restarting...`);
+                        Hf.log(`warn1`, `StoreTestFixtureComposite.start - Test fixture:${fixture.name} is already started. Restarting...`);
                     }
                 }
             };
@@ -180,18 +181,18 @@ export default CompositeElement({
              */
             this.stop = function stop (done) {
                 const fixture = this;
-                if (!Hflow.isFunction(done)) {
-                    Hflow.log(`error`, `StoreTestFixtureComposite.stop - Input done function is invalid.`);
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `StoreTestFixtureComposite.stop - Input done function is invalid.`);
                 } else {
                     if (!_started) {
-                        Hflow.log(`warn1`, `StoreTestFixtureComposite.stop - Test fixture:${fixture.name} is already stopped.`);
+                        Hf.log(`warn1`, `StoreTestFixtureComposite.stop - Test fixture:${fixture.name} is already stopped.`);
                     } else {
                         fixture.teardown(() => {
-                            if (Hflow.isObject(_store)) {
+                            if (Hf.isObject(_store)) {
                                 _store.teardown(() => {
                                     _store.deactivateIncomingStream();
                                     _store.deactivateOutgoingStream();
-                                    Hflow.log(`info`, `Test fixture:${fixture.name} deactivated store:${_store.name}.`);
+                                    Hf.log(`info`, `Test fixture:${fixture.name} deactivated store:${_store.name}.`);
                                 });
                             }
                             fixture.deactivateIncomingStream();

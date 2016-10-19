@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../core/elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../core/elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A web storage composite module.
@@ -49,7 +50,7 @@ export default CompositeElement({
              * @return void
              */
             this.getProvider = function getProvider () {
-                Hflow.log(`error`, `WebStorageComposite.getProvider - Method is not implemented by default.`);
+                Hf.log(`error`, `WebStorageComposite.getProvider - Method is not implemented by default.`);
             };
         }
     },
@@ -71,16 +72,16 @@ export default CompositeElement({
          */
         fetch: function fetch (...pathIds) {
             const service = this;
-            if (Hflow.isEmpty(pathIds) || !pathIds.every((pathId) => Hflow.isString(pathId) || Hflow.isArray(pathId))) {
-                Hflow.log(`error`, `WebStorageComposite.fetch - Input pathIds are invalid.`);
+            if (Hf.isEmpty(pathIds) || !pathIds.every((pathId) => Hf.isString(pathId) || Hf.isArray(pathId))) {
+                Hf.log(`error`, `WebStorageComposite.fetch - Input pathIds are invalid.`);
             } else {
                 const {
                     storage
                 } = service.getProvider();
-                if (!Hflow.isDefined(storage)) {
-                    Hflow.log(`error`, `WebStorageComposite.fetch - Storage provider is not unsupported.`);
+                if (!Hf.isDefined(storage)) {
+                    Hf.log(`error`, `WebStorageComposite.fetch - Storage provider is not unsupported.`);
                 } else {
-                    pathIds = pathIds.map((pathId) => Hflow.isString(pathId) ? Hflow.stringToArray(pathId, `.`) : pathId);
+                    pathIds = pathIds.map((pathId) => Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId);
                     return {
                         /**
                          * @description - Do a read operation from storage.
@@ -90,8 +91,8 @@ export default CompositeElement({
                          */
                         read: function read () {
                             const promises = pathIds.filter((pathId) => {
-                                if (Hflow.isEmpty(pathId)) {
-                                    Hflow.log(`warn1`, `WebStorageComposite.fetch.read - Input pathId is invalid.`);
+                                if (Hf.isEmpty(pathId)) {
+                                    Hf.log(`warn1`, `WebStorageComposite.fetch.read - Input pathId is invalid.`);
                                     return false;
                                 }
                                 return true;
@@ -99,10 +100,10 @@ export default CompositeElement({
                                 const rootKey = pathId.shift();
                                 return new Promise((resolve, reject) => {
                                     if (storage.hasOwnProperty(rootKey)) {
-                                        const parse = Hflow.compose(storage.getItem.bind(storage), JSON.parse);
+                                        const parse = Hf.compose(storage.getItem.bind(storage), JSON.parse);
                                         const rootItem = parse(rootKey);
-                                        if (!Hflow.isEmpty(pathId)) {
-                                            resolve(Hflow.retrieve(pathId, `.`).from(rootItem));
+                                        if (!Hf.isEmpty(pathId)) {
+                                            resolve(Hf.retrieve(pathId, `.`).from(rootItem));
                                         } else {
                                             resolve(rootItem);
                                         }
@@ -123,20 +124,20 @@ export default CompositeElement({
                          * @return {object}
                          */
                         write: function write (cmd = {}) {
-                            if (!Hflow.isSchema({
+                            if (!Hf.isSchema({
                                 bundle: `object`
                             }).of(cmd)) {
-                                Hflow.log(`error`, `WebStorageComposite.fetch.write - Input fetch command statement bundle is invalid.`);
+                                Hf.log(`error`, `WebStorageComposite.fetch.write - Input fetch command statement bundle is invalid.`);
                             } else {
                                 const {
                                     bundle,
                                     touchRoot
-                                } = Hflow.fallback({
+                                } = Hf.fallback({
                                     touchRoot: false
                                 }).of(cmd);
                                 const promises = pathIds.filter((pathId) => {
-                                    if (Hflow.isEmpty(pathId)) {
-                                        Hflow.log(`warn1`, `WebStorageComposite.fetch.write - Input pathId is invalid.`);
+                                    if (Hf.isEmpty(pathId)) {
+                                        Hf.log(`warn1`, `WebStorageComposite.fetch.write - Input pathId is invalid.`);
                                         return false;
                                     }
                                     return true;
@@ -146,12 +147,12 @@ export default CompositeElement({
                                         if (touchRoot && storage.hasOwnProperty(rootKey)) {
                                             resolve(bundle);
                                         } else {
-                                            const parse = Hflow.compose(storage.getItem.bind(storage), JSON.parse);
+                                            const parse = Hf.compose(storage.getItem.bind(storage), JSON.parse);
                                             const rootItem = parse(rootKey);
-                                            if (!Hflow.isEmpty(pathId)) {
+                                            if (!Hf.isEmpty(pathId)) {
                                                 if (rootItem !== null) {
                                                     const mutator = bundle;
-                                                    storage.setItem(rootKey, JSON.stringify(Hflow.mutate(rootItem).atPathBy(mutator, pathId)));
+                                                    storage.setItem(rootKey, JSON.stringify(Hf.mutate(rootItem).atPathBy(mutator, pathId)));
                                                 } else {
                                                     reject(new Error(`ERROR: Unable to write to storage. PathId${pathId} is invalid.`));
                                                 }
@@ -164,8 +165,8 @@ export default CompositeElement({
                                             } else {
                                                 if (rootItem !== null) {
                                                     const mutator = bundle;
-                                                    if (Hflow.isObject(mutator) || Hflow.isArray(mutator)) {
-                                                        storage.setItem(rootKey, JSON.stringify(Hflow.mutate(rootItem).by(mutator)));
+                                                    if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
+                                                        storage.setItem(rootKey, JSON.stringify(Hf.mutate(rootItem).by(mutator)));
                                                     } else {
                                                         storage.setItem(rootKey, JSON.stringify(mutator));
                                                     }

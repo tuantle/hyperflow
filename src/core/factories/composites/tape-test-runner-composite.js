@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 import tape from 'tape';
@@ -30,8 +31,8 @@ import CompositeElement from '../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -54,11 +55,11 @@ export default CompositeElement({
          */
         $initTapeTestRunnerComposite: function $initTapeTestRunnerComposite () {
             const fixture = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     fId: `string`
                 }).of(fixture) || fixture.fId.substr(0, FIXTURE_FACTORY_CODE.length) !== FIXTURE_FACTORY_CODE) {
-                    Hflow.log(`error`, `TapeTestRunnerComposite.$init - Fixture is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `TapeTestRunnerComposite.$init - Fixture is invalid. Cannot apply composite.`);
                 }
             }
         },
@@ -71,10 +72,10 @@ export default CompositeElement({
          * @return void
          */
         test: function test (tester, description = ``) {
-            description = Hflow.isString(description) ? description : ``;
+            description = Hf.isString(description) ? description : ``;
 
-            if (!Hflow.isFunction(tester)) {
-                Hflow.log(`error`, `TapeTestRunnerComposite.test - Input test function is invalid.`);
+            if (!Hf.isFunction(tester)) {
+                Hf.log(`error`, `TapeTestRunnerComposite.test - Input test function is invalid.`);
             } else {
                 tape(description, tester);
             }

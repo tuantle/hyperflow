@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load default constrainable descriptor presets */
@@ -32,8 +33,8 @@ import stronglyTypedPreset from './descriptors/presets/strongly-typed-constraina
 /* load CommonElement */
 import CommonElement from './common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A data cursor prototypes.
@@ -42,6 +43,40 @@ const Hflow = CommonElement();
  */
 const DataCursorElementPrototype = Object.create({}).prototype = {
     /* ----- Prototype Definitions --------- */
+    /**
+     * @description - Helper function to create schema from a source object.
+     *
+     * @method _createSchema
+     * @param {object} source
+     * @return {object}
+     */
+    _createSchema: function _createSchema (source) {
+        const cursor = this;
+        if (!(Hf.isObject(source) || Hf.isArray(source))) {
+            Hf.log(`error`, `DataCursorElement._createSchema - Input source object is invalid.`);
+        } else {
+            return Object.keys(source).reduce((schema, key) => {
+                const value = source[key];
+                if (Hf.isObject(value)) {
+                    schema[key] = cursor._createSchema(value);
+                } else if (Hf.isArray(value)) {
+                    schema[key] = value.map((arrayItem) => {
+                        if (Hf.isObject(arrayItem)) {
+                            return cursor._createSchema(arrayItem);
+                        }
+                        return Hf.typeOf(arrayItem);
+                    });
+                } else if (cursor.isItemComputable(key)) {
+                    schema[key] = `computable`;
+                } else if (cursor.isItemObservable(key)) {
+                    schema[key] = `observable`;
+                } else {
+                    schema[key] = Hf.typeOf(value);
+                }
+                return schema;
+            }, {});
+        }
+    },
     /**
      * @description - At cursor, check if there is a data item in content at key.
      *
@@ -232,7 +267,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
     getContentType: function getContentType () {
         const cursor = this;
 
-        return Hflow.typeOf(cursor._content);
+        return Hf.typeOf(cursor._content);
     },
     /**
      * @description - At cursor, get content item keys.
@@ -257,12 +292,12 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const pathId = `${cursor._pathId}.${key}`;
 
         if (!cursor.hasItem(key)) {
-            Hflow.log(`error`, `DataCursorElement.getContentItem - Data item key:${key} at pathId:${pathId} is not defined.`);
+            Hf.log(`error`, `DataCursorElement.getContentItem - Data item key:${key} at pathId:${pathId} is not defined.`);
         } else {
             const contentItem = cursor._content[key];
-            if (Hflow.isObject(contentItem) || Hflow.isArray(contentItem)) {
+            if (Hf.isObject(contentItem) || Hf.isArray(contentItem)) {
                 // TODO: should freeze or clone the return content item?
-                return Hflow.clone(contentItem);
+                return Hf.clone(contentItem);
                 // return Object.freeze(contentItem);
             }
             return contentItem;
@@ -281,16 +316,16 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const data = cursor._data;
         const pathId = `${cursor._pathId}.${key}`;
 
-        if (Hflow.isDefined(item)) {
+        if (Hf.isDefined(item)) {
             if (cursor.hasItem(key)) {
                 /* check that data item is not computable */
                 if (cursor.isItemComputable(key)) {
-                    Hflow.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} is already described as a computable.`);
+                    Hf.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} is already described as a computable.`);
                 } else {
-                    if (Hflow.isObject(item) || Hflow.isArray(item)) {
-                        if (Hflow.isObject(item)) {
-                            if (Hflow.isEmpty(item)) {
-                                Hflow.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty object.`);
+                    if (Hf.isObject(item) || Hf.isArray(item)) {
+                        if (Hf.isObject(item)) {
+                            if (Hf.isEmpty(item)) {
+                                Hf.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty object.`);
                             } else {
                                 cursor._content[key] = {};
                                 const innerCursor = data.select(pathId);
@@ -299,8 +334,8 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                                 });
                             }
                         } else {
-                            if (Hflow.isEmpty(item)) {
-                                Hflow.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty array.`);
+                            if (Hf.isEmpty(item)) {
+                                Hf.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty array.`);
                             } else {
                                 cursor._content[key] = [];
                                 const innerCursor = data.select(pathId);
@@ -333,10 +368,10 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                     }
                 }
             } else {
-                if (Hflow.isObject(item) || Hflow.isArray(item)) {
-                    if (Hflow.isObject(item)) {
-                        if (Hflow.isEmpty(item)) {
-                            Hflow.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty object.`);
+                if (Hf.isObject(item) || Hf.isArray(item)) {
+                    if (Hf.isObject(item)) {
+                        if (Hf.isEmpty(item)) {
+                            Hf.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty object.`);
                         } else {
                             cursor._content[key] = {};
                             const innerCursor = data.select(pathId);
@@ -345,8 +380,8 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                             });
                         }
                     } else {
-                        if (Hflow.isEmpty(item)) {
-                            Hflow.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty array.`);
+                        if (Hf.isEmpty(item)) {
+                            Hf.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty array.`);
                         } else {
                             cursor._content[key] = [];
                             const innerCursor = data.select(pathId);
@@ -379,7 +414,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 }
             }
         } else {
-            Hflow.log(`error`, `DataCursorElement.setContentItem - Input data item with key:${key} at pathId:${pathId} is invalid.`);
+            Hf.log(`error`, `DataCursorElement.setContentItem - Input data item with key:${key} at pathId:${pathId} is invalid.`);
         }
     },
     /**
@@ -395,24 +430,24 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const pathId = `${cursor._pathId}.${key}`;
 
         if (!cursor.hasItem(key)) {
-            Hflow.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is not defined.`);
-        } else if (!Hflow.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
-            Hflow.log(`error`, `DataCursorElement.recallContentItem - Input time index offset must be non-zero and negative.`);
+            Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is not defined.`);
+        } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
+            Hf.log(`error`, `DataCursorElement.recallContentItem - Input time index offset must be non-zero and negative.`);
         } else {
             if (!cursor.isImmutable()) {
-                Hflow.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is mutable and has no mutation history.`);
+                Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is mutable and has no mutation history.`);
             } else {
                 const data = cursor._data;
                 const mMap = data._mutation.mMap;
                 const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
                 const recallTimeIndex = currentTimeIndex + timeIndexOffset;
                 const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
-                let pathIdAtTimeIndex = Hflow.stringToArray(cursor._pathId, `.`);
+                let pathIdAtTimeIndex = Hf.stringToArray(cursor._pathId, `.`);
 
                 if (cursorTimestamps.length > recallTimeIndex) {
                     pathIdAtTimeIndex.shift();
                     pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
-                    pathIdAtTimeIndex = Hflow.arrayToString(pathIdAtTimeIndex, `.`);
+                    pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
 
                     if (mMap.hasNode(pathIdAtTimeIndex)) {
                         return {
@@ -420,7 +455,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                             content: mMap.select(pathIdAtTimeIndex).getContent()
                         };
                     } else { // eslint-disable-line
-                        Hflow.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
+                        Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
                     }
                 } else {
                     return {
@@ -443,10 +478,10 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const pathId = `${cursor._pathId}.${key}`;
 
         if (!cursor.hasItem(key)) {
-            Hflow.log(`error`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is not defined.`);
+            Hf.log(`error`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is not defined.`);
         } else {
             if (!cursor.isImmutable()) {
-                Hflow.log(`error`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is mutable and has no mutation history.`);
+                Hf.log(`error`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is mutable and has no mutation history.`);
             } else {
                 const data = cursor._data;
                 const mMap = data._mutation.mMap;
@@ -456,11 +491,11 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
 
                 return timestamps.slice(1).map((timestamp) => {
                     const recallTimeIndex = currentTimeIndex + timeIndexOffset;
-                    let pathIdAtTimeIndex = Hflow.stringToArray(cursor._pathId, `.`);
+                    let pathIdAtTimeIndex = Hf.stringToArray(cursor._pathId, `.`);
                     timeIndexOffset--;
                     pathIdAtTimeIndex.shift();
                     pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
-                    pathIdAtTimeIndex = Hflow.arrayToString(pathIdAtTimeIndex, `.`);
+                    pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
 
                     if (mMap.hasNode(pathIdAtTimeIndex)) {
                         return {
@@ -468,7 +503,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                             content: mMap.select(pathIdAtTimeIndex).getContent()
                         };
                     } else { // eslint-disable-line
-                        Hflow.log(`warn1`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
+                        Hf.log(`warn1`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
                         return {
                             timestamp: null,
                             content: null
@@ -490,7 +525,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const pathId = `${cursor._pathId}.${key}`;
 
         if (!cursor.hasItem(key)) {
-            Hflow.log(`error`, `DataCursorElement.getItemDescription - Data item key:${key} at pathId:${pathId} is not defined.`);
+            Hf.log(`error`, `DataCursorElement.getItemDescription - Data item key:${key} at pathId:${pathId} is not defined.`);
         } else {
             return {
                 /**
@@ -501,7 +536,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  */
                 ofConstrainable: function ofConstrainable () {
                     if (!cursor.isItemObservable(key)) {
-                        Hflow.log(`error`, `DataCursorElement.getItemDescription.ofConstrainable - Data item key:${key} at pathId:${pathId} does not have a constrainable description.`);
+                        Hf.log(`error`, `DataCursorElement.getItemDescription.ofConstrainable - Data item key:${key} at pathId:${pathId} does not have a constrainable description.`);
                     } else {
                         return cursor._descriptor.select(`constrainable`).getDescription(pathId);
                     }
@@ -514,7 +549,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  */
                 ofComputable: function ofComputable () {
                     if (!cursor.isItemComputable(key)) {
-                        Hflow.log(`error`, `DataCursorElement.getItemDescription.ofComputable - Data item key:${key} at pathId:${pathId} does not have a computable description.`);
+                        Hf.log(`error`, `DataCursorElement.getItemDescription.ofComputable - Data item key:${key} at pathId:${pathId} does not have a computable description.`);
                     } else {
                         return cursor._descriptor.select(`computable`).getDescription(pathId);
                     }
@@ -527,7 +562,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  */
                 ofObservable: function ofObservable () {
                     if (!cursor.isItemObservable(key)) {
-                        Hflow.log(`error`, `DataCursorElement.getItemDescription.ofObservable - Data item key:${key} at pathId:${pathId} does not have an observable description.`);
+                        Hf.log(`error`, `DataCursorElement.getItemDescription.ofObservable - Data item key:${key} at pathId:${pathId} does not have an observable description.`);
                     } else {
                         return cursor._descriptor.select(`observable`).getDescription(pathId);
                     }
@@ -547,7 +582,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const pathId = `${cursor._pathId}.${key}`;
 
         if (!cursor.hasItem(key)) {
-            Hflow.log(`error`, `DataCursorElement.describeItem - Data item key:${key} at pathId:${pathId} is not defined.`);
+            Hf.log(`error`, `DataCursorElement.describeItem - Data item key:${key} at pathId:${pathId} is not defined.`);
         } else {
             const constrainableItem = cursor.isItemConstrainable(key);
             const computableItem = cursor.isItemComputable(key);
@@ -562,13 +597,13 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  * @return {object}
                  */
                 asOneOfValues: function asOneOfValues (values) {
-                    if (!Hflow.isArray(values) || Hflow.isEmpty(values)) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Input values are invalid.`);
-                    } else if (!values.every((value) => Hflow.isString(value) || Hflow.isNumeric(value))) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Value must be either numeric or string.`);
+                    if (!Hf.isArray(values) || Hf.isEmpty(values)) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Input values are invalid.`);
+                    } else if (!values.every((value) => Hf.isString(value) || Hf.isNumeric(value))) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Value must be either numeric or string.`);
                     } else {
                         if (computableItem) {
-                            Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                            Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`constrainable`);
                             const constraint = oneOfValuesPreset(values);
@@ -597,13 +632,13 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  * @return {object}
                  */
                 asOneOfTypes: function asOneOfTypes (types) {
-                    if (!Hflow.isArray(types) || Hflow.isEmpty(types)) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Input types are invalid.`);
-                    } else if (!types.every((type) => Hflow.isString(type))) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Type value must be string.`);
+                    if (!Hf.isArray(types) || Hf.isEmpty(types)) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Input types are invalid.`);
+                    } else if (!types.every((type) => Hf.isString(type))) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Type value must be string.`);
                     } else {
                         if (computableItem) {
-                            Hflow.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                            Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`constrainable`);
                             const constraint = oneOfTypesPreset(types);
@@ -649,7 +684,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                         }
 
                         /* recursively set requirable description to nested objects */
-                        if (Hflow.isObject(_content[_key])) {
+                        if (Hf.isObject(_content[_key])) {
                             Object.keys(_content[_key]).forEach((innerKey) => {
                                 deepAssignDescription(`${_pathId}.${innerKey}`, _content[_key], innerKey);
                             });
@@ -657,7 +692,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                     }
 
                     if (computableItem) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asRequired - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                        Hf.log(`error`, `DataCursorElement.describeItem.asRequired - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                     } else {
                         deepAssignDescription(pathId, cursor._content, key);
                     }
@@ -687,7 +722,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                         }
 
                         /* recursively set strongly typed description to nested objects */
-                        if (Hflow.isObject(_content[_key])) {
+                        if (Hf.isObject(_content[_key])) {
                             Object.keys(_content[_key]).forEach((innerKey) => {
                                 deepAssignDescription(`${_pathId}.${innerKey}`, _content[_key], innerKey);
                             });
@@ -695,7 +730,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                     }
 
                     if (computableItem) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asStronglyTyped - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                        Hf.log(`error`, `DataCursorElement.describeItem.asStronglyTyped - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                     } else {
                         deepAssignDescription(pathId, cursor._content, key);
                     }
@@ -710,11 +745,11 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  * @return {object}
                  */
                 asBounded: function asBounded (lowerBound, upperBound) {
-                    if (!Hflow.isNumeric(lowerBound) && !Hflow.isNumeric(upperBound)) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asBounded - Input bouding range values are must be numeric.`);
+                    if (!Hf.isNumeric(lowerBound) && !Hf.isNumeric(upperBound)) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asBounded - Input bouding range values are must be numeric.`);
                     } else {
                         if (computableItem) {
-                            Hflow.log(`error`, `DataCursorElement.describeItem.asBounded - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                            Hf.log(`error`, `DataCursorElement.describeItem.asBounded - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`constrainable`);
                             const constraint = boundedPreset(lowerBound, upperBound);
@@ -742,15 +777,15 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 asConstrainable: function asConstrainable (constraint) {
-                    if (!Hflow.isObject(constraint) && Object.key(constraint).forEach((constraintKey) => {
-                        return Hflow.isSchema({
+                    if (!Hf.isObject(constraint) && Object.key(constraint).forEach((constraintKey) => {
+                        return Hf.isSchema({
                             constrainer: `function`
                         }).of(constraint[constraintKey]);
                     })) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asConstrainable - Input constraint is invalid.`);
+                        Hf.log(`error`, `DataCursorElement.describeItem.asConstrainable - Input constraint is invalid.`);
                     } else {
                         if (computableItem) {
-                            Hflow.log(`error`, `DataCursorElement.describeItem.asConstrainable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                            Hf.log(`error`, `DataCursorElement.describeItem.asConstrainable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`constrainable`);
 
@@ -783,10 +818,10 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  */
                 asObservable: function asObservable (condition, subscriber) {
                     if (computableItem) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asObservable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                        Hf.log(`error`, `DataCursorElement.describeItem.asObservable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                     } else {
-                        condition = Hflow.isObject(condition) ? condition : {};
-                        subscriber = Hflow.isObject(subscriber) ? subscriber : {};
+                        condition = Hf.isObject(condition) ? condition : {};
+                        subscriber = Hf.isObject(subscriber) ? subscriber : {};
 
                         const descriptor = cursor._descriptor.select(`observable`);
                         const descPreset = {
@@ -798,10 +833,10 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                         if (!descriptor.hasDescription(pathId)) {
                             descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                         } else {
-                            Hflow.forEach(condition, (trigger, conditionKey) => {
+                            Hf.forEach(condition, (trigger, conditionKey) => {
                                 descriptor.getDescription(pathId).addCondition(trigger, conditionKey);
                             });
-                            Hflow.forEach(subscriber, (handler, handlerKey) => {
+                            Hf.forEach(subscriber, (handler, handlerKey) => {
                                 descriptor.getDescription(pathId).addSubscriber(handler, handlerKey);
                             });
                         }
@@ -817,13 +852,13 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 asComputable: function asComputable (contexts, compute) {
-                    if (!Hflow.isArray(contexts)) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asComputable - Input computable contexts are invalid.`);
-                    } else if (!Hflow.isFunction(compute)) {
-                        Hflow.log(`error`, `DataCursorElement.describeItem.asComputable - Input compute function is invalid.`);
+                    if (!Hf.isArray(contexts)) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asComputable - Input computable contexts are invalid.`);
+                    } else if (!Hf.isFunction(compute)) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asComputable - Input compute function is invalid.`);
                     } else {
                         if (constrainableItem || observableItem) {
-                            Hflow.log(`error`, `DataCursorElement.describeItem.asComputable - Cannot redescribe computable to data item key:${key} at pathId:${pathId}.`);
+                            Hf.log(`error`, `DataCursorElement.describeItem.asComputable - Cannot redescribe computable to data item key:${key} at pathId:${pathId}.`);
                         } else {
                             const descriptor = cursor._descriptor.select(`computable`);
                             const descPreset = {
@@ -855,7 +890,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const pathId = `${cursor._pathId}.${key}`;
 
         if (!cursor.hasItem(key)) {
-            Hflow.log(`error`, `DataCursorElement.unDescribeItem - Data item key:${key} at pathId:${pathId} is not defined.`);
+            Hf.log(`error`, `DataCursorElement.unDescribeItem - Data item key:${key} at pathId:${pathId} is not defined.`);
         } else {
             const constrainableItem = cursor.isItemComputable(key);
             const computableItem = cursor.isItemComputable(key);
@@ -910,14 +945,14 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     forEach: function forEach (iterator, context) {
-        if (Hflow.isFunction(iterator)) {
+        if (Hf.isFunction(iterator)) {
             const cursor = this;
 
-            Hflow.forEach(cursor._content, (item, key) => {
+            Hf.forEach(cursor._content, (item, key) => {
                 iterator.call(context, item, key);
             });
         } else {
-            Hflow.log(`error`, `DataCursorElement.forEach - Input iterator callback is invalid.`);
+            Hf.log(`error`, `DataCursorElement.forEach - Input iterator callback is invalid.`);
         }
     },
     /**
@@ -928,34 +963,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      */
     getSchema: function getSchema () {
         const cursor = this;
-        /* helper function to create schema from a source object */
-        const createSchema = function createSchema (source) {
-            if (!(Hflow.isObject(source) || Hflow.isArray(source))) {
-                Hflow.log(`error`, `DataCursorElement.createSchema - Input source object is invalid.`);
-            } else {
-                return Object.keys(source).reduce((schema, key) => {
-                    const value = source[key];
-                    if (Hflow.isObject(value)) {
-                        schema[key] = createSchema(value);
-                    } else if (Hflow.isArray(value)) {
-                        schema[key] = value.map((arrayItem) => {
-                            if (Hflow.isObject(arrayItem)) {
-                                return createSchema(arrayItem);
-                            }
-                            return Hflow.typeOf(arrayItem);
-                        });
-                    } else if (cursor.isItemComputable(key)) {
-                        schema[key] = `computable`;
-                    } else if (cursor.isItemObservable(key)) {
-                        schema[key] = `observable`;
-                    } else {
-                        schema[key] = Hflow.typeOf(value);
-                    }
-                    return schema;
-                }, {});
-            }
-        };
-        return createSchema(cursor._content);
+        return cursor._createSchema(cursor._content);
     },
     /**
      * @description - At cursor, return data item as plain object.
@@ -965,29 +973,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      */
     toObject: function toObject () {
         const cursor = this;
-        /* helper function to deep clone data item as plain object. */
-        // TODO: this deepValueClone is not working. Tobe removed.
-        // const deepValueClone = function deepValueClone (source) {
-        //     if (!(Hflow.isObject(source) || Hflow.isArray(source))) {
-        //         Hflow.log(`error`, `DataCursorElement.deepValueClone - Input is not an object or array type.`);
-        //     } else {
-        //         let result;
-        //         if (Hflow.isObject(source)) {
-        //             result = Object.keys(source).reduce((_result, key) => {
-        //                 const value = source[key];
-        //                 _result[key] = Hflow.isObject(value) || Hflow.isArray(value) ? Hflow.clone(value) : value;
-        //                 return _result;
-        //             }, {});
-        //         } else if (Hflow.isArray(source)) {
-        //             result = source.map((value) => {
-        //                 return Hflow.isObject(value) || Hflow.isArray(value) ? Hflow.clone(value) : value;
-        //             }).slice(0);
-        //         }
-        //         return result;
-        //     }
-        // };
-        // return deepValueClone(cursor._content);
-        return Hflow.clone(cursor._content);
+        return Hf.clone(cursor._content);
     },
     /**
      * @description - At cursor, return data item as a JSON string.
@@ -999,7 +985,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
     toString: function toString (beautified = true) {
         const cursor = this;
 
-        beautified = Hflow.isBoolean(beautified) ? beautified : true;
+        beautified = Hf.isBoolean(beautified) ? beautified : true;
 
         if (beautified) {
             return JSON.stringify(cursor.toObject(), null, `\t`);
@@ -1016,29 +1002,29 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function DataCursorElement (data, pathId) {
-    if (!Hflow.isObject(data)) {
-        Hflow.log(`error`, `DataCursorElement - Input data element instance is invalid.`);
+    if (!Hf.isObject(data)) {
+        Hf.log(`error`, `DataCursorElement - Input data element instance is invalid.`);
     } else {
-        if (Hflow.isString(pathId) || Hflow.isArray(pathId)) {
+        if (Hf.isString(pathId) || Hf.isArray(pathId)) {
             let rootKey = ``;
             let key = ``;
             /* parsing pathId and retrive content */
-            const content = Hflow.retrieve(pathId, `.`).from(data._rootContent);
+            const content = Hf.retrieve(pathId, `.`).from(data._rootContent);
 
             /* get the keys from pathId */
-            if (Hflow.isString(pathId)) {
-                key = Hflow.stringToArray(pathId, `.`).pop();
-                rootKey = Hflow.stringToArray(pathId, `.`).reverse().pop();
+            if (Hf.isString(pathId)) {
+                key = Hf.stringToArray(pathId, `.`).pop();
+                rootKey = Hf.stringToArray(pathId, `.`).reverse().pop();
             }
-            if (Hflow.isArray(pathId)) {
+            if (Hf.isArray(pathId)) {
                 rootKey = pathId.slice(0).reverse().pop();
                 key = pathId.slice(0).pop();
-                pathId = Hflow.arrayToString(pathId, `.`);
+                pathId = Hf.arrayToString(pathId, `.`);
             }
 
             /* check that content must be an object or array */
-            if (!(Hflow.isObject(content) || Hflow.isArray(content))) {
-                Hflow.log(`error`, `DataCursorElement - Invalid pathId. Last content in pathId must be an object or array.`);
+            if (!(Hf.isObject(content) || Hf.isArray(content))) {
+                Hf.log(`error`, `DataCursorElement - Invalid pathId. Last content in pathId must be an object or array.`);
             } else {
                 const element = Object.create(DataCursorElementPrototype, {
                     _pathId: {
@@ -1086,14 +1072,14 @@ export default function DataCursorElement (data, pathId) {
                     }
                 });
 
-                if (!Hflow.isObject(element)) {
-                    Hflow.log(`error`, `DataCursorElement - Unable to create a data cursor element instance.`);
+                if (!Hf.isObject(element)) {
+                    Hf.log(`error`, `DataCursorElement - Unable to create a data cursor element instance.`);
                 } else {
                     return element;
                 }
             }
         } else {
-            Hflow.log(`error`, `DataCursorElement - Input pathId is invalid.`);
+            Hf.log(`error`, `DataCursorElement - Input pathId is invalid.`);
         }
     }
 }

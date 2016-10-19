@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../core/elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../core/elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 const EXCEPTION_KEYS = [
     /* react specific methods and properties */
@@ -82,8 +83,8 @@ export default CompositeElement({
          */
         $initReactComponentComposite: function $initReactComponentComposite () {
             const intf = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     name: `string`,
                     isStateless: `function`,
                     incoming: `function`,
@@ -93,20 +94,20 @@ export default CompositeElement({
                     getComponentLib: `function`,
                     getInitialReflectedState: `function`
                 }).of(intf)) {
-                    Hflow.log(`error`, `ReactComponentComposite.$init - Interface is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `ReactComponentComposite.$init - Interface is invalid. Cannot apply composite.`);
                 } else {
                     const cursor = intf.getStateCursor();
                     cursor.forEach((value, key) => {
                         if (key !== `fId`) {
                             if (cursor.isItemComputable(key)) {
-                                Hflow.log(`error`, `ReactComponentComposite.$init - Computable state key:${key} is not allowed for interface. Cannot apply composite.`);
+                                Hf.log(`error`, `ReactComponentComposite.$init - Computable state key:${key} is not allowed for interface. Cannot apply composite.`);
                             }
                             if (cursor.isItemObservable(key)) {
-                                Hflow.log(`error`, `ReactComponentComposite.$init - Observable state key:${key} is not allowed for interface. Cannot apply composite.`);
+                                Hf.log(`error`, `ReactComponentComposite.$init - Observable state key:${key} is not allowed for interface. Cannot apply composite.`);
                             }
                         }
                     });
-                    if (Hflow.isSchema({
+                    if (Hf.isSchema({
                         getDefaultProps: `function`,
                         getInitialState: `function`,
                         componentWillMount: `function`,
@@ -117,7 +118,7 @@ export default CompositeElement({
                         componentWillUnmount: `function`,
                         shouldComponentUpdate: `function`
                     }).of(intf)) {
-                        Hflow.log(`warn1`, `ReactComponentComposite.toComponent - Interface:${intf.name} should not have internally reverved React lifecyle methods defined.`);
+                        Hf.log(`warn1`, `ReactComponentComposite.toComponent - Interface:${intf.name} should not have internally reverved React lifecyle methods defined.`);
                     }
                 }
             }
@@ -131,8 +132,8 @@ export default CompositeElement({
          */
         preMountStage: function preMountStage (handler) {
             const intf = this;
-            if (!Hflow.isFunction(handler)) {
-                Hflow.log(`error`, `ReactComponentComposite.preMountStage - Input handler function is invalid.`);
+            if (!Hf.isFunction(handler)) {
+                Hf.log(`error`, `ReactComponentComposite.preMountStage - Input handler function is invalid.`);
             } else {
                 // intf.incoming(`on-component-will-mount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
                 //     handler(component);
@@ -153,8 +154,8 @@ export default CompositeElement({
          */
         postMountStage: function postMountStage (handler) {
             const intf = this;
-            if (!Hflow.isFunction(handler)) {
-                Hflow.log(`error`, `ReactComponentComposite.postMountStage - Input handler function is invalid.`);
+            if (!Hf.isFunction(handler)) {
+                Hf.log(`error`, `ReactComponentComposite.postMountStage - Input handler function is invalid.`);
             } else {
                 // intf.incoming(`on-component-did-mount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
                 //     handler(component);
@@ -175,8 +176,8 @@ export default CompositeElement({
          */
         preDismountStage: function preDismountStage (handler) {
             const intf = this;
-            if (!Hflow.isFunction(handler)) {
-                Hflow.log(`error`, `ReactComponentComposite.preDismountStage - Input handler function is invalid.`);
+            if (!Hf.isFunction(handler)) {
+                Hf.log(`error`, `ReactComponentComposite.preDismountStage - Input handler function is invalid.`);
             } else {
                 // intf.incoming(`on-component-will-unmount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
                 //     handler(component);
@@ -197,8 +198,8 @@ export default CompositeElement({
          */
         postDismountStage: function postDismountStage (handler) {
             const intf = this;
-            if (!Hflow.isFunction(handler)) {
-                Hflow.log(`error`, `ReactComponentComposite.postDismountStage - Input handler function is invalid.`);
+            if (!Hf.isFunction(handler)) {
+                Hf.log(`error`, `ReactComponentComposite.postDismountStage - Input handler function is invalid.`);
             } else {
                 // intf.incoming(`on-component-did-unmount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
                 //     handler(component);
@@ -219,8 +220,8 @@ export default CompositeElement({
          */
         preUpdateStage: function preUpdateStage (handler) {
             const intf = this;
-            if (!Hflow.isFunction(handler)) {
-                Hflow.log(`error`, `ReactComponentComposite.preUpdateStage - Input handler function is invalid.`);
+            if (!Hf.isFunction(handler)) {
+                Hf.log(`error`, `ReactComponentComposite.preUpdateStage - Input handler function is invalid.`);
             } else {
                 // intf.incoming(`on-component-will-update`).filter((component) => component.props.fId === intf.fId).handle((component) => {
                 //     handler(component);
@@ -241,8 +242,8 @@ export default CompositeElement({
          */
         postUpdateStage: function postUpdateStage (handler) {
             const intf = this;
-            if (!Hflow.isFunction(handler)) {
-                Hflow.log(`error`, `ReactComponentComposite.postUpdateStage - Input handler function is invalid.`);
+            if (!Hf.isFunction(handler)) {
+                Hf.log(`error`, `ReactComponentComposite.postUpdateStage - Input handler function is invalid.`);
             } else {
                 // intf.incoming(`on-component-did-update`).filter((component) => component.props.fId === intf.fId).handle((component) => {
                 //     handler(component);
@@ -271,16 +272,16 @@ export default CompositeElement({
                 const stateless = intf.isStateless();
                 const cursor = intf.getStateCursor();
                 if (!stateless) {
-                    Hflow.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React compoenent.`);
+                    Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React compoenent.`);
                 } else {
                     const {
                         React
                     } = intf.getComponentLib();
-                    if (!Hflow.isSchema({
+                    if (!Hf.isSchema({
                         PropTypes: `object`,
                         createClass: `function`
                     }).of(React)) {
-                        Hflow.log(`error`, `ReactComponentComposite.toPureComponent - React component is invalid.`);
+                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component is invalid.`);
                     } else {
                         const defaultProperty = intf.getStateAsObject();
                         const reactPropTypeStronglyTyped = {
@@ -308,7 +309,7 @@ export default CompositeElement({
                                     /* set react property type checking */
                                     this.propTypes = (() => {
                                         return Object.keys(defaultProperty).reduce((propType, key) => {
-                                            const typeAliasKey = Hflow.typeOf(defaultProperty[key]);
+                                            const typeAliasKey = Hf.typeOf(defaultProperty[key]);
                                             if (cursor.isItemOneOfValues(key)) {
                                                 const {
                                                     condition: values
@@ -344,10 +345,10 @@ export default CompositeElement({
                                 }
                             }
                         }).mixin(intf).resolve())();
-                        if (!Hflow.isSchema({
+                        if (!Hf.isSchema({
                             pureRender: `function`
                         }).of(reactPureDefinition)) {
-                            Hflow.log(`error`, `ReactComponentComposite.toPureComponent - React pure component definition is invalid.`);
+                            Hf.log(`error`, `ReactComponentComposite.toPureComponent - React pure component definition is invalid.`);
                         } else {
                             const {
                                 pureRender: reactPureComponent
@@ -369,11 +370,11 @@ export default CompositeElement({
                 const {
                     React
                 } = intf.getComponentLib();
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     PropTypes: `object`,
                     createClass: `function`
                 }).of(React)) {
-                    Hflow.log(`error`, `ReactComponentComposite.toComponent - React component is invalid.`);
+                    Hf.log(`error`, `ReactComponentComposite.toComponent - React component is invalid.`);
                 } else {
                     const stateless = intf.isStateless();
                     const defaultProperty = intf.getStateAsObject();
@@ -402,7 +403,7 @@ export default CompositeElement({
                                 /* set react property type checking */
                                 this.propTypes = (() => {
                                     return Object.keys(defaultProperty).reduce((propType, key) => {
-                                        const typeAliasKey = Hflow.typeOf(defaultProperty[key]);
+                                        const typeAliasKey = Hf.typeOf(defaultProperty[key]);
                                         if (cursor.isItemOneOfValues(key)) {
                                             const {
                                                 condition: values
@@ -468,19 +469,19 @@ export default CompositeElement({
                                     // if (!stateless) {
                                     //     /* this event is call ONLY when the state did mutate in store */
                                     //     intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                    //         if (Hflow.isObject(reflectedState)) {
+                                    //         if (Hf.isObject(reflectedState)) {
                                     //             component.setState(reflectedState);
                                     //             _mutationOccurred = true;
-                                    //             Hflow.log(`info`, `State mutated for component:${component.props.name}.`);
+                                    //             Hf.log(`info`, `State mutated for component:${component.props.name}.`);
                                     //         }
                                     //     });
                                     // }
                                     /* needs to sync up interface state and component props before mounting.
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
-                                    if (intf.mutateState(Hflow.fallback(defaultProperty).of(component.props))) {
+                                    if (intf.mutateState(Hf.fallback(defaultProperty).of(component.props))) {
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
-                                        Hflow.log(`info`, `Property mutated for component:${component.props.name}.`);
+                                        Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
                                     }
                                     intf.outgoing(`on-component-will-mount`).emit(() => component);
                                 };
@@ -496,11 +497,11 @@ export default CompositeElement({
                                     /* The interface tracks new props mutation when component receive new props.
                                        This will do necessary mutation on interface state. */
                                     const currentProperty = intf.getStateAsObject();
-                                    if (intf.mutateState(Hflow.fallback(currentProperty).of(nextProperty))) {
+                                    if (intf.mutateState(Hf.fallback(currentProperty).of(nextProperty))) {
                                         /* The interface will detect mutation when component gets new props and update accordingly */
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
-                                        Hflow.log(`info`, `Property mutated for component:${component.props.name}.`);
+                                        Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
                                     }
                                 };
                                 /**
@@ -514,18 +515,18 @@ export default CompositeElement({
                                     if (!stateless) {
                                         /* this event is call ONLY when the state did mutate in store */
                                         intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                            if (Hflow.isObject(reflectedState)) {
+                                            if (Hf.isObject(reflectedState)) {
                                                 component.setState(reflectedState);
                                                 _mutationOccurred = true;
-                                                Hflow.log(`info`, `State mutated for component:${component.props.name}.`);
+                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
                                             }
                                         });
                                     }
                                     const currentProperty = intf.getStateAsObject();
-                                    if (intf.mutateState(Hflow.fallback(currentProperty).of(component.props))) {
+                                    if (intf.mutateState(Hf.fallback(currentProperty).of(component.props))) {
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
-                                        Hflow.log(`info`, `Property mutated for component:${component.props.name}.`);
+                                        Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
                                     }
                                     intf.outgoing(`on-component-did-mount`).emit(() => component);
                                 };
@@ -571,9 +572,9 @@ export default CompositeElement({
                                     if (_mutationOccurred) {
                                         _mutationOccurred = false;
                                         shouldUpdate = true;
-                                        Hflow.log(`info`, `Render updated for component:${component.props.name}.`);
+                                        Hf.log(`info`, `Render updated for component:${component.props.name}.`);
                                     } else {
-                                        // Hflow.log(`info`, `Render skipped update for component:${component.props.name}.`);
+                                        // Hf.log(`info`, `Render skipped update for component:${component.props.name}.`);
                                     }
                                     return shouldUpdate;
                                 };
@@ -581,8 +582,8 @@ export default CompositeElement({
                         }
                     }).mixin(intf).resolve())();
                     const reactComponent = React.createClass(reactDefinition);
-                    if (!Hflow.isFunction(reactComponent)) {
-                        Hflow.log(`error`, `ReactComponentComposite.toPureComponent - React component definition is invalid.`);
+                    if (!Hf.isFunction(reactComponent)) {
+                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component definition is invalid.`);
                     } else {
                         return reactComponent;
                     }

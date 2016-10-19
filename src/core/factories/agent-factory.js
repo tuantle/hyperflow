@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Composer */
@@ -28,8 +29,8 @@ import Composer from '../composer';
 /* load CommonElement */
 import CommonElement from '../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -60,7 +61,7 @@ export default Composer({
          * @return void
          */
         this.$init = function $init () {
-            Hflow.log(`warn0`, `AgentFactory.$init - Method is not implemented by default.`);
+            Hf.log(`warn0`, `AgentFactory.$init - Method is not implemented by default.`);
         };
         /**
          * @description - Register testable domain, interface, service, or store fixtures.
@@ -71,16 +72,16 @@ export default Composer({
          */
         this.register = function register (definition) {
             const agent = this;
-            if (!Hflow.isSchema({
+            if (!Hf.isSchema({
                 fixtures: `array`
             }).of(definition)) {
-                Hflow.log(`error`, `AgentFactory.register - Input definition is invalid.`);
+                Hf.log(`error`, `AgentFactory.register - Input definition is invalid.`);
             } else {
                 const {
                     fixtures
                 } = definition;
                 if (!fixtures.every((fixture) => {
-                    return Hflow.isSchema({
+                    return Hf.isSchema({
                         fId: `string`,
                         name: `string`,
                         hasStarted: `function`,
@@ -95,13 +96,13 @@ export default Composer({
                         deactivateOutgoingStream: `function`
                     }).of(fixture) && fixture.fId.substr(0, FIXTURE_FACTORY_CODE.length) === FIXTURE_FACTORY_CODE;
                 })) {
-                    Hflow.log(`error`, `AgentFactory.register - Input fixtures are invalid.`);
+                    Hf.log(`error`, `AgentFactory.register - Input fixtures are invalid.`);
                 } else {
                     _fixtures = _fixtures.concat(fixtures.filter((fixture) => {
                         if (_fixtures.some((_fixture) => _fixture.name === fixture.name)) {
-                            Hflow.log(`warn1`, `AgentFactory.register - Test fixture:${fixture.name} is already registered.`);
+                            Hf.log(`warn1`, `AgentFactory.register - Test fixture:${fixture.name} is already registered.`);
                         }
-                        Hflow.log(`info`, `Test agent:${agent.name} registered fixture:${fixture.name}.`);
+                        Hf.log(`info`, `Test agent:${agent.name} registered fixture:${fixture.name}.`);
                         return true;
                     }));
                 }
@@ -118,21 +119,21 @@ export default Composer({
             const agent = this;
 
             // TODO: Implement use case for agent run option.
-            option = Hflow.isObject(option) ? option : {};
+            option = Hf.isObject(option) ? option : {};
 
-            if (Hflow.isEmpty(_fixtures)) {
-                Hflow.log(`error`, `AgentFactory.run - Test agent:${agent.name} is not registered with a test fixture.`);
+            if (Hf.isEmpty(_fixtures)) {
+                Hf.log(`error`, `AgentFactory.run - Test agent:${agent.name} is not registered with a test fixture.`);
             } else {
                 _fixtures.forEach((fixture) => {
                     if (!fixture.hasStarted()) {
                         fixture.start(option, () => {
-                            Hflow.log(`info`, `Running test fixture:${fixture.name}...`);
+                            Hf.log(`info`, `Running test fixture:${fixture.name}...`);
                         });
                     } else {
                         fixture.restart(option, () => {
-                            Hflow.log(`info`, `Rerunning test fixture:${fixture.name}...`);
+                            Hf.log(`info`, `Rerunning test fixture:${fixture.name}...`);
                         });
-                        Hflow.log(`warn1`, `AgentFactory.run - Test fixture:${fixture.name} is already running. Restarting...`);
+                        Hf.log(`warn1`, `AgentFactory.run - Test fixture:${fixture.name} is already running. Restarting...`);
                     }
                 });
             }

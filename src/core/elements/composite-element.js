@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load DataElement */
@@ -28,8 +29,8 @@ import DataElement from './data-element';
 /* load CommonElement */
 import CommonElement from './common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 const PRIVATE_PREFIX = `_`;
 const INITIALIZATION_PREFIX = `$`;
@@ -50,14 +51,14 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      */
     getEnclosure: function getEnclosure (...fnNames) {
         const composite = this;
-        let clonedEnclosure = Hflow.clone(composite._enclosure);
+        let clonedEnclosure = Hf.clone(composite._enclosure);
 
-        if (Hflow.isEmpty(fnNames)) {
-            Hflow.log(`warn0`, `CompositeElement.getEnclosure - Input enclosure function name array is empty.`);
+        if (Hf.isEmpty(fnNames)) {
+            Hf.log(`warn0`, `CompositeElement.getEnclosure - Input enclosure function name array is empty.`);
         } else {
             return fnNames.filter((fnName) => {
-                if (!Hflow.isString(fnName)) {
-                    Hflow.log(`error`, `CompositeElement.getEnclosure - Input enclosure function name is invalid.`);
+                if (!Hf.isString(fnName)) {
+                    Hf.log(`error`, `CompositeElement.getEnclosure - Input enclosure function name is invalid.`);
                     return false;
                 }
                 return composite._enclosure.hasOwnProperty(fnName);
@@ -77,14 +78,14 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      */
     getTemplate: function getTemplate (...keys) {
         const composite = this;
-        let clonedTemplate = Hflow.clone(composite._template);
+        let clonedTemplate = Hf.clone(composite._template);
 
-        if (Hflow.isEmpty(keys)) {
-            Hflow.log(`warn0`, `CompositeElement.getTemplate - Input template key array is empty.`);
+        if (Hf.isEmpty(keys)) {
+            Hf.log(`warn0`, `CompositeElement.getTemplate - Input template key array is empty.`);
         } else {
             return keys.filter((key) => {
-                if (!Hflow.isString(key)) {
-                    Hflow.log(`error`, `CompositeElement.getTemplate - Input template key is invalid.`);
+                if (!Hf.isString(key)) {
+                    Hf.log(`error`, `CompositeElement.getTemplate - Input template key is invalid.`);
                     return false;
                 }
                 return composite._template.hasOwnProperty(key);
@@ -103,7 +104,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      */
     getExclusion: function getExclusion () {
         const composite = this;
-        return Hflow.clone(composite._exclusion);
+        return Hf.clone(composite._exclusion);
     },
     /**
      * @description - Mix self with a set of methods defined by source.
@@ -115,31 +116,31 @@ const CompositeElementPrototype = Object.create({}).prototype = {
     mixin: function mixin (...sources) {
         const composite = this;
 
-        if (!Hflow.isEmpty(sources)) {
+        if (!Hf.isEmpty(sources)) {
             const mixedTemplate = sources.filter((source) => {
-                if (!(Hflow.isObject(source) || Hflow.isFunction(source))) {
-                    Hflow.log(`warn0`, `CompositeElement.mixin - Input source is invalid.`);
+                if (!(Hf.isObject(source) || Hf.isFunction(source))) {
+                    Hf.log(`warn0`, `CompositeElement.mixin - Input source is invalid.`);
                     return false;
                 }
                 return true;
             }).reduce((_mixedTemplate, source) => {
                 let sourceObj = {};
 
-                if (Hflow.isObject(source)) {
+                if (Hf.isObject(source)) {
                     /* object literal mixins */
                     sourceObj = source;
                 }
-                if (Hflow.isFunction(source)) {
+                if (Hf.isFunction(source)) {
                     /* functional mixins */
                     source.call(sourceObj);
                 }
-                _mixedTemplate = Hflow.mix(sourceObj).with(_mixedTemplate);
+                _mixedTemplate = Hf.mix(sourceObj).with(_mixedTemplate);
 
                 return _mixedTemplate;
             }, composite.getTemplate());
 
-            if (!Hflow.isObject(mixedTemplate)) {
-                Hflow.log(`error`, `CompositeElement.mixin - Unable to mixin methods of source object.`);
+            if (!Hf.isObject(mixedTemplate)) {
+                Hf.log(`error`, `CompositeElement.mixin - Unable to mixin methods of source object.`);
             } else {
                 const definition = {
                     exclusion: composite.getExclusion(),
@@ -149,7 +150,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                 return CompositeElement(definition); // eslint-disable-line
             }
         } else {
-            Hflow.log(`warn0`, `CompositeElement.mixin - Input source array is empty.`);
+            Hf.log(`warn0`, `CompositeElement.mixin - Input source array is empty.`);
         }
     },
     /**
@@ -162,40 +163,40 @@ const CompositeElementPrototype = Object.create({}).prototype = {
     compose: function compose (...composites) {
         const composite = this;
 
-        if (!Hflow.isEmpty(composites)) {
+        if (!Hf.isEmpty(composites)) {
             composites = composites.filter((_composite) => {
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     // NOTE: for composite with internal private state, use enclosure.
                     getEnclosure: `function`,
                     // NOTE: for composite with no internal private state, use template.
                     getTemplate: `function`,
                     getExclusion: `function`
                 }).of(_composite)) {
-                    Hflow.log(`warn0`, `CompositeElement.compose - Input composite object is invalid.`);
+                    Hf.log(`warn0`, `CompositeElement.compose - Input composite object is invalid.`);
                     return false;
                 }
                 return true;
             });
 
-            if (!Hflow.isEmpty(composites)) {
+            if (!Hf.isEmpty(composites)) {
                 const composedExclusion = composites.reduce((_composedExclusion, _composite) => {
-                    const mergeExclusion = Hflow.compose(_composite.getExclusion, Hflow.merge);
+                    const mergeExclusion = Hf.compose(_composite.getExclusion, Hf.merge);
                     _composedExclusion = mergeExclusion().with(_composedExclusion);
                     return _composedExclusion;
                 }, composite.getExclusion());
                 const composedEnclosure = composites.reduce((_composedEnclosure, _composite) => {
-                    const mixEnclosure = Hflow.compose(_composite.getEnclosure, Hflow.mix);
+                    const mixEnclosure = Hf.compose(_composite.getEnclosure, Hf.mix);
                     _composedEnclosure = mixEnclosure().with(_composedEnclosure);
                     return _composedEnclosure;
                 }, composite.getEnclosure());
                 const composedTemplate = composites.reduce((_composedTemplate, _composite) => {
-                    const mixTemplate = Hflow.compose(_composite.getTemplate, Hflow.mix);
+                    const mixTemplate = Hf.compose(_composite.getTemplate, Hf.mix);
                     _composedTemplate = mixTemplate().with(_composedTemplate);
                     return _composedTemplate;
                 }, composite.getTemplate());
 
-                if (!(Hflow.isObject(composedEnclosure) && Hflow.isObject(composedTemplate))) {
-                    Hflow.log(`error`, `CompositeElement.compose - Unable to compose composites set.`);
+                if (!(Hf.isObject(composedEnclosure) && Hf.isObject(composedTemplate))) {
+                    Hf.log(`error`, `CompositeElement.compose - Unable to compose composites set.`);
                 } else {
                     const definition = {
                         exclusion: composedExclusion,
@@ -205,10 +206,10 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                     return CompositeElement(definition); // eslint-disable-line
                 }
             } else {
-                Hflow.log(`error`, `CompositeElement.compose - Input composites set is invalid.`);
+                Hf.log(`error`, `CompositeElement.compose - Input composites set is invalid.`);
             }
         } else {
-            Hflow.log(`warn0`, `CompositeElement.compose - Input composites set is empty.`);
+            Hf.log(`warn0`, `CompositeElement.compose - Input composites set is empty.`);
         }
     },
     /**
@@ -220,7 +221,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      */
     resolve: function resolve (initialState = {}) {
         const composite = this;
-        initialState = Hflow.isObject(initialState) ? initialState : {};
+        initialState = Hf.isObject(initialState) ? initialState : {};
         /* return a factory function */
         return function Factory (state = {}) {
             const exclusion = composite.getExclusion();
@@ -228,79 +229,79 @@ const CompositeElementPrototype = Object.create({}).prototype = {
             const data = DataElement();
             let product;
 
-            if (!Hflow.isEmpty(initialState)) {
+            if (!Hf.isEmpty(initialState)) {
                 const cursor = data.read(initialState, `state`).select(`state`);
                 /* helper function to deep mutate product state by a mutator. */
                 const deepStateMutation = function deepStateMutation (_source, _mutator, _pathId = []) {
-                    _pathId = Hflow.isArray(_pathId) ? _pathId : [];
-                    if (Hflow.isEmpty(_pathId)) {
-                        if (Hflow.isObject(_source) && Hflow.isObject(_mutator)) {
+                    _pathId = Hf.isArray(_pathId) ? _pathId : [];
+                    if (Hf.isEmpty(_pathId)) {
+                        if (Hf.isObject(_source) && Hf.isObject(_mutator)) {
                             Object.keys(_source).filter((key) => {
                                 if (!_mutator.hasOwnProperty(key)) {
-                                    Hflow.log(`warn0`, `Factory.deepStateMutation - Source key:${key} is not defined in mutator.`);
+                                    Hf.log(`warn0`, `Factory.deepStateMutation - Source key:${key} is not defined in mutator.`);
                                     return false;
                                 } else if (cursor.isItemComputable(key)) {
-                                    Hflow.log(`warn0`, `Factory.deepStateMutation - Ignore mutation of computable key:${key}.`);
+                                    Hf.log(`warn0`, `Factory.deepStateMutation - Ignore mutation of computable key:${key}.`);
                                     return false;
-                                } else if (Hflow.isFunction(_source[key])) {
-                                    Hflow.log(`warn0`, `Factory.deepStateMutation - Ignore mutation of function key:${key}.`);
+                                } else if (Hf.isFunction(_source[key])) {
+                                    Hf.log(`warn0`, `Factory.deepStateMutation - Ignore mutation of function key:${key}.`);
                                     return false;
                                 }
                                 return true;
                             }).forEach((key) => {
                                 const sourceItem = _source[key];
                                 const mutatorItem = _mutator[key];
-                                if ((Hflow.isObject(sourceItem) && Hflow.isObject(mutatorItem)) ||
-                                    (Hflow.isArray(sourceItem) && Hflow.isArray(mutatorItem))) {
+                                if ((Hf.isObject(sourceItem) && Hf.isObject(mutatorItem)) ||
+                                    (Hf.isArray(sourceItem) && Hf.isArray(mutatorItem))) {
                                     deepStateMutation(sourceItem, mutatorItem);
                                 } else {
                                     _source[key] = mutatorItem;
                                 }
                             });
-                        } else if (Hflow.isArray(_source) && Hflow.isArray(_mutator)) {
+                        } else if (Hf.isArray(_source) && Hf.isArray(_mutator)) {
                             _source.filter((sourceItem, key) => {
-                                if (Hflow.isFunction(sourceItem)) {
-                                    Hflow.log(`warn0`, `Factory.deepStateMutation - Ignore mutation of function key:${key}.`);
+                                if (Hf.isFunction(sourceItem)) {
+                                    Hf.log(`warn0`, `Factory.deepStateMutation - Ignore mutation of function key:${key}.`);
                                     return false;
                                 }
                                 return key < _mutator.length;
                             }).forEach((sourceItem, key) => {
                                 const mutatorItem = _mutator[key];
-                                if ((Hflow.isObject(sourceItem) && Hflow.isObject(mutatorItem)) ||
-                                    (Hflow.isArray(sourceItem) && Hflow.isArray(mutatorItem))) {
+                                if ((Hf.isObject(sourceItem) && Hf.isObject(mutatorItem)) ||
+                                    (Hf.isArray(sourceItem) && Hf.isArray(mutatorItem))) {
                                     deepStateMutation(sourceItem, mutatorItem);
                                 } else {
                                     _source[key] = mutatorItem;
                                 }
                             });
                         } else {
-                            Hflow.log(`error`, `Factory.deepStateMutation - Input mutator is invalid.`);
+                            Hf.log(`error`, `Factory.deepStateMutation - Input mutator is invalid.`);
                         }
                     } else {
                         const key = _pathId.shift();
-                        if (Hflow.isObject(_source) && _source.hasOwnProperty(key)) {
-                            if (Hflow.isEmpty(_pathId)) {
-                                if (Hflow.isObject(_mutator) && _mutator.hasOwnProperty(key)) {
+                        if (Hf.isObject(_source) && _source.hasOwnProperty(key)) {
+                            if (Hf.isEmpty(_pathId)) {
+                                if (Hf.isObject(_mutator) && _mutator.hasOwnProperty(key)) {
                                     deepStateMutation(_source[key], _mutator[key], _pathId.slice(0));
                                 }
                             } else {
                                 deepStateMutation(_source[key], _mutator, _pathId.slice(0));
                             }
-                        } else if (Hflow.isArray(_source) && Hflow.isInteger(key) && key < _source.length) {
-                            if (Hflow.isEmpty(_pathId)) {
-                                if (Hflow.isArray(_mutator) && key < _mutator.length) {
+                        } else if (Hf.isArray(_source) && Hf.isInteger(key) && key < _source.length) {
+                            if (Hf.isEmpty(_pathId)) {
+                                if (Hf.isArray(_mutator) && key < _mutator.length) {
                                     deepStateMutation(_source[key], _mutator[key], _pathId.slice(0));
                                 }
                             } else {
                                 deepStateMutation(_source[key], _mutator, _pathId.slice(0));
                             }
                         } else {
-                            Hflow.log(`error`, `Factory.deepStateMutation - Path ends at property key:${key}.`);
+                            Hf.log(`error`, `Factory.deepStateMutation - Path ends at property key:${key}.`);
                         }
                     }
                 };
                 // FIXME: error thrown in collect method when enclosure is empty.
-                product = composite.mixin(...Hflow.collect(enclosure, ...Object.keys(enclosure))).mixin({
+                product = composite.mixin(...Hf.collect(enclosure, ...Object.keys(enclosure))).mixin({
                     /**
                      * @description - Check if product state has muated.
                      *
@@ -371,14 +372,14 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      */
                     mutateState: function mutateState (mutator) {
                         let stateMutated = false;
-                        if (Hflow.isObject(mutator)) {
+                        if (Hf.isObject(mutator)) {
                             deepStateMutation(product._state, mutator);
                             if (product._cursor.isImmutable()) {
                                 const currentState = product._cursor.getAccessor();
                                 stateMutated = product._state !== currentState;
                             }
                         } else {
-                            Hflow.log(`error`, `Factory.mutateState - Input mutator is invalid.`);
+                            Hf.log(`error`, `Factory.mutateState - Input mutator is invalid.`);
                         }
                         return stateMutated;
                     },
@@ -392,19 +393,19 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @return {boolean}
                      */
                     mutateStateAtPath: function mutateStateAtPath (mutator, pathId) {
-                        pathId = Hflow.isString(pathId) ? Hflow.stringToArray(pathId, `.`) : pathId;
-                        if (!(Hflow.isArray(pathId) && !Hflow.isEmpty(pathId))) {
-                            Hflow.log(`error`, `Factory.mutateStateAtPath - Input pathId is invalid.`);
+                        pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
+                        if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+                            Hf.log(`error`, `Factory.mutateStateAtPath - Input pathId is invalid.`);
                         } else {
                             let stateMutated = false;
-                            if (Hflow.isObject(mutator)) {
+                            if (Hf.isObject(mutator)) {
                                 deepStateMutation(product._state, mutator, pathId.slice(0));
                                 if (product._cursor.isImmutable()) {
                                     const currentState = product._cursor.getAccessor();
                                     stateMutated = product._state !== currentState;
                                 }
                             } else {
-                                Hflow.log(`error`, `Factory.mutateStateAtPath - Input mutator is invalid.`);
+                                Hf.log(`error`, `Factory.mutateStateAtPath - Input mutator is invalid.`);
                             }
                             return stateMutated;
                         }
@@ -424,7 +425,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                     enumerable: false
                 });
 
-                if (Hflow.isObject(state) && !Hflow.isEmpty(state)) {
+                if (Hf.isObject(state) && !Hf.isEmpty(state)) {
                     if (product.mutateState(state)) {
                         product.updateStateAccessor();
                     }
@@ -444,9 +445,9 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                 }, product);
             } else {
                 // FIXME: error thrown in collect method when enclosure is empty.
-                product = composite.mixin(...Hflow.collect(enclosure, ...Object.keys(enclosure))).getTemplate();
+                product = composite.mixin(...Hf.collect(enclosure, ...Object.keys(enclosure))).getTemplate();
             }
-            let revealedProduct = Hflow.reveal(product, {
+            let revealedProduct = Hf.reveal(product, {
                 exclusion
             });
 
@@ -455,7 +456,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
 
             /* if a function with initialization prefix is defined, call it once at init */
             Object.keys(product).filter((key) => {
-                return Hflow.isFunction(product[key]) && key.charAt(0) === INITIALIZATION_PREFIX;
+                return Hf.isFunction(product[key]) && key.charAt(0) === INITIALIZATION_PREFIX;
             }).sort((fnNameA, fnNameB) => {
                 if (fnNameA < fnNameB) {
                     return -1;
@@ -484,14 +485,14 @@ const CompositeElementPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function CompositeElement (definition) {
-    if (!Hflow.isObject(definition)) {
-        Hflow.log(`error`, `CompositeElement - Input composite definition object is invalid.`);
+    if (!Hf.isObject(definition)) {
+        Hf.log(`error`, `CompositeElement - Input composite definition object is invalid.`);
     } else {
         const {
             enclosure,
             template,
             exclusion
-        } = Hflow.fallback({
+        } = Hf.fallback({
             enclosure: {},
             template: {},
             exclusion: {
@@ -505,8 +506,8 @@ export default function CompositeElement (definition) {
             return exclusion.prefixes.indexOf(prefix) === -1;
         }));
 
-        if (!Object.keys(enclosure).every((fnName) => Hflow.isFunction(enclosure[fnName]))) {
-            Hflow.log(`error`, `CompositeElement - Input composite definition for enclosure object is invalid.`);
+        if (!Object.keys(enclosure).every((fnName) => Hf.isFunction(enclosure[fnName]))) {
+            Hf.log(`error`, `CompositeElement - Input composite definition for enclosure object is invalid.`);
         } else {
             const element = Object.create(CompositeElementPrototype, {
                 // TODO: Implement $init sequence for composer method. This will allow the $init method call order to be deterministic.
@@ -534,10 +535,10 @@ export default function CompositeElement (definition) {
                 }
             });
 
-            if (!Hflow.isObject(element)) {
-                Hflow.log(`error`, `CompositeElement - Unable to create a composite element instance.`);
+            if (!Hf.isObject(element)) {
+                Hf.log(`error`, `CompositeElement - Unable to create a composite element instance.`);
             } else {
-                const revealFrozen = Hflow.compose(Hflow.reveal, Object.freeze);
+                const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
                 /* reveal only the public properties and functions */
                 return revealFrozen(element);
             }

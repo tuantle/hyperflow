@@ -21,13 +21,14 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
 import CommonElement from '../common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A computable descriptor prototypes.
@@ -45,12 +46,12 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     assign: function assign (descPreset) {
-        if (!Hflow.isSchema({
+        if (!Hf.isSchema({
             key: `string|number`,
             contexts: `array`,
             compute: `function`
         }).of(descPreset)) {
-            Hflow.log(`error`, `ComputableDescriptor.assign - Input descriptor preset object is invalid.`);
+            Hf.log(`error`, `ComputableDescriptor.assign - Input descriptor preset object is invalid.`);
         } else {
             const computable = this;
             const {
@@ -72,9 +73,9 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 to: function to (target) {
-                    if (Hflow.isObject(target) || Hflow.isArray(target)) {
+                    if (Hf.isObject(target) || Hf.isArray(target)) {
                         if (target.hasOwnProperty(fnName) && target[fnName] !== null) {
-                            Hflow.log(`error`, `ComputableDescriptor.assign.to - Target already has a defined property key:${fnName}`);
+                            Hf.log(`error`, `ComputableDescriptor.assign.to - Target already has a defined property key:${fnName}`);
                         } else {
                             computable._description.assigned = true;
                             computable._description.fnName = fnName;
@@ -82,14 +83,14 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
 
                             /* create context of the computable */
                             computable._description.context = contextPathIds.reduce((_context, contextPathId) => {
-                                contextPathId = Hflow.isString(contextPathId) ? Hflow.stringToArray(contextPathId, `.`) : contextPathId;
+                                contextPathId = Hf.isString(contextPathId) ? Hf.stringToArray(contextPathId, `.`) : contextPathId;
                                 const key = contextPathId.pop();
                                 Object.defineProperty(_context, key, {
                                     get: function get () {
-                                        if (Hflow.isEmpty(contextPathId)) {
+                                        if (Hf.isEmpty(contextPathId)) {
                                             return computable._description.proxy[key];
                                         }
-                                        return Hflow.retrieve(contextPathId, `.`).from(computable._description.proxy)[key];
+                                        return Hf.retrieve(contextPathId, `.`).from(computable._description.proxy)[key];
                                     },
                                     configurable: false,
                                     enumerable: true
@@ -107,7 +108,7 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
                             });
                         }
                     } else {
-                        Hflow.log(`error`, `ComputableDescriptor.assign.to - Input target is invalid.`);
+                        Hf.log(`error`, `ComputableDescriptor.assign.to - Input target is invalid.`);
                     }
                 }
             };
@@ -145,8 +146,8 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function ComputableDescriptor (id) {
-    if (!Hflow.isString(id)) {
-        Hflow.log(`error`, `ComputableDescriptor - Input descriptor Id is invalid.`);
+    if (!Hf.isString(id)) {
+        Hf.log(`error`, `ComputableDescriptor - Input descriptor Id is invalid.`);
     } else {
         const descriptor = Object.create(ComputableDescriptorPrototype, {
             _id: {
@@ -170,10 +171,10 @@ export default function ComputableDescriptor (id) {
             }
         });
 
-        if (!Hflow.isObject(descriptor)) {
-            Hflow.log(`error`, `ComputableDescriptor - Unable to create a computable descriptor instance.`);
+        if (!Hf.isObject(descriptor)) {
+            Hf.log(`error`, `ComputableDescriptor - Unable to create a computable descriptor instance.`);
         } else {
-            const revealFrozen = Hflow.compose(Hflow.reveal, Object.freeze);
+            const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
             /* reveal only the public properties and functions */
             return revealFrozen(descriptor);
         }

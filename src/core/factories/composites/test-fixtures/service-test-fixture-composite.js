@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -56,8 +57,8 @@ export default CompositeElement({
          */
         $initServiceTestFixtureComposite: function $initServiceTestFixtureComposite () {
             const fixture = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     fId: `string`,
                     name: `string`,
                     setup: `function`,
@@ -68,7 +69,7 @@ export default CompositeElement({
                     deactivateIncomingStream: `function`,
                     deactivateOutgoingStream: `function`
                 }).of(fixture) || fixture.fId.substr(0, FIXTURE_FACTORY_CODE.length) !== FIXTURE_FACTORY_CODE) {
-                    Hflow.log(`error`, `ServiceTestFixtureComposite.$init - Fixture is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `ServiceTestFixtureComposite.$init - Fixture is invalid. Cannot apply composite.`);
                 }
             }
         }
@@ -90,16 +91,16 @@ export default CompositeElement({
              */
             this.register = function register (definition) {
                 const fixture = this;
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     testSubject: `object`
                 }).of(definition)) {
-                    Hflow.log(`error`, `ServiceTestFixtureComposite.register - Input definition object is invalid.`);
+                    Hf.log(`error`, `ServiceTestFixtureComposite.register - Input definition object is invalid.`);
                 } else {
                     const {
                         testSubject: service
                     } = definition;
-                    if (Hflow.isObject(service)) {
-                        if (!Hflow.isSchema({
+                    if (Hf.isObject(service)) {
+                        if (!Hf.isSchema({
                             fId: `string`,
                             name: `string`,
                             setup: `function`,
@@ -110,18 +111,18 @@ export default CompositeElement({
                             deactivateIncomingStream: `function`,
                             deactivateOutgoingStream: `function`
                         }).of(service) || service.fId.substr(0, SERVICE_FACTORY_CODE.length) !== SERVICE_FACTORY_CODE) {
-                            Hflow.log(`error`, `ServiceTestFixtureComposite.register - Input service is invalid.`);
-                        } else if (Hflow.isObject(_service)) {
-                            Hflow.log(`warn1`, `ServiceTestFixtureComposite.register - Test fixture:${fixture.name} registered service:${service.name}.`);
+                            Hf.log(`error`, `ServiceTestFixtureComposite.register - Input service is invalid.`);
+                        } else if (Hf.isObject(_service)) {
+                            Hf.log(`warn1`, `ServiceTestFixtureComposite.register - Test fixture:${fixture.name} registered service:${service.name}.`);
                         } else {
                             _service = service;
                             /* setup event stream observation duplex between service and test fixture */
                             _service.observe(fixture);
                             fixture.observe(_service).delay(DELAY_SERVICE_IN_MS);
-                            Hflow.log(`info`, `Test fixture:${fixture.name} registered service:${service.name}.`);
+                            Hf.log(`info`, `Test fixture:${fixture.name} registered service:${service.name}.`);
 
                             _service = service;
-                            Hflow.log(`info`, `Test fixture:${fixture.name} registered service:${service.name}.`);
+                            Hf.log(`info`, `Test fixture:${fixture.name} registered service:${service.name}.`);
                         }
                     }
                 }
@@ -138,21 +139,21 @@ export default CompositeElement({
                 const fixture = this;
 
                 // TODO: Implement use case for fixture start option.
-                option = Hflow.isObject(option) ? option : {};
+                option = Hf.isObject(option) ? option : {};
 
-                if (!Hflow.isFunction(done)) {
-                    Hflow.log(`error`, `ServiceTestFixtureComposite.start - Input done function is invalid.`);
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `ServiceTestFixtureComposite.start - Input done function is invalid.`);
                 } else {
                     if (!_started) {
                         fixture.activateIncomingStream();
                         fixture.setup(() => {
-                            if (!Hflow.isObject(_service)) {
-                                Hflow.log(`error`, `ServiceTestFixtureComposite.start - Test fixture:${fixture.name} is not registered with a service.`);
+                            if (!Hf.isObject(_service)) {
+                                Hf.log(`error`, `ServiceTestFixtureComposite.start - Test fixture:${fixture.name} is not registered with a service.`);
                             } else {
                                 _service.activateIncomingStream();
                                 _service.setup(() => {
                                     _service.activateOutgoingStream();
-                                    Hflow.log(`info`, `Test fixture:${fixture.name} activated service:${_service.name}.`);
+                                    Hf.log(`info`, `Test fixture:${fixture.name} activated service:${_service.name}.`);
                                 });
                             }
                             fixture.activateOutgoingStream();
@@ -161,7 +162,7 @@ export default CompositeElement({
                         });
                     } else {
                         fixture.restart(option);
-                        Hflow.log(`warn1`, `ServiceTestFixtureComposite.start - Test fixture:${fixture.name} is already started. Restarting...`);
+                        Hf.log(`warn1`, `ServiceTestFixtureComposite.start - Test fixture:${fixture.name} is already started. Restarting...`);
                     }
                 }
             };
@@ -174,18 +175,18 @@ export default CompositeElement({
              */
             this.stop = function stop (done) {
                 const fixture = this;
-                if (!Hflow.isFunction(done)) {
-                    Hflow.log(`error`, `ServiceTestFixtureComposite.stop - Input done function is invalid.`);
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `ServiceTestFixtureComposite.stop - Input done function is invalid.`);
                 } else {
                     if (!_started) {
-                        Hflow.log(`warn1`, `ServiceTestFixtureComposite.stop - Test fixture:${fixture.name} is already stopped.`);
+                        Hf.log(`warn1`, `ServiceTestFixtureComposite.stop - Test fixture:${fixture.name} is already stopped.`);
                     } else {
                         fixture.teardown(() => {
-                            if (Hflow.isObject(_service)) {
+                            if (Hf.isObject(_service)) {
                                 _service.teardown(() => {
                                     _service.deactivateIncomingStream();
                                     _service.deactivateOutgoingStream();
-                                    Hflow.log(`info`, `Test fixture:${fixture.name} deactivated service:${_service.name}.`);
+                                    Hf.log(`info`, `Test fixture:${fixture.name} deactivated service:${_service.name}.`);
                                 });
                             }
                             fixture.deactivateIncomingStream();

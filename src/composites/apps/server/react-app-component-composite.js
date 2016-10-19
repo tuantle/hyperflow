@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../core/elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../core/elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A React server component composite module.
@@ -47,12 +48,12 @@ export default CompositeElement({
          */
         $initReactAppComponentComposite: function $initReactAppComponentComposite () {
             const app = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     name: `string`,
                     getTopDomain: `function`
                 }).of(app)) {
-                    Hflow.log(`error`, `ReactAppComponentComposite.$init - App is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `ReactAppComponentComposite.$init - App is invalid. Cannot apply composite.`);
                 }
             }
         },
@@ -65,32 +66,32 @@ export default CompositeElement({
         getTopComponent: function getTopComponent () {
             const app = this;
             const domain = app.getTopDomain();
-            if (!Hflow.isSchema({
+            if (!Hf.isSchema({
                 name: `string`,
                 getInterface: `function`
             }).of(domain)) {
-                Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} domain is invalid.`);
+                Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} domain is invalid.`);
             } else {
                 const intf = domain.getInterface();
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     toComponent: `function`,
                     getComponentLib: `function`
                 }).of(intf)) {
-                    Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} top domain:${domain.name} interface is invalid.`);
+                    Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} top domain:${domain.name} interface is invalid.`);
                 } else {
                     const {
                         React
                     } = intf.getComponentLib();
-                    if (!Hflow.isSchema({
+                    if (!Hf.isSchema({
                         PropTypes: `object`,
                         createClass: `function`,
                         createElement: `function`
                     }).of(React)) {
-                        Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
+                        Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
                     } else {
                         const topComponent = intf.toComponent();
-                        if (!Hflow.isFunction(topComponent)) {
-                            Hflow.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
+                        if (!Hf.isFunction(topComponent)) {
+                            Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
                         } else {
                             return React.createElement(topComponent);
                         }

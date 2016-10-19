@@ -20,13 +20,14 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
 import CommonElement from '../../common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for strongly typed value.
@@ -46,17 +47,17 @@ const stronglyTypedPreset = function stronglyTypedPreset () {
              */
             constrainer: function stronglyTyped () {
                 const context = this;
-                const oldValueType = Hflow.typeOf(context.oldValue);
-                const newValueType = Hflow.typeOf(context.newValue);
+                const oldValueType = Hf.typeOf(context.oldValue);
+                const newValueType = Hf.typeOf(context.newValue);
                 const result = {
                     verified: true,
                     reject: function reject () {
-                        Hflow.log(`warn1`, `stronglyTyped - Value of key:${context.key} is strongly typed to ${oldValueType}.`);
+                        Hf.log(`warn1`, `stronglyTyped - Value of key:${context.key} is strongly typed to ${oldValueType}.`);
                     }
                 };
                 if (oldValueType === `undefined` || oldValueType === `null`) {
                     result.verified = true;
-                    Hflow.log(`warn0`, `stronglyTyped - Ignoring type constraint of key:${context.key} as it is ${oldValueType}.`);
+                    Hf.log(`warn0`, `stronglyTyped - Ignoring type constraint of key:${context.key} as it is ${oldValueType}.`);
                 } else {
                     result.verified = oldValueType === newValueType;
                 }

@@ -21,6 +21,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load RxJs dependency */
@@ -29,8 +30,8 @@ import Rx from 'rx';
 /* load CommonElement */
 import CommonElement from '../common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A emitter descriptor prototypes.
@@ -74,7 +75,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
         const observable = this;
 
         if (!observable._description.assigned) {
-            Hflow.log(`error`, `ObservableDescriptor.getStream - Descriptor as no assignment.`);
+            Hf.log(`error`, `ObservableDescriptor.getStream - Descriptor as no assignment.`);
         } else {
             return observable._stream;
         }
@@ -88,10 +89,10 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @return void
      */
     addSubscriber: function addSubscriber (handler, handerKey) {
-        if (!Hflow.isFunction(handler)) {
-            Hflow.log(`error`, `ObservableDescriptor.addSubscriber - Input subscription handler function is invalid.`);
-        } else if (!Hflow.isString(handerKey)) {
-            Hflow.log(`error`, `ObservableDescriptor.addSubscriber - Input subscription handler key is invalid.`);
+        if (!Hf.isFunction(handler)) {
+            Hf.log(`error`, `ObservableDescriptor.addSubscriber - Input subscription handler function is invalid.`);
+        } else if (!Hf.isString(handerKey)) {
+            Hf.log(`error`, `ObservableDescriptor.addSubscriber - Input subscription handler key is invalid.`);
         } else {
             const observable = this;
             const eventId = `${observable._id}.${handerKey}`;
@@ -109,8 +110,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @return void
      */
     removeSubscriber: function removeSubscriber (handerKey) {
-        if (!Hflow.isString(handerKey)) {
-            Hflow.log(`error`, `ObservableDescriptor.removeSubscriber - Input subscriber handler key is invalid.`);
+        if (!Hf.isString(handerKey)) {
+            Hf.log(`error`, `ObservableDescriptor.removeSubscriber - Input subscriber handler key is invalid.`);
         } else {
             const observable = this;
             const eventId = `${observable._id}.${handerKey}`;
@@ -130,10 +131,10 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @return void
      */
     addCondition: function addCondition (trigger, conditionKey) {
-        if (!Hflow.isFunction(trigger)) {
-            Hflow.log(`error`, `ObservableDescriptor.addCondition - Input condition trigger function is invalid.`);
-        } else if (!Hflow.isString(conditionKey)) {
-            Hflow.log(`error`, `ObservableDescriptor.addCondition - Input condition key is invalid.`);
+        if (!Hf.isFunction(trigger)) {
+            Hf.log(`error`, `ObservableDescriptor.addCondition - Input condition trigger function is invalid.`);
+        } else if (!Hf.isString(conditionKey)) {
+            Hf.log(`error`, `ObservableDescriptor.addCondition - Input condition key is invalid.`);
         } else {
             const observable = this;
             const eventId = `${observable._id}.${conditionKey}`;
@@ -151,8 +152,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @return void
      */
     removeCondition: function removeCondition (conditionKey) {
-        if (!Hflow.isString(conditionKey)) {
-            Hflow.log(`error`, `ObservableDescriptor.removeCondition - Input condition key is invalid.`);
+        if (!Hf.isString(conditionKey)) {
+            Hf.log(`error`, `ObservableDescriptor.removeCondition - Input condition key is invalid.`);
         } else {
             const observable = this;
             const eventId = `${observable._id}.${conditionKey}`;
@@ -171,17 +172,17 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     assign: function assign (descPreset) {
-        if (!Hflow.isSchema({
+        if (!Hf.isSchema({
             key: `string|number`
         }).of(descPreset)) {
-            Hflow.log(`error`, `ObservableDescriptor.assign - Input descriptor preset object is invalid.`);
+            Hf.log(`error`, `ObservableDescriptor.assign - Input descriptor preset object is invalid.`);
         } else {
             const observable = this;
             const {
                 key,
                 condition,
                 subscriber
-            } = Hflow.fallback({
+            } = Hf.fallback({
                 condition: {},
                 subscriber: {}
             }).of(descPreset);
@@ -190,14 +191,14 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                 observable.unassign();
             }
 
-            if (!Hflow.isEmpty(condition)) {
-                Hflow.forEach(condition, (trigger, conditionKey) => {
+            if (!Hf.isEmpty(condition)) {
+                Hf.forEach(condition, (trigger, conditionKey) => {
                     observable.addCondition(trigger, conditionKey);
                 });
             }
 
-            if (!Hflow.isEmpty(subscriber)) {
-                Hflow.forEach(subscriber, (handler, handlerKey) => {
+            if (!Hf.isEmpty(subscriber)) {
+                Hf.forEach(subscriber, (handler, handlerKey) => {
                     observable.addSubscriber(handler, handlerKey);
                 });
             }
@@ -211,7 +212,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 function onNext (payload) {
-                    if (Hflow.isSchema({
+                    if (Hf.isSchema({
                         eventId: `string`
                     }).of(payload)) {
                         const {
@@ -223,7 +224,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                             handler(value);
                         }
                     } else {
-                        Hflow.log(`error`, `ObservableDescriptor.onNext - Payload event Id is invalid.`);
+                        Hf.log(`error`, `ObservableDescriptor.onNext - Payload event Id is invalid.`);
                     }
                 },
                 /**
@@ -234,7 +235,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 function onError (error) {
-                    Hflow.log(`error`, `ObservableDescriptor.onError - Subscription error. ${error.message}`);
+                    Hf.log(`error`, `ObservableDescriptor.onError - Subscription error. ${error.message}`);
                 },
                 /**
                  * @description - On subscription to completion...
@@ -243,7 +244,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 function onCompleted () {
-                    Hflow.log(`info`, `Subscription completed.`);
+                    Hf.log(`info`, `Subscription completed.`);
                 }
             );
 
@@ -256,7 +257,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 to: function to (target) {
-                    if (Hflow.isObject(target) || Hflow.isArray(target)) {
+                    if (Hf.isObject(target) || Hf.isArray(target)) {
                         if (target.hasOwnProperty(key)) {
                             observable._description.assigned = true;
                             observable._description.key = key;
@@ -297,7 +298,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                                     eventId: `${observable._id}`,
                                     value
                                 };
-                                if (!Hflow.isEmpty(observable._description.condition)) {
+                                if (!Hf.isEmpty(observable._description.condition)) {
                                     return Object.keys(observable._description.condition).reduce((payload, eventId) => {
                                         let context = {};
                                         const trigger = observable._description.condition[eventId];
@@ -318,10 +319,10 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
 
                             observable._subscription = observable._stream.subscribe(observable._observer);
                         } else {
-                            Hflow.log(`error`, `ObservableDescriptor.assign.to - Property key:${key} is not defined.`);
+                            Hf.log(`error`, `ObservableDescriptor.assign.to - Property key:${key} is not defined.`);
                         }
                     } else {
-                        Hflow.log(`error`, `ObservableDescriptor.assign.to - Input target is invalid.`);
+                        Hf.log(`error`, `ObservableDescriptor.assign.to - Input target is invalid.`);
                     }
                 }
             };
@@ -365,8 +366,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
             observable._stream = undefined;
             observable._observer = undefined;
             observable._subscription = undefined;
-            Hflow.clear(observable._description.condition);
-            Hflow.clear(observable._description.subscriber);
+            Hf.clear(observable._description.condition);
+            Hf.clear(observable._description.subscriber);
         }
     }
 };
@@ -379,8 +380,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function ObservableDescriptor (id) {
-    if (!Hflow.isString(id)) {
-        Hflow.log(`error`, `ObservableDescriptor - Input descriptor Id is invalid.`);
+    if (!Hf.isString(id)) {
+        Hf.log(`error`, `ObservableDescriptor - Input descriptor Id is invalid.`);
     } else {
         const descriptor = Object.create(ObservableDescriptorPrototype, {
             _id: {
@@ -423,10 +424,10 @@ export default function ObservableDescriptor (id) {
             }
         });
 
-        if (!Hflow.isObject(descriptor)) {
-            Hflow.log(`error`, `ObservableDescriptor - Unable to create a computable descriptor instance.`);
+        if (!Hf.isObject(descriptor)) {
+            Hf.log(`error`, `ObservableDescriptor - Unable to create a computable descriptor instance.`);
         } else {
-            const revealFrozen = Hflow.compose(Hflow.reveal, Object.freeze);
+            const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
             /* reveal only the public properties and functions */
             return revealFrozen(descriptor);
         }

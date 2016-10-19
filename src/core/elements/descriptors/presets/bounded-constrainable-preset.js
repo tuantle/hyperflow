@@ -20,13 +20,14 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
 import CommonElement from '../../common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for the bounding range.
@@ -38,8 +39,8 @@ const Hflow = CommonElement();
  */
 const boundedPreset = function boundedPreset (_lowerBound, _upperBound) {
     // TODO: Add +infinity and -infinity to lower & upper bound range values.
-    if (!Hflow.isNumeric(_lowerBound) && !Hflow.isNumeric(_upperBound)) {
-        Hflow.log(`error`, `bounded - Input bouding range values are invalid.`);
+    if (!Hf.isNumeric(_lowerBound) && !Hf.isNumeric(_upperBound)) {
+        Hf.log(`error`, `bounded - Input bouding range values are invalid.`);
     } else {
         return {
             bounded: {
@@ -60,19 +61,19 @@ const boundedPreset = function boundedPreset (_lowerBound, _upperBound) {
                     const result = {
                         verified: true,
                         reject: function reject () {
-                            if (Hflow.isString(context.newValue)) {
-                                Hflow.log(`warn1`, `bounded - Property key:${context.key} length is not in a bounded range of ${lowerBound} to ${upperBound}`);
+                            if (Hf.isString(context.newValue)) {
+                                Hf.log(`warn1`, `bounded - Property key:${context.key} length is not in a bounded range of ${lowerBound} to ${upperBound}`);
                             } else {
-                                Hflow.log(`warn1`, `bounded - Property key:${context.key} is not in a bounded range of ${lowerBound} to ${upperBound}`);
+                                Hf.log(`warn1`, `bounded - Property key:${context.key} is not in a bounded range of ${lowerBound} to ${upperBound}`);
                             }
                         }
                     };
-                    if (Hflow.isNumeric(context.newValue)) {
+                    if (Hf.isNumeric(context.newValue)) {
                         if (context.newValue < lowerBound || context.newValue > upperBound) {
                             result.verified = false;
                         }
                     }
-                    if (Hflow.isString(context.newValue)) {
+                    if (Hf.isString(context.newValue)) {
                         if (context.newValue.length < lowerBound || context.newValue.length > upperBound) {
                             result.verified = false;
                         }

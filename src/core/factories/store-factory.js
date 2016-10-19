@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load EventStreamComposite */
@@ -34,8 +35,8 @@ import Composer from '../composer';
 /* load CommonElement */
 import CommonElement from '../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -79,7 +80,7 @@ export default Composer({
          * @return void
          */
         this.$init = function $init () {
-            Hflow.log(`warn0`, `StoreFactory.$init - Method is not implemented by default.`);
+            Hf.log(`warn0`, `StoreFactory.$init - Method is not implemented by default.`);
         };
         /**
          * @description - Setup store event stream.
@@ -89,8 +90,8 @@ export default Composer({
          * @return void
          */
         this.setup = function setup (done) { // eslint-disable-line
-            if (!Hflow.isFunction(done)) {
-                Hflow.log(`error`, `StoreFactory.setup - Input done function is invalid.`);
+            if (!Hf.isFunction(done)) {
+                Hf.log(`error`, `StoreFactory.setup - Input done function is invalid.`);
             } else {
                 done();
             }
@@ -103,8 +104,8 @@ export default Composer({
          * @return void
          */
         this.teardown = function teardown (done) { // eslint-disable-line
-            if (!Hflow.isFunction(done)) {
-                Hflow.log(`error`, `StoreFactory.teardown - Input done function is invalid.`);
+            if (!Hf.isFunction(done)) {
+                Hf.log(`error`, `StoreFactory.teardown - Input done function is invalid.`);
             } else {
                 done();
             }

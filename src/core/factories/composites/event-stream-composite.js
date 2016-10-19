@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Rx dependency */
@@ -33,8 +34,8 @@ import CompositeElement from '../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -71,8 +72,8 @@ export default CompositeElement({
          */
         $initEventStreamComposite: function $initEventStreamComposite () {
             const factory = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     fId: `string`,
                     name: `string`
                 }).of(factory) || !(factory.fId.substr(0, FIXTURE_FACTORY_CODE.length) === FIXTURE_FACTORY_CODE ||
@@ -80,7 +81,7 @@ export default CompositeElement({
                                     factory.fId.substr(0, INTERFACE_FACTORY_CODE.length) === INTERFACE_FACTORY_CODE ||
                                     factory.fId.substr(0, SERVICE_FACTORY_CODE.length) === SERVICE_FACTORY_CODE ||
                                     factory.fId.substr(0, STORE_FACTORY_CODE.length) === STORE_FACTORY_CODE)) {
-                    Hflow.log(`error`, `EventStreamComposite.$init - Factory is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `EventStreamComposite.$init - Factory is invalid. Cannot apply composite.`);
                 }
             }
         }
@@ -112,7 +113,7 @@ export default CompositeElement({
                  * @return void
                  */
                 function onNext (payload) {
-                    if (Hflow.isSchema({
+                    if (Hf.isSchema({
                         eventId: `string`
                     }).of(payload)) {
                         const {
@@ -126,7 +127,7 @@ export default CompositeElement({
                                 waitTime,
                                 handler,
                                 relayer
-                            } = Hflow.fallback({
+                            } = Hf.fallback({
                                 completed: false,
                                 waitTime: 0
                             }).of((_arbiter[eventId]));
@@ -136,8 +137,8 @@ export default CompositeElement({
                                 }
                                 if (waitTime > 0) {
                                     setTimeout(() => {
-                                        const handledValue = Hflow.isFunction(handler) ? handler(value) : undefined;
-                                        if (Hflow.isFunction(relayer)) {
+                                        const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
+                                        if (Hf.isFunction(relayer)) {
                                             relayer(handledValue);
                                         }
                                         if (completed) {
@@ -146,8 +147,8 @@ export default CompositeElement({
                                         }
                                     }, waitTime);
                                 } else {
-                                    const handledValue = Hflow.isFunction(handler) ? handler(value) : undefined;
-                                    if (Hflow.isFunction(relayer)) {
+                                    const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
+                                    if (Hf.isFunction(relayer)) {
                                         relayer(handledValue);
                                     }
                                     if (completed) {
@@ -160,7 +161,7 @@ export default CompositeElement({
                             }
                         }
                     } else {
-                        Hflow.log(`error`, `EventStreamComposite.onNext - Payload event Id is invalid.`);
+                        Hf.log(`error`, `EventStreamComposite.onNext - Payload event Id is invalid.`);
                     }
                 },
                 /**
@@ -171,7 +172,7 @@ export default CompositeElement({
                  * @return void
                  */
                 function onError (error) {
-                    Hflow.log(`error`, `EventStreamComposite.onError - Subscription error. ${error.message}`);
+                    Hf.log(`error`, `EventStreamComposite.onError - Subscription error. ${error.message}`);
                 },
                 /**
                  * @description - On subscription to completion...
@@ -180,7 +181,7 @@ export default CompositeElement({
                  * @return void
                  */
                 function onCompleted () {
-                    Hflow.log(`info`, `Subscription completed.`);
+                    Hf.log(`info`, `Subscription completed.`);
                 }
             );
 
@@ -196,8 +197,8 @@ export default CompositeElement({
              * @return {object}
              */
             function _createStreamOperatorFor (direction) {
-                if (!Hflow.isString(direction)) {
-                    Hflow.log(`error`, `EventStreamComposite._createStreamOperatorFor - Input event stream direction is invalid.`);
+                if (!Hf.isString(direction)) {
+                    Hf.log(`error`, `EventStreamComposite._createStreamOperatorFor - Input event stream direction is invalid.`);
                 } else {
                     const operator = {
                         /**
@@ -208,8 +209,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         delay: function delay (ms) {
-                            if (!Hflow.isInteger(ms)) {
-                                Hflow.log(`error`, `EventStreamComposite.delay - Input delay time is invalid.`);
+                            if (!Hf.isInteger(ms)) {
+                                Hf.log(`error`, `EventStreamComposite.delay - Input delay time is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
@@ -230,8 +231,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         debounce: function debounce (ms) {
-                            if (!Hflow.isInteger(ms)) {
-                                Hflow.log(`error`, `EventStreamComposite.debounce - Input debounce time is invalid.`);
+                            if (!Hf.isInteger(ms)) {
+                                Hf.log(`error`, `EventStreamComposite.debounce - Input debounce time is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
@@ -252,8 +253,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         filter: function filter (predicate) {
-                            if (!Hflow.isFunction(predicate)) {
-                                Hflow.log(`error`, `EventStreamComposite.filter - Input filter predicate function is invalid.`);
+                            if (!Hf.isFunction(predicate)) {
+                                Hf.log(`error`, `EventStreamComposite.filter - Input filter predicate function is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
@@ -274,8 +275,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         map: function map (selector) {
-                            if (!Hflow.isFunction(selector)) {
-                                Hflow.log(`error`, `EventStreamComposite.map - Input map selector function is invalid.`);
+                            if (!Hf.isFunction(selector)) {
+                                Hf.log(`error`, `EventStreamComposite.map - Input map selector function is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
@@ -296,8 +297,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         flatMap: function flatMap (selector) {
-                            if (!Hflow.isFunction(selector)) {
-                                Hflow.log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
+                            if (!Hf.isFunction(selector)) {
+                                Hf.log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
@@ -319,14 +320,14 @@ export default CompositeElement({
                          * @return {object}
                          */
                         reduce: function reduce (accumulator, defaultPayload) {
-                            if (!Hflow.isFunction(accumulator)) {
-                                Hflow.log(`error`, `EventStreamComposite.reduce - Input reduce accumulator function is invalid.`);
+                            if (!Hf.isFunction(accumulator)) {
+                                Hf.log(`error`, `EventStreamComposite.reduce - Input reduce accumulator function is invalid.`);
                             } else {
-                                if (Hflow.isObject(defaultPayload)) {
-                                    if (Hflow.isSchema({
+                                if (Hf.isObject(defaultPayload)) {
+                                    if (Hf.isSchema({
                                         eventId: `string`
                                     }).of(defaultPayload)) {
-                                        Hflow.log(`error`, `EventStreamComposite.reduce - Payload event Id is invalid.`);
+                                        Hf.log(`error`, `EventStreamComposite.reduce - Payload event Id is invalid.`);
                                     } else {
                                         switch (direction) { // eslint-disable-line
                                         case `incoming`:
@@ -359,10 +360,10 @@ export default CompositeElement({
                          * @return {object}
                          */
                         transduce: function transduce (selector, predicate) {
-                            if (!Hflow.isFunction(selector)) {
-                                Hflow.log(`error`, `EventStreamComposite.transduce - Input map selector function is invalid.`);
-                            } else if (!Hflow.isFunction(predicate)) {
-                                Hflow.log(`error`, `EventStreamComposite.transduce - Input filter predicate function is invalid.`);
+                            if (!Hf.isFunction(selector)) {
+                                Hf.log(`error`, `EventStreamComposite.transduce - Input map selector function is invalid.`);
+                            } else if (!Hf.isFunction(predicate)) {
+                                Hf.log(`error`, `EventStreamComposite.transduce - Input filter predicate function is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
@@ -391,10 +392,10 @@ export default CompositeElement({
                         startWith: function startWith (...payloads) {
                             // FIXME: startWith method not working? Needs testings.
                             if (payloads.every((payload) => {
-                                if (!Hflow.isSchema({
+                                if (!Hf.isSchema({
                                     eventId: `string`
                                 }).of(payload)) {
-                                    Hflow.log(`error`, `EventStreamComposite.startWith - Payload event Id is invalid.`);
+                                    Hf.log(`error`, `EventStreamComposite.startWith - Payload event Id is invalid.`);
                                     return false;
                                 }
                                 return true;
@@ -418,8 +419,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         takeLast: function takeLast (count) {
-                            if (!Hflow.isInteger(count)) {
-                                Hflow.log(`error`, `EventStreamComposite.takeLast - Input count number is invalid.`);
+                            if (!Hf.isInteger(count)) {
+                                Hf.log(`error`, `EventStreamComposite.takeLast - Input count number is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
@@ -441,12 +442,12 @@ export default CompositeElement({
                          * @return {object}
                          */
                         timeout: function timeout (timeoutPayload, ms) {
-                            if (!Hflow.isSchema({
+                            if (!Hf.isSchema({
                                 eventId: `string`
                             }).of(timeoutPayload)) {
-                                Hflow.log(`error`, `EventStreamComposite.timeout - Input timeout payload is invalid.`);
-                            } else if (!Hflow.isInteger(ms)) {
-                                Hflow.log(`error`, `EventStreamComposite.timeout - Input timeout is invalid.`);
+                                Hf.log(`error`, `EventStreamComposite.timeout - Input timeout payload is invalid.`);
+                            } else if (!Hf.isInteger(ms)) {
+                                Hf.log(`error`, `EventStreamComposite.timeout - Input timeout is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
@@ -467,16 +468,16 @@ export default CompositeElement({
                          * @return {object}
                          */
                         monitor: function monitor (logger = {}) {
-                            if (!Hflow.isSchema({
+                            if (!Hf.isSchema({
                                 logOnNext: `function`
                             }).of(logger)) {
-                                Hflow.log(`error`, `EventStreamComposite.monitor - Input logger object is invalid.`);
+                                Hf.log(`error`, `EventStreamComposite.monitor - Input logger object is invalid.`);
                             } else {
                                 const {
                                     logOnNext,
                                     logOnError,
                                     logOnComplete
-                                } = Hflow.fallback({
+                                } = Hf.fallback({
                                     /**
                                      * @description - On subscription to error...
                                      *
@@ -485,7 +486,7 @@ export default CompositeElement({
                                      * @return void
                                      */
                                     logOnError: function logOnError (error) {
-                                        Hflow.log(`error`, `EventStreamComposite.monitor.logOnError - ${error.message}`);
+                                        Hf.log(`error`, `EventStreamComposite.monitor.logOnError - ${error.message}`);
                                     },
                                     /**
                                      * @description - On subscription to completion...
@@ -494,7 +495,7 @@ export default CompositeElement({
                                      * @return void
                                      */
                                     logOnComplete: function logOnComplete () {
-                                        Hflow.log(`info`, `Complete side subscription.`);
+                                        Hf.log(`info`, `Complete side subscription.`);
                                     }
                                 }).of(logger);
                                 /* using a side observer for monitoring */
@@ -537,7 +538,7 @@ export default CompositeElement({
              * @return void
              */
             this.operateIncomingStream = function operateIncomingStream (operator) { // eslint-disable-line
-                Hflow.log(`warn0`, `EventStreamComposite.operateIncomingStream - Method is not implemented by default. Ignore this warning if intended.`);
+                Hf.log(`warn0`, `EventStreamComposite.operateIncomingStream - Method is not implemented by default. Ignore this warning if intended.`);
             };
             /**
              * @description - Apply outgoing event stream operators.
@@ -547,7 +548,7 @@ export default CompositeElement({
              * @return void
              */
             this.operateOutgoingStream = function operateOutgoingStream (operator) { // eslint-disable-line
-                Hflow.log(`warn0`, `EventStreamComposite.operateOutgoingStream - Method is not implemented by default. Ignore this warning if intended.`);
+                Hf.log(`warn0`, `EventStreamComposite.operateOutgoingStream - Method is not implemented by default. Ignore this warning if intended.`);
             };
             /**
              * @description - When there is an outgoing event...
@@ -558,10 +559,10 @@ export default CompositeElement({
              */
             this.outgoing = function outgoing (...eventIds) {
                 const factory = this;
-                if (Hflow.isEmpty(eventIds)) {
-                    Hflow.log(`error`, `EventStreamComposite.outgoing - Factory:${factory.name} input eventId array is empty.`);
-                } else if (eventIds.some((eventId) => !Hflow.isString(eventId))) {
-                    Hflow.log(`error`, `EventStreamComposite.outgoing - Factory:${factory.name} input event Id is invalid.`);
+                if (Hf.isEmpty(eventIds)) {
+                    Hf.log(`error`, `EventStreamComposite.outgoing - Factory:${factory.name} input eventId array is empty.`);
+                } else if (eventIds.some((eventId) => !Hf.isString(eventId))) {
+                    Hf.log(`error`, `EventStreamComposite.outgoing - Factory:${factory.name} input event Id is invalid.`);
                 } else {
                     eventIds = eventIds.filter((eventId) => {
                         if (_arbiter.hasOwnProperty(eventId)) {
@@ -578,8 +579,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         delay: function delay (ms) {
-                            if (!Hflow.isInteger(ms)) {
-                                Hflow.log(`error`, `EventStreamComposite.outgoing.delay - Input wait time is invalid.`);
+                            if (!Hf.isInteger(ms)) {
+                                Hf.log(`error`, `EventStreamComposite.outgoing.delay - Input wait time is invalid.`);
                             } else {
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
@@ -611,8 +612,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         interval: function interval (ms) {
-                            if (!Hflow.isInteger(ms)) {
-                                Hflow.log(`error`, `EventStreamComposite.outgoing.interval - Input period time is invalid.`);
+                            if (!Hf.isInteger(ms)) {
+                                Hf.log(`error`, `EventStreamComposite.outgoing.interval - Input period time is invalid.`);
                             } else {
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
@@ -646,7 +647,7 @@ export default CompositeElement({
                             eventIds.map((eventId) => {
                                 const payload = {
                                     eventId,
-                                    value: Hflow.isFunction(emitter) ? emitter() : undefined
+                                    value: Hf.isFunction(emitter) ? emitter() : undefined
                                 };
                                 return payload;
                             }).forEach((payload) => {
@@ -657,13 +658,13 @@ export default CompositeElement({
                                     if (!_unemitPayloads.some((unemitPayload) => unemitPayload.eventId === eventId)) {
                                         _unemitPayloads.push(payload);
                                     }
-                                    Hflow.log(`warn0`, `EventStreamComposite.outgoing.emit - Emitting payload with eventId:${eventId} before observer activation.`);
+                                    Hf.log(`warn0`, `EventStreamComposite.outgoing.emit - Emitting payload with eventId:${eventId} before observer activation.`);
                                 } else {
                                     if (_arbiter.hasOwnProperty(eventId)) {
                                         const {
                                             waitTime,
                                             intervalPeriod
-                                        } = Hflow.fallback({
+                                        } = Hf.fallback({
                                             waitTime: 0,
                                             intervalPeriod: 0
                                         }).of((_arbiter[eventId]));
@@ -695,7 +696,7 @@ export default CompositeElement({
                                         };
                                         _streamEmitter.onNext(payload);
                                     }
-                                    Hflow.log(`info`, `Factory:${factory.name} is emitting eventIds:[${eventIds}].`);
+                                    // Hf.log(`info`, `Factory:${factory.name} is emitting eventIds:[${eventIds}].`);
                                 }
                             });
                         }
@@ -712,10 +713,10 @@ export default CompositeElement({
              */
             this.incoming = function incoming (...eventIds) {
                 const factory = this;
-                if (Hflow.isEmpty(eventIds)) {
-                    Hflow.log(`error`, `EventStreamComposite.incoming - Factory:${factory.name} input eventId array is empty.`);
-                } else if (eventIds.some((eventId) => !Hflow.isString(eventId))) {
-                    Hflow.log(`error`, `EventStreamComposite.incoming - Factory:${factory.name} input event Id is invalid.`);
+                if (Hf.isEmpty(eventIds)) {
+                    Hf.log(`error`, `EventStreamComposite.incoming - Factory:${factory.name} input eventId array is empty.`);
+                } else if (eventIds.some((eventId) => !Hf.isString(eventId))) {
+                    Hf.log(`error`, `EventStreamComposite.incoming - Factory:${factory.name} input event Id is invalid.`);
                 } else {
                     eventIds = eventIds.filter((eventId) => {
                         if (_arbiter.hasOwnProperty(eventId)) {
@@ -732,8 +733,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         delay: function delay (ms) {
-                            if (!Hflow.isInteger(ms)) {
-                                Hflow.log(`error`, `EventStreamComposite.incoming.delay - Input wait time is invalid.`);
+                            if (!Hf.isInteger(ms)) {
+                                Hf.log(`error`, `EventStreamComposite.incoming.delay - Input wait time is invalid.`);
                             } else {
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
@@ -816,7 +817,7 @@ export default CompositeElement({
                             if (eventIds.length > 1) {
                                 let sideSubscription;
                                 const awaitedEventId = eventIds.reduce((_awaitedEventId, eventId) => {
-                                    return Hflow.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId}-&-${eventId}`;
+                                    return Hf.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId}-&-${eventId}`;
                                 }, ``);
                                 const incomingAWaitOperator = factory.incoming(awaitedEventId);
                                 const sideObserver = Rx.Observer.create(
@@ -829,7 +830,7 @@ export default CompositeElement({
                                      */
                                     function onNext (payloadBundle) {
                                         if (Object.keys(payloadBundle).length === eventIds.length) {
-                                            factory.outgoing(awaitedEventId).emit(() => Hflow.collect(payloadBundle, ...eventIds));
+                                            factory.outgoing(awaitedEventId).emit(() => Hf.collect(payloadBundle, ...eventIds));
                                         }
                                     },
                                     /**
@@ -840,7 +841,7 @@ export default CompositeElement({
                                      * @return void
                                      */
                                     function onError (error) {
-                                        Hflow.log(`error`, `EventStreamComposite.incoming.await.onError - Side subscription error. ${error.message}`);
+                                        Hf.log(`error`, `EventStreamComposite.incoming.await.onError - Side subscription error. ${error.message}`);
                                     },
                                     /**
                                      * @description - On subscription to side completion...
@@ -850,7 +851,7 @@ export default CompositeElement({
                                      */
                                     function onCompleted () {
                                         sideSubscription.dispose();
-                                        Hflow.log(`info`, `Side subscription completed.`);
+                                        Hf.log(`info`, `Side subscription completed.`);
                                     }
                                 );
                                 sideSubscription = _incomingStream.filter((payload) => {
@@ -879,8 +880,8 @@ export default CompositeElement({
                          * @return {object}
                          */
                         handle: function handle (handler) {
-                            if (!Hflow.isFunction(handler)) {
-                                Hflow.log(`error`, `EventStreamComposite.incoming.handle - Factory:${factory.name} input handler is invalid.`);
+                            if (!Hf.isFunction(handler)) {
+                                Hf.log(`error`, `EventStreamComposite.incoming.handle - Factory:${factory.name} input handler is invalid.`);
                             } else {
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
@@ -906,15 +907,15 @@ export default CompositeElement({
                                      * @return void
                                      */
                                     relay: function relay (...relayEventIds) {
-                                        if (Hflow.isEmpty(relayEventIds)) {
-                                            Hflow.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id array is empty.`);
-                                        } else if (relayEventIds.some((relayEventId) => !Hflow.isString(relayEventId))) {
-                                            Hflow.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id is invalid.`);
+                                        if (Hf.isEmpty(relayEventIds)) {
+                                            Hf.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id array is empty.`);
+                                        } else if (relayEventIds.some((relayEventId) => !Hf.isString(relayEventId))) {
+                                            Hf.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id is invalid.`);
                                         } else {
                                             relayEventIds = relayEventIds.filter((relayEventId) => {
                                                 if (eventIds.some((eventId) => eventId === relayEventId)) {
                                                     /* relaying the same eventIds will cause infinite loop error */
-                                                    Hflow.log(`warn1`, `EventStreamComposite.incoming.handle.relay - Cannot relay the same eventId:${relayEventId}.`);
+                                                    Hf.log(`warn1`, `EventStreamComposite.incoming.handle.relay - Cannot relay the same eventId:${relayEventId}.`);
                                                     return false;
                                                 }
                                                 return true;
@@ -923,7 +924,7 @@ export default CompositeElement({
                                                 arbiter[eventId].eventDirectionalState = RELAY_EVENT;
                                                 arbiter[eventId].relayer = (handledValue) => {
                                                     factory.outgoing(...relayEventIds).emit(() => handledValue);
-                                                    Hflow.log(`info`, `Factory:${factory.name} is relaying eventIds:[${relayEventIds}].`);
+                                                    // Hf.log(`info`, `Factory:${factory.name} is relaying eventIds:[${relayEventIds}].`);
                                                 };
                                                 return arbiter;
                                             }, _arbiter);
@@ -940,7 +941,7 @@ export default CompositeElement({
                                             arbiter[eventId].completed = true;
                                             return arbiter;
                                         }, _arbiter);
-                                        Hflow.log(`info`, `Factory:${factory.name} is completing eventIds:[${eventIds}].`);
+                                        // Hf.log(`info`, `Factory:${factory.name} is completing eventIds:[${eventIds}].`);
                                     }
                                 };
                             }
@@ -959,7 +960,7 @@ export default CompositeElement({
                                     arbiter[eventId].handler = (value) => value;
                                     arbiter[eventId].relayer = (handledValue) => {
                                         factory.outgoing(eventId).emit(() => handledValue);
-                                        Hflow.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
+                                        // Hf.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
                                     };
                                 } else {
                                     arbiter[eventId] = {
@@ -967,7 +968,7 @@ export default CompositeElement({
                                         handler: (value) => value,
                                         relayer: (handledValue) => {
                                             factory.outgoing(eventId).emit(() => handledValue);
-                                            Hflow.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
+                                            // Hf.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
                                         }
                                     };
                                 }
@@ -982,15 +983,15 @@ export default CompositeElement({
                          * @return {void}
                          */
                         forward: function forward (...forwardEventIds) {
-                            if (Hflow.isEmpty(forwardEventIds)) {
-                                Hflow.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input eventId array is empty.`);
-                            } else if (forwardEventIds.some((forwardEventId) => !Hflow.isString(forwardEventId))) {
-                                Hflow.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input event Id is invalid.`);
+                            if (Hf.isEmpty(forwardEventIds)) {
+                                Hf.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input eventId array is empty.`);
+                            } else if (forwardEventIds.some((forwardEventId) => !Hf.isString(forwardEventId))) {
+                                Hf.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input event Id is invalid.`);
                             } else {
                                 forwardEventIds = forwardEventIds.filter((forwardEventId) => {
                                     if (eventIds.some((eventId) => eventId === forwardEventId)) {
                                         /* forwarding the same eventIds will cause infinite loop error */
-                                        Hflow.log(`warn1`, `EventStreamComposite.incoming.forward - Cannot forward the same eventId:${forwardEventId}.`);
+                                        Hf.log(`warn1`, `EventStreamComposite.incoming.forward - Cannot forward the same eventId:${forwardEventId}.`);
                                         return false;
                                     }
                                     return true;
@@ -1018,7 +1019,7 @@ export default CompositeElement({
 
                     _incomingStreamActivated = true;
                 } else {
-                    Hflow.log(`warn0`, `EventStreamComposite.activateIncomingStream - Incoming event stream subscription is already activated.`);
+                    Hf.log(`warn0`, `EventStreamComposite.activateIncomingStream - Incoming event stream subscription is already activated.`);
                 }
             };
             /**
@@ -1045,9 +1046,9 @@ export default CompositeElement({
                         } = unemitPayload;
                         factory.outgoing(eventId).emit(() => value);
                     });
-                    Hflow.clear(_unemitPayloads);
+                    Hf.clear(_unemitPayloads);
                 } else {
-                    Hflow.log(`warn0`, `EventStreamComposite.activateOutgoingStream - Outgoing event stream subscription is already activated.`);
+                    Hf.log(`warn0`, `EventStreamComposite.activateOutgoingStream - Outgoing event stream subscription is already activated.`);
                 }
             };
             /**
@@ -1062,7 +1063,7 @@ export default CompositeElement({
                     _incomingSubscription = undefined;
                     _incomingStreamActivated = false;
                 } else {
-                    Hflow.log(`warn0`, `EventStreamComposite.deactivateIncomingStream - Incoming event stream subscription is not activated.`);
+                    Hf.log(`warn0`, `EventStreamComposite.deactivateIncomingStream - Incoming event stream subscription is not activated.`);
                 }
             };
             /**
@@ -1078,7 +1079,7 @@ export default CompositeElement({
                     _outgoingSubscription = undefined;
                     _outgoingStreamActivated = false;
                 } else {
-                    Hflow.log(`warn0`, `EventStreamComposite.deactivateOutgoingStream - Outgoing event stream subscription is not activated.`);
+                    Hf.log(`warn0`, `EventStreamComposite.deactivateOutgoingStream - Outgoing event stream subscription is not activated.`);
                 }
             };
             /**
@@ -1090,21 +1091,24 @@ export default CompositeElement({
              */
             this.observe = function observe (...sources) {
                 const factory = this;
-                if (Hflow.isEmpty(sources)) {
-                    Hflow.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source array is empty.`);
+                if (Hf.isEmpty(sources)) {
+                    Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source array is empty.`);
                 } else if (sources.some((source) => {
-                    return !Hflow.isSchema({
+                    return !Hf.isSchema({
                         name: `string`,
                         getStream: `function`
                     }).of(source);
                 })) {
-                    Hflow.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
+                    Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
                 } else {
                     /* merge all external incoming event streams into one */
                     _incomingStream = Rx.Observable.merge(sources.map((source) => {
-                        Hflow.log(`info`, `Factory:${factory.name} is observing source:${source.name}.`);
-                        // TODO: undefine check for returning stream from getStream?
-                        return source.getStream();
+                        // Hf.log(`info`, `Factory:${factory.name} is observing source:${source.name}.`);
+                        const stream = source.getStream();
+                        if (!Hf.isDefined(stream)) {
+                            Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
+                        }
+                        return stream;
                     }).concat([
                         _incomingStream
                     ]));

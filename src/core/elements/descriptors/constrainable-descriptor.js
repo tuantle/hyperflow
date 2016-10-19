@@ -20,13 +20,14 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
 import CommonElement from '../common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A constraint descriptor prototypes.
@@ -55,12 +56,12 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     getConstraint: function getConstraint (constraintKey) {
-        if (!Hflow.isString(constraintKey)) {
-            Hflow.log(`error`, `ConstrainableDescriptor.getConstraint - Input constraint key is invalid.`);
+        if (!Hf.isString(constraintKey)) {
+            Hf.log(`error`, `ConstrainableDescriptor.getConstraint - Input constraint key is invalid.`);
         } else {
             const constrainable = this;
             if (!constrainable.hasConstraint(constraintKey)) {
-                Hflow.log(`warn1`, `ConstrainableDescriptor.getConstraint - Constraint key:${constraintKey} is not found.`);
+                Hf.log(`warn1`, `ConstrainableDescriptor.getConstraint - Constraint key:${constraintKey} is not found.`);
             }
             return constrainable._description.constraint[constraintKey];
         }
@@ -75,15 +76,15 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @return void
      */
     addConstraint: function addConstraint (constrainer, condition, constraintKey) {
-        if (!Hflow.isFunction(constrainer)) {
-            Hflow.log(`error`, `ConstrainableDescriptor.addConstraint - Input constrainer function is invalid.`);
-        } else if (!Hflow.isString(constraintKey)) {
-            Hflow.log(`error`, `ConstrainableDescriptor.addConstraint - Input constraint key is invalid.`);
+        if (!Hf.isFunction(constrainer)) {
+            Hf.log(`error`, `ConstrainableDescriptor.addConstraint - Input constrainer function is invalid.`);
+        } else if (!Hf.isString(constraintKey)) {
+            Hf.log(`error`, `ConstrainableDescriptor.addConstraint - Input constraint key is invalid.`);
         } else {
             const constrainable = this;
 
             if (constrainable.hasConstraint(constraintKey)) {
-                Hflow.log(`warn0`, `ConstrainableDescriptor.addConstraint - Overwriting constraint key:${constraintKey}.`);
+                Hf.log(`warn0`, `ConstrainableDescriptor.addConstraint - Overwriting constraint key:${constraintKey}.`);
             }
             constrainable._description.constraint[constraintKey] = {
                 constrainer,
@@ -104,8 +105,8 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @return void
      */
     removeConstraint: function removeConstraint (constraintKey) {
-        if (!Hflow.isString(constraintKey)) {
-            Hflow.log(`error`, `ConstrainableDescriptor.removeConstraint - Input constraint key is invalid.`);
+        if (!Hf.isString(constraintKey)) {
+            Hf.log(`error`, `ConstrainableDescriptor.removeConstraint - Input constraint key is invalid.`);
         } else {
             const constrainable = this;
 
@@ -124,17 +125,17 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     assign: function assign (descPreset) {
-        if (!Hflow.isSchema({
+        if (!Hf.isSchema({
             key: `string|number`,
             constraint: `object`
         }).of(descPreset)) {
-            Hflow.log(`error`, `ConstrainableDescriptor.assign - Input descriptor preset object is invalid.`);
+            Hf.log(`error`, `ConstrainableDescriptor.assign - Input descriptor preset object is invalid.`);
         } else if (Object.keys(descPreset.constraint).forEach((constraintKey) => {
-            return Hflow.isSchema({
+            return Hf.isSchema({
                 constrainer: `function`
             }).of(descPreset.constraint[constraintKey]);
         })) {
-            Hflow.log(`error`, `ConstrainableDescriptor.assign - Input descriptor constraint is invalid.`);
+            Hf.log(`error`, `ConstrainableDescriptor.assign - Input descriptor constraint is invalid.`);
         } else {
             const constrainable = this;
             const {
@@ -154,7 +155,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                  * @return void
                  */
                 to: function to (target) {
-                    if (Hflow.isObject(target) || Hflow.isArray(target)) {
+                    if (Hf.isObject(target) || Hf.isArray(target)) {
                         if (target.hasOwnProperty(key)) {
                             constrainable._description.assigned = true;
                             constrainable._description.proxy = target;
@@ -205,11 +206,11 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                                             constrainer,
                                             condition
                                         } = constrainable._description.constraint[constraintKey];
-                                        return Hflow.fallback({
+                                        return Hf.fallback({
                                             verified: true,
                                             reject: function reject () {}
                                         }, (_key) => {
-                                            Hflow.log(`error`, `ConstrainableDescriptor.assign.to - Constraint callback returns invalid result object key${_key}.`);
+                                            Hf.log(`error`, `ConstrainableDescriptor.assign.to - Constraint callback returns invalid result object key${_key}.`);
                                         }).of(constrainer.call(context, condition));
                                     });
                                     results.forEach((result) => {
@@ -236,10 +237,10 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                                 constrainable.addConstraint(constrainer, condition, constraintKey);
                             });
                         } else {
-                            Hflow.log(`error`, `ConstrainableDescriptor.assign.to - Property key:${key} is not defined.`);
+                            Hf.log(`error`, `ConstrainableDescriptor.assign.to - Property key:${key} is not defined.`);
                         }
                     } else {
-                        Hflow.log(`error`, `ConstrainableDescriptor.assign.to - Input target is invalid.`);
+                        Hf.log(`error`, `ConstrainableDescriptor.assign.to - Input target is invalid.`);
                     }
                 }
             };
@@ -277,7 +278,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
             constrainable._description.key = undefined;
             constrainable._description.orgDesc = undefined;
             constrainable._description.proxy = undefined;
-            Hflow.clear(constrainable._description.constraint);
+            Hf.clear(constrainable._description.constraint);
         }
     }
 };
@@ -290,8 +291,8 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function ConstrainableDescriptor (id) {
-    if (!Hflow.isString(id)) {
-        Hflow.log(`error`, `ConstrainableDescriptor - Input descriptor Id is invalid.`);
+    if (!Hf.isString(id)) {
+        Hf.log(`error`, `ConstrainableDescriptor - Input descriptor Id is invalid.`);
     } else {
         const descriptor = Object.create(ConstrainableDescriptorPrototype, {
             _id: {
@@ -315,10 +316,10 @@ export default function ConstrainableDescriptor (id) {
             }
         });
 
-        if (!Hflow.isObject(descriptor)) {
-            Hflow.log(`error`, `ConstrainableDescriptor - Unable to create a computable descriptor instance.`);
+        if (!Hf.isObject(descriptor)) {
+            Hf.log(`error`, `ConstrainableDescriptor - Unable to create a computable descriptor instance.`);
         } else {
-            const revealFrozen = Hflow.compose(Hflow.reveal, Object.freeze);
+            const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
             /* reveal only the public properties and functions */
             return revealFrozen(descriptor);
         }

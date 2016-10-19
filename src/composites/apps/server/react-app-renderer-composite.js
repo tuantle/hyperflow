@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../core/elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../core/elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A React server app renderer composite module.
@@ -47,13 +48,13 @@ export default CompositeElement({
          */
         $initReactAppRendererComposite: function $initReactAppRendererComposite () {
             const app = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     getTopDomain: `function`,
                     getRenderer: `function`,
                     getTopComponent: `function`
                 }).of(app)) {
-                    Hflow.log(`error`, `ReactAppRendererComposite.$init - App is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `ReactAppRendererComposite.$init - App is invalid. Cannot apply composite.`);
                 }
             }
         },
@@ -66,26 +67,26 @@ export default CompositeElement({
         renderToTarget: function renderToTarget () {
             const app = this;
             const appComponent = app.getTopComponent();
-            if (!(Hflow.isObject(appComponent) || Hflow.isFunction(appComponent))) {
-                Hflow.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
+            if (!(Hf.isObject(appComponent) || Hf.isFunction(appComponent))) {
+                Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
             } else {
                 const ReactDOMRenderer = app.getRenderer();
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     renderToString: `function`
                 }).of(ReactDOMRenderer)) {
-                    Hflow.log(`error`, `ReactAppRendererComposite.renderToTarget - React renderer is invalid.`);
+                    Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React renderer is invalid.`);
                 } else {
                     const domain = app.getTopDomain();
-                    if (!Hflow.isSchema({
+                    if (!Hf.isSchema({
                         outgoing: `function`
                     }).of(domain)) {
-                        Hflow.log(`error`, `ReactAppRendererComposite.renderToTarget - App:${app.name} domain is invalid.`);
+                        Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - App:${app.name} domain is invalid.`);
                     } else {
                         const renderedMarkup = ReactDOMRenderer.renderToString(appComponent);
-                        if (Hflow.isString(renderedMarkup) && !Hflow.isEmpty(renderedMarkup)) {
+                        if (Hf.isString(renderedMarkup) && !Hf.isEmpty(renderedMarkup)) {
                             domain.outgoing(`on-render-markup-to-string`).emit(() => renderedMarkup);
                         } else {
-                            Hflow.log(`warn1`, `ReactAppRendererComposite.renderToTarget - React rendered markup is invalid.`);
+                            Hf.log(`warn1`, `ReactAppRendererComposite.renderToTarget - React rendered markup is invalid.`);
                         }
                     }
                 }

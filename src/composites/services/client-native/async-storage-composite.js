@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../core/elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../core/elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - An async storage composite module.
@@ -49,7 +50,7 @@ export default CompositeElement({
              * @return void
             */
             this.getProvider = function getProvider () {
-                Hflow.log(`error`, `AsyncStorageComposite.getProvider - Method is not implemented by default.`);
+                Hf.log(`error`, `AsyncStorageComposite.getProvider - Method is not implemented by default.`);
             };
         }
     },
@@ -71,16 +72,16 @@ export default CompositeElement({
          */
         fetch: function fetch (...pathIds) {
             const service = this;
-            if (Hflow.isEmpty(pathIds) || !pathIds.every((pathId) => Hflow.isString(pathId) || Hflow.isArray(pathId))) {
-                Hflow.log(`error`, `AsyncStorageComposite.fetch - Input pathIds are invalid.`);
+            if (Hf.isEmpty(pathIds) || !pathIds.every((pathId) => Hf.isString(pathId) || Hf.isArray(pathId))) {
+                Hf.log(`error`, `AsyncStorageComposite.fetch - Input pathIds are invalid.`);
             } else {
                 const {
                     storage
                 } = service.getProvider();
-                if (!Hflow.isDefined(storage)) {
-                    Hflow.log(`error`, `AsyncStorageComposite.fetch - Async storage provider is not unsupported.`);
+                if (!Hf.isDefined(storage)) {
+                    Hf.log(`error`, `AsyncStorageComposite.fetch - Async storage provider is not unsupported.`);
                 } else {
-                    pathIds = pathIds.map((pathId) => Hflow.isString(pathId) ? Hflow.stringToArray(pathId, `.`) : pathId);
+                    pathIds = pathIds.map((pathId) => Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId);
                     return {
                         /**
                          * @description - Do a read operation from async storage.
@@ -90,8 +91,8 @@ export default CompositeElement({
                          */
                         read: function read () {
                             const promises = pathIds.filter((pathId) => {
-                                if (Hflow.isEmpty(pathId)) {
-                                    Hflow.log(`warn1`, `AsyncStorageComposite.fetch.read - Input pathId is invalid.`);
+                                if (Hf.isEmpty(pathId)) {
+                                    Hf.log(`warn1`, `AsyncStorageComposite.fetch.read - Input pathId is invalid.`);
                                     return false;
                                 }
                                 return true;
@@ -101,8 +102,8 @@ export default CompositeElement({
                                     storage.getAllKeys().then((rootKeys) => {
                                         if (rootKeys.indexOf(rootKey) !== -1) {
                                             storage.getItem(rootKey).then((rootItem) => {
-                                                if (!Hflow.isEmpty(pathId)) {
-                                                    resolve(Hflow.retrieve(pathId, `.`).from(JSON.parse(rootItem)));
+                                                if (!Hf.isEmpty(pathId)) {
+                                                    resolve(Hf.retrieve(pathId, `.`).from(JSON.parse(rootItem)));
                                                 } else {
                                                     resolve(JSON.parse(rootItem));
                                                 }
@@ -129,20 +130,20 @@ export default CompositeElement({
                          * @return {object}
                          */
                         write: function write (cmd = {}) {
-                            if (!Hflow.isSchema({
+                            if (!Hf.isSchema({
                                 bundle: `object`
                             }).of(cmd)) {
-                                Hflow.log(`error`, `AsyncStorageComposite.fetch.write - Input fetch command statement bundle is invalid.`);
+                                Hf.log(`error`, `AsyncStorageComposite.fetch.write - Input fetch command statement bundle is invalid.`);
                             } else {
                                 const {
                                     bundle,
                                     touchRoot
-                                } = Hflow.fallback({
+                                } = Hf.fallback({
                                     touchRoot: false
                                 }).of(cmd);
                                 const promises = pathIds.filter((pathId) => {
-                                    if (Hflow.isEmpty(pathId)) {
-                                        Hflow.log(`warn1`, `AsyncStorageComposite.fetch.write - Input pathId is invalid.`);
+                                    if (Hf.isEmpty(pathId)) {
+                                        Hf.log(`warn1`, `AsyncStorageComposite.fetch.write - Input pathId is invalid.`);
                                         return false;
                                     }
                                     return true;
@@ -153,12 +154,12 @@ export default CompositeElement({
                                             if (touchRoot && rootKeys.indexOf(rootKey) !== -1) {
                                                 resolve(bundle);
                                             } else {
-                                                if (!Hflow.isEmpty(pathId)) {
+                                                if (!Hf.isEmpty(pathId)) {
                                                     storage.getItem(rootKey).then((rootItem) => {
                                                         const mutator = bundle;
                                                         storage.setItem(
                                                             rootKey,
-                                                            JSON.stringify(Hflow.mutate(JSON.parse(rootItem)).atPathBy(mutator, pathId))
+                                                            JSON.stringify(Hf.mutate(JSON.parse(rootItem)).atPathBy(mutator, pathId))
                                                         ).then(() => {
                                                             resolve(bundle);
                                                         }).catch((_error) => {
@@ -170,10 +171,10 @@ export default CompositeElement({
                                                 } else {
                                                     storage.getItem(rootKey).then((rootItem) => {
                                                         const mutator = bundle;
-                                                        if (Hflow.isObject(mutator) || Hflow.isArray(mutator)) {
+                                                        if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
                                                             storage.setItem(
                                                                 rootKey,
-                                                                JSON.stringify(Hflow.mutate(JSON.parse(rootItem)).by(mutator))
+                                                                JSON.stringify(Hf.mutate(JSON.parse(rootItem)).by(mutator))
                                                             ).then(() => {
                                                                 resolve(bundle);
                                                             }).catch((error) => {

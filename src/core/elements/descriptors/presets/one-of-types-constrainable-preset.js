@@ -20,13 +20,14 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
 import CommonElement from '../../common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for the one of types.
@@ -36,10 +37,10 @@ const Hflow = CommonElement();
  * @return {object}
  */
 const oneOfTypesPreset = function oneOfTypesPreset (_types) {
-    if (!Hflow.isArray(_types) || Hflow.isEmpty(_types)) {
-        Hflow.log(`error`, `oneTypeOf - Input types are invalid.`);
-    } else if (!_types.every((type) => Hflow.isString(type))) {
-        Hflow.log(`error`, `oneTypeOf - Type value must be string.`);
+    if (!Hf.isArray(_types) || Hf.isEmpty(_types)) {
+        Hf.log(`error`, `oneTypeOf - Input types are invalid.`);
+    } else if (!_types.every((type) => Hf.isString(type))) {
+        Hf.log(`error`, `oneTypeOf - Type value must be string.`);
     } else {
         return {
             oneTypeOf: {
@@ -52,12 +53,12 @@ const oneOfTypesPreset = function oneOfTypesPreset (_types) {
                  */
                 constrainer: function oneTypeOf (types) {
                     const context = this;
-                    const oldValueType = Hflow.typeOf(context.oldValue);
-                    const newValueType = Hflow.typeOf(context.newValue);
+                    const oldValueType = Hf.typeOf(context.oldValue);
+                    const newValueType = Hf.typeOf(context.newValue);
                     const result = {
                         verified: true,
                         reject: function reject () {
-                            Hflow.log(`warn1`, `oneTypeOf - Property key:${context.key} value is not one type of ${types}`);
+                            Hf.log(`warn1`, `oneTypeOf - Property key:${context.key} value is not one type of ${types}`);
                         }
                     };
                     result.verified = types.some((type) => (oldValueType === type)) && types.some((type) => (newValueType === type));

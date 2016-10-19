@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../core/elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../core/elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
 * @description - Node postgres composite module.
@@ -49,7 +50,7 @@ export default CompositeElement({
              * @return void
              */
             this.getProvider = function getProvider () {
-                Hflow.log(`error`, `PGComposite.getProvider - Method is not implemented by default.`);
+                Hf.log(`error`, `PGComposite.getProvider - Method is not implemented by default.`);
             };
         }
     },
@@ -62,14 +63,14 @@ export default CompositeElement({
          */
         $initPGComposite: function $initPGComposite () {
             const service = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     dbServer: {
                         name: `string`
                     },
                     dbServerUrl: `string`
                 }).of(service)) {
-                    Hflow.log(`error`, `PGComposite.$init - Service is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `PGComposite.$init - Service is invalid. Cannot apply composite.`);
                 }
             }
         },
@@ -82,8 +83,8 @@ export default CompositeElement({
          */
         query: function query (tableName) {
             const service = this;
-            if (!Hflow.isString(tableName)) {
-                Hflow.log(`error`, `PGComposite.query - Input table name is invalid.`);
+            if (!Hf.isString(tableName)) {
+                Hf.log(`error`, `PGComposite.query - Input table name is invalid.`);
             } else {
                 const {
                     dbServer,
@@ -95,8 +96,8 @@ export default CompositeElement({
                     pg,
                     sql
                 } = getProvider();
-                if (!Hflow.isObject(pg) || !Hflow.isObject(sql)) {
-                    Hflow.log(`error`, `PGComposite.query - Postgres driver or squel builder provider is not unsupported.`);
+                if (!Hf.isObject(pg) || !Hf.isObject(sql)) {
+                    Hf.log(`error`, `PGComposite.query - Postgres driver or squel builder provider is not unsupported.`);
                 } else {
                     const sqlPostgres = sql.useFlavour(`postgres`);
                     return {
@@ -107,8 +108,8 @@ export default CompositeElement({
                          * @method query.select
                          */
                         select: function select (sqlCreate) {
-                            if (!Hflow.isFunction(sqlCreate)) {
-                                Hflow.log(`error`, `PGComposite.query.select - Input squel function is invalid.`);
+                            if (!Hf.isFunction(sqlCreate)) {
+                                Hf.log(`error`, `PGComposite.query.select - Input squel function is invalid.`);
                             } else {
                                 return new Promise((resolve, reject) => {
                                     pg.connect(dbServerUrl, (error, client, done) => {
@@ -124,11 +125,11 @@ export default CompositeElement({
                                                 tableAliasQuoteCharacter: `|`,
                                                 fieldAliasQuoteCharacter: `~`
                                             }).from(tableName));
-                                            if (!Hflow.isObject(statementSQL)) {
+                                            if (!Hf.isObject(statementSQL)) {
                                                 reject(new Error(`ERROR: SQL statement object is invalid.`));
                                             } else {
                                                 const selectQuery = client.query(statementSQL.toParam());
-                                                Hflow.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
+                                                Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
                                                 /* stream results back one row at a time */
                                                 selectQuery.on(`row`, (row) => {
                                                     results.push(row);
@@ -163,8 +164,8 @@ export default CompositeElement({
                          * @method query.update
                          */
                         update: function update (sqlCreate) {
-                            if (!Hflow.isFunction(sqlCreate)) {
-                                Hflow.log(`error`, `PGComposite.query.update - Input squel function is invalid.`);
+                            if (!Hf.isFunction(sqlCreate)) {
+                                Hf.log(`error`, `PGComposite.query.update - Input squel function is invalid.`);
                             } else {
                                 return new Promise((resolve, reject) => {
                                     pg.connect(dbServerUrl, (error, client, done) => {
@@ -181,11 +182,11 @@ export default CompositeElement({
                                                 tableAliasQuoteCharacter: `|`,
                                                 fieldAliasQuoteCharacter: `~`
                                             }).table(tableName));
-                                            if (!Hflow.isObject(statementSQL)) {
+                                            if (!Hf.isObject(statementSQL)) {
                                                 reject(new Error(`ERROR: SQL statement object is invalid.`));
                                             } else {
                                                 const updateQuery = client.query(statementSQL.returning(`*`).toParam());
-                                                Hflow.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
+                                                Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
 
                                                 updateQuery.on(`row`, (row) => {
                                                     result = row;
@@ -220,8 +221,8 @@ export default CompositeElement({
                          * @method query.insert
                          */
                         insert: function insert (sqlCreate) {
-                            if (!Hflow.isFunction(sqlCreate)) {
-                                Hflow.log(`error`, `PGComposite.query.insert - Input squel function is invalid.`);
+                            if (!Hf.isFunction(sqlCreate)) {
+                                Hf.log(`error`, `PGComposite.query.insert - Input squel function is invalid.`);
                             } else {
                                 return new Promise((resolve, reject) => {
                                     pg.connect(dbServerUrl, (error, client, done) => {
@@ -238,11 +239,11 @@ export default CompositeElement({
                                                 tableAliasQuoteCharacter: `|`,
                                                 fieldAliasQuoteCharacter: `~`
                                             }).into(tableName));
-                                            if (!Hflow.isObject(statementSQL)) {
+                                            if (!Hf.isObject(statementSQL)) {
                                                 reject(new Error(`ERROR: SQL statement object is invalid.`));
                                             } else {
                                                 const insertQuery = client.query(statementSQL.returning(`*`).toParam());
-                                                Hflow.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
+                                                Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
 
                                                 insertQuery.on(`row`, (row) => {
                                                     result = row;

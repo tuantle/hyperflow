@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Composer */
@@ -28,8 +29,8 @@ import Composer from '../composer';
 /* load CommonElement */
 import CommonElement from '../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -61,7 +62,7 @@ export default Composer({
          * @return void
          */
         this.$init = function $init () {
-            Hflow.log(`warn0`, `AppFactory.$init - Method is not implemented by default.`);
+            Hf.log(`warn0`, `AppFactory.$init - Method is not implemented by default.`);
         };
         /**
          * @description - Render app top level component to the target env.
@@ -70,7 +71,7 @@ export default Composer({
          * @return {void|string}
          */
         this.renderToTarget = function renderToTarget () {
-            Hflow.log(`warn0`, `AppFactory.renderToTarget - Method is not implemented by default.`);
+            Hf.log(`warn0`, `AppFactory.renderToTarget - Method is not implemented by default.`);
         };
         /**
          * @description - Get app renderer.
@@ -80,8 +81,8 @@ export default Composer({
          */
         this.getRenderer = function getRenderer () {
             const app = this;
-            if (!Hflow.isObject(_renderer)) {
-                Hflow.log(`error`, `AppFactory.getRenderer - App:${app.name} is not registered with a component renderer.`);
+            if (!Hf.isObject(_renderer)) {
+                Hf.log(`error`, `AppFactory.getRenderer - App:${app.name} is not registered with a component renderer.`);
             } else {
                 return _renderer;
             }
@@ -93,7 +94,7 @@ export default Composer({
          * @return {object|function}
          */
         this.getTopComponent = function getTopComponent () {
-            Hflow.log(`warn0`, `AppFactory.getTopComponent - Method is not implemented by default.`);
+            Hf.log(`warn0`, `AppFactory.getTopComponent - Method is not implemented by default.`);
         };
         /**
          * @description - Get app top level domain.
@@ -103,8 +104,8 @@ export default Composer({
          */
         this.getTopDomain = function getTopDomain () {
             const app = this;
-            if (!Hflow.isObject(_domain)) {
-                Hflow.log(`error`, `AppFactory.getTopDomain - App:${app.name} is not registered with a domain.`);
+            if (!Hf.isObject(_domain)) {
+                Hf.log(`error`, `AppFactory.getTopDomain - App:${app.name} is not registered with a domain.`);
             } else {
                 return _domain;
             }
@@ -118,20 +119,20 @@ export default Composer({
          */
         this.register = function register (definition) {
             const app = this;
-            if (!Hflow.isSchema({
+            if (!Hf.isSchema({
                 domain: `object`,
                 component: {
                     library: `object`,
                     renderer: `object`
                 }
             }).of(definition)) {
-                Hflow.log(`error`, `AppFactory.register - Input definition is invalid.`);
+                Hf.log(`error`, `AppFactory.register - Input definition is invalid.`);
             } else {
                 const {
                     domain,
                     component
                 } = definition;
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     fId: `string`,
                     name: `string`,
                     hasStarted: `function`,
@@ -139,23 +140,23 @@ export default Composer({
                     start: `function`,
                     restart: `function`
                 }).of(domain) || domain.fId.substr(0, DOMAIN_FACTORY_CODE.length) !== DOMAIN_FACTORY_CODE) {
-                    Hflow.log(`error`, `AppFactory.register - Input domain is invalid.`);
-                } else if (Hflow.isObject(_domain)) {
-                    Hflow.log(`warn1`, `AppFactory.register - App:${app.name} registered domain:${domain.name}.`);
+                    Hf.log(`error`, `AppFactory.register - Input domain is invalid.`);
+                } else if (Hf.isObject(_domain)) {
+                    Hf.log(`warn1`, `AppFactory.register - App:${app.name} registered domain:${domain.name}.`);
                 } else {
                     _domain = domain;
                     _renderer = component.renderer;
 
                     const intf = domain.getInterface();
-                    if (!Hflow.isSchema({
+                    if (!Hf.isSchema({
                         registerComponentLib: `function`
                     }).of(intf)) {
-                        Hflow.log(`error`, `AppFactory.register - App top domain:${domain.name} interface is invalid.`);
+                        Hf.log(`error`, `AppFactory.register - App top domain:${domain.name} interface is invalid.`);
                     } else {
                         intf.registerComponentLib(component.library);
                     }
 
-                    Hflow.log(`info`, `App:${app.name} registered domain:${domain.name}.`);
+                    Hf.log(`info`, `App:${app.name} registered domain:${domain.name}.`);
                 }
             }
         };
@@ -170,22 +171,22 @@ export default Composer({
             const app = this;
 
             // TODO: Implement use case for app run option.
-            option = Hflow.isObject(option) ? option : {};
+            option = Hf.isObject(option) ? option : {};
 
-            if (!Hflow.isObject(_domain)) {
-                Hflow.log(`error`, `AppFactory.run - App:${app.name} is not registered with a domain.`);
+            if (!Hf.isObject(_domain)) {
+                Hf.log(`error`, `AppFactory.run - App:${app.name} is not registered with a domain.`);
             } else {
                 if (!_domain.hasStarted()) {
                     _domain.start(option, () => {
                         app.renderToTarget();
-                        Hflow.log(`info`, `Domain:${_domain.name} has started.`);
-                        Hflow.log(`info`, `Running app:${app.name}...`);
+                        Hf.log(`info`, `Domain:${_domain.name} has started.`);
+                        Hf.log(`info`, `Running app:${app.name}...`);
                     });
                 } else {
                     _domain.restart(option, () => {
                         app.renderToTarget();
-                        Hflow.log(`info`, `Domain:${_domain.name} has restarted.`);
-                        Hflow.log(`warn1`, `AppFactory.run - App:${app.name} is already running. Restarting...`);
+                        Hf.log(`info`, `Domain:${_domain.name} has restarted.`);
+                        Hf.log(`warn1`, `AppFactory.run - App:${app.name} is already running. Restarting...`);
                     });
                 }
             }

@@ -20,13 +20,14 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
 import CommonElement from '../../common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for required value.
@@ -49,11 +50,11 @@ const requiredPreset = function requiredPreset () {
                 const result = {
                     verified: true,
                     reject: function reject () {
-                        Hflow.log(`warn1`, `required - Required property key:${context.key} cannot be not null or undefined or empty.`);
+                        Hf.log(`warn1`, `required - Required property key:${context.key} cannot be not null or undefined or empty.`);
                     }
                 };
-                if (Hflow.isString(context.newValue) || Hflow.isObject(context.newValue) || Hflow.isArray(context.newValue)) {
-                    result.verified = !Hflow.isEmpty(context.newValue);
+                if (Hf.isString(context.newValue) || Hf.isObject(context.newValue) || Hf.isArray(context.newValue)) {
+                    result.verified = !Hf.isEmpty(context.newValue);
                 } else {
                     result.verified = context.newValue !== null;
                 }

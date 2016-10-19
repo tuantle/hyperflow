@@ -20,13 +20,14 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
 import CommonElement from '../../common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for the one of values.
@@ -36,10 +37,10 @@ const Hflow = CommonElement();
  * @return {object}
  */
 const oneOfValuesPreset = function oneOfValuesPreset (_values) {
-    if (!Hflow.isArray(_values) || Hflow.isEmpty(_values)) {
-        Hflow.log(`error`, `oneOf - Input values are invalid.`);
-    } else if (!_values.every((value) => Hflow.isString(value) || Hflow.isNumeric(value))) {
-        Hflow.log(`error`, `oneOf - Value must be either numeric or string.`);
+    if (!Hf.isArray(_values) || Hf.isEmpty(_values)) {
+        Hf.log(`error`, `oneOf - Input values are invalid.`);
+    } else if (!_values.every((value) => Hf.isString(value) || Hf.isNumeric(value))) {
+        Hf.log(`error`, `oneOf - Value must be either numeric or string.`);
     } else {
         return {
             oneOf: {
@@ -55,13 +56,13 @@ const oneOfValuesPreset = function oneOfValuesPreset (_values) {
                     const result = {
                         verified: true,
                         reject: function reject () {
-                            Hflow.log(`warn1`, `oneOf - Property key:${context.key} value is not one of ${values}`);
+                            Hf.log(`warn1`, `oneOf - Property key:${context.key} value is not one of ${values}`);
                         }
                     };
-                    if (Hflow.isArray(context.newValue)) {
+                    if (Hf.isArray(context.newValue)) {
                         const newValues = context.newValue;
                         result.verified = newValues.every((newValue) => values.some((value) => newValue === value));
-                    } else if (Hflow.isString(context.newValue) || Hflow.isNumeric(context.newValue)) {
+                    } else if (Hf.isString(context.newValue) || Hf.isNumeric(context.newValue)) {
                         result.verified = values.some((value) => context.newValue === value);
                     } else {
                         result.verified = false;

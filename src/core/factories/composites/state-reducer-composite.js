@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -53,8 +54,8 @@ export default CompositeElement({
          */
         $initStateReducerComposite: function $initStateReducerComposite () {
             const factory = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     fId: `string`,
                     name: `string`,
                     outgoing: `function`,
@@ -63,7 +64,7 @@ export default CompositeElement({
                     updateStateAccessor: `function`
                 }).of(factory) || !(factory.fId.substr(0, SERVICE_FACTORY_CODE.length) === SERVICE_FACTORY_CODE ||
                                     factory.fId.substr(0, STORE_FACTORY_CODE.length) === STORE_FACTORY_CODE)) {
-                    Hflow.log(`error`, `StateReducerComposite.$init - Factory is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `StateReducerComposite.$init - Factory is invalid. Cannot apply composite.`);
                 }
             }
         },
@@ -76,7 +77,7 @@ export default CompositeElement({
         forceMutationEvent: function forceMutationEvent () {
             const factory = this;
             factory.outgoing(`as-state-mutated`).emit(() => {
-                return Hflow.mix(factory.getStateAsObject(), {
+                return Hf.mix(factory.getStateAsObject(), {
                     exclusion: {
                         keys: [
                             `name`,
@@ -96,7 +97,7 @@ export default CompositeElement({
         reduce: function reduce (mutator) {
             const factory = this;
             let mutated = false;
-            const currentState = Hflow.mix(factory.getStateAsObject(), {
+            const currentState = Hf.mix(factory.getStateAsObject(), {
                 exclusion: {
                     keys: [
                         `name`,
@@ -105,16 +106,16 @@ export default CompositeElement({
                 }
             }).with({});
 
-            if (Hflow.isFunction(mutator)) {
+            if (Hf.isFunction(mutator)) {
                 mutated = factory.mutateState(mutator(currentState));
-            } else if (Hflow.isObject(mutator)) {
+            } else if (Hf.isObject(mutator)) {
                 mutated = factory.mutateState(mutator);
             }
             if (mutated) {
                 factory.updateStateAccessor();
                 /* emitting a mutation event to interface */
                 factory.outgoing(`as-state-mutated`).emit(() => {
-                    return Hflow.mix(factory.getStateAsObject(), {
+                    return Hf.mix(factory.getStateAsObject(), {
                         exclusion: {
                             keys: [
                                 `name`,
@@ -136,12 +137,12 @@ export default CompositeElement({
          */
         reduceAtPath: function reduceAtPath (mutator, pathId) {
             const factory = this;
-            pathId = Hflow.isString(pathId) ? Hflow.stringToArray(pathId, `.`) : pathId;
-            if (!(Hflow.isArray(pathId) && !Hflow.isEmpty(pathId))) {
-                Hflow.log(`error`, `StateReducerComposite.reduceAtPath - Input pathId is invalid.`);
+            pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
+            if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+                Hf.log(`error`, `StateReducerComposite.reduceAtPath - Input pathId is invalid.`);
             } else {
                 let mutated = false;
-                const currentState = Hflow.mix(factory.getStateAsObject(), {
+                const currentState = Hf.mix(factory.getStateAsObject(), {
                     exclusion: {
                         keys: [
                             `name`,
@@ -150,16 +151,16 @@ export default CompositeElement({
                     }
                 }).with({});
 
-                if (Hflow.isFunction(mutator)) {
+                if (Hf.isFunction(mutator)) {
                     mutated = factory.mutateStateAtPath(mutator(currentState), pathId);
-                } else if (Hflow.isObject(mutator)) {
+                } else if (Hf.isObject(mutator)) {
                     mutated = factory.mutateStateAtPath(mutator, pathId);
                 }
                 if (mutated) {
                     factory.updateStateAccessor();
                     /* emitting a mutation event to interface */
                     factory.outgoing(`as-state-mutated`).emit(() => {
-                        return Hflow.mix(factory.getStateAsObject(), {
+                        return Hf.mix(factory.getStateAsObject(), {
                             exclusion: {
                                 keys: [
                                     `name`,

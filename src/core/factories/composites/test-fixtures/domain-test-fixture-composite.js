@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -56,8 +57,8 @@ export default CompositeElement({
          */
         $initDomainTestFixtureComposite: function $initDomainTestFixtureComposite () {
             const fixture = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     fId: `string`,
                     name: `string`,
                     start: `function`,
@@ -70,7 +71,7 @@ export default CompositeElement({
                     deactivateIncomingStream: `function`,
                     deactivateOutgoingStream: `function`
                 }).of(fixture) || fixture.fId.substr(0, FIXTURE_FACTORY_CODE.length) !== FIXTURE_FACTORY_CODE) {
-                    Hflow.log(`error`, `DomainTestFixtureComposite.$init - Fixture is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `DomainTestFixtureComposite.$init - Fixture is invalid. Cannot apply composite.`);
                 }
             }
         }
@@ -101,31 +102,31 @@ export default CompositeElement({
              */
             this.register = function register (definition) {
                 const fixture = this;
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     testSubject: `object`
                 }).of(definition)) {
-                    Hflow.log(`error`, `DomainTestFixtureComposite.register - Input definition object is invalid.`);
+                    Hf.log(`error`, `DomainTestFixtureComposite.register - Input definition object is invalid.`);
                 } else {
                     const {
                         testSubject: domain
                     } = definition;
-                    if (Hflow.isObject(domain)) {
-                        if (!Hflow.isSchema({
+                    if (Hf.isObject(domain)) {
+                        if (!Hf.isSchema({
                             fId: `string`,
                             name: `string`,
                             start: `function`,
                             stop: `function`,
                             observe: `function`
                         }).of(domain) || domain.fId.substr(0, DOMAIN_FACTORY_CODE.length) !== DOMAIN_FACTORY_CODE) {
-                            Hflow.log(`error`, `DomainTestFixtureComposite.register - Input domain is invalid.`);
-                        } else if (Hflow.isObject(_domain)) {
-                            Hflow.log(`warn1`, `DomainTestFixtureComposite.register - Test fixture:${fixture.name} registered domain:${domain.name}.`);
+                            Hf.log(`error`, `DomainTestFixtureComposite.register - Input domain is invalid.`);
+                        } else if (Hf.isObject(_domain)) {
+                            Hf.log(`warn1`, `DomainTestFixtureComposite.register - Test fixture:${fixture.name} registered domain:${domain.name}.`);
                         } else {
                             _domain = domain;
                             /* setup event stream observation duplex between domain and test fixture */
                             _domain.observe(fixture);
                             fixture.observe(_domain).delay(DELAY_DOMAIN_IN_MS);
-                            Hflow.log(`info`, `Test fixture:${fixture.name} registered domain:${domain.name}.`);
+                            Hf.log(`info`, `Test fixture:${fixture.name} registered domain:${domain.name}.`);
                         }
                     }
                 }
@@ -142,19 +143,19 @@ export default CompositeElement({
                 const fixture = this;
 
                 // TODO: Implement use case for fixture start option.
-                option = Hflow.isObject(option) ? option : {};
+                option = Hf.isObject(option) ? option : {};
 
-                if (!Hflow.isFunction(done)) {
-                    Hflow.log(`error`, `DomainTestFixtureComposite.start - Input done function is invalid.`);
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `DomainTestFixtureComposite.start - Input done function is invalid.`);
                 } else {
                     if (!_started) {
                         fixture.activateIncomingStream();
                         fixture.setup(() => {
-                            if (!Hflow.isObject(_domain)) {
-                                Hflow.log(`error`, `DomainTestFixtureComposite.start - Test fixture:${fixture.name} is not registered with a domain.`);
+                            if (!Hf.isObject(_domain)) {
+                                Hf.log(`error`, `DomainTestFixtureComposite.start - Test fixture:${fixture.name} is not registered with a domain.`);
                             } else {
                                 _domain.start(() => {
-                                    Hflow.log(`info`, `Domain:${_domain.name} has started.`);
+                                    Hf.log(`info`, `Domain:${_domain.name} has started.`);
                                 });
                             }
                             fixture.activateOutgoingStream();
@@ -163,7 +164,7 @@ export default CompositeElement({
                         });
                     } else {
                         fixture.restart(option, done);
-                        Hflow.log(`warn1`, `DomainTestFixtureComposite.start - Test fixture:${fixture.name} is already started. Restarting...`);
+                        Hf.log(`warn1`, `DomainTestFixtureComposite.start - Test fixture:${fixture.name} is already started. Restarting...`);
                     }
                 }
             };
@@ -176,16 +177,16 @@ export default CompositeElement({
              */
             this.stop = function stop (done) {
                 const fixture = this;
-                if (!Hflow.isFunction(done)) {
-                    Hflow.log(`error`, `DomainTestFixtureComposite.stop - Input done function is invalid.`);
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `DomainTestFixtureComposite.stop - Input done function is invalid.`);
                 } else {
                     if (!_started) {
-                        Hflow.log(`warn1`, `DomainTestFixtureComposite.stop - Test fixture:${fixture.name} is already stopped.`);
+                        Hf.log(`warn1`, `DomainTestFixtureComposite.stop - Test fixture:${fixture.name} is already stopped.`);
                     } else {
                         fixture.teardown(() => {
-                            if (Hflow.isObject(_domain)) {
+                            if (Hf.isObject(_domain)) {
                                 _domain.stop(() => {
-                                    Hflow.log(`info`, `Domain:${_domain.name} has stopped.`);
+                                    Hf.log(`info`, `Domain:${_domain.name} has stopped.`);
                                 });
                             }
                             fixture.deactivateIncomingStream();

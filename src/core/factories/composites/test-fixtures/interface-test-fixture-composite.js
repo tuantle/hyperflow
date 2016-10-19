@@ -20,6 +20,7 @@
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  */
+/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CompositeElement */
@@ -28,8 +29,8 @@ import CompositeElement from '../../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../elements/common-element';
 
-/* create CommonElement as Hflow object */
-const Hflow = CommonElement();
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -56,8 +57,8 @@ export default CompositeElement({
          */
         $initInterfaceTestFixtureComposite: function $initInterfaceTestFixtureComposite () {
             const fixture = this;
-            if (Hflow.DEVELOPMENT) {
-                if (!Hflow.isSchema({
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
                     fId: `string`,
                     name: `string`,
                     setup: `function`,
@@ -68,7 +69,7 @@ export default CompositeElement({
                     deactivateIncomingStream: `function`,
                     deactivateOutgoingStream: `function`
                 }).of(fixture) || fixture.fId.substr(0, FIXTURE_FACTORY_CODE.length) !== FIXTURE_FACTORY_CODE) {
-                    Hflow.log(`error`, `InterfaceTestFixtureComposite.$init - Fixture is invalid. Cannot apply composite.`);
+                    Hf.log(`error`, `InterfaceTestFixtureComposite.$init - Fixture is invalid. Cannot apply composite.`);
                 }
             }
         }
@@ -98,7 +99,7 @@ export default CompositeElement({
              * @return {object|function}
              */
             this.getTopComponent = function getTopComponent () {
-                Hflow.log(`warn0`, `InterfaceTestFixtureComposite.getTopComponent - Method is not implemented by default.`);
+                Hf.log(`warn0`, `InterfaceTestFixtureComposite.getTopComponent - Method is not implemented by default.`);
             };
             /**
              * @description - Get this fixture as a top level intf.
@@ -117,7 +118,7 @@ export default CompositeElement({
              * @return {void|string}
              */
             this.renderToTarget = function renderToTarget () {
-                Hflow.log(`warn0`, `InterfaceTestFixtureComposite.renderToTarget - Method is not implemented by default.`);
+                Hf.log(`warn0`, `InterfaceTestFixtureComposite.renderToTarget - Method is not implemented by default.`);
             };
             /**
              * @description - Get test fixture renderer.
@@ -126,8 +127,8 @@ export default CompositeElement({
              * @return {object}
              */
             this.getRenderer = function getRenderer () {
-                if (!Hflow.isObject(_componentRenderer)) {
-                    Hflow.log(`error`, `InterfaceTestFixtureComposite.getRenderer - Test fixture is not registered with a component renderer.`);
+                if (!Hf.isObject(_componentRenderer)) {
+                    Hf.log(`error`, `InterfaceTestFixtureComposite.getRenderer - Test fixture is not registered with a component renderer.`);
                 } else {
                     return _componentRenderer;
                 }
@@ -141,22 +142,22 @@ export default CompositeElement({
              */
             this.register = function register (definition) {
                 const fixture = this;
-                if (!Hflow.isSchema({
+                if (!Hf.isSchema({
                     testSubject: `object`,
                     component: {
                         library: `object`,
                         renderer: `object`
                     }
                 }).of(definition)) {
-                    Hflow.log(`error`, `InterfaceTestFixtureComposite.register - Input definition object is invalid.`);
+                    Hf.log(`error`, `InterfaceTestFixtureComposite.register - Input definition object is invalid.`);
                 } else {
                     const {
                         testSubject: intf,
                         component
                     } = definition;
                     _componentRenderer = component.renderer;
-                    if (Hflow.isObject(intf)) {
-                        if (!Hflow.isSchema({
+                    if (Hf.isObject(intf)) {
+                        if (!Hf.isSchema({
                             fId: `string`,
                             name: `string`,
                             setup: `function`,
@@ -167,15 +168,15 @@ export default CompositeElement({
                             deactivateIncomingStream: `function`,
                             deactivateOutgoingStream: `function`
                         }).of(intf) || intf.fId.substr(0, INTERFACE_FACTORY_CODE.length) !== INTERFACE_FACTORY_CODE) {
-                            Hflow.log(`error`, `InterfaceTestFixtureComposite.register - Input interface is invalid.`);
-                        } else if (Hflow.isObject(_intf)) {
-                            Hflow.log(`warn1`, `InterfaceTestFixtureComposite.register - Test fixture:${fixture.name} registered interface:${intf.name}.`);
+                            Hf.log(`error`, `InterfaceTestFixtureComposite.register - Input interface is invalid.`);
+                        } else if (Hf.isObject(_intf)) {
+                            Hf.log(`warn1`, `InterfaceTestFixtureComposite.register - Test fixture:${fixture.name} registered interface:${intf.name}.`);
                         } else {
                             _intf = intf;
                             /* setup event stream observation duplex between interface and test fixture */
                             _intf.observe(fixture);
                             fixture.observe(_intf).delay(DELAY_INTERFACE_IN_MS);
-                            Hflow.log(`info`, `Test fixture:${fixture.name} registered interface:${intf.name}.`);
+                            Hf.log(`info`, `Test fixture:${fixture.name} registered interface:${intf.name}.`);
                         }
                     }
                 }
@@ -192,10 +193,10 @@ export default CompositeElement({
                 const fixture = this;
 
                 // TODO: Implement use case for fixture start option.
-                option = Hflow.isObject(option) ? option : {};
+                option = Hf.isObject(option) ? option : {};
 
-                if (!Hflow.isFunction(done)) {
-                    Hflow.log(`error`, `InterfaceTestFixtureComposite.start - Input done function is invalid.`);
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `InterfaceTestFixtureComposite.start - Input done function is invalid.`);
                 } else {
                     // TODO: Needs implementation.
                 }
@@ -209,18 +210,18 @@ export default CompositeElement({
              */
             this.stop = function stop (done) {
                 const fixture = this;
-                if (!Hflow.isFunction(done)) {
-                    Hflow.log(`error`, `InterfaceTestFixtureComposite.stop - Input done function is invalid.`);
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `InterfaceTestFixtureComposite.stop - Input done function is invalid.`);
                 } else {
                     if (!_started) {
-                        Hflow.log(`warn1`, `InterfaceTestFixtureComposite.stop - Test fixture:${fixture.name} is already stopped.`);
+                        Hf.log(`warn1`, `InterfaceTestFixtureComposite.stop - Test fixture:${fixture.name} is already stopped.`);
                     } else {
                         fixture.teardown(() => {
-                            if (Hflow.isObject(_intf)) {
+                            if (Hf.isObject(_intf)) {
                                 _intf.teardown(() => {
                                     _intf.deactivateIncomingStream();
                                     _intf.deactivateOutgoingStream();
-                                    Hflow.log(`info`, `Test fixture:${fixture.name} deactivated intf:${_intf.name}.`);
+                                    Hf.log(`info`, `Test fixture:${fixture.name} deactivated intf:${_intf.name}.`);
                                 });
                             }
                             fixture.deactivateIncomingStream();
