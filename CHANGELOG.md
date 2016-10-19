@@ -16,7 +16,7 @@ Bug fixes:
 ```
 Notes:
 New Features:
-    - Added the optional Hflow.Event.create method. This allows a more opinionated way of naming event Id.  
+    - Added the optional Hf.Event.create method. This allows a more opinionated way of naming event Id.  
 Breaking Changes:
     - Commented out getState & getComposite in Composer, and getStateAccessor & getStateSchema in CompositeElement. Will be removed if find no use case.
 Improvements:
@@ -54,7 +54,7 @@ Notes:
 New Features:
 Breaking Changes:
 Improvements:
-    - Minor tweak to Hflow.Event.create method return object. Property key names are uppercased.
+    - Minor tweak to Hf.Event.create method return object. Property key names are uppercased.
     - Clean up asPromised method in EventStreamComposite.
 Bug fixes:
     - Added correct delay instead of debounce method to event stream from domain to services and store for DomainFactory.
@@ -79,7 +79,7 @@ Bug fixes:
 Notes:
 New Features:
 Breaking Changes:
-    - Changed how Hflow.Event.create method read in event map object.
+    - Changed how Hf.Event.create method read in event map object.
 Improvements:
 Bug fixes:
     - Fixed repeat method in EventStreamComposite. The method only repeat once for first event. It is now fixed and will repeat for all incoming events.
@@ -89,10 +89,10 @@ Bug fixes:
 Notes:
 New Features:
 Breaking Changes:
-    - Changed how Hflow.Event.create method read in event map object.
+    - Changed how Hf.Event.create method read in event map object.
 Improvements:
 Bug fixes:
-    - Fixed Hflow.Event.create method. Incorrectly generate event Ids for RESPONSE.TO.*.ERROR.
+    - Fixed Hf.Event.create method. Incorrectly generate event Ids for RESPONSE.TO.*.ERROR.
 ```
 **Development Beta Version 0.1.0-beta9 (9/26/2016)**
 ```
@@ -100,9 +100,9 @@ Notes:
 New Features:
 Breaking Changes:
 Improvements:
-    - Added NOT_MODIFIED response in Hflow.Event.create method.
+    - Added NOT_MODIFIED response in Hf.Event.create method.
     - Methods registerComponentLib and reflectStateOf now return an instance of the interface in InterfaceFactory.
-    - Reimplemented how Hflow object is imported.
+    - Reimplemented how Hf object is imported.
     - Reimplemented how operators are applied to event stream for EventStreamComposite. This new implementation prevents operator methods from executing twice.
 Bug fixes:
     - Fixed props mutation calls in methods componentWillMount, componentDidMount, and componentWillReceiveProps for ReactComponentComposite. The fix was to allow fallback to current props of the new props mutator.
@@ -127,6 +127,16 @@ New Features:
 Breaking Changes:
     - Removed methods incoming & outgoing from exception keys for ReactComponentComposite. Component will NOT have access to interface's event stream incoming & outgoing methods.
 Improvements:
-    - Refactored DataElement descriptors and presets. 
+    - Refactored DataElement descriptors and presets.
 Bug fixes:
 ```
+**Development Beta Version 0.1.0-beta12 (10/19/2016)**
+Notes: Renamed Hflow to just Hf.
+New Features:
+Breaking Changes:
+    - Renamed Hflow to just Hf.
+Improvements:
+    - Added flow type check to all source files.
+    - Optimized code by moving function declaration inside other functions to the outside.
+    - Reduced unnecessary console log for EventStreamComposite.
+Bug fixes:
