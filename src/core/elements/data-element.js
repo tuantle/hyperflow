@@ -241,8 +241,8 @@ const DataElementPrototype = Object.create({}).prototype = {
             const {
                 required,
                 stronglyTyped,
-                oneTypeOf: oneOfTypes,
-                oneOf: oneOfValues,
+                oneOfTypes,
+                oneOfValues,
                 boundarydValues,
                 constrainable,
                 observable,
@@ -476,9 +476,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                             }
                             if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
                                 if (Hf.isSchema({
-                                    oneTypeOf: [
-                                        `string`
-                                    ]
+                                    oneTypeOf: [ `string` ]
                                 }).of(bundleItem)) {
                                     if (!Hf.isEmpty(bundleItem.oneTypeOf)) {
                                         formatedBundleItem.oneOfTypes = bundleItem.oneTypeOf;
@@ -491,9 +489,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                             }
                             if (bundleItem.hasOwnProperty(`oneOf`)) {
                                 if (Hf.isSchema({
-                                    oneOf: [
-                                        `number|string`
-                                    ]
+                                    oneOf: [ `number|string` ]
                                 }).of(bundleItem)) {
                                     if (!Hf.isEmpty(bundleItem.oneOf)) {
                                         formatedBundleItem.oneOfValues = bundleItem.oneOf;
