@@ -130,7 +130,7 @@ Improvements:
     - Refactored DataElement descriptors and presets.
 Bug fixes:
 ```
-**Development Beta Version 0.1.0-beta12 (10/19/2016)**
+**Development Beta Version 0.1.0-beta12 (10/20/2016)**
 Notes: Renamed Hflow to just Hf.
 New Features:
 Breaking Changes:
@@ -140,3 +140,4 @@ Improvements:
     - Optimized code by moving function declaration inside other functions to the outside.
     - Reduced unnecessary console log for EventStreamComposite.
 Bug fixes:
+    - Fixed non-functional oneOF and oneTypeOf constrainable descriptors for DataElement.
