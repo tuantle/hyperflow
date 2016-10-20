@@ -19,7 +19,7 @@ export function runTests () {
         assert.equal(typeof common, `object`);
         assert.end();
     });
-    test(`common.isInteger should correctly check if value is an integer.`, (assert) => {
+    test(`CommonElement isInteger should correctly check if value is an integer.`, (assert) => {
         assert.equal(common.isInteger(1234), true);
         assert.equal(common.isInteger(-1234), true);
         assert.equal(common.isInteger(3.14), false);
@@ -30,7 +30,7 @@ export function runTests () {
         assert.equal(common.isInteger(NaN), false);
         assert.end();
     });
-    test(`common.isFloat should correctly check if value is a float.`, (assert) => {
+    test(`CommonElement isFloat should correctly check if value is a float.`, (assert) => {
         assert.equal(common.isFloat(3.14), true);
         assert.equal(common.isFloat(-3.14), true);
         assert.equal(common.isFloat(`99,999`), false);
@@ -40,7 +40,7 @@ export function runTests () {
         assert.equal(common.isFloat(NaN), false);
         assert.end();
     });
-    test(`common.isNumeric should correctly check if value is a number.`, (assert) => {
+    test(`CommonElement isNumeric should correctly check if value is a number.`, (assert) => {
         assert.equal(common.isNumeric(-1), true);
         assert.equal(common.isNumeric(-1.5), true);
         assert.equal(common.isNumeric(0), true);
@@ -53,39 +53,39 @@ export function runTests () {
         assert.equal(common.isNumeric(NaN), false);
         assert.end();
     });
-    test(`common.isString should correctly check if value is a string.`, (assert) => {
+    test(`CommonElement isString should correctly check if value is a string.`, (assert) => {
         assert.equal(common.isString(`This is a String.`), true);
         assert.equal(common.isString(1234), false);
         assert.equal(common.isString({}), false);
         assert.equal(common.isString([]), false);
         assert.end();
     });
-    test(`common.isBoolean should correctly check if value is a boolean.`, (assert) => {
+    test(`CommonElement isBoolean should correctly check if value is a boolean.`, (assert) => {
         assert.equal(common.isBoolean(`true`), true);
         assert.equal(common.isBoolean(`false`), true);
         assert.equal(common.isBoolean(true), true);
         assert.equal(common.isBoolean(false), true);
         assert.end();
     });
-    test(`common.isDefined should correctly check if value is defined.`, (assert) => {
+    test(`CommonElement isDefined should correctly check if value is defined.`, (assert) => {
         assert.equal(common.isDefined({}), true);
         assert.equal(common.isDefined(undefined), false);
         assert.end();
     });
-    test(`common.isFunction should correctly check if value is a function.`, (assert) => {
+    test(`CommonElement isFunction should correctly check if value is a function.`, (assert) => {
         assert.equal(common.isFunction(function () {}), true);
         assert.end();
     });
-    test(`common.isDate should correctly check if value is a date.`, (assert) => {
+    test(`CommonElement isDate should correctly check if value is a date.`, (assert) => {
         assert.equal(common.isDate(new Date()), true);
         assert.end();
     });
-    test(`common.isArray/isObject should correctly check if value is an array/object.`, (assert) => {
+    test(`CommonElement isArray/isObject should correctly check if value is an array/object.`, (assert) => {
         assert.equal(common.isObject({}), true);
         assert.equal(common.isArray([]), true);
         assert.end();
     });
-    test(`common.isSchema should correctly check and compare an object to a schema.`, (assert) => {
+    test(`CommonElement isSchema should correctly check and compare an object to a schema.`, (assert) => {
         const schemaA = {
             fnA: `function`,
             a: {
@@ -143,14 +143,14 @@ export function runTests () {
         assert.equal(common.isSchema(schemaC).of(objC2), false);
         assert.end();
     });
-    test(`common.isEmpty should correctly check if object is empty.`, (assert) => {
+    test(`CommonElement isEmpty should correctly check if object is empty.`, (assert) => {
         assert.equal(common.isEmpty({}), true);
         assert.equal(common.isEmpty({
             data: 1234
         }), false);
         assert.end();
     });
-    test(`common.typeOf should correctly check value type.`, (assert) => {
+    test(`CommonElement typeOf should correctly check value type.`, (assert) => {
         assert.equal(common.typeOf({}), `object`);
         assert.equal(common.typeOf([]), `array`);
         assert.equal(common.typeOf(``), `string`);
@@ -158,7 +158,7 @@ export function runTests () {
         assert.equal(common.typeOf(null), `null`);
         assert.end();
     });
-    test(`common.clear should correctly clear an object or array.`, (assert) => {
+    test(`CommonElement clear should correctly clear an object or array.`, (assert) => {
         const obj = {
             data: 1234
         };
@@ -170,7 +170,7 @@ export function runTests () {
         assert.equal(array.length === 0, true);
         assert.end();
     });
-    test(`common.compose should correctly compose two for more functions.`, (assert) => {
+    test(`CommonElement compose should correctly compose two for more functions.`, (assert) => {
         function fnA (x) {
             return x + 1;
         }
@@ -184,7 +184,7 @@ export function runTests () {
         assert.equal(fnABC(12), 28730);
         assert.end();
     });
-    test(`common.collect should correctly pluck propteries from an object or array.`, (assert) => {
+    test(`CommonElement collect should correctly pluck propteries from an object or array.`, (assert) => {
         const obj = {
             data1: {
                 a: `a`,
@@ -204,7 +204,7 @@ export function runTests () {
         assert.equal(results[1], `a`);
         assert.end();
     });
-    test(`common.clone should correctly clone an object or array.`, (assert) => {
+    test(`CommonElement clone should correctly clone an object or array.`, (assert) => {
         const array = [ 1, 2, 3, 4, `a`, `b`, `c` ];
         const obj = {
             data1: {
@@ -229,7 +229,7 @@ export function runTests () {
         assert.equal(objA.a !== objB.a, true);
         assert.end();
     });
-    test(`common.retrieve should correctly retrieve a property of an object.`, (assert) => {
+    test(`CommonElement retrieve should correctly retrieve a property of an object.`, (assert) => {
         const obj = {
             dataA0: `dataA0`,
             dataA1: {
@@ -251,7 +251,7 @@ export function runTests () {
         assert.equal(valueC.dataAB.dataAB1[3].b, `b`);
         assert.end();
     });
-    test(`common.fallback should be able to do fallback.`, (assert) => {
+    test(`CommonElement fallback should be able to do fallback.`, (assert) => {
         const defaultObj = {
             a: `a`,
             b: {
@@ -272,7 +272,7 @@ export function runTests () {
         assert.equal(result.a, `a`);
         assert.end();
     });
-    test(`common.mutate should be able to mutate an object by a reference mutator object.`, (assert) => {
+    test(`CommonElement mutate should be able to mutate an object by a reference mutator object.`, (assert) => {
         const obj = {
             foo: {
                 bar: 3
@@ -317,7 +317,7 @@ export function runTests () {
         // console.log(JSON.stringify(resultB, null, `\t`));
         assert.end();
     });
-    test(`common.merge should be able to merge 2 objects.`, (assert) => {
+    test(`CommonElement merge should be able to deep merge 2 objects.`, (assert) => {
         const objA = {
             foo: {
                 bar: 3
@@ -344,7 +344,7 @@ export function runTests () {
         assert.equal(result.array[1].b, `b`);
         assert.end();
     });
-    test(`common.reveal should be able to reveal a an object.`, (assert) => {
+    test(`CommonElement reveal should be able to reveal a an object.`, (assert) => {
         const fnA = function () {
             const a = `a`;
             this.getA = function () {
@@ -359,7 +359,7 @@ export function runTests () {
         assert.equal(obj.getUpperCaseA(), `A`);
         assert.end();
     });
-    test(`common.mix should be able to do mixin for 2 objects.`, (assert) => {
+    test(`CommonElement mix should be able to do mixin for 2 objects.`, (assert) => {
         const fnX = function () {
             const a = `a`;
 
@@ -395,7 +395,7 @@ export function runTests () {
         assert.equal(fnZ.getB(), `b`);
         assert.end();
     });
-    test(`common.arrayToString and stringToArray should work.`, (assert) => {
+    test(`CommonElement arrayToString and stringToArray should work.`, (assert) => {
         const a = [ `Hello`, `world,`, `how`, `are`, `you?` ];
         const b = `Hello/world,/how/are/you?`;
         const resultA = common.arrayToString(a, `/`);
@@ -404,7 +404,7 @@ export function runTests () {
         assert.equal(resultB.toString(), a.toString());
         assert.end();
     });
-    test(`common.camelcaseToUnderscore and underscoreToCamelcase should work.`, (assert) => {
+    test(`CommonElement camelcaseToUnderscore and underscoreToCamelcase should work.`, (assert) => {
         const a = `this_is_a_var`;
         const b = `thisIsAVar`;
         const resultA = common.underscoreToCamelcase(a);
@@ -413,7 +413,7 @@ export function runTests () {
         assert.equal(resultB, a);
         assert.end();
     });
-    test(`common.forEach should be able to iterate object and array.`, (assert) => {
+    test(`CommonElement forEach should be able to iterate object and array.`, (assert) => {
         const obj = {
             a: `a`,
             b: `b`,

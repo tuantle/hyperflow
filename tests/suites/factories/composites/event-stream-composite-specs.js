@@ -9,7 +9,7 @@
  */
 'use strict'; // eslint-disable-line
 
-import test from 'tape';
+// import test from 'tape';
 
 import Composer from '../../../../src/core/composer';
 import EventStreamComposite from '../../../../src/core/factories/composites/event-stream-composite';
@@ -37,7 +37,7 @@ const Factory = Composer({
     },
     Factory: function Factory () {
         this.connectStream = function connectStream (source, duplex = false) {
-            this.observe(source);
+            this.observe(source).delay(10);
             if (duplex) {
                 source.observe(this);
             }
@@ -48,11 +48,16 @@ const factoryA = Factory.augment({
     state: {
         name: `factoryA`
     },
-    // operateStream: function operateStream (operator) {
-    //     operator.monitor({
-    //         logOnNext: (payload) => console.log(`Monitor factory A incoming event stream -- ${payload.value}`)
-    //     });
-    // },
+    operateIncomingStream: function operateIncomingStream (operator) {
+        operator.monitor({
+            logOnNext: (payload) => console.log(`Monitor factory A incoming event stream -- ${payload.value}`)
+        });
+    },
+    operateOutgoingStream: function operateOutgoingStream (operator) {
+        operator.monitor({
+            logOnNext: (payload) => console.log(`Monitor factory A outgoing event stream -- ${payload.value}`)
+        });
+    },
     setup: function setup (done) {
         const factory = this;
         factory.incoming(
@@ -84,10 +89,10 @@ const factoryB = Factory.augment({
     },
     setup: function setup (done) {
         const factory = this;
-        factory.outgoing(`event1`).delay(1000).emit(() => `1`);
-        factory.outgoing(`event4`).delay(300).emit(() => `4a`);
+        factory.outgoing(`event1`).emit(() => `1`);
+        factory.outgoing(`event4`).emit(() => `4a`);
         factory.outgoing(`event5`).emit(() => `5`);
-        factory.outgoing(`event6`).delay(500).emit(() => `From B`);
+        factory.outgoing(`event6`).emit(() => `From B`);
         done();
     }
 })();
@@ -97,9 +102,9 @@ const factoryC = Factory.augment({
     },
     setup: function setup (done) {
         const factory = this;
-        factory.outgoing(`event2`).delay(1200).emit(() => `2`);
-        factory.outgoing(`event4`).delay(400).emit(() => `4b`);
-        factory.outgoing(`event6`).delay(1000).emit(() => `From C`);
+        factory.outgoing(`event2`).emit(() => `2`);
+        factory.outgoing(`event4`).emit(() => `4b`);
+        factory.outgoing(`event6`).emit(() => `From C`);
         done();
     }
 })();
@@ -107,14 +112,6 @@ const factoryD = Factory.augment({
     state: {
         name: `factoryD`
     },
-    // operateStream: function operateStream (operator) {
-    //     operator.monitor({
-    //         logOnNext: (payload) => {
-    //             console.log(`Monitor factory D incoming event stream.`);
-    //             console.log(payload);
-    //         }
-    //     });
-    // },
     setup: function setup (done) {
         const factory = this;
         factory.incoming(`event3`).handle((results) => {
@@ -126,20 +123,17 @@ const factoryD = Factory.augment({
         });
         factory.incoming(`event7`).forward(`event9`);
         factory.incoming(`event8`).forward(`event10`);
-
         factory.outgoing(`event-final`).emit(() => `DONE!`);
     }
 })();
 
 export function runTests () {
-
     factoryA.connectStream(factoryB);
     factoryA.connectStream(factoryC);
     factoryA.connectStream(factoryD, true);
 
     factoryA.activateIncomingStream();
     factoryA.setup(() => {
-
         factoryD.activateIncomingStream();
         factoryD.setup(() => {
             factoryD.activateOutgoingStream();
