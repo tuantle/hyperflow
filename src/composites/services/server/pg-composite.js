@@ -131,14 +131,7 @@ export default CompositeElement({
                                                 const selectQuery = client.query(statementSQL.toParam());
                                                 Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
                                                 /* stream results back one row at a time */
-                                                selectQuery.on(`row`, (row) => {
-                                                    results.push(row);
-                                                    // if (row.hasOwnProperty(`id`)) {
-                                                    //     results.push(row);
-                                                    // } else {
-                                                    //     reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}. Missing required Id field.`));
-                                                    // }
-                                                });
+                                                selectQuery.on(`row`, (row) => results.push(row));
 
                                                 /* after all data is returned, close connection and resolve results */
                                                 selectQuery.on(`end`, () => {
@@ -172,8 +165,7 @@ export default CompositeElement({
                                         if (error) {
                                             reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
                                         } else {
-                                            // let id;
-                                            let result;
+                                            const results = [];
                                             /* do sql query update */
                                             const statementSQL = sqlCreate(sqlPostgres.update({
                                                 separator: `\n`,
@@ -188,19 +180,12 @@ export default CompositeElement({
                                                 const updateQuery = client.query(statementSQL.returning(`*`).toParam());
                                                 Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
 
-                                                updateQuery.on(`row`, (row) => {
-                                                    result = row;
-                                                    // if (row.hasOwnProperty(`id`)) {
-                                                    //     id = row.id;
-                                                    // } else {
-                                                    //     reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}. Missing required Id field.`));
-                                                    // }
-                                                });
+                                                updateQuery.on(`row`, (row) => results.push(row));
 
                                                 /* after data is updated, close connection and resolve the Id */
                                                 updateQuery.on(`end`, () => {
                                                     // client.end();
-                                                    resolve(result);
+                                                    resolve(results);
                                                     /* call `done()` to release the client back to the pool */
                                                     done();
                                                 });
@@ -229,8 +214,7 @@ export default CompositeElement({
                                         if (error) {
                                             reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
                                         } else {
-                                            // let id;
-                                            let result;
+                                            const results = [];
                                             /* do sql query insert */
                                             const statementSQL = sqlCreate(sqlPostgres.insert({
                                                 separator: `\n`,
@@ -245,20 +229,13 @@ export default CompositeElement({
                                                 const insertQuery = client.query(statementSQL.returning(`*`).toParam());
                                                 Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
 
-                                                insertQuery.on(`row`, (row) => {
-                                                    result = row;
-                                                    // if (row.hasOwnProperty(`id`)) {
-                                                    //     id = row.id;
-                                                    // } else {
-                                                    //     reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}. Missing required Id field.`));
-                                                    // }
-                                                });
+                                                insertQuery.on(`row`, (row) => results.push(row));
 
                                                 /* after data is inserted, close connection and resolve the Id */
                                                 insertQuery.on(`end`, () => {
                                                     // client.end();
-                                                    resolve(result);
-                                                    /* call `done()` to release the client back to the pool */
+                                                    resolve(results);
+                                                    /* call done to release the client back to the pool */
                                                     done();
                                                 });
 
@@ -270,16 +247,56 @@ export default CompositeElement({
                                     });
                                 });
                             }
-                        }
+                        },
                         /**
                          * @description - Do delete query on data base.
                          *
                          * @param {function} sqlCreate
                          * @method query.delete
                          */
-                        // delete: function delete (sqlCreate) {
-                        //     // TODO: Needs implementation.
-                        // }
+                        delete: function _delete (sqlCreate) {
+                            if (!Hf.isFunction(sqlCreate)) {
+                                Hf.log(`error`, `PGComposite.query.delete - Input squel function is invalid.`);
+                            } else {
+                                return new Promise((resolve, reject) => {
+                                    pg.connect(dbServerUrl, (error, client, done) => {
+                                        if (error) {
+                                            reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
+                                        } else {
+                                            const results = [];
+                                            /* do sql query delete */
+                                            const statementSQL = sqlCreate(sqlPostgres.delete({
+                                                separator: `\n`,
+                                                autoQuoteFieldNames: true,
+                                                nameQuoteCharacter: `"`,
+                                                tableAliasQuoteCharacter: `|`,
+                                                fieldAliasQuoteCharacter: `~`
+                                            }).from(tableName));
+                                            if (!Hf.isObject(statementSQL)) {
+                                                reject(new Error(`ERROR: SQL statement object is invalid.`));
+                                            } else {
+                                                const deleteQuery = client.query(statementSQL.returning(`*`).toParam());
+                                                Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
+
+                                                deleteQuery.on(`row`, (row) => results.push(row));
+
+                                                /* after data is deleted, close connection and resolve the Id */
+                                                deleteQuery.on(`end`, () => {
+                                                    // client.end();
+                                                    resolve(results);
+                                                    /* call done to release the client back to the pool */
+                                                    done();
+                                                });
+
+                                                deleteQuery.on(`error`, (_error) => {
+                                                    reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
+                                                });
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+                        }
                     };
                 }
             }
