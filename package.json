@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta12",
+    "version": "0.1.0-beta13",
     "registry": "github",
     "description": "Hyperflow (Hf) - A toolkit & library for developing universal app.",
     "license": "MIT",

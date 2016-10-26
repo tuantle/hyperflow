@@ -131,6 +131,7 @@ Improvements:
 Bug fixes:
 ```
 **Development Beta Version 0.1.0-beta12 (10/20/2016)**
+```
 Notes: Renamed Hflow to just Hf.
 New Features:
 Breaking Changes:
@@ -141,3 +142,15 @@ Improvements:
     - Reduced unnecessary console log for EventStreamComposite.
 Bug fixes:
     - Fixed non-functional oneOF and oneTypeOf constrainable descriptors for DataElement.
+```
+**Development Beta Version 0.1.0-beta13 (10/25/2016)**
+    Notes: .
+    New Features:
+        - Added Added throttle stream operator method to EventStreamComposite.
+        - Added delete query method to PGComposite.
+    Breaking Changes:
+    Improvements:
+        - Code cleanups.
+    Bug fixes:
+        - Fixed propTypes and defaultProps for toPureComponent method. Allowed React factory function access to getIterface method. for ReactComponentComposite.
+        - Fixed query results return for insert and update method for PGComposite.
