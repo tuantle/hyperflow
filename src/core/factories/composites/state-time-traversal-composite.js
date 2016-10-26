@@ -94,7 +94,7 @@ export default CompositeElement({
             if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
                 Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Input pathId is invalid.`);
             } else {
-                const key = pathId[0];
+                const [ key ] = pathId;
 
                 if (!cursor.hasItem(key)) {
                     Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Data item key:${key} is not defined.`);
@@ -144,7 +144,7 @@ export default CompositeElement({
             if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
                 Hf.log(`error`, `StateTimeTraversalComposite.recall - Input pathId is invalid.`);
             } else {
-                const key = pathId[0];
+                const [ key ] = pathId;
 
                 if (!cursor.hasItem(key)) {
                     Hf.log(`error`, `StateTimeTraversalComposite.recall - Data item key:${key} is not defined.`);
@@ -179,7 +179,7 @@ export default CompositeElement({
             if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
                 Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Input pathId is invalid.`);
             } else {
-                const key = pathId[0];
+                const [ key ] = pathId;
                 if (!cursor.hasItem(key)) {
                     Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Data item key:${key} is not defined.`);
                 } else {
