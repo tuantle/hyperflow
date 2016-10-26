@@ -410,14 +410,13 @@ export default Composer({
                 } else if (compositeIntfs.some((compositeIntf) => intf.name === compositeIntf.name)) {
                     Hf.log(`error`, `InterfaceFactory.composedOf - Cannot compose interface:${intf.name} as a composite of itself.`);
                 } else {
-                    const newCompositeInterfaces = compositeIntfs.filter((compositeIntf) => {
+                    _compositeCache = compositeIntfs.filter((compositeIntf) => {
                         if (Object.keys(_compositeCache).some((name) => name === compositeIntf.name)) {
                             Hf.log(`warn1`, `InterfaceFactory.composedOf - Interface:${intf.name} is already composed of composite interface:${compositeIntf.name}.`);
                             return false;
                         }
                         return true;
-                    });
-                    _compositeCache = newCompositeInterfaces.map((compositeIntf) => {
+                    }).map((compositeIntf) => {
                         intf.observe(compositeIntf).debounce(DEBOUNCE_COMPOSITE_INTERFACE_IN_MS);
                         Hf.log(`info`, `Interface:${intf.name} is composed of composite interface:${compositeIntf.name}.`);
                         return compositeIntf;
