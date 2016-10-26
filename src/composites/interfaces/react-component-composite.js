@@ -313,13 +313,13 @@ export default CompositeElement({
                                             if (cursor.isItemOneOfValues(key)) {
                                                 const {
                                                     condition: values
-                                                } = cursor.getItemDescription(key).getConstraint(`oneOf`);
+                                                } = cursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
                                                 propType[key] = React.PropTypes.oneOf(values);
                                             }
                                             if (cursor.isItemOneOfTypes(key)) {
                                                 const {
                                                     condition: types
-                                                } = cursor.getItemDescription(key).getConstraint(`oneTypeOf`);
+                                                } = cursor.getItemDescription(key).ofConstrainable().s(`oneTypeOf`);
                                                 propType[key] = React.PropTypes.oneOfType(types.map((type) => {
                                                     return reactPropTypeStronglyTyped[type];
                                                 }));
@@ -332,16 +332,6 @@ export default CompositeElement({
                                     })();
                                     /* set react default property */
                                     this.defaultProps = defaultProperty;
-                                    /* ----- Public Functions -------------- */
-                                    /**
-                                     * @description - Get this component's interface.
-                                     *
-                                     * @method getInterface
-                                     * @return {object}
-                                     */
-                                    this.getInterface = function getInterface () {
-                                        return intf;
-                                    };
                                 }
                             }
                         }).mixin(intf).resolve())();
@@ -350,10 +340,19 @@ export default CompositeElement({
                         }).of(reactPureDefinition)) {
                             Hf.log(`error`, `ReactComponentComposite.toPureComponent - React pure component definition is invalid.`);
                         } else {
-                            const {
-                                pureRender: reactPureComponent
+                            let {
+                                pureRender: reactPureFunctionalComponent
                             } = reactPureDefinition;
-                            return reactPureComponent.bind(reactPureDefinition);
+
+                            reactPureFunctionalComponent = reactPureFunctionalComponent.bind(reactPureDefinition);
+
+                            /* allow React pure component function access to React propTypes */
+                            reactPureFunctionalComponent.propTypes = reactPureDefinition.propTypes;
+
+                            /* allow React pure component function access to default property */
+                            reactPureFunctionalComponent.defaultProps = reactPureDefinition.defaultProps;
+
+                            return reactPureFunctionalComponent;
                         }
                     }
                 }
@@ -407,13 +406,13 @@ export default CompositeElement({
                                         if (cursor.isItemOneOfValues(key)) {
                                             const {
                                                 condition: values
-                                            } = cursor.getItemDescription(key).getConstraint(`oneOf`);
+                                            } = cursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
                                             propType[key] = React.PropTypes.oneOf(values);
                                         }
                                         if (cursor.isItemOneOfTypes(key)) {
                                             const {
                                                 condition: types
-                                            } = cursor.getItemDescription(key).getConstraint(`oneTypeOf`);
+                                            } = cursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
                                             propType[key] = React.PropTypes.oneOfType(types.map((type) => {
                                                 return reactPropTypeStronglyTyped[type];
                                             }));
@@ -581,7 +580,11 @@ export default CompositeElement({
                             }
                         }
                     }).mixin(intf).resolve())();
-                    const reactComponent = React.createClass(reactDefinition);
+                    let reactComponent = React.createClass(reactDefinition);
+
+                    /* allow React factory function access to the get interface function */
+                    reactComponent.getInterface = reactDefinition.getInterface;
+
                     if (!Hf.isFunction(reactComponent)) {
                         Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component definition is invalid.`);
                     } else {
