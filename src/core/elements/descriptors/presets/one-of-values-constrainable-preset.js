@@ -40,7 +40,7 @@ const oneOfValuesPreset = function oneOfValuesPreset (_values) {
     if (!Hf.isArray(_values) || Hf.isEmpty(_values)) {
         Hf.log(`error`, `oneOf - Input values are invalid.`);
     } else if (!_values.every((value) => Hf.isString(value) || Hf.isNumeric(value))) {
-        Hf.log(`error`, `oneOf - Value must be either numeric or string.`);
+        Hf.log(`error`, `oneOf - Value must be either number or string.`);
     } else {
         return {
             oneOf: {
