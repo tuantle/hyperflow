@@ -85,7 +85,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
             });
         } else if (common.isArray(schema) && common.isArray(target)) {
             if (schema.length === 1) {
-                const schemaItem = schema[0];
+                const [ schemaItem ] = schema;
                 verified = target.reduce((_verified, targetItem) => {
                     let itemTypes = [];
                     if ((common.isObject(targetItem) && common.isObject(schemaItem)) || (common.isArray(targetItem) && common.isArray(schemaItem))) {

@@ -65,7 +65,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             Hf.log(`error`, `DataElement._getAccessor - Input pathId is invalid.`);
         } else {
             const data = this;
-            const rootKey = pathId[0];
+            const [ rootKey ] = pathId;
             const mRecords = data._mutation.records;
             const immutableRootKeys = data._mutation.immutableRootKeys;
             if (immutableRootKeys.indexOf(rootKey) !== -1 && !Hf.isEmpty(mRecords)) {
@@ -89,7 +89,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             Hf.log(`error`, `DataElement._recordMutation - Input pathId is invalid.`);
         } else {
             const data = this;
-            const rootKey = pathId[0];
+            const [ rootKey ] = pathId;
             const immutableRootKeys = data._mutation.immutableRootKeys;
             const mRecords = data._mutation.records;
 
@@ -130,7 +130,7 @@ const DataElementPrototype = Object.create({}).prototype = {
         } else {
             const cursor = data.select(pathId);
             let accessor = cursor.getContentType() === `object` ? {} : [];
-            let mutatedKeys = !Hf.isEmpty(records) ? records[0] : [];
+            let [ mutatedKeys ] = !Hf.isEmpty(records) ? records : [[]];
 
             cursor.forEach((item, key) => {
                 if (Hf.isObject(item) || Hf.isArray(item)) {

@@ -535,7 +535,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                  * @return {object}
                  */
                 ofConstrainable: function ofConstrainable () {
-                    if (!cursor.isItemObservable(key)) {
+                    if (!cursor.isItemConstrainable(key)) {
                         Hf.log(`error`, `DataCursorElement.getItemDescription.ofConstrainable - Data item key:${key} at pathId:${pathId} does not have a constrainable description.`);
                     } else {
                         return cursor._descriptor.select(`constrainable`).getDescription(pathId);
@@ -1013,12 +1013,12 @@ export default function DataCursorElement (data, pathId) {
 
             /* get the keys from pathId */
             if (Hf.isString(pathId)) {
-                key = Hf.stringToArray(pathId, `.`).pop();
-                rootKey = Hf.stringToArray(pathId, `.`).reverse().pop();
+                [ key ] = Hf.stringToArray(pathId, `.`).reverse();
+                [ rootKey ] = Hf.stringToArray(pathId, `.`);
             }
             if (Hf.isArray(pathId)) {
-                rootKey = pathId.slice(0).reverse().pop();
-                key = pathId.slice(0).pop();
+                [ rootKey ] = pathId;
+                [ key ] = pathId.slice(0).reverse();
                 pathId = Hf.arrayToString(pathId, `.`);
             }
 

@@ -538,7 +538,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
                     rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.indexOf(rtNode._key) !== -1);
 
                     rtsNodes.forEach((rtsNode) => {
-                        const tsNode = tNodes.filter((tNode) => tNode._key === rtsNode._key)[0];
+                        const [ tsNode ] = tNodes.filter((tNode) => tNode._key === rtsNode._key);
 
                         tsNode.refer(rtsNode._pathId);
                     });
@@ -691,10 +691,10 @@ export default function TreeNodeElement (tree, pathId) {
 
             /* get the key from pathId */
             if (Hf.isString(pathId)) {
-                key = Hf.stringToArray(pathId, `.`).pop();
+                [ key ] = Hf.stringToArray(pathId, `.`).reverse();
             }
             if (Hf.isArray(pathId)) {
-                key = pathId.slice(0).pop();
+                [ key ] = pathId.slice(0).reverse();
                 pathId = Hf.arrayToString(pathId, `.`);
             }
 
