@@ -434,11 +434,33 @@ export default CompositeElement({
                             return operator;
                         },
                         /**
+                         * @description - At observable stream, operates a throttle on the entire stream.
+                         *
+                         * @method throttle
+                         * @param {number} windowDuration - Time in ms to wait before emitting another item after emitting the last item.
+                         * @return {object}
+                         */
+                        throttle: function throttle (windowDuration) {
+                            if (!Hf.isInteger(windowDuration)) {
+                                Hf.log(`error`, `EventStreamComposite.throttle - Input throttle timw window is invalid.`);
+                            } else {
+                                switch (direction) { // eslint-disable-line
+                                case `incoming`:
+                                    _incomingStream = _incomingStream.throttle(windowDuration).share();
+                                    break;
+                                case `outgoing`:
+                                    _outgoingStream = _outgoingStream.throttle(windowDuration).share();
+                                    break;
+                                }
+                            }
+                            return operator;
+                        },
+                        /**
                          * @description - At observable stream, operates a timeout on the entire stream.
                          *
                          * @method timeout
                          * @param {object} timeoutPayload
-                         * @param {numeric} ms
+                         * @param {number} ms
                          * @return {object}
                          */
                         timeout: function timeout (timeoutPayload, ms) {
@@ -561,7 +583,7 @@ export default CompositeElement({
                 const factory = this;
                 if (Hf.isEmpty(eventIds)) {
                     Hf.log(`error`, `EventStreamComposite.outgoing - Factory:${factory.name} input eventId array is empty.`);
-                } else if (eventIds.some((eventId) => !Hf.isString(eventId))) {
+                } else if (eventIds.some((eventId) => !Hf.isString(eventId) || Hf.isEmpty(eventId))) {
                     Hf.log(`error`, `EventStreamComposite.outgoing - Factory:${factory.name} input event Id is invalid.`);
                 } else {
                     eventIds = eventIds.filter((eventId) => {
@@ -715,7 +737,7 @@ export default CompositeElement({
                 const factory = this;
                 if (Hf.isEmpty(eventIds)) {
                     Hf.log(`error`, `EventStreamComposite.incoming - Factory:${factory.name} input eventId array is empty.`);
-                } else if (eventIds.some((eventId) => !Hf.isString(eventId))) {
+                } else if (eventIds.some((eventId) => !Hf.isString(eventId) || Hf.isEmpty(eventId))) {
                     Hf.log(`error`, `EventStreamComposite.incoming - Factory:${factory.name} input event Id is invalid.`);
                 } else {
                     eventIds = eventIds.filter((eventId) => {
@@ -774,7 +796,7 @@ export default CompositeElement({
                                 //         resolve(value);
                                 //     });
                                 // });
-                                const eventId = eventIds[0];
+                                const [ eventId ] = eventIds;
                                 return new Promise((resolve) => {
                                     if (_arbiter.hasOwnProperty(eventId)) {
                                         _arbiter[eventId].handler = (value) => resolve(value);
@@ -909,7 +931,7 @@ export default CompositeElement({
                                     relay: function relay (...relayEventIds) {
                                         if (Hf.isEmpty(relayEventIds)) {
                                             Hf.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id array is empty.`);
-                                        } else if (relayEventIds.some((relayEventId) => !Hf.isString(relayEventId))) {
+                                        } else if (relayEventIds.some((relayEventId) => !Hf.isString(relayEventId) || Hf.isEmpty(relayEventId))) {
                                             Hf.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id is invalid.`);
                                         } else {
                                             relayEventIds = relayEventIds.filter((relayEventId) => {
@@ -985,7 +1007,7 @@ export default CompositeElement({
                         forward: function forward (...forwardEventIds) {
                             if (Hf.isEmpty(forwardEventIds)) {
                                 Hf.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input eventId array is empty.`);
-                            } else if (forwardEventIds.some((forwardEventId) => !Hf.isString(forwardEventId))) {
+                            } else if (forwardEventIds.some((forwardEventId) => !Hf.isString(forwardEventId) || Hf.isEmpty(forwardEventId))) {
                                 Hf.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input event Id is invalid.`);
                             } else {
                                 forwardEventIds = forwardEventIds.filter((forwardEventId) => {
