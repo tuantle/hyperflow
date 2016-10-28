@@ -335,11 +335,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
                     const hNode = node._getHead();
 
                     if (!hNode._contentProxy) {
-                        if (Hf.isString(node._key)) {
-                            hNode._contentProxy = {};
-                        } else {
-                            hNode._contentProxy = [];
-                        }
+                        hNode._contentProxy = Hf.isString(node._key) ? {} : [];
                     }
                     if (!hNode._contentProxy.hasOwnProperty(node._key)) {
                         Object.defineProperty(hNode._contentProxy, node._key, {
