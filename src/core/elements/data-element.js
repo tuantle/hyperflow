@@ -61,7 +61,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     _getAccessor: function _getAccessor (pathId) {
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-        if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+        if (!Hf.isNonEmptyArray(pathId)) {
             Hf.log(`error`, `DataElement._getAccessor - Input pathId is invalid.`);
         } else {
             const data = this;
@@ -85,7 +85,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     _recordMutation: function _recordMutation (pathId) {
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-        if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+        if (!Hf.isNonEmptyArray(pathId)) {
             Hf.log(`error`, `DataElement._recordMutation - Input pathId is invalid.`);
         } else {
             const data = this;
@@ -143,7 +143,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                             get: function get () {
                                 return cursor.getContentItem(key);
                             },
-                            configurable: true,
+                            configurable: false,
                             enumerable: true
                         });
                     // } else if (cursor.isItemObservable(key)) {
@@ -151,13 +151,9 @@ const DataElementPrototype = Object.create({}).prototype = {
                     //
                     } else {
                         const cachedItem = item;
-
                         Object.defineProperty(accessor, key, {
                             get: function get () {
-                                if (cursor.isImmutable()) {
-                                    return cachedItem;
-                                }
-                                return cursor.getContentItem(key);
+                                return cursor.isImmutable() ? cachedItem : cursor.getContentItem(key);
                             },
                             set: function set (value) {
                                 cursor.setContentItem(value, key);
@@ -418,7 +414,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     select: function select (pathId) {
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-        if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+        if (!Hf.isNonEmptyArray(pathId)) {
             Hf.log(`error`, `DataElement.select - Input pathId is invalid.`);
         } else {
             const data = this;
@@ -447,125 +443,117 @@ const DataElementPrototype = Object.create({}).prototype = {
             let formatedBundle = {};
             let formatedBundleItem;
 
-            formatedBundle.mutable = Hf.isSchema({
-                mutable: `boolean`
-            }).of(bundle) ? bundle.mutable : false;
-
             Hf.forEach(bundle, (bundleItem, bundleKey) => {
                 if (Hf.isDefined(bundleItem)) {
-                    if (bundleKey !== `mutable`) {
-                        formatedBundle[bundleKey] = {};
-                        formatedBundleItem = formatedBundle[bundleKey];
+                    formatedBundle[bundleKey] = {};
+                    formatedBundleItem = formatedBundle[bundleKey];
 
-                        if (Hf.isSchema({
-                            value: `defined`
-                        }).of(bundleItem)) {
-                            if (bundleItem.hasOwnProperty(`required`)) {
-                                if (Hf.isBoolean(bundleItem.required)) {
-                                    formatedBundleItem.required = bundleItem.required;
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable required for key:${bundleKey} is invalid.`);
-                                }
+                    if (Hf.isSchema({
+                        value: `defined`
+                    }).of(bundleItem)) {
+                        if (bundleItem.hasOwnProperty(`required`)) {
+                            if (Hf.isBoolean(bundleItem.required)) {
+                                formatedBundleItem.required = bundleItem.required;
+                            } else {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable required for key:${bundleKey} is invalid.`);
                             }
-                            if (bundleItem.hasOwnProperty(`stronglyTyped`)) {
-                                if (Hf.isBoolean(bundleItem.stronglyTyped)) {
-                                    formatedBundleItem.stronglyTyped = bundleItem.stronglyTyped;
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable strongly typed for key:${bundleKey} is invalid.`);
-                                }
+                        }
+                        if (bundleItem.hasOwnProperty(`stronglyTyped`)) {
+                            if (Hf.isBoolean(bundleItem.stronglyTyped)) {
+                                formatedBundleItem.stronglyTyped = bundleItem.stronglyTyped;
+                            } else {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable strongly typed for key:${bundleKey} is invalid.`);
                             }
-                            if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
-                                if (Hf.isSchema({
-                                    oneTypeOf: [ `string` ]
-                                }).of(bundleItem)) {
-                                    if (!Hf.isEmpty(bundleItem.oneTypeOf)) {
-                                        formatedBundleItem.oneOfTypes = bundleItem.oneTypeOf;
-                                    } else {
-                                        Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is empty.`);
-                                    }
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is invalid.`);
-                                }
-                            }
-                            if (bundleItem.hasOwnProperty(`oneOf`)) {
-                                if (Hf.isSchema({
-                                    oneOf: [ `number|string` ]
-                                }).of(bundleItem)) {
-                                    if (!Hf.isEmpty(bundleItem.oneOf)) {
-                                        formatedBundleItem.oneOfValues = bundleItem.oneOf;
-                                    } else {
-                                        Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is empty.`);
-                                    }
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is invalid.`);
-                                }
-                            }
-                            if (bundleItem.hasOwnProperty(`bounded`)) {
-                                if (Hf.isSchema({
-                                    bounded: [
-                                        `number`
-                                    ]
-                                }).of(bundleItem)) {
-                                    if (bundleItem.bounded.length === 2) {
-                                        formatedBundleItem.boundarydValues = bundleItem.bounded;
-                                    } else {
-                                        Hf.log(`error`, `DataElement.format - Bundle constrainable bounding range for key:${bundleKey} is invalid.`);
-                                    }
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable bounded range for key:${bundleKey} is invalid.`);
-                                }
-                            }
-                            if (bundleItem.hasOwnProperty(`constrainable`)) {
-                                if (Hf.isSchema({
-                                    constrainable: {
-                                        constraint: `object`,
-                                        target: `object`
-                                    }
-                                }).of(bundleItem)) {
-                                    formatedBundleItem.constrainable = bundleItem.constrainable;
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable for key:${bundleKey} is invalid.`);
-                                }
-                            }
-                            if (bundleItem.hasOwnProperty(`observable`)) {
-                                if (Hf.isSchema({
-                                    observable: {
-                                        condition: `object`,
-                                        subscriber: `object`
-                                    }
-                                }).of(bundleItem)) {
-                                    formatedBundleItem.observable = bundleItem.observable;
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle observable for key:${bundleKey} is invalid.`);
-                                }
-                            }
-                            formatedBundleItem.value = bundleItem.value;
-                        } else if (Hf.isObject(bundleItem) && bundleItem.hasOwnProperty(`computable`)) {
+                        }
+                        if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
                             if (Hf.isSchema({
-                                computable: {
-                                    contexts: `array`,
-                                    compute: `function`
+                                oneTypeOf: [ `string` ]
+                            }).of(bundleItem)) {
+                                if (!Hf.isEmpty(bundleItem.oneTypeOf)) {
+                                    formatedBundleItem.oneOfTypes = bundleItem.oneTypeOf;
+                                } else {
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is empty.`);
+                                }
+                            } else {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is invalid.`);
+                            }
+                        }
+                        if (bundleItem.hasOwnProperty(`oneOf`)) {
+                            if (Hf.isSchema({
+                                oneOf: [ `number|string` ]
+                            }).of(bundleItem)) {
+                                if (!Hf.isEmpty(bundleItem.oneOf)) {
+                                    formatedBundleItem.oneOfValues = bundleItem.oneOf;
+                                } else {
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is empty.`);
+                                }
+                            } else {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is invalid.`);
+                            }
+                        }
+                        if (bundleItem.hasOwnProperty(`bounded`)) {
+                            if (Hf.isSchema({
+                                bounded: [
+                                    `number`
+                                ]
+                            }).of(bundleItem)) {
+                                if (bundleItem.bounded.length === 2) {
+                                    formatedBundleItem.boundarydValues = bundleItem.bounded;
+                                } else {
+                                    Hf.log(`error`, `DataElement.format - Bundle constrainable bounding range for key:${bundleKey} is invalid.`);
+                                }
+                            } else {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable bounded range for key:${bundleKey} is invalid.`);
+                            }
+                        }
+                        if (bundleItem.hasOwnProperty(`constrainable`)) {
+                            if (Hf.isSchema({
+                                constrainable: {
+                                    constraint: `object`,
+                                    target: `object`
                                 }
                             }).of(bundleItem)) {
-                                formatedBundleItem.computable = bundleItem.computable;
+                                formatedBundleItem.constrainable = bundleItem.constrainable;
                             } else {
-                                Hf.log(`error`, `DataElement.format - Bundle computable for key:${bundleKey} is invalid.`);
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable for key:${bundleKey} is invalid.`);
                             }
-                        } else {
-                            formatedBundleItem.value = bundleItem;
-                            // if (Hf.isObject(bundleItem)) {
-                            //     if (!Hf.isEmpty(bundleItem)) {
-                            //         formatedBundleItem.value = bundleItem;
-                            //     } else {
-                            //         Hf.log(`error`, `DataElement.format - Bundle key:${bundleKey} is empty.`);
-                            //     }
-                            // } else {
-                            //     formatedBundleItem.value = bundleItem;
-                            // }
                         }
+                        if (bundleItem.hasOwnProperty(`observable`)) {
+                            if (Hf.isSchema({
+                                observable: {
+                                    condition: `object`,
+                                    subscriber: `object`
+                                }
+                            }).of(bundleItem)) {
+                                formatedBundleItem.observable = bundleItem.observable;
+                            } else {
+                                Hf.log(`error`, `DataElement.format - Bundle observable for key:${bundleKey} is invalid.`);
+                            }
+                        }
+                        formatedBundleItem.value = bundleItem.value;
+                    } else if (Hf.isObject(bundleItem) && bundleItem.hasOwnProperty(`computable`)) {
+                        if (Hf.isSchema({
+                            computable: {
+                                contexts: `array`,
+                                compute: `function`
+                            }
+                        }).of(bundleItem)) {
+                            formatedBundleItem.computable = bundleItem.computable;
+                        } else {
+                            Hf.log(`error`, `DataElement.format - Bundle computable for key:${bundleKey} is invalid.`);
+                        }
+                    } else {
+                        formatedBundleItem.value = bundleItem;
+                        // if (Hf.isObject(bundleItem)) {
+                        //     if (!Hf.isEmpty(bundleItem)) {
+                        //         formatedBundleItem.value = bundleItem;
+                        //     } else {
+                        //         Hf.log(`error`, `DataElement.format - Bundle key:${bundleKey} is empty.`);
+                        //     }
+                        // } else {
+                        //     formatedBundleItem.value = bundleItem;
+                        // }
                     }
-                } else {
-                    Hf.log(`error`, `DataElement.format - Bundle key:${bundleKey} is invalid.`);
                 }
             });
 
@@ -593,7 +581,6 @@ const DataElementPrototype = Object.create({}).prototype = {
             const rootKey = bundleName;
             /* format bundle to correct format */
             const formatedBundle = data.format(bundle);
-            const mutable = formatedBundle.mutable;
             let cursor;
 
             /* create a root data content for bundle */
@@ -602,28 +589,35 @@ const DataElementPrototype = Object.create({}).prototype = {
 
             /* read bundle and assign descriptors */
             Hf.forEach(formatedBundle, (bundleItem, bundleKey) => {
-                if (bundleKey !== `mutable`) {
-                    if (bundleItem.hasOwnProperty(`value`)) {
-                        const value = bundleItem.value;
-                        if (Hf.isDefined(value)) {
-                            cursor.setContentItem(value, bundleKey);
-                        } else {
-                            Hf.log(`error`, `DataElement.read - Cannot set undefined data bundle item key:${bundleKey}.`);
-                        }
+                if (bundleItem.hasOwnProperty(`value`)) {
+                    const value = bundleItem.value;
+                    if (Hf.isDefined(value)) {
+                        cursor.setContentItem(value, bundleKey);
+                    } else {
+                        Hf.log(`error`, `DataElement.read - Cannot set undefined data bundle item key:${bundleKey}.`);
                     }
-                    data._assignDescription(cursor, bundleItem, bundleKey);
                 }
+                data._assignDescription(cursor, bundleItem, bundleKey);
             });
 
             if (Hf.isEmpty(data._rootContent[bundleName])) {
                 Hf.log(`error`, `DataElement.read - Root data content item name:${bundleName} is empty.`);
             } else {
                 data._updateMMap(rootKey);
-                if (!mutable) {
-                    data.setImmutability(rootKey, true);
-                }
+
                 return {
-                    select: data.select.bind(data)
+                    /**
+                     * @description - Set data immutability after reading.
+                     *
+                     * @method asImmutable
+                     * @param {boolean} immutable
+                     * @return {object}
+                     */
+                    asImmutable: function asImmutable (immutable = true) {
+                        immutable = Hf.isBoolean(immutable) ? immutable : true;
+                        data.setImmutability(rootKey, immutable);
+                        return data;
+                    }
                 };
             }
         }
