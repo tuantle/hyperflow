@@ -83,7 +83,7 @@ export default CompositeElement({
                         Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - App:${app.name} domain is invalid.`);
                     } else {
                         const renderedMarkup = ReactDOMRenderer.renderToString(appComponent);
-                        if (Hf.isString(renderedMarkup) && !Hf.isEmpty(renderedMarkup)) {
+                        if (Hf.isNonEmptyString(renderedMarkup)) {
                             domain.outgoing(`on-render-markup-to-string`).emit(() => renderedMarkup);
                         } else {
                             Hf.log(`warn1`, `ReactAppRendererComposite.renderToTarget - React rendered markup is invalid.`);
