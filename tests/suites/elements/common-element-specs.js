@@ -60,6 +60,12 @@ export function runTests () {
         assert.equal(common.isString([]), false);
         assert.end();
     });
+    test(`CommonElement isNonEmptyString should correctly check if value is a string and not empty.`, (assert) => {
+        assert.equal(common.isNonEmptyString(`This is a String.`), true);
+        assert.equal(common.isNonEmptyString(``), false);
+        assert.equal(common.isNonEmptyString(1234), false);
+        assert.end();
+    });
     test(`CommonElement isBoolean should correctly check if value is a boolean.`, (assert) => {
         assert.equal(common.isBoolean(`true`), true);
         assert.equal(common.isBoolean(`false`), true);
@@ -74,15 +80,29 @@ export function runTests () {
     });
     test(`CommonElement isFunction should correctly check if value is a function.`, (assert) => {
         assert.equal(common.isFunction(function () {}), true);
+        assert.equal(common.isFunction(() => {}), true);
+        assert.equal(common.isFunction(1234), false);
         assert.end();
     });
     test(`CommonElement isDate should correctly check if value is a date.`, (assert) => {
         assert.equal(common.isDate(new Date()), true);
+        assert.equal(common.isDate(1234), false);
         assert.end();
     });
     test(`CommonElement isArray/isObject should correctly check if value is an array/object.`, (assert) => {
         assert.equal(common.isObject({}), true);
         assert.equal(common.isArray([]), true);
+        assert.equal(common.isObject(1234), false);
+        assert.equal(common.isArray(1234), false);
+        assert.end();
+    });
+    test(`CommonElement isNonEmptyArray/isNonEmptyObject should correctly check if value is an array/object and not empty.`, (assert) => {
+        assert.equal(common.isNonEmptyObject({
+            a: 1
+        }), true);
+        assert.equal(common.isNonEmptyArray([ 1, 2, 3, 4 ]), true);
+        assert.equal(common.isNonEmptyObject({}), false);
+        assert.equal(common.isNonEmptyArray([]), false);
         assert.end();
     });
     test(`CommonElement isSchema should correctly check and compare an object to a schema.`, (assert) => {
@@ -267,7 +287,6 @@ export function runTests () {
             d: [ 1, 2, 3, 4 ]
         };
         const result = common.fallback(defaultObj).of(Object.freeze(objA));
-        // console.log(JSON.stringify(result, null, `\t`));
         assert.equal(result.b.c, 1234);
         assert.equal(result.a, `a`);
         assert.end();
@@ -288,21 +307,14 @@ export function runTests () {
             },
             bar: [{
                 a: `A`,
-                b: `b`,
                 foo: [ 5, 2, 3 ]
             }]
         };
         const mutatorB = {
             foo: [ 4, 5, 6 ]
         };
-        // const mutatorC = {
-        //     bar: [{
-        //         a: `b`
-        //     }]
-        // };
         const resultA = common.mutate(obj).by(mutatorA);
         const resultB = common.mutate(obj).atPathBy(mutatorB, `bar.0.foo`);
-        // const resultC = common.mutate(obj).by(mutatorC);
 
         assert.equal(resultA.foo.bar, 4);
         assert.equal(resultA.bar[0].a, `A`);
@@ -312,9 +324,6 @@ export function runTests () {
         assert.equal(resultB.bar[0].a, `a`);
         assert.equal(resultB.bar[0].foo.length, 3);
         assert.equal(resultB.bar[0].foo[0], 4);
-        // console.log(JSON.stringify(obj, null, `\t`));
-        // console.log(JSON.stringify(resultA, null, `\t`));
-        // console.log(JSON.stringify(resultB, null, `\t`));
         assert.end();
     });
     test(`CommonElement merge should be able to deep merge 2 objects.`, (assert) => {

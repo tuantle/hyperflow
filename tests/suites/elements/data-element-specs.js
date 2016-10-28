@@ -38,7 +38,7 @@ export function runTests () {
         };
 
         const data = DataElement();
-        const cursor = data.read(obj, `obj`).select(`obj`);
+        const cursor = data.read(obj, `obj`).asImmutable().select(`obj`);
         assert.equal(JSON.stringify(cursor.toObject()), JSON.stringify(obj));
         assert.end();
     });
@@ -48,7 +48,7 @@ export function runTests () {
     //
     //     console.log(obj)
     //     const data = DataElement();
-    //     const cursor = data.read(obj, `obj`).select(`obj`);
+    //     const cursor = data.read(obj, `obj`).asImmutable().select(`obj`);
     //     // assert.equal(JSON.stringify(cursor.toObject()), JSON.stringify(obj));
     //     assert.end();
     // });
@@ -76,7 +76,7 @@ export function runTests () {
             }
         };
         const data = DataElement();
-        const cursor = data.read(objB, `obj`).select(`obj`);
+        const cursor = data.read(objB, `obj`).asImmutable().select(`obj`);
         assert.equal(JSON.stringify(cursor.toObject()), JSON.stringify(objA));
         assert.end();
     });
@@ -94,8 +94,7 @@ export function runTests () {
                 b: [ 1, 2 ]
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursorB = data.select(`obj.data1.b`);
         const cursorC = data.select(`obj.data2.b`);
         assert.equal(JSON.stringify(cursorB.toObject()), JSON.stringify(obj.data1.b));
@@ -117,8 +116,7 @@ export function runTests () {
                 b: [ 1, 2 ]
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursor = data.select(`obj.data1`);
         let accessor = cursor.getAccessor();
 
@@ -134,8 +132,7 @@ export function runTests () {
                 stronglyTyped: true
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursor = data.select(`obj`);
         let accessor = cursor.getAccessor();
 
@@ -157,13 +154,10 @@ export function runTests () {
                 required: true
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursor = data.select(`obj`);
         let accessor = cursor.getAccessor();
 
-        accessor.a = null;
-        assert.equal(cursor.getAccessor().a, `a`);
         accessor.a = `b`;
         assert.equal(cursor.getAccessor().a, `b`);
 
@@ -176,8 +170,7 @@ export function runTests () {
                 oneOf: [ `a`, `b`, `c`, 123 ]
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursor = data.select(`obj`);
         let accessor = cursor.getAccessor();
 
@@ -197,8 +190,7 @@ export function runTests () {
                 bounded: [ 10, 13 ]
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursor = data.select(`obj`);
         let accessor = cursor.getAccessor();
 
@@ -221,8 +213,7 @@ export function runTests () {
                 ]
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursor = data.select(`obj`);
         let accessor = cursor.getAccessor();
 
@@ -247,8 +238,7 @@ export function runTests () {
                 // FIXME: oneOf violation alert is being called twice with bounded constraint.
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursor = data.select(`obj`);
         let accessor = cursor.getAccessor();
 
@@ -258,53 +248,52 @@ export function runTests () {
     });
     test(`DataElement immutability should work as expected.`, (assert) => {
         const obj = {
-            a: {
-                value: {
-                    a0: [ `1`, `2`, `3` ],
-                    a1: `a1`
-                }
-            },
-            b: {
-                value: null
-            },
-            c: {
-                value: null
+            state: {
+                a: null,
+                b: null
             }
         };
-        const data = DataElement();
-        data.read(obj, `obj`);
+        const data = DataElement().read(obj, `obj`).asImmutable();
         const cursor = data.select(`obj`);
         let accessor = cursor.getAccessor();
 
-        accessor.a.a1 = `A1`;
+        // let b = {
+        //     b1: `b1`,
+        //     b2: `b2`
+        // };
+        //
+        // accessor.state.b = b;
+        // cursor.getAccessor();
+        //
+        // b.b3 = `b3`;
+        //
+        // accessor.state.b = b;
+        // cursor.getAccessor();
+        //
+        // b.b4 = `b4`;
+        //
+        // accessor.state.b = b;
+        // cursor.getAccessor();
 
-        assert.equal(accessor.a.a1, `a1`);
-        assert.equal(cursor.getAccessor().a.a1, `A1`);
-        assert.notEqual(accessor, cursor.getAccessor());
+        let b = [ 1, 2, 3 ];
 
-        let bObj = {
-            b1: `b1`,
-            b2: `b2`,
-            b3: `b3`
-        };
-        let cObj = [ 1, 2, 3, 4 ];
-        accessor.c = cObj;
+        accessor.state.b = b;
+        cursor.getAccessor();
 
-        bObj.b4 = `b4`;
-        accessor.b = bObj;
+        b.push(4);
 
-        cObj.push(4);
-        accessor.c = cObj;
+        accessor.state.b = b;
+        cursor.getAccessor();
 
-        accessor = cursor.getAccessor();
+        b.push(5);
 
-        accessor.a.a0[0] = 0;
+        accessor.state.b = b;
+        cursor.getAccessor();
 
-        console.log(accessor.c === cursor.getAccessor().c);
-
-        console.log(JSON.stringify(accessor, null, ` `));
+        console.log(JSON.stringify(accessor, null, `\t`));
         console.log(`---`);
-        console.log(JSON.stringify(cursor.getAccessor(), null, ` `));
+        console.log(JSON.stringify(cursor.recallAllContentItems(`state`), null, `\t`));
+        console.log(JSON.stringify(cursor.getAccessor(), null, `\t`));
 
         assert.end();
     });
