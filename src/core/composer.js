@@ -180,7 +180,7 @@ export default function Composer (definition) {
                         value: state,
                         writable: false,
                         configurable: false,
-                        enumerable: true
+                        enumerable: false
                     },
                     _composite: {
                         value: (() => {
@@ -193,7 +193,7 @@ export default function Composer (definition) {
                         })(),
                         writable: false,
                         configurable: false,
-                        enumerable: true
+                        enumerable: false
                     }
                 });
 
