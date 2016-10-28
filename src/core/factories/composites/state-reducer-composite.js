@@ -59,7 +59,8 @@ export default CompositeElement({
                     fId: `string`,
                     name: `string`,
                     outgoing: `function`,
-                    mutateState: `function`,
+                    reduceState: `function`,
+                    reduceStateAtPath: `function`,
                     getStateAsObject: `function`,
                     updateStateAccessor: `function`
                 }).of(factory) || !(factory.fId.substr(0, SERVICE_FACTORY_CODE.length) === SERVICE_FACTORY_CODE ||
@@ -74,27 +75,28 @@ export default CompositeElement({
          * @method forceMutationEvent
          * @return void
          */
-        forceMutationEvent: function forceMutationEvent () {
-            const factory = this;
-            factory.outgoing(`as-state-mutated`).emit(() => {
-                return Hf.mix(factory.getStateAsObject(), {
-                    exclusion: {
-                        keys: [
-                            `name`,
-                            `fId`
-                        ]
-                    }
-                }).with({});
-            });
-        },
+        // TODO: remove if find no use case.
+        // forceMutationEvent: function forceMutationEvent () {
+        //     const factory = this;
+        //     factory.outgoing(`as-state-mutated`).emit(() => {
+        //         return Hf.mix(factory.getStateAsObject(), {
+        //             exclusion: {
+        //                 keys: [
+        //                     `name`,
+        //                     `fId`
+        //                 ]
+        //             }
+        //         }).with({});
+        //     });
+        // },
         /**
-         * @description -  Reduce and update state accessor on state change/mutation.
+         * @description -  Reduce and update state on state change/mutation.
          *
          * @method reduce
-         * @param {object|function} mutator
-         * @return void
+         * @param {object|function} reducer
+         * @return {boolean}
          */
-        reduce: function reduce (mutator) {
+        reduce: function reduce (reducer) {
             const factory = this;
             let mutated = false;
             const currentState = Hf.mix(factory.getStateAsObject(), {
@@ -106,10 +108,10 @@ export default CompositeElement({
                 }
             }).with({});
 
-            if (Hf.isFunction(mutator)) {
-                mutated = factory.mutateState(mutator(currentState));
-            } else if (Hf.isObject(mutator)) {
-                mutated = factory.mutateState(mutator);
+            if (Hf.isFunction(reducer)) {
+                mutated = factory.reduceState(reducer(currentState));
+            } else if (Hf.isObject(reducer)) {
+                mutated = factory.reduceState(reducer);
             }
             if (mutated) {
                 factory.updateStateAccessor();
@@ -128,17 +130,17 @@ export default CompositeElement({
             return mutated;
         },
         /**
-         * @description -  Reduce and update state accessor on state change/mutation at pathId.
+         * @description -  Reduce and update state on state change/mutation at pathId.
          *
          * @method reduceAtPath
-         * @param {object|function} mutator
-         * @param {string|array} pathId - Path of the property to retrieve.
-         * @return void
+         * @param {object|function} reducer
+         * @param {string|array} pathId - Path of the state property to reduce.
+         * @return {boolean}
          */
-        reduceAtPath: function reduceAtPath (mutator, pathId) {
+        reduceAtPath: function reduceAtPath (reducer, pathId) {
             const factory = this;
             pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+            if (!Hf.isNonEmptyArray(pathId)) {
                 Hf.log(`error`, `StateReducerComposite.reduceAtPath - Input pathId is invalid.`);
             } else {
                 let mutated = false;
@@ -151,10 +153,10 @@ export default CompositeElement({
                     }
                 }).with({});
 
-                if (Hf.isFunction(mutator)) {
-                    mutated = factory.mutateStateAtPath(mutator(currentState), pathId);
-                } else if (Hf.isObject(mutator)) {
-                    mutated = factory.mutateStateAtPath(mutator, pathId);
+                if (Hf.isFunction(reducer)) {
+                    mutated = factory.reduceStateAtPath(reducer(currentState), pathId);
+                } else if (Hf.isObject(reducer)) {
+                    mutated = factory.reduceStateAtPath(reducer, pathId);
                 }
                 if (mutated) {
                     factory.updateStateAccessor();
