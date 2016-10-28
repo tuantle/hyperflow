@@ -60,7 +60,7 @@ export default CompositeElement({
                     fId: `string`,
                     name: `string`,
                     outgoing: `function`,
-                    mutateState: `function`,
+                    reduceState: `function`,
                     getStateCursor: `function`,
                     getStateAsObject: `function`,
                     updateStateAccessor: `function`
@@ -68,11 +68,11 @@ export default CompositeElement({
                                     factory.fId.substr(0, STORE_FACTORY_CODE.length) === STORE_FACTORY_CODE)) {
                     Hf.log(`error`, `StateTimeTraversalComposite.$init - Factory is invalid. Cannot apply composite.`);
                 } else {
-                    const cursor = factory.getStateCursor();
+                    const stateCursor = factory.getStateCursor();
                     if (!Hf.isSchema({
                         hasItem: `function`,
                         recallContentItem: `function`
-                    }).of(cursor)) {
+                    }).of(stateCursor)) {
                         Hf.log(`error`, `StateTimeTraversalComposite.$init - Factory state curcor is invalid. Cannot apply composite.`);
                     }
                 }
@@ -89,14 +89,14 @@ export default CompositeElement({
          */
         timeTraverse: function timeTraverse (pathId, timeIndexOffset) {
             const factory = this;
-            const cursor = factory.getStateCursor();
+            const stateCursor = factory.getStateCursor();
             pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+            if (!Hf.isNonEmptyArray(pathId)) {
                 Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Input pathId is invalid.`);
             } else {
                 const [ key ] = pathId;
 
-                if (!cursor.hasItem(key)) {
+                if (!stateCursor.hasItem(key)) {
                     Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Data item key:${key} is not defined.`);
                 } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
                     Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Input time index offset must be non-zero and negative.`);
@@ -104,10 +104,10 @@ export default CompositeElement({
                     const {
                         timestamp,
                         content
-                    } = cursor.recallContentItem(key, timeIndexOffset);
+                    } = stateCursor.recallContentItem(key, timeIndexOffset);
                     if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
-                        let mutator = Hf.retrieve(pathId, `.`, true).from(content);
-                        if (factory.mutateState(mutator)) {
+                        let reducer = Hf.retrieve(pathId, `.`, true).from(content);
+                        if (factory.reduceState(reducer)) {
                             factory.updateStateAccessor();
                             /* emitting a mutation event to interface */
                             factory.outgoing(`as-state-mutated`).emit(() => {
@@ -139,14 +139,14 @@ export default CompositeElement({
          */
         recall: function recall (pathId, timeIndexOffset) {
             const factory = this;
-            const cursor = factory.getStateCursor();
+            const stateCursor = factory.getStateCursor();
             pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+            if (!Hf.isNonEmptyArray(pathId)) {
                 Hf.log(`error`, `StateTimeTraversalComposite.recall - Input pathId is invalid.`);
             } else {
                 const [ key ] = pathId;
 
-                if (!cursor.hasItem(key)) {
+                if (!stateCursor.hasItem(key)) {
                     Hf.log(`error`, `StateTimeTraversalComposite.recall - Data item key:${key} is not defined.`);
                 } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
                     Hf.log(`error`, `StateTimeTraversalComposite.recall - Input time index offset must be non-zero and negative.`);
@@ -154,7 +154,7 @@ export default CompositeElement({
                     const {
                         timestamp,
                         content
-                    } = cursor.recallContentItem(key, timeIndexOffset);
+                    } = stateCursor.recallContentItem(key, timeIndexOffset);
                     if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
                         Hf.log(`info`, `Recalling previous state at timestamp:${timestamp} of key:${key}.`);
                         return Hf.retrieve(pathId, `.`, true).from(content);
@@ -174,16 +174,16 @@ export default CompositeElement({
          */
         recallAll: function recallAll (pathId) {
             const factory = this;
-            const cursor = factory.getStateCursor();
+            const stateCursor = factory.getStateCursor();
             pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+            if (!Hf.isNonEmptyArray(pathId)) {
                 Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Input pathId is invalid.`);
             } else {
                 const [ key ] = pathId;
-                if (!cursor.hasItem(key)) {
+                if (!stateCursor.hasItem(key)) {
                     Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Data item key:${key} is not defined.`);
                 } else {
-                    const contentHistoryItems = cursor.recallAllContentItems(key);
+                    const contentHistoryItems = stateCursor.recallAllContentItems(key);
                     if (Hf.isArray(contentHistoryItems)) {
                         Hf.log(`info`, `Recalling all previous states of key:${key}.`);
                         return contentHistoryItems.map((contentHistory) => {
