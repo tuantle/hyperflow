@@ -26,8 +26,9 @@
 /* load EventStreamComposite */
 import EventStreamComposite from './composites/event-stream-composite';
 
-/* load StateReducerComposite */
+/* load StateReducerComposite and StateReconfigurationComposite */
 import StateReducerComposite from './composites/state-reducer-composite';
+import StateReconfigurationComposite from './composites/state-reconfiguration-composite';
 
 /* load Composer */
 import Composer from '../composer';
@@ -51,7 +52,8 @@ import {
 export default Composer({
     composites: [
         EventStreamComposite,
-        StateReducerComposite
+        StateReducerComposite,
+        StateReconfigurationComposite
     ],
     state: {
         name: {
