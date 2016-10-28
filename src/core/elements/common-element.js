@@ -130,45 +130,35 @@ const CommonElementPrototype = Object.create({}).prototype = {
             if (common.isEmpty(pathId)) {
                 if (common.isObject(source) && common.isObject(mutator)) {
                     result = Object.assign({}, source);
-                    Object.keys(source).filter((key) => {
-                        if (!mutator.hasOwnProperty(key)) {
-                            common.log(`warn0`, `CommonElement._deepMutation - Source key:${key} is not defined in mutator.`);
-                            return false;
-                        } else if (common.isFunction(source[key])) {
-                            common.log(`warn0`, `CommonElement._deepMutation - Ignore mutation of function key:${key}.`);
-                            return false;
-                        }
-                        return true;
-                    }).forEach((key) => {
-                        const sourceItem = source[key];
-                        const mutatorItem = mutator[key];
-                        if ((common.isObject(sourceItem) && common.isObject(mutatorItem)) ||
-                            (common.isArray(sourceItem) && common.isArray(mutatorItem))) {
-                            result[key] = common._deepMutation(sourceItem, mutatorItem);
-                        } else {
-                            result[key] = mutatorItem;
-                        }
-                    });
+                    const sourceKeys = Object.keys(source);
+                    const mutatorKeys = Object.keys(mutator);
+                    if (sourceKeys.length >= mutatorKeys.length && mutatorKeys.every((key) => sourceKeys.some((_key) => _key === key))) {
+                        Object.keys(source).forEach((key) => {
+                            const sourceItem = source[key];
+                            const mutatorItem = mutator[key];
+                            if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
+                                result[key] = common._deepMutation(sourceItem, mutatorItem);
+                            } else {
+                                result[key] = mutatorItem;
+                            }
+                        });
+                    } else {
+                        common.log(`warn1`, `CommonElement._deepMutation - Input mutator object schema is not a subset of the source schema..`);
+                    }
                 } else if (common.isArray(source) && common.isArray(mutator)) {
                     result = source.slice(0);
-                    if (source.length < mutator.length) {
-                        common.log(`warn0`, `CommonElement._deepMutation - Target mutator array length is greater than what is defined in source.`);
+                    if (source.length === mutator.length) {
+                        source.forEach((sourceItem, key) => {
+                            const mutatorItem = mutator[key];
+                            if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
+                                result[key] = common._deepMutation(sourceItem, mutatorItem);
+                            } else {
+                                result[key] = mutatorItem;
+                            }
+                        });
+                    } else {
+                        common.log(`warn1`, `CommonElement._deepMutation - Input mutator array must be the same size as the source array.`);
                     }
-                    source.filter((sourceItem, key) => {
-                        if (common.isFunction(sourceItem)) {
-                            common.log(`warn0`, `CommonElement._deepMutation - Ignore mutation of function key:${key}.`);
-                            return false;
-                        }
-                        return key < mutator.length;
-                    }).forEach((sourceItem, key) => {
-                        const mutatorItem = mutator[key];
-                        if ((common.isObject(sourceItem) && common.isObject(mutatorItem)) ||
-                            (common.isArray(sourceItem) && common.isArray(mutatorItem))) {
-                            result[key] = common._deepMutation(sourceItem, mutatorItem);
-                        } else {
-                            result[key] = mutatorItem;
-                        }
-                    });
                 } else {
                     common.log(`error`, `CommonElement._deepMutation - Input source or target mutator is invalid.`);
                 }
@@ -179,10 +169,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     if (common.isEmpty(pathId)) {
                         if (common.isObject(mutator) && mutator.hasOwnProperty(key)) {
                             result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
+                        } else {
+                            common.log(`warn1`, `CommonElement._deepMutation - Key:${key} of path Id is not defined in mutator.`);
                         }
-                        // } else {
-                        //     common.log(`warn1`, `CommonElement._deepMutation - Target mutator key:${key} is not defined in source.`);
-                        // }
                     } else {
                         result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
                     }
@@ -191,10 +180,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     if (common.isEmpty(pathId)) {
                         if (common.isArray(mutator) && key < mutator.length) {
                             result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
+                        } else {
+                            common.log(`warn1`, `CommonElement._deepMutation - Array index:${key} is greater than mutator array size.`);
                         }
-                        // } else {
-                        //     common.log(`warn1`, `CommonElement._deepMutation - Target mutator array length is greater than what is defined in source.`);
-                        // }
                     } else {
                         result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
                     }
@@ -442,7 +430,23 @@ const CommonElementPrototype = Object.create({}).prototype = {
     isNumeric: function isNumeric (value) {
         return !isNaN(parseFloat(value)) && isFinite(value);
     },
+    /**
+     * @description - Check if an object, array, or string is empty.
+     *
+     * @method isEmpty
+     * @param {object|array|string} value - To be checked if it is an empty object, array, or string.
+     * @returns {boolean}
+     */
+    isEmpty: function isEmpty (value) {
+        const common = this;
 
+        if (common.isObject(value)) {
+            return Object.getOwnPropertyNames(value).length === 0;
+        } else if (common.isArray(value) || common.isString(value)) {
+            return value.length === 0;
+        }
+        return true;
+    },
     /**
      * @description - Check for a string type.
      *
@@ -454,6 +458,18 @@ const CommonElementPrototype = Object.create({}).prototype = {
         const common = this;
 
         return common.typeOf(str) === `string` || (common.typeOf(str) === `object` && str.constructor === String);
+    },
+    /**
+     * @description - Check for a string type and is not empty.
+     *
+     * @method isNonEmptyString
+     * @param {string} str - To be checked if it is a string and not empty.
+     * @returns {boolean}
+     */
+    isNonEmptyString: function isNonEmptyString (str) {
+        const common = this;
+
+        return common.isString(str) && !common.isEmpty(str);
     },
     /**
      * @description - Check if value is a boolean.
@@ -520,6 +536,18 @@ const CommonElementPrototype = Object.create({}).prototype = {
         return Object.prototype.toString.call(array) === `[object Array]` || Array.isArray(array) && array !== null;
     },
     /**
+     * @description - Check for an array type and is not empty.
+     *
+     * @method isNonEmptyArray
+     * @param {array} array - To be checked if it is an array and not empty.
+     * @returns {boolean}
+     */
+    isNonEmptyArray: function isNonEmptyArray (array) {
+        const common = this;
+
+        return common.isArray(array) && !common.isEmpty(array);
+    },
+    /**
      * @description - Check for object type.
      *
      * @method isObject
@@ -532,21 +560,16 @@ const CommonElementPrototype = Object.create({}).prototype = {
         return common.typeOf(obj) === `object` && obj === Object(obj) && !common.isArray(obj) && obj !== null;
     },
     /**
-     * @description - Check if an object, array, or string is empty.
+     * @description - Check for an object type and is not empty.
      *
-     * @method isEmpty
-     * @param {object|array|string} value - To be checked if it is an empty object, array, or string.
+     * @method isNonEmptyObject
+     * @param {array} array - To be checked if it is an object and not empty.
      * @returns {boolean}
      */
-    isEmpty: function isEmpty (value) {
+    isNonEmptyObject: function isNonEmptyObject (array) {
         const common = this;
 
-        if (common.isObject(value)) {
-            return Object.getOwnPropertyNames(value).length === 0;
-        } else if (common.isArray(value) || common.isString(value)) {
-            return value.length === 0;
-        }
-        return true;
+        return common.isObject(array) && !common.isEmpty(array);
     },
     /**
      * @description - Check object by comparing it to a predefined schema.
@@ -683,6 +706,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                 }).slice(0);
             }
             return Object.isFrozen(source) ? Object.freeze(result) : result;
+            // return result;
         }
     },
     /**
