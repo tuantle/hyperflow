@@ -89,6 +89,8 @@ export default CompositeElement({
                     isStateless: `function`,
                     incoming: `function`,
                     outgoing: `function`,
+                    reduceState: `function`,
+                    updateStateAccessor: `function`,
                     getStateCursor: `function`,
                     getStateAsObject: `function`,
                     getComponentLib: `function`,
@@ -96,17 +98,6 @@ export default CompositeElement({
                 }).of(intf)) {
                     Hf.log(`error`, `ReactComponentComposite.$init - Interface is invalid. Cannot apply composite.`);
                 } else {
-                    const cursor = intf.getStateCursor();
-                    cursor.forEach((value, key) => {
-                        if (key !== `fId`) {
-                            if (cursor.isItemComputable(key)) {
-                                Hf.log(`error`, `ReactComponentComposite.$init - Computable state key:${key} is not allowed for interface. Cannot apply composite.`);
-                            }
-                            if (cursor.isItemObservable(key)) {
-                                Hf.log(`error`, `ReactComponentComposite.$init - Observable state key:${key} is not allowed for interface. Cannot apply composite.`);
-                            }
-                        }
-                    });
                     if (Hf.isSchema({
                         getDefaultProps: `function`,
                         getInitialState: `function`,
@@ -270,7 +261,7 @@ export default CompositeElement({
             this.toPureComponent = function toPureComponent () {
                 const intf = this;
                 const stateless = intf.isStateless();
-                const cursor = intf.getStateCursor();
+                const stateCursor = intf.getStateCursor();
                 if (!stateless) {
                     Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React compoenent.`);
                 } else {
@@ -310,16 +301,16 @@ export default CompositeElement({
                                     this.propTypes = (() => {
                                         return Object.keys(defaultProperty).reduce((propType, key) => {
                                             const typeAliasKey = Hf.typeOf(defaultProperty[key]);
-                                            if (cursor.isItemOneOfValues(key)) {
+                                            if (stateCursor.isItemOneOfValues(key)) {
                                                 const {
                                                     condition: values
-                                                } = cursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
+                                                } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
                                                 propType[key] = React.PropTypes.oneOf(values);
                                             }
-                                            if (cursor.isItemOneOfTypes(key)) {
+                                            if (stateCursor.isItemOneOfTypes(key)) {
                                                 const {
                                                     condition: types
-                                                } = cursor.getItemDescription(key).ofConstrainable().s(`oneTypeOf`);
+                                                } = stateCursor.getItemDescription(key).ofConstrainable().s(`oneTypeOf`);
                                                 propType[key] = React.PropTypes.oneOfType(types.map((type) => {
                                                     return reactPropTypeStronglyTyped[type];
                                                 }));
@@ -365,7 +356,7 @@ export default CompositeElement({
              */
             this.toComponent = function toComponent () {
                 const intf = this;
-                const cursor = intf.getStateCursor();
+                const stateCursor = intf.getStateCursor();
                 const {
                     React
                 } = intf.getComponentLib();
@@ -403,16 +394,16 @@ export default CompositeElement({
                                 this.propTypes = (() => {
                                     return Object.keys(defaultProperty).reduce((propType, key) => {
                                         const typeAliasKey = Hf.typeOf(defaultProperty[key]);
-                                        if (cursor.isItemOneOfValues(key)) {
+                                        if (stateCursor.isItemOneOfValues(key)) {
                                             const {
                                                 condition: values
-                                            } = cursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
+                                            } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
                                             propType[key] = React.PropTypes.oneOf(values);
                                         }
-                                        if (cursor.isItemOneOfTypes(key)) {
+                                        if (stateCursor.isItemOneOfTypes(key)) {
                                             const {
                                                 condition: types
-                                            } = cursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
+                                            } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
                                             propType[key] = React.PropTypes.oneOfType(types.map((type) => {
                                                 return reactPropTypeStronglyTyped[type];
                                             }));
@@ -465,19 +456,9 @@ export default CompositeElement({
                                  */
                                 this.componentWillMount = function componentWillMount () {
                                     const component = this;
-                                    // if (!stateless) {
-                                    //     /* this event is call ONLY when the state did mutate in store */
-                                    //     intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                    //         if (Hf.isObject(reflectedState)) {
-                                    //             component.setState(reflectedState);
-                                    //             _mutationOccurred = true;
-                                    //             Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                    //         }
-                                    //     });
-                                    // }
                                     /* needs to sync up interface state and component props before mounting.
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
-                                    if (intf.mutateState(Hf.fallback(defaultProperty).of(component.props))) {
+                                    if (intf.reduceState(Hf.fallback(defaultProperty).of(component.props))) {
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
                                         Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
@@ -496,7 +477,7 @@ export default CompositeElement({
                                     /* The interface tracks new props mutation when component receive new props.
                                        This will do necessary mutation on interface state. */
                                     const currentProperty = intf.getStateAsObject();
-                                    if (intf.mutateState(Hf.fallback(currentProperty).of(nextProperty))) {
+                                    if (intf.reduceState(Hf.fallback(currentProperty).of(nextProperty))) {
                                         /* The interface will detect mutation when component gets new props and update accordingly */
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
@@ -522,7 +503,7 @@ export default CompositeElement({
                                         });
                                     }
                                     const currentProperty = intf.getStateAsObject();
-                                    if (intf.mutateState(Hf.fallback(currentProperty).of(component.props))) {
+                                    if (intf.reduceState(Hf.fallback(currentProperty).of(component.props))) {
                                         intf.updateStateAccessor();
                                         _mutationOccurred = true;
                                         Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
