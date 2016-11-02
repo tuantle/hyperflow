@@ -144,7 +144,8 @@ Bug fixes:
     - Fixed non-functional oneOF and oneTypeOf constrainable descriptors for DataElement.
 ```
 **Development Beta Version 0.1.0-beta13 (10/25/2016)**
-    Notes: .
+```
+    Notes:
     New Features:
         - Added Added throttle stream operator method to EventStreamComposite.
         - Added delete query method to PGComposite.
@@ -152,5 +153,19 @@ Bug fixes:
     Improvements:
         - Code cleanups.
     Bug fixes:
-        - Fixed propTypes and defaultProps for toPureComponent method. Allowed React factory function access to getIterface method. for ReactComponentComposite.
+        - Fixed propTypes and defaultProps for toPureComponent method. Allowed React factory function access to getInterface method. for ReactComponentComposite.
         - Fixed query results return for insert and update method for PGComposite.
+```
+**Development Beta Version 0.1.0-beta14 (11/02/2016)**
+    Notes:
+    New Features:
+        - Added non empty check methods for string, array, and object for CommonElement.
+        - Added reconfigState and reconfigStateAtPath methods for CompositeElement. reconfigState and reconfigStateAtPath methods can change the schema of state, where as mutateState and mutateStateAtPath cannot.
+    Breaking Changes:
+        - Renamed and reimplemented methods mutateState and mutateStateAtPath to reduceState and reduceStateAtPath for CompositeElement.
+        - Code changed for read and format methods. Removed mutable flag for DataElement.
+    Improvements:
+    Bug fixes:
+        - Reimplemented setContentItem method and fixed bugs in recallContentItem method for DataCursorElement.
+        - Fixed typos in React propTypes setup and minor code cleanups. Removed unnecessary warning checks for ReactComponentComposite.
+```
