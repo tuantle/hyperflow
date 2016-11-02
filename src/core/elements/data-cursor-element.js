@@ -1081,7 +1081,7 @@ export default function DataCursorElement (data, pathId) {
                     },
                     _immutable: {
                         get: function get () {
-                            return data._mutation.immutableRootKeys.indexOf(rootKey) !== -1;
+                            return data._mutation.immutableRootKeys.includes(rootKey);
                         },
                         configurable: false,
                         enumerable: false

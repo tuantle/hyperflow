@@ -68,7 +68,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             const [ rootKey ] = pathId;
             const mRecords = data._mutation.records;
             const immutableRootKeys = data._mutation.immutableRootKeys;
-            if (immutableRootKeys.indexOf(rootKey) !== -1 && !Hf.isEmpty(mRecords)) {
+            if (immutableRootKeys.includes(rootKey) && !Hf.isEmpty(mRecords)) {
                 data._updateMMap(rootKey);
                 Hf.clear(data._mutation.records);
             }
@@ -93,14 +93,14 @@ const DataElementPrototype = Object.create({}).prototype = {
             const immutableRootKeys = data._mutation.immutableRootKeys;
             const mRecords = data._mutation.records;
 
-            if (immutableRootKeys.indexOf(rootKey) !== -1) {
+            if (immutableRootKeys.includes(rootKey)) {
                 data._mutation.records = mRecords.concat(pathId.filter((key, index) => {
                     return mRecords.length <= index;
                 }).map((key) => [ key ])).map((layers, index) => {
                     if (pathId.length > index) {
                         const key = pathId[index];
 
-                        if (layers.indexOf(key) === -1) {
+                        if (!layers.includes(key)) {
                             layers.push(key);
                         }
                     }
@@ -134,7 +134,7 @@ const DataElementPrototype = Object.create({}).prototype = {
 
             cursor.forEach((item, key) => {
                 if (Hf.isObject(item) || Hf.isArray(item)) {
-                    if (!cursor.isImmutable() || (cursor.isImmutable() && mutatedKeys.indexOf(key) !== -1)) {
+                    if (!cursor.isImmutable() || (cursor.isImmutable() && mutatedKeys.includes(key))) {
                         data._deepUpdateMMap(node.branch(key), `${pathId}.${key}`, records.slice(1));
                     }
                 } else {
@@ -185,7 +185,7 @@ const DataElementPrototype = Object.create({}).prototype = {
         if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
             const immutableRootKeys = data._mutation.immutableRootKeys;
 
-            if (immutableRootKeys.indexOf(rootKey) !== -1) {
+            if (immutableRootKeys.includes(rootKey)) {
                 const mRecords = data._mutation.records;
                 const oldRootNode = mMap.select(pathId).rekey(`${rootKey}${data._mutation.timeIndex[rootKey]}`);
                 const newRootNode = mMap.sproutRoot(rootKey);
@@ -356,7 +356,7 @@ const DataElementPrototype = Object.create({}).prototype = {
 
         if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
             if (immutable) {
-                if (immutableRootKeys.indexOf(rootKey) === -1) {
+                if (!immutableRootKeys.includes(rootKey)) {
                     immutableRootKeys.push(rootKey);
                     data._mutation.timeIndex[rootKey] = 0;
                     data._mutation.timestamp[rootKey] = [ (new Date()).getTime() - INITIAL_TIMESTAMP_REF_IN_MS ];
@@ -392,7 +392,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             const mMap = data._mutation.mMap;
             const immutableRootKeys = data._mutation.immutableRootKeys;
 
-            if (immutableRootKeys.indexOf(rootKey) !== -1) {
+            if (immutableRootKeys.includes(rootKey)) {
                 let timeIndexOffset = data._mutation.timeIndex[rootKey];
                 while (timeIndexOffset > 0) {
                     timeIndexOffset--;

@@ -598,7 +598,7 @@ export default function CompositeElement (definition) {
         }).of(definition);
 
         exclusion.prefixes = exclusion.prefixes.concat(DEFAULT_EXCLUSION_PREFIXES.filter((prefix) => {
-            return exclusion.prefixes.indexOf(prefix) === -1;
+            return !exclusion.prefixes.includes(prefix);
         }));
 
         if (!Object.keys(enclosure).every((fnName) => Hf.isFunction(enclosure[fnName]))) {

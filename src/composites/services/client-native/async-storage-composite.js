@@ -100,7 +100,7 @@ export default CompositeElement({
                                 const rootKey = pathId.shift();
                                 return new Promise((resolve, reject) => {
                                     storage.getAllKeys().then((rootKeys) => {
-                                        if (rootKeys.indexOf(rootKey) !== -1) {
+                                        if (rootKeys.includes(rootKey)) {
                                             storage.getItem(rootKey).then((rootItem) => {
                                                 if (!Hf.isEmpty(pathId)) {
                                                     resolve(Hf.retrieve(pathId, `.`).from(JSON.parse(rootItem)));
@@ -151,7 +151,7 @@ export default CompositeElement({
                                     const rootKey = pathId.shift();
                                     return new Promise((resolve, reject) => {
                                         storage.getAllKeys().then((rootKeys) => {
-                                            if (touchRoot && rootKeys.indexOf(rootKey) !== -1) {
+                                            if (touchRoot && rootKeys.includes(rootKey)) {
                                                 resolve(bundle);
                                             } else {
                                                 if (!Hf.isEmpty(pathId)) {

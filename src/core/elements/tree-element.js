@@ -156,10 +156,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
     getRootCount: function getRootCount () {
         const tree = this;
         return Object.keys(tree._node).reduce((count, pathId) => {
-            if (tree._node[pathId].isRoot()) {
-                count++;
-            }
-            return count;
+            return tree._node[pathId].isRoot() ? count++ : count;
         }, 0);
     },
     /**

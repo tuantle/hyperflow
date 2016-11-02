@@ -76,7 +76,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     } else {
                         if (common.isString(schemaItem)) {
                             itemTypes = common.stringToArray(schemaItem, `|`);
-                            verified = itemTypes.indexOf(`undefined`) !== -1;
+                            verified = itemTypes.includes(`undefined`);
                         } else {
                             verified = false;
                         }
@@ -217,7 +217,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         } else if (common.isObject(item)) {
                             result[key] = common._deepMerge(source[key], item);
                         } else {
-                            if (source.indexOf(item) === -1) {
+                            if (!source.includes(item)) {
                                 result.push(item);
                             }
                         }
@@ -886,7 +886,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                 const postfixExcepted = !common.isEmpty(exclusion.exception.postfixes) ? exclusion.exception.postfixes.some((postfix) => {
                     return key.substr(0, postfix.length) === postfix;
                 }) : false;
-                const keyExcepted = !common.isEmpty(exclusion.exception.keys) ? exclusion.exception.keys.indexOf(key) !== -1 : false;
+                const keyExcepted = !common.isEmpty(exclusion.exception.keys) ? exclusion.exception.keys.includes(key) : false;
 
                 included = true;
 
@@ -901,7 +901,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         included = false;
                     } else {
                         if (included) {
-                            included = exclusion.keys.indexOf(key) === -1;
+                            included = !exclusion.keys.includes(key);
                         }
                     }
                 }
@@ -1209,7 +1209,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
         } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
             common.log(`error`, `CommonElement.stringToArray - Input delimiter is invalid.`);
         } else {
-            if (str.indexOf(delimiter) !== -1 && str.length > 1) {
+            if (str.includes(delimiter) && str.length > 1) {
                 /* split string into array */
                 return str.split(delimiter).map((value) => {
                     return common.isInteger(value) ? parseInt(value, 10) : value;

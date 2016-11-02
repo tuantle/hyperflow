@@ -530,8 +530,8 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
                     const rtNodes = rNode._getTails();
                     const tNodeKeys = tNodes.map((tNode) => tNode._key);
 
-                    rtdNodes = rtNodes.filter((rtNode) => tNodeKeys.indexOf(rtNode._key) === -1);
-                    rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.indexOf(rtNode._key) !== -1);
+                    rtdNodes = rtNodes.filter((rtNode) => !tNodeKeys.includes(rtNode._key));
+                    rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.includes(rtNode._key));
 
                     rtsNodes.forEach((rtsNode) => {
                         const [ tsNode ] = tNodes.filter((tNode) => tNode._key === rtsNode._key);
