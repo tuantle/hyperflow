@@ -26,7 +26,8 @@ export function runTests () {
             ],
             state: {
                 a: {
-                    value: null
+                    value: [],
+                    stronglyTyped: true
                 },
                 b: {
                     value: null
@@ -45,7 +46,7 @@ export function runTests () {
         const store = TestStore();
 
         let a = [ 1, 2, 3 ];
-        store.reconfig({
+        store.reduce({
             a
         });
 
@@ -100,7 +101,7 @@ export function runTests () {
         // console.log(JSON.stringify(store.b, null, `\t`));
         // console.log(JSON.stringify(store.getStateCursor().recallAllContentItems(`b`), null, `\t`));
 
-        console.log(JSON.stringify(store.c, null, `\t`));
+        console.log(JSON.stringify(store, null, `\t`));
         assert.end();
     });
 }
