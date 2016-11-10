@@ -32,6 +32,10 @@ import CommonElement from '../../core/elements/common-element';
 /* create CommonElement as Hf object */
 const Hf = CommonElement();
 
+const WILL_MOUNT_STAGE = 0;
+const DID_MOUNT_STAGE = 1;
+const WILL_UNMOUNT_STAGE = 2;
+
 const EXCEPTION_KEYS = [
     /* react specific methods and properties */
     `propTypes`,
@@ -251,6 +255,7 @@ export default CompositeElement({
         ReactComponentComposite: function ReactComponentComposite () {
             /* ----- Private Variables ------------- */
             let _mutationOccurred = false;
+            let _mountStage = WILL_MOUNT_STAGE;
             /* ----- Public Functions -------------- */
             /**
              * @description - Convert composite to a renderable pure component.
@@ -456,6 +461,9 @@ export default CompositeElement({
                                  */
                                 this.componentWillMount = function componentWillMount () {
                                     const component = this;
+
+                                    _mountStage = WILL_MOUNT_STAGE;
+
                                     /* needs to sync up interface state and component props before mounting.
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
                                     if (intf.reduceState(Hf.fallback(defaultProperty).of(component.props))) {
@@ -492,10 +500,13 @@ export default CompositeElement({
                                  */
                                 this.componentDidMount = function componentDidMount () {
                                     const component = this;
+
+                                    _mountStage = DID_MOUNT_STAGE;
+
                                     if (!stateless) {
                                         /* this event is call ONLY when the state did mutate in store */
                                         intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState)) {
+                                            if (Hf.isObject(reflectedState) && _mountStage !== WILL_UNMOUNT_STAGE) {
                                                 component.setState(reflectedState);
                                                 _mutationOccurred = true;
                                                 Hf.log(`info`, `State mutated for component:${component.props.name}.`);
@@ -518,6 +529,9 @@ export default CompositeElement({
                                  */
                                 this.componentWillUnmount = function componentWillUnmount () {
                                     const component = this;
+
+                                    _mountStage = WILL_UNMOUNT_STAGE;
+
                                     intf.outgoing(`on-component-will-unmount`).emit(() => component);
                                 };
                                 /**
