@@ -55,9 +55,9 @@ const stronglyTypedPreset = function stronglyTypedPreset () {
                         Hf.log(`warn1`, `stronglyTyped - Value of key:${context.key} is strongly typed to ${oldValueType}.`);
                     }
                 };
-                if (oldValueType === `undefined` || oldValueType === `null`) {
+                if (oldValueType === `null` || newValueType === `null`) {
                     result.verified = true;
-                    Hf.log(`warn0`, `stronglyTyped - Ignoring type constraint of key:${context.key} as it is ${oldValueType}.`);
+                    Hf.log(`warn0`, `stronglyTyped - Ignoring type constraint of key:${context.key} as it is null or being set to null.`);
                 } else {
                     result.verified = oldValueType === newValueType;
                 }
