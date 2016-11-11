@@ -709,7 +709,7 @@ export default function TreeNodeElement (tree, pathId) {
                 },
                 _tPathIds: {
                     value: [],
-                    writable: true,
+                    writable: false,
                     configurable: true,
                     enumerable: false
                 },
