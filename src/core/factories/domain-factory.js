@@ -430,7 +430,6 @@ export default Composer({
                             /* helper function to activate all child interfaces event stream */
                             const deepInterfaceActivateStream = function deepInterfaceActivateStream (intf) {
                                 if (Hf.isObject(intf)) {
-                                    // TODO: compositeIntf does not need to activate incoming event stream.
                                     intf.activateIncomingStream();
                                     intf.setup(() => {
                                         intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceActivateStream(compositeIntf));

@@ -307,7 +307,6 @@ export default Composer({
         this.getComponentComposites = function getComponentComposites (...intfNames) {
             let components = [];
             if (!Hf.isEmpty(_compositeCache)) {
-                // TODO: Allows getting composite component of composite component.
                 if (!Hf.isEmpty(intfNames)) {
                     if (!intfNames.every((name) => Hf.isString(name))) {
                         Hf.log(`error`, `InterfaceFactory.getComponentComposites - Input interface name is invalid.`);
@@ -338,8 +337,6 @@ export default Composer({
         this.getInterfaceComposites = function getInterfaceComposites (...intfNames) {
             let intfs = [];
             if (!Hf.isEmpty(_compositeCache)) {
-                // TODO: Remove this method if find no use case.
-                // TODO: Allows getting composite interface of composite interface.
                 if (!Hf.isEmpty(intfNames)) {
                     if (!intfNames.every((name) => Hf.isString(name))) {
                         Hf.log(`error`, `InterfaceFactory.getInterfaceComposites - Input interface name is invalid.`);
