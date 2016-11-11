@@ -338,13 +338,19 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                                     const reconfigtorItem = reconfigtor[key];
                                     if (Hf.isObject(originalStateItem) && Hf.isObject(reconfigtorItem) || Hf.isArray(originalStateItem) && Hf.isArray(reconfigtorItem)) {
                                         deepStateReconfiguration(originalStateItem, reconfigtorItem, originalState, key);
+                                    } else if (Hf.isObject(originalStateItem) && !Hf.isObject(reconfigtorItem) || Hf.isArray(originalStateItem) && !Hf.isArray(reconfigtorItem)) {
+                                        Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state object at key:${key} as it is not null initially.`);
                                     } else {
                                         originalState[key] = reconfigtorItem;
                                     }
                                 });
                             } else {
                                 if (Hf.isObject(parentState) && parentState.hasOwnProperty(parentKey)) {
-                                    parentState[parentKey] = reconfigtor;
+                                    if (parentState[parentKey] === null) {
+                                        parentState[parentKey] = reconfigtor;
+                                    } else {
+                                        Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state object at key:${parentKey} as it is not null initially.`);
+                                    }
                                 } else {
                                     Hf.log(`warn1`, `Factory.deepStateReconfiguration - Top level state object is non-configurable.`);
                                 }
@@ -355,13 +361,19 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                                     const reconfigtorItem = reconfigtor[key];
                                     if (Hf.isObject(originalStateItem) && Hf.isObject(reconfigtorItem) || Hf.isArray(originalStateItem) && Hf.isArray(reconfigtorItem)) {
                                         deepStateReconfiguration(originalStateItem, reconfigtorItem, originalState, key);
+                                    } else if (Hf.isObject(originalStateItem) && !Hf.isObject(reconfigtorItem) || Hf.isArray(originalStateItem) && !Hf.isArray(reconfigtorItem)) {
+                                        Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state array at key:${key} as it is not null initially.`);
                                     } else {
                                         originalState[key] = reconfigtorItem;
                                     }
                                 });
                             } else {
                                 if (Hf.isObject(parentState) && parentState.hasOwnProperty(parentKey)) {
-                                    parentState[parentKey] = reconfigtor;
+                                    if (parentState[parentKey] === null) {
+                                        parentState[parentKey] = reconfigtor;
+                                    } else {
+                                        Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state array at key:${parentKey} as it is not null initially.`);
+                                    }
                                 } else {
                                     Hf.log(`warn1`, `Factory.deepStateReconfiguration - Top level state array is non-configurable.`);
                                 }
@@ -438,6 +450,28 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      */
                     updateStateAccessor: function updateStateAccessor () {
                         currentStateAccessor = nextStateAccessor;
+                    },
+                    /**
+                     * @description - Reset state to initial default and clear all mutation history.
+                     *
+                     * @method resetState
+                     * @return void
+                     */
+                    resetState: function resetState () {
+                        currentStateAccessor = originalStateAccessor;
+                        nextStateAccessor = originalStateAccessor;
+                        /* reset all state data element mutation history recorded */
+                        data.flush(`state`);
+                    },
+                    /**
+                     * @description - Clear all state mutation history.
+                     *
+                     * @method flushState
+                     * @return void
+                     */
+                    flushState: function flushState () {
+                        /* reset all state data element mutation history recorded */
+                        data.flush(`state`);
                     },
                     /**
                      * @description - Do a strict mutation of original state. The reducer object must have matching
