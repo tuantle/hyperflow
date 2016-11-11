@@ -26,16 +26,6 @@
 
 const PRIVATE_PREFIX = `_`;
 
-/* this flag indicates develeopment or production status of the project */
-let DEVELOPMENT = true;
-
-/* this flag enables console log of debug messages when calling method Hf.log(`info`, `a debug message.`) */
-let CONSOLE_LOG_DEBUG = {
-    ENABLE_INFO_MESSAGE: true,
-    ENABLE_WARN_LVL0_MESSAGE: false,
-    ENABLE_WARN_LVL1_MESSAGE: true
-};
-
 /**
  * @description - Common element prototype object.
  *
@@ -669,7 +659,6 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     clear: function clear (value) {
-        // TODO: To be removed if find no use case.
         const common = this;
 
         if (common.isObject(value)) {
@@ -871,7 +860,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
             }
         }).of(option);
 
-        if (!DEVELOPMENT) {
+        if (!common.DEVELOPMENT) {
             exclusion.prefixes.push(`DEBUG_`);
         }
 
@@ -1229,9 +1218,15 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {string}
      */
     camelcaseToUnderscore: function camelcaseToUnderscore (str) {
-        return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => {
-            return `_${word.toLowerCase()}`;
-        }).replace(/^_/, ``);
+        const common = this;
+
+        if (!common.isString(str)) {
+            common.log(`error`, `CommonElement.camelcaseToUnderscore - Input string is invalid.`);
+        } else {
+            return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => {
+                return `_${word.toLowerCase()}`;
+            }).replace(/^_/, ``);
+        }
     },
     /**
      * @description - Helper function to convert unserScore str name to camelcase.
@@ -1241,9 +1236,15 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {string}
      */
     underscoreToCamelcase: function underscoreToCamelcase (str) {
-        return str.replace(/_([a-z])/g, (match, word) => {
-            return word.toUpperCase();
-        });
+        const common = this;
+
+        if (!common.isString(str)) {
+            common.log(`error`, `CommonElement.underscoreToCamelcase - Input string is invalid.`);
+        } else {
+            return str.replace(/_([a-z])/g, (match, word) => {
+                return word.toUpperCase();
+            });
+        }
     },
     /**
      * @description - A simple console log wrapper. Only active in debug/development mode.
@@ -1254,37 +1255,72 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns void
      */
     log: function log (type, message) {
-        if (DEVELOPMENT) {
-            const logger = {
-                error () {
-                    throw new Error(`ERROR: ${message}`);
-                },
-                warn0 () {
-                    if (CONSOLE_LOG_DEBUG.ENABLE_WARN_LVL0_MESSAGE) {
-                        console.warn(`WARNING-0: ${message}`);
+        const common = this;
+
+        if (common.isString(type)) {
+            if (common.DEVELOPMENT) {
+                const logger = {
+                    error () {
+                        throw new Error(`ERROR: ${message}`);
+                    },
+                    warn0 () {
+                        if (common._consoleLog.enableWarn0Log) {
+                            console.warn(`WARNING-0: ${message}`);
+                            common._consoleLog.history.warn0Logs.push({
+                                timestamp: new Date(),
+                                message: `INFO: ${message}`
+                            });
+                        }
+                    },
+                    warn1 () {
+                        if (common._consoleLog.enableWarn1Log) {
+                            console.warn(`WARNING-1: ${message}`);
+                            common._consoleLog.history.warn1Logs.push({
+                                timestamp: new Date(),
+                                message: `INFO: ${message}`
+                            });
+                        }
+                    },
+                    info () {
+                        if (common._consoleLog.enableInfoLog) {
+                            console.info(`INFO: ${message}`);
+                            common._consoleLog.history.infoLogs.push({
+                                timestamp: new Date(),
+                                message: `INFO: ${message}`
+                            });
+                        }
                     }
-                },
-                warn1 () {
-                    if (CONSOLE_LOG_DEBUG.ENABLE_WARN_LVL1_MESSAGE) {
-                        console.warn(`WARNING-1: ${message}`);
-                    }
-                },
-                info () {
-                    if (CONSOLE_LOG_DEBUG.ENABLE_INFO_MESSAGE) {
-                        console.info(`INFO: ${message}`);
-                    }
+                };
+                if (logger.hasOwnProperty(type)) {
+                    logger[type]();
                 }
-            };
-            // TODO: Implement a way to save all log messages.
-            if (logger.hasOwnProperty(type)) {
-                logger[type]();
+            }
+        }
+    },
+    /**
+     * @description - Get log history.
+     *
+     * @method logHistory
+     * @param {string} type
+     * @returns {array}
+     */
+    getLogHistory: function getLogHistory (type) {
+        const common = this;
+
+        if (!common.isString(type)) {
+            common.log(`error`, `CommonElement.getLogHistory - Input log type is invalid.`);
+        } else {
+            switch (type) { // eslint-disable-line
+            case `info`:
+                return common._consoleLog.history.infoLogs;
+            case `warn0`:
+                return common._consoleLog.history.warn0Logs;
+            case `warn1`:
+                return common._consoleLog.history.warn1Logs;
             }
         }
     }
 };
-
-/* glocal scope  common element object */
-const element = Object.create(CommonElementPrototype);
 
 /**
  * @description - A common element module export function.
@@ -1293,15 +1329,39 @@ const element = Object.create(CommonElementPrototype);
  * @return {object}
  */
 export default function CommonElement ({
-    development = DEVELOPMENT,
-    enableInfoMessage = CONSOLE_LOG_DEBUG.ENABLE_INFO_MESSAGE,
-    enableWarn0Message = CONSOLE_LOG_DEBUG.ENABLE_WARN_LVL0_MESSAGE,
-    enableWarn1Message = CONSOLE_LOG_DEBUG.ENABLE_WARN_LVL1_MESSAGE
+    enableInfoLog = true,
+    enableWarn0Log = false,
+    enableWarn1Log = true
 } = {}) {
-    DEVELOPMENT = element.isBoolean(development) ? development : DEVELOPMENT;
-    CONSOLE_LOG_DEBUG.ENABLE_INFO_MESSAGE = element.isBoolean(enableInfoMessage) ? enableInfoMessage : CONSOLE_LOG_DEBUG.ENABLE_INFO_MESSAGE;
-    CONSOLE_LOG_DEBUG.ENABLE_WARN_LVL0_MESSAGE = element.isBoolean(enableWarn0Message) ? enableWarn0Message : CONSOLE_LOG_DEBUG.ENABLE_WARN_LVL0_MESSAGE;
-    CONSOLE_LOG_DEBUG.ENABLE_WARN_LVL1_MESSAGE = element.isBoolean(enableWarn1Message) ? enableWarn1Message : CONSOLE_LOG_DEBUG.ENABLE_WARN_LVL1_MESSAGE;
+    enableInfoLog = CommonElementPrototype.isBoolean(enableInfoLog) ? enableInfoLog : true;
+    enableWarn0Log = CommonElementPrototype.isBoolean(enableWarn0Log) ? enableWarn0Log : true;
+    enableWarn1Log = CommonElementPrototype.isBoolean(enableWarn1Log) ? enableWarn1Log : true;
+
+    const element = Object.create(CommonElementPrototype, {
+        /* this flag indicates develeopment or production status of the project */
+        DEVELOPMENT: {
+            value: process.env.NODE_ENV === `development`, // eslint-disable-line
+            writable: false,
+            configurable: false,
+            enumerable: true
+        },
+        _consoleLog: {
+            value: {
+                /* this flag enables console log of debug messages when calling method Hf.log(`info`, `a debug message.`) */
+                enableInfoLog,
+                enableWarn0Log,
+                enableWarn1Log,
+                history: {
+                    infoLogs: [],
+                    warn0Logs: [],
+                    warn1Logs: []
+                }
+            },
+            writable: false,
+            configurable: true,
+            enumerable: false
+        }
+    });
     /* reveal only the public properties and functions */
     return Object.freeze(element.reveal(element));
 }
