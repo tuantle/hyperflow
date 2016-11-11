@@ -322,14 +322,11 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 if (cursor.isItemComputable(key)) {
                     Hf.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} is already described as a computable.`);
                 } else {
-                    if (item === null) {
+                    if (item === null && cursor._content[key] !== null) {
                         cursor._content[key] = null;
                         /* unassign descriptors if data item is strongly typed and/or is required */
-                        if (cursor.isItemStronglyTyped(key)) {
-                            cursor.unDescribeItem(key).asStronglyTyped();
-                        }
-                        if (cursor.isItemRequired(key)) {
-                            cursor.unDescribeItem(key).asRequired();
+                        if (cursor.isItemStronglyTyped(key) || cursor.isItemRequired(key)) {
+                            cursor.unDescribeItem(key).asConstrainable();
                         }
                         /* save change to mutation record at cursor if immutable */
                         if (cursor.isImmutable()) {
@@ -1081,7 +1078,7 @@ export default function DataCursorElement (data, pathId) {
                     },
                     _immutable: {
                         get: function get () {
-                            return data._mutation.immutableRootKeys.includes(rootKey);
+                            return data._mutation.immutableRootKeys.indexOf(rootKey) !== -1;
                         },
                         configurable: false,
                         enumerable: false
