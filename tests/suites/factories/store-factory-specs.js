@@ -25,19 +25,17 @@ export function runTests () {
                 StateTimeTraversalComposite
             ],
             state: {
-                a: {
-                    value: [],
-                    stronglyTyped: true
-                },
-                b: {
-                    value: null
-                },
+                // a: {
+                //     value: [],
+                //     stronglyTyped: true
+                // },
+                // b: {
+                //     value: null
+                // },
                 c: {
                     value: {
-                        c1: {
-                            ca: `ca`,
-                            cb: `cb`
-                        }
+                        c1: null,
+                        c2: [ 1, 2, 3 ]
                     },
                     stronglyTyped: true
                 }
@@ -45,58 +43,68 @@ export function runTests () {
         });
         const store = TestStore();
 
-        let a = [ 1, 2, 3 ];
-        store.reduce({
-            a
-        });
+        // let a = [ 1, 2, 3 ];
+        // store.reduce({
+        //     a
+        // });
+        //
+        // a.push(4);
+        // store.reconfig({
+        //     a
+        // });
+        //
+        // a.push(5);
+        // store.reconfig({
+        //     a
+        // });
+        //
+        // if (store.reduce({
+        //     a
+        // })) {
+        //     console.log(`NOOO`);
+        // }
+        //
+        // a[4] = `A`;
+        // a.push(`B`);
+        // store.reconfig({
+        //     a
+        // });
+        //
+        // a[5] = `C`;
+        // if (store.reduce({
+        //     a
+        // })) {
+        //     console.log(`YESS`);
+        // }
+        //
+        // if (store.reduce({
+        //     a
+        // })) {
+        //     console.log(`NOOO`);
+        // }
 
-        a.push(4);
+        // (store.reconfig({
+        //     c: [ 1, 2 ]
+        // });
+
         store.reconfig({
-            a
-        });
-
-        a.push(5);
-        store.reconfig({
-            a
-        });
-
-        if (store.reduce({
-            a
-        })) {
-            console.log(`NOOO`);
-        }
-
-        a[4] = `A`;
-        a.push(`B`);
-        store.reconfig({
-            a
-        });
-
-        a[5] = `C`;
-        if (store.reduce({
-            a
-        })) {
-            console.log(`YESS`);
-        }
-
-        if (store.reduce({
-            a
-        })) {
-            console.log(`NOOO`);
-        }
-
-        if (store.reduce({
             c: {
                 c1: {
-                    ca: `CA`
+                    a: `a`
                 }
             }
-        })) {
-            console.log(`YESS`);
-        }
+        });
+        store.reconfig({
+            c: {
+                c1: {
+                    a: `a`,
+                    b: `b`
+                }
+            }
+        });
 
-        console.log(JSON.stringify(store.a, null, `\t`));
-        console.log(JSON.stringify(store.getStateCursor().recallAllContentItems(`a`), null, `\t`));
+        // console.log(JSON.stringify(store.a, null, `\t`));
+        // console.log(JSON.stringify(store.getStateCursor().recallAllContentItems(`a`), null, `\t`));
 
         // console.log(JSON.stringify(store.b, null, `\t`));
         // console.log(JSON.stringify(store.getStateCursor().recallAllContentItems(`b`), null, `\t`));

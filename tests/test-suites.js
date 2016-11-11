@@ -30,25 +30,24 @@ require('babel-core/register')({
 });
 
 /* load and initialize hyperflow */
-const Hflow = require('../src/hyperflow');
+const Hf = require('../src/hyperflow');
 
-Hflow.init({
+Hf.init({
     TARGET: `client-web`,
-    DEVELOPMENT: true,
-    ENABLE_INFO_MESSAGE: true,
-    ENABLE_WARN_0_MESSAGE: true,
-    ENABLE_WARN_1_MESSAGE: true
+    enableInfoLog: true,
+    enableWarn0Log: false,
+    enableWarn1Log: true
 });
 
 /* load test specs for Hf modules */
-var commonElementSpecs = require('./suites/elements/common-element-specs'); // eslint-disable-line
-var dataElementSpecs = require('./suites/elements/data-element-specs'); // eslint-disable-line
-var composerSpecs = require('./suites/composer-specs'); // eslint-disable-line
-var eventStreamCompositeSpecs = require('./suites/factories/composites/event-stream-composite-specs'); // eslint-disable-line
+// var commonElementSpecs = require('./suites/elements/common-element-specs'); // eslint-disable-line
+// var dataElementSpecs = require('./suites/elements/data-element-specs'); // eslint-disable-line
+// var composerSpecs = require('./suites/composer-specs'); // eslint-disable-line
+// var eventStreamCompositeSpecs = require('./suites/factories/composites/event-stream-composite-specs'); // eslint-disable-line
 var storeFactorySpecs = require('./suites/factories/store-factory-specs'); // eslint-disable-line
 
-commonElementSpecs.runTests();
-dataElementSpecs.runTests();
-composerSpecs.runTests();
-eventStreamCompositeSpecs.runTests();
+// commonElementSpecs.runTests();
+// dataElementSpecs.runTests();
+// composerSpecs.runTests();
+// eventStreamCompositeSpecs.runTests();
 storeFactorySpecs.runTests();
