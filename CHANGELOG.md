@@ -157,6 +157,7 @@ Bug fixes:
         - Fixed query results return for insert and update method for PGComposite.
 ```
 **Development Beta Version 0.1.0-beta14 (11/02/2016)**
+```
     Notes:
     New Features:
         - Added non empty check methods for string, array, and object for CommonElement.
@@ -168,4 +169,18 @@ Bug fixes:
     Bug fixes:
         - Reimplemented setContentItem method and fixed bugs in recallContentItem method for DataCursorElement.
         - Fixed typos in React propTypes setup and minor code cleanups. Removed unnecessary warning checks for ReactComponentComposite.
+```
+**Development Beta Version 0.1.0-beta15 (11/10/2016)**
+```
+    Notes:
+    New Features:
+        - Added resetState and flushState methods to CompositeElement.
+        - Added reset method to StateReducerComposite and StateReconfigurationComposiste.
+    Breaking Changes:
+    Improvements:
+        - Updated log method and added log history log cache to CommonElement.
+        - Improved warning messages for deepStateReconfiguration method in CompositeElement.
+    Bug fixes:
+        - Fixed warning message in stronglyTypedPreset when setting null value.
+        - Added mount stage flag to ReactComponentComposite. This prevents incoming stream from calling setState when component is about to unmount.
 ```

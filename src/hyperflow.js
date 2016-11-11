@@ -92,24 +92,21 @@ let Hf = null;
  * @returns {object}
  */
 const init = function init ({
-    TARGET = `client-web`,
-    DEVELOPMENT = true,
-    ENABLE_INFO_MESSAGE = true,
-    ENABLE_WARN_LVL0_MESSAGE = false,
-    ENABLE_WARN_LVL1_MESSAGE = true
+    target = `client-web`,
+    enableInfoLog = true,
+    enableWarn0Log = false,
+    enableWarn1Log = true
 } = {}) {
     if (Hf === null) {
         const common = CommonElement({
-            devleopment: DEVELOPMENT,
-            enableInfoMessage: ENABLE_INFO_MESSAGE,
-            enableWarn0Message: ENABLE_WARN_LVL0_MESSAGE,
-            enableWarn1Message: ENABLE_WARN_LVL1_MESSAGE
+            enableInfoLog,
+            enableWarn0Log,
+            enableWarn1Log
         });
         const HfProperty = {
-            VERSION: `0.1.0-beta14`,
-            ENV: TARGET === `server` ? process.env.NODE_ENV : {}, // eslint-disable-line
-            TARGET,
-            DEVELOPMENT,
+            VERSION: `0.1.0-beta15`,
+            TARGET: target,
+            ENV: process.env.NODE_ENV, // eslint-disable-line
             /* set composer factory namespace */
             Composer,
             /* set data and composite element namespaces */
@@ -257,7 +254,7 @@ const init = function init ({
             React: {
                 ComponentComposite: ReactComponentComposite,
                 AppComponentComposite: (() => {
-                    switch (TARGET) { // eslint-disable-line
+                    switch (target) { // eslint-disable-line
                     case `client-native`:
                         return ReactClientNativeAppComponentComposite;
                     case `client-web`:
@@ -267,7 +264,7 @@ const init = function init ({
                     }
                 })(),
                 AppRendererComposite: (() => {
-                    switch (TARGET) { // eslint-disable-line
+                    switch (target) { // eslint-disable-line
                     case `client-native`:
                         return ReactClientNativeAppRendererComposite;
                     case `client-web`:
@@ -278,7 +275,7 @@ const init = function init ({
                 })()
             },
             Storage: (() => {
-                switch (TARGET) { // eslint-disable-line
+                switch (target) { // eslint-disable-line
                 case `client-native`:
                     return {
                         ASyncStorageComposite
