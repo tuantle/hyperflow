@@ -15,11 +15,7 @@
     <script>
         System.import("hyperflow").then(function (Hf) {
             Hf.init({
-                TARGET: `client-web`,
-                DEVELOPMENT: true,
-                ENABLE_INFO_MESSAGE: true,
-                ENABLE_WARN_0_MESSAGE: false,
-                ENABLE_WARN_1_MESSAGE: true
+                target: `client-web`
             });
         }).then(function () {
             System.import("calculator/app").then(function ({
