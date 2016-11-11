@@ -654,7 +654,7 @@ export default function DataElement (mutationHistoryDepth = DEFAULT_MUTATION_HIS
         _rootContent: {
             value: {},
             writable: false,
-            configurable: false,
+            configurable: true,
             enumerable: false
         },
         _mutation: {
@@ -667,7 +667,7 @@ export default function DataElement (mutationHistoryDepth = DEFAULT_MUTATION_HIS
                 mutationHistoryDepth
             },
             writable: false,
-            configurable: false,
+            configurable: true,
             enumerable: false
         }
     });
