@@ -153,19 +153,19 @@ export default function DescriptorElement () {
     const element = Object.create(DescriptorElementPrototype, {
         _constrainableRegistry: {
             value: {},
-            writable: true,
+            writable: false,
             configurable: true,
             enumerable: false
         },
         _computableRegistry: {
             value: {},
-            writable: true,
+            writable: false,
             configurable: true,
             enumerable: false
         },
         _observableRegistry: {
             value: {},
-            writable: true,
+            writable: false,
             configurable: true,
             enumerable: false
         }
