@@ -59,6 +59,7 @@ export default CompositeElement({
                     fId: `string`,
                     name: `string`,
                     outgoing: `function`,
+                    resetState: `function`,
                     reconfigState: `function`,
                     reconfigStateAtPath: `function`,
                     getStateAsObject: `function`,
@@ -68,6 +69,26 @@ export default CompositeElement({
                     Hf.log(`error`, `StateReconfigurationComposite.$init - Factory is invalid. Cannot apply composite.`);
                 }
             }
+        },
+        /**
+         * @description - Reset state to initial default.
+         *
+         * @method reset
+         * @return void
+         */
+        reset: function reset () {
+            const factory = this;
+            factory.resetState();
+            factory.outgoing(`as-state-mutated`).emit(() => {
+                return Hf.mix(factory.getStateAsObject(), {
+                    exclusion: {
+                        keys: [
+                            `name`,
+                            `fId`
+                        ]
+                    }
+                }).with({});
+            });
         },
         /**
          * @description -  Reconfig and update state.

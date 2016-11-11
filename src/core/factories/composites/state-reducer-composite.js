@@ -59,6 +59,7 @@ export default CompositeElement({
                     fId: `string`,
                     name: `string`,
                     outgoing: `function`,
+                    resetState: `function`,
                     reduceState: `function`,
                     reduceStateAtPath: `function`,
                     getStateAsObject: `function`,
@@ -89,6 +90,26 @@ export default CompositeElement({
         //         }).with({});
         //     });
         // },
+        /**
+         * @description - Reset state to initial default.
+         *
+         * @method reset
+         * @return void
+         */
+        reset: function reset () {
+            const factory = this;
+            factory.resetState();
+            factory.outgoing(`as-state-mutated`).emit(() => {
+                return Hf.mix(factory.getStateAsObject(), {
+                    exclusion: {
+                        keys: [
+                            `name`,
+                            `fId`
+                        ]
+                    }
+                }).with({});
+            });
+        },
         /**
          * @description -  Reduce and update state on state change/mutation.
          *
