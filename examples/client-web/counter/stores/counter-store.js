@@ -47,13 +47,15 @@ const CounterStore = Hf.Store.augment({
                 offset: value
             })) {
                 store.outgoing(EVENT.AS.OFFSET_MUTATED).emit(() => {
-                    return { offset: store.offset };
+                    return {
+                        offset: store.offset
+                    };
                 });
                 Hf.log(`info`, `Store mutated`);
             }
         });
-        store.incoming(EVENT.DO.COUNT_MUTATION).handle((modifyCount) => {
-            if (store.reduce(modifyCount)) {
+        store.incoming(EVENT.DO.COUNT_MUTATION).handle((mutateCount) => {
+            if (store.reduce(mutateCount)) {
                 store.outgoing(EVENT.AS.COUNT_MUTATED).emit(() => {
                     return {
                         count: store.count

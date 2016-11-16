@@ -17,7 +17,7 @@ System.config({
     "babel": "npm:babel-core@5.8.38",
     "babel-runtime": "npm:babel-runtime@5.8.38",
     "core-js": "npm:core-js@1.2.7",
-    "hyperflow": "github:hyperflow@0.1.0-beta12",
+    "hyperflow": "github:hyperflow@0.1.0-beta15",
     "material-ui": "npm:material-ui@0.15.4",
     "moment": "npm:moment@2.15.1",
     "react": "npm:react@15.3.2",
@@ -27,7 +27,7 @@ System.config({
     "rx": "npm:rx@4.1.0",
     "tape": "npm:tape@4.6.0",
     "transducers-js": "npm:transducers-js@0.4.174",
-    "github:hyperflow@0.1.0-beta12": {
+    "github:hyperflow@0.1.0-beta15": {
       "rx": "npm:rx@4.1.0",
       "tape": "npm:tape@4.6.0",
       "transducers-js": "npm:transducers-js@0.4.174"

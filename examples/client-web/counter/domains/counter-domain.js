@@ -46,7 +46,7 @@ const CounterDomain = Hf.Domain.augment({
         domain.outgoing(EVENT.REQUEST.DATAREAD).emit();
         domain.incoming(EVENT.RESPONSE.TO.DATAREAD.OK).forward(EVENT.DO.INIT);
         domain.incoming(EVENT.ON.COUNT).handle((multiplier) => {
-            return function modifyCount (state) {
+            return function mutateCount (state) {
                 const newCount = state.count + multiplier * state.offset;
                 return {
                     count: newCount >= 0 ? newCount : 0

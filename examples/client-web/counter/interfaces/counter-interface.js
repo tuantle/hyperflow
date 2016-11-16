@@ -200,13 +200,7 @@ const CounterInterface = Hf.Interface.augment({
                 name: `undo-button`
             }),
             OffsetInputInterface({
-                name: `offset-input`,
-                style: {
-                    input: {
-                        color: `whitesmoke`,
-                        background: `#E0645C`
-                    }
-                }
+                name: `offset-input`
             })
         );
     },

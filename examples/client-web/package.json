@@ -55,10 +55,10 @@
     "babel-preset-stage-1": "latest",
     "babel-preset-stage-2": "latest",
     "babel-preset-stage-3": "latest",
-    "babel-preset-react": "latest",
     "babel-plugin-transform-strict-mode": "latest",
-    "eslint": "latest",
+    "babel-preset-react": "latest",
     "babel-eslint": "latest",
+    "eslint": "latest",
     "eslint-plugin-react": "latest",
     "eslint-plugin-react-native": "latest"
   },
@@ -67,10 +67,10 @@
     "url": "git+ssh://git@github.com/tuantle/hyperflow.git"
   },
   "scripts": {
-    "webpack-build-counter": "webpack --progress --colors --config counter-webpack.config.js",
-    "webpack-start-counter": "webpack-dev-server --content-base --progress --colors counter/build",
-    "jspm-start-counter": "live-server -q --open=counter/index.html",
-    "jspm-start-calculator": "live-server -q --open=calculator/index.html"
+    "webpack-build-counter": "NODE_ENV=development webpack --progress --colors --config counter-webpack.config.js",
+    "webpack-start-counter": "NODE_ENV=development webpack-dev-server --content-base --progress --colors counter/build",
+    "jspm-start-counter": "NODE_ENV=development live-server --no-browser -q --open=counter/index.html",
+    "jspm-start-calculator": "NODE_ENV=development live-server --no-browser -q --open=calculator/index.html"
   },
   "modulePathIgnorePatterns": [
     "/node_modules/",
