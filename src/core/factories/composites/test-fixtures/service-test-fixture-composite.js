@@ -29,14 +29,14 @@ import CompositeElement from '../../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     FIXTURE_FACTORY_CODE,
     SERVICE_FACTORY_CODE
 } from '../../factory-code';
+
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* delay all data stream from service by 1s as default */
 const DELAY_SERVICE_IN_MS = 1000;

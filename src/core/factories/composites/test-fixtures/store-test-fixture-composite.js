@@ -29,14 +29,14 @@ import CompositeElement from '../../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     FIXTURE_FACTORY_CODE,
     STORE_FACTORY_CODE
 } from '../../factory-code';
+
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /* delay all data stream from store by 1s as default */
 const DELAY_STORE_IN_MS = 1000;
