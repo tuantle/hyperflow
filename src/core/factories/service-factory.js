@@ -32,13 +32,13 @@ import Composer from '../composer';
 /* load CommonElement */
 import CommonElement from '../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     SERVICE_FACTORY_CODE
 } from './factory-code';
+
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A service factory module.
