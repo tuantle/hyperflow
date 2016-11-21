@@ -32,17 +32,15 @@ import Composer from '../composer';
 /* load CommonElement */
 import CommonElement from '../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     STORE_FACTORY_CODE,
     INTERFACE_FACTORY_CODE
 } from './factory-code';
 
-/* delay data stream from composite interface by 10ms as default */
-const DEBOUNCE_COMPOSITE_INTERFACE_IN_MS = 10;
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
+
 
 /**
  * @description - An interface component factory.
@@ -414,7 +412,7 @@ export default Composer({
                         }
                         return true;
                     }).map((compositeIntf) => {
-                        intf.observe(compositeIntf).debounce(DEBOUNCE_COMPOSITE_INTERFACE_IN_MS);
+                        intf.observe(compositeIntf);
                         Hf.log(`info`, `Interface:${intf.name} is composed of composite interface:${compositeIntf.name}.`);
                         return compositeIntf;
                     }).reduce((compositeBundle, compositeIntf) => {
@@ -453,7 +451,7 @@ export default Composer({
                             ]
                         }
                     }).with({});
-                    intf.incoming(`as-state-mutated`).handle((reflectedState) => {
+                    intf.incoming(`do-sync-reflected-state`).handle((reflectedState) => {
                         /* update initial reflected state snapshot as state from store mutated */
                         _initialReflectedState = reflectedState;
                     });
