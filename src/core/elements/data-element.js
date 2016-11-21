@@ -56,10 +56,11 @@ const DataElementPrototype = Object.create({}).prototype = {
      *
      * @method _getAccessor
      * @param {string|array} pathId
+     * @param {boolean} skipNonmutationReferals
      * @return {object}
      * @private
      */
-    _getAccessor: function _getAccessor (pathId) {
+    _getAccessor: function _getAccessor (pathId, skipNonmutationReferals = false) {
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
         if (!Hf.isNonEmptyArray(pathId)) {
             Hf.log(`error`, `DataElement._getAccessor - Input pathId is invalid.`);
@@ -69,7 +70,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             const mRecords = data._mutation.records;
             const immutableRootKeys = data._mutation.immutableRootKeys;
             if (immutableRootKeys.includes(rootKey) && !Hf.isEmpty(mRecords)) {
-                data._updateMMap(rootKey);
+                data._updateMMap(rootKey, skipNonmutationReferals);
                 Hf.clear(data._mutation.records);
             }
             return data._mutation.mMap.select(pathId).getContent();
@@ -172,15 +173,18 @@ const DataElementPrototype = Object.create({}).prototype = {
      *
      * @method _updateMMap
      * @param {string} rootKey
+     * @param {boolean} skipNonmutationReferals
      * @return void
      * @private
      */
-    _updateMMap: function _updateMMap (rootKey) {
+    _updateMMap: function _updateMMap (rootKey, skipNonmutationReferals = false) {
         const data = this;
         const mMap = data._mutation.mMap;
         const mutationHistoryDepth = data._mutation.mutationHistoryDepth;
         const rootContent = data._rootContent;
         const pathId = rootKey;
+
+        skipNonmutationReferals = Hf.isBoolean(skipNonmutationReferals) ? skipNonmutationReferals : false;
 
         if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
             const immutableRootKeys = data._mutation.immutableRootKeys;
@@ -189,10 +193,14 @@ const DataElementPrototype = Object.create({}).prototype = {
                 const mRecords = data._mutation.records;
                 const oldRootNode = mMap.select(pathId).rekey(`${rootKey}${data._mutation.timeIndex[rootKey]}`);
                 const newRootNode = mMap.sproutRoot(rootKey);
-                const referenceNonmutationsInMMap = Hf.compose(oldRootNode.getPathId, newRootNode.refer);
+                const referingNonmutations = Hf.compose(oldRootNode.getPathId, newRootNode.refer);
 
                 data._deepUpdateMMap(newRootNode, pathId, mRecords.slice(1));
-                referenceNonmutationsInMMap();
+
+                if (!skipNonmutationReferals) {
+                    referingNonmutations();
+                }
+
                 newRootNode.freezeContent();
                 data._mutation.timeIndex[rootKey]++;
                 data._mutation.timestamp[rootKey].push((new Date()).getTime() - INITIAL_TIMESTAMP_REF_IN_MS);
