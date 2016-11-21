@@ -29,14 +29,14 @@ import CompositeElement from '../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     SERVICE_FACTORY_CODE,
     STORE_FACTORY_CODE
 } from '../factory-code';
+
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A persistent state time traversal composite module.
@@ -106,20 +106,28 @@ export default CompositeElement({
                         content
                     } = stateCursor.recallContentItem(key, timeIndexOffset);
                     if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
-                        let reducer = Hf.retrieve(pathId, `.`, true).from(content);
+                        let reducer = {};
+
+                        if (Hf.isObject(content) || Hf.isArray(content)) {
+                            reducer = Hf.retrieve(pathId, `.`, true).from(content);
+                        } else {
+                            reducer[key] = content;
+                        }
                         if (factory.reduceState(reducer)) {
                             factory.updateStateAccessor();
+
+                            const recalledState = Hf.mix(factory.getStateAsObject(), {
+                                exclusion: {
+                                    keys: [
+                                        `name`,
+                                        `fId`
+                                    ]
+                                }
+                            }).with({});
+
                             /* emitting a mutation event to interface */
-                            factory.outgoing(`as-state-mutated`).emit(() => {
-                                return Hf.mix(factory.getStateAsObject(), {
-                                    exclusion: {
-                                        keys: [
-                                            `name`,
-                                            `fId`
-                                        ]
-                                    }
-                                }).with({});
-                            });
+                            factory.outgoing(`as-state-mutated`).emit(() => recalledState);
+                            factory.outgoing(`do-sync-reflected-state`).emit(() => recalledState);
                             Hf.log(`info`, `Time traversing to previous state at timestamp:${timestamp} of key:${key}.`);
                         }
                     } else {
@@ -157,7 +165,12 @@ export default CompositeElement({
                     } = stateCursor.recallContentItem(key, timeIndexOffset);
                     if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
                         Hf.log(`info`, `Recalling previous state at timestamp:${timestamp} of key:${key}.`);
-                        return Hf.retrieve(pathId, `.`, true).from(content);
+
+                        if (Hf.isObject(content) || Hf.isArray(content)) {
+                            return Hf.retrieve(pathId, `.`, true).from(content);
+                        } else { // eslint-disable-line
+                            return content;
+                        }
                     } else { // eslint-disable-line
                         Hf.log(`warn1`, `StateTimeTraversalComposite.recall - Unable to recall an undefined state of key:${key} at time index.`);
                     }
@@ -187,9 +200,22 @@ export default CompositeElement({
                     if (Hf.isArray(contentHistoryItems)) {
                         Hf.log(`info`, `Recalling all previous states of key:${key}.`);
                         return contentHistoryItems.map((contentHistory) => {
-                            let _contentHistory = Hf.retrieve(pathId, `.`, true).from(contentHistory.content);
-                            _contentHistory.timestamp = contentHistory.timestamp;
-                            return _contentHistory;
+                            const {
+                                timestamp,
+                                content
+                            } = contentHistory;
+
+                            if (Hf.isObject(content) || Hf.isArray(content)) {
+                                return {
+                                    timestamp,
+                                    content: Hf.retrieve(pathId, `.`, true).from(content)
+                                };
+                            } else { // eslint-disable-line
+                                return {
+                                    timestamp,
+                                    content
+                                };
+                            }
                         });
                     } else { // eslint-disable-line
                         Hf.log(`warn1`, `StateTimeTraversalComposite.recallAll - Unable to recall all previous states of key:${key}.`);
