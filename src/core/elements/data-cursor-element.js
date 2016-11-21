@@ -49,6 +49,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @method _createSchema
      * @param {object} source
      * @return {object}
+     * @private
      */
     _createSchema: function _createSchema (source) {
         const cursor = this;
@@ -250,13 +251,14 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @description - At cursor, get data item accessor.
      *
      * @method getAccessor
+     * @param {boolean} skipNonmutationReferals
      * @return {object}
      */
-    getAccessor: function getAccessor () {
+    getAccessor: function getAccessor (skipNonmutationReferals = false) {
         const cursor = this;
         const data = cursor._data;
 
-        return data._getAccessor(cursor._pathId);
+        return data._getAccessor(cursor._pathId, skipNonmutationReferals);
     },
     /**
      * @description - At cursor, get data type of content.
@@ -489,9 +491,13 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
                 const recallTimeIndex = currentTimeIndex + timeIndexOffset;
                 const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
+                const leafType = cursor.getContentType(key) !== `object` || cursor.getContentType(key) !== `array`;
                 let pathIdAtTimeIndex = Hf.stringToArray(pathId, `.`);
 
                 if (cursorTimestamps.length > recallTimeIndex) {
+                    if (leafType) {
+                        pathIdAtTimeIndex.pop();
+                    }
                     pathIdAtTimeIndex.shift();
                     pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
                     pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
@@ -499,7 +505,8 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                     if (mMap.hasNode(pathIdAtTimeIndex)) {
                         return {
                             timestamp: cursorTimestamps[recallTimeIndex],
-                            content: mMap.select(pathIdAtTimeIndex).getContent()
+                            key,
+                            content: leafType ? mMap.select(pathIdAtTimeIndex).getContent()[key] : mMap.select(pathIdAtTimeIndex).getContent()
                         };
                     } else { // eslint-disable-line
                         Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
@@ -533,24 +540,32 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 const data = cursor._data;
                 const mMap = data._mutation.mMap;
                 const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
-                const timestamps = data._mutation.timestamp[cursor._rootKey];
+                const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
+                const leafType = cursor.getContentType(key) !== `object` || cursor.getContentType(key) !== `array`;
                 let timeIndexOffset = -1;
 
-                return timestamps.slice(1).map((timestamp) => {
+                return cursorTimestamps.slice(1).map((cursorTimestamp) => {
                     const recallTimeIndex = currentTimeIndex + timeIndexOffset;
                     let pathIdAtTimeIndex = Hf.stringToArray(pathId, `.`);
+
                     timeIndexOffset--;
+
+                    if (leafType) {
+                        pathIdAtTimeIndex.pop();
+                    }
+
                     pathIdAtTimeIndex.shift();
                     pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
                     pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
                     return {
-                        timestamp,
+                        timestamp: cursorTimestamp,
                         pathIdAtTimeIndex
                     };
                 }).filter((timeCursor) => mMap.hasNode(timeCursor.pathIdAtTimeIndex)).map((timeCursor) => {
                     return {
                         timestamp: timeCursor.timestamp,
-                        content: mMap.select(timeCursor.pathIdAtTimeIndex).getContent()
+                        key,
+                        content: leafType ? mMap.select(timeCursor.pathIdAtTimeIndex).getContent()[key] : mMap.select(timeCursor.pathIdAtTimeIndex).getContent()
                     };
                 });
             }
