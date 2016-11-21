@@ -255,6 +255,8 @@ export default CompositeElement({
         ReactComponentComposite: function ReactComponentComposite () {
             /* ----- Private Variables ------------- */
             let _mutationOccurred = false;
+
+            // FIXME: _mountStage flag is not working.
             let _mountStage = WILL_MOUNT_STAGE;
             /* ----- Public Functions -------------- */
             /**
@@ -280,13 +282,13 @@ export default CompositeElement({
                         Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component is invalid.`);
                     } else {
                         const defaultProperty = intf.getStateAsObject();
-                        const reactPropTypeStronglyTyped = {
-                            boolean: React.PropTypes.bool.isRequired,
-                            array: React.PropTypes.array.isRequired,
-                            object: React.PropTypes.object.isRequired,
-                            function: React.PropTypes.func.isRequired,
-                            string: React.PropTypes.string.isRequired,
-                            number: React.PropTypes.number.isRequired
+                        const reactPropTypeAlias = {
+                            boolean: React.PropTypes.bool,
+                            array: React.PropTypes.array,
+                            object: React.PropTypes.object,
+                            function: React.PropTypes.func,
+                            string: React.PropTypes.string,
+                            number: React.PropTypes.number
                         };
                         const reactPureDefinition = (CompositeElement({
                             exclusion: {
@@ -305,23 +307,32 @@ export default CompositeElement({
                                     /* set react property type checking */
                                     this.propTypes = (() => {
                                         return Object.keys(defaultProperty).reduce((propType, key) => {
-                                            const typeAliasKey = Hf.typeOf(defaultProperty[key]);
                                             if (stateCursor.isItemOneOfValues(key)) {
                                                 const {
-                                                    condition: values
+                                                    condition: types
                                                 } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
-                                                propType[key] = React.PropTypes.oneOf(values);
+                                                propType[key] = React.PropTypes.oneOf(types.map((typeAliasKey) => {
+                                                    return reactPropTypeAlias[typeAliasKey];
+                                                }));
                                             }
                                             if (stateCursor.isItemOneOfTypes(key)) {
                                                 const {
                                                     condition: types
                                                 } = stateCursor.getItemDescription(key).ofConstrainable().s(`oneTypeOf`);
-                                                propType[key] = React.PropTypes.oneOfType(types.map((type) => {
-                                                    return reactPropTypeStronglyTyped[type];
+                                                propType[key] = React.PropTypes.oneOfType(types.map((typeAliasKey) => {
+                                                    return reactPropTypeAlias[typeAliasKey];
                                                 }));
                                             }
-                                            if (reactPropTypeStronglyTyped.hasOwnProperty(typeAliasKey)) {
-                                                propType[key] = reactPropTypeStronglyTyped[typeAliasKey];
+
+                                            if (stateCursor.isItemStronglyTyped(key)) {
+                                                const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
+                                                if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
+                                                    if (stateCursor.isItemRequired(key)) {
+                                                        propType[key] = reactPropTypeAlias[propertyTypeAliasKey].isRequired;
+                                                    } else {
+                                                        propType[key] = reactPropTypeAlias[propertyTypeAliasKey];
+                                                    }
+                                                }
                                             }
                                             return propType;
                                         }, {});
@@ -373,13 +384,13 @@ export default CompositeElement({
                 } else {
                     const stateless = intf.isStateless();
                     const defaultProperty = intf.getStateAsObject();
-                    const reactPropTypeStronglyTyped = {
-                        boolean: React.PropTypes.bool.isRequired,
-                        array: React.PropTypes.array.isRequired,
-                        object: React.PropTypes.object.isRequired,
-                        function: React.PropTypes.func.isRequired,
-                        string: React.PropTypes.string.isRequired,
-                        number: React.PropTypes.number.isRequired
+                    const reactPropTypeAlias = {
+                        boolean: React.PropTypes.bool,
+                        array: React.PropTypes.array,
+                        object: React.PropTypes.object,
+                        function: React.PropTypes.func,
+                        string: React.PropTypes.string,
+                        number: React.PropTypes.number
                     };
                     const reactDefinition = (CompositeElement({
                         exclusion: {
@@ -398,23 +409,32 @@ export default CompositeElement({
                                 /* set react property type checking */
                                 this.propTypes = (() => {
                                     return Object.keys(defaultProperty).reduce((propType, key) => {
-                                        const typeAliasKey = Hf.typeOf(defaultProperty[key]);
                                         if (stateCursor.isItemOneOfValues(key)) {
                                             const {
-                                                condition: values
+                                                condition: types
                                             } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
-                                            propType[key] = React.PropTypes.oneOf(values);
+                                            propType[key] = React.PropTypes.oneOf(types.map((typeAliasKey) => {
+                                                return reactPropTypeAlias[typeAliasKey];
+                                            }));
                                         }
                                         if (stateCursor.isItemOneOfTypes(key)) {
                                             const {
                                                 condition: types
-                                            } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
-                                            propType[key] = React.PropTypes.oneOfType(types.map((type) => {
-                                                return reactPropTypeStronglyTyped[type];
+                                            } = stateCursor.getItemDescription(key).ofConstrainable().s(`oneTypeOf`);
+                                            propType[key] = React.PropTypes.oneOfType(types.map((typeAliasKey) => {
+                                                return reactPropTypeAlias[typeAliasKey];
                                             }));
                                         }
-                                        if (reactPropTypeStronglyTyped.hasOwnProperty(typeAliasKey)) {
-                                            propType[key] = reactPropTypeStronglyTyped[typeAliasKey];
+
+                                        if (stateCursor.isItemStronglyTyped(key)) {
+                                            const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
+                                            if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
+                                                if (stateCursor.isItemRequired(key)) {
+                                                    propType[key] = reactPropTypeAlias[propertyTypeAliasKey].isRequired;
+                                                } else {
+                                                    propType[key] = reactPropTypeAlias[propertyTypeAliasKey];
+                                                }
+                                            }
                                         }
                                         return propType;
                                     }, {});
