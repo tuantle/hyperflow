@@ -29,13 +29,13 @@ import Composer from '../composer';
 /* load CommonElement */
 import CommonElement from '../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     DOMAIN_FACTORY_CODE
 } from './factory-code';
+
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - An app factory module.
@@ -161,35 +161,79 @@ export default Composer({
             }
         };
         /**
-         * @description - Run the app.
+         * @description - Start app.
          *
-         * @method run
+         * @method start
          * @param {object} option
          * @return void
          */
-        this.run = function run (option = {}) {
+        this.start = function start (option = {}) {
             const app = this;
-
-            // TODO: Implement use case for app run option.
-            option = Hf.isObject(option) ? option : {};
+            const {
+                enableSlowRunMode,
+                doRenderToTarget
+            } = Hf.fallback({
+                enableSlowRunMode: false,
+                doRenderToTarget: true
+            }).of(option);
 
             if (!Hf.isObject(_domain)) {
-                Hf.log(`error`, `AppFactory.run - App:${app.name} is not registered with a domain.`);
+                Hf.log(`error`, `AppFactory.start - App:${app.name} is not registered with a domain.`);
             } else {
                 if (!_domain.hasStarted()) {
-                    _domain.start(option, () => {
-                        app.renderToTarget();
+                    Hf.log(`info`, `Starting app:${app.name}...`);
+                    _domain.start({
+                        enableSlowRunMode
+                    }, () => {
+                        if (doRenderToTarget) {
+                            app.renderToTarget();
+                        }
                         Hf.log(`info`, `Domain:${_domain.name} has started.`);
-                        Hf.log(`info`, `Running app:${app.name}...`);
                     });
                 } else {
-                    _domain.restart(option, () => {
-                        app.renderToTarget();
+                    Hf.log(`warn1`, `AppFactory.main - App:${app.name} is already running. Restarting...`);
+                    _domain.restart({
+                        enableSlowRunMode
+                    }, () => {
+                        if (doRenderToTarget) {
+                            app.renderToTarget();
+                        }
                         Hf.log(`info`, `Domain:${_domain.name} has restarted.`);
-                        Hf.log(`warn1`, `AppFactory.run - App:${app.name} is already running. Restarting...`);
                     });
                 }
             }
+        };
+        /**
+         * @description - Stop app.
+         *
+         * @method stop
+         * @return void
+         */
+        this.stop = function stop () {
+            const app = this;
+            if (!Hf.isObject(_domain)) {
+                Hf.log(`error`, `AppFactory.stop - App:${app.name} is not registered with a domain.`);
+            } else {
+                if (_domain.hasStarted()) {
+                    Hf.log(`info`, `Stopping app:${app.name}...`);
+                    _domain.stop(() => {
+                        Hf.log(`info`, `Domain:${_domain.name} has stopped.`);
+                    });
+                }
+            }
+        };
+        /**
+         * @description - Restart app.
+         *
+         * @method restart
+         * @param {object} option,
+         * @return void
+         */
+        this.restart = function restart (option = {}) {
+            const app = this;
+            app.stop(() => {
+                app.start(option);
+            });
         };
     }
 });
