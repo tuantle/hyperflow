@@ -40,6 +40,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} schema - Predefined schema.
      * @param {object} target - Predefined schema.
      * @returns {object}
+     * @private
      */
     _deepCompareSchema: function _deepCompareSchema (schema, target) {
         const common = this;
@@ -110,6 +111,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} mutator - Mutator object.
      * @param {array} pathId - Mutation path Id.
      * @returns {object}
+     * @private
      */
     _deepMutation: function _deepMutation (source, mutator, pathId = []) {
         const common = this;
@@ -123,7 +125,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     const sourceKeys = Object.keys(source);
                     const mutatorKeys = Object.keys(mutator);
                     if (sourceKeys.length >= mutatorKeys.length && mutatorKeys.every((key) => sourceKeys.some((_key) => _key === key))) {
-                        Object.keys(source).forEach((key) => {
+                        mutatorKeys.forEach((key) => {
                             const sourceItem = source[key];
                             const mutatorItem = mutator[key];
                             if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
@@ -191,6 +193,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} target - Target object.
      * @param {array} pathId - Merge at path Id.
      * @returns {object}
+     * @private
      */
     _deepMerge: function _deepMerge (source, target, pathId = []) {
         const common = this;
@@ -265,6 +268,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} target - Target object.
      * @param {function} notify - Optional notification callback when a fallback occurs.
      * @returns {object}
+     * @private
      */
     _deepCompareAndFallback: function _deepCompareAndFallback (source, target, notify) {
         const common = this;
@@ -347,6 +351,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {array} pathId - Retrival path Id.
      * @param {boolean} asNestedObject
      * @returns {object}
+     * @private
      */
     _deepRetrieval: function _deepRetrieval (target, pathId, asNestedObject) {
         const common = this;
@@ -1256,44 +1261,55 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     log: function log (type, message) {
         const common = this;
-
-        if (common.isString(type)) {
-            if (common.DEVELOPMENT) {
-                const logger = {
-                    error () {
-                        throw new Error(`ERROR: ${message}`);
-                    },
-                    warn0 () {
-                        if (common._consoleLog.enableWarn0Log) {
-                            console.warn(`WARNING-0: ${message}`);
-                            common._consoleLog.history.warn0Logs.push({
-                                timestamp: new Date(),
-                                message: `INFO: ${message}`
-                            });
-                        }
-                    },
-                    warn1 () {
-                        if (common._consoleLog.enableWarn1Log) {
-                            console.warn(`WARNING-1: ${message}`);
-                            common._consoleLog.history.warn1Logs.push({
-                                timestamp: new Date(),
-                                message: `INFO: ${message}`
-                            });
-                        }
-                    },
-                    info () {
-                        if (common._consoleLog.enableInfoLog) {
-                            console.info(`INFO: ${message}`);
-                            common._consoleLog.history.infoLogs.push({
-                                timestamp: new Date(),
-                                message: `INFO: ${message}`
-                            });
-                        }
+        if (common.DEVELOPMENT) {
+            const logger = {
+                error () {
+                    throw new Error(`ERROR: ${message}`);
+                },
+                warn0 () {
+                    if (common._consoleLog.enableWarn0Log) {
+                        console.warn(`WARNING-0: ${message}`);
+                        common._consoleLog.history.warn0Logs.push({
+                            timestamp: new Date(),
+                            message: `WARNING-0: ${message}`
+                        });
                     }
-                };
-                if (logger.hasOwnProperty(type)) {
-                    logger[type]();
+                },
+                warn1 () {
+                    if (common._consoleLog.enableWarn1Log) {
+                        console.warn(`WARNING-1: ${message}`);
+                        common._consoleLog.history.warn1Logs.push({
+                            timestamp: new Date(),
+                            message: `WARNING-1: ${message}`
+                        });
+                    }
+                },
+                info () {
+                    if (common._consoleLog.enableInfoLog) {
+                        console.info(`INFO: ${message}`);
+                        common._consoleLog.history.infoLogs.push({
+                            timestamp: new Date(),
+                            message: `INFO: ${message}`
+                        });
+                    }
                 }
+            };
+            switch (type) { // eslint-disable-line
+            case `info`:
+                logger.info();
+                break;
+            case `warn0`:
+                logger.warn0();
+                break;
+            case `warn1`:
+                logger.warn1();
+                break;
+            case `error`:
+                logger.error();
+                break;
+            default:
+                console.warn(`WARNING-1: CommonElement.log - Invalid log type:${type}.`);
+                return;
             }
         }
     },
@@ -1306,10 +1322,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     getLogHistory: function getLogHistory (type) {
         const common = this;
-
-        if (!common.isString(type)) {
-            common.log(`error`, `CommonElement.getLogHistory - Input log type is invalid.`);
-        } else {
+        if (common.DEVELOPMENT) {
             switch (type) { // eslint-disable-line
             case `info`:
                 return common._consoleLog.history.infoLogs;
@@ -1317,6 +1330,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
                 return common._consoleLog.history.warn0Logs;
             case `warn1`:
                 return common._consoleLog.history.warn1Logs;
+            default:
+                common.log(`warn1`, `CommonElement.getLogHistory - Invalid log type:${type}.`);
+                return;
             }
         }
     }
@@ -1329,6 +1345,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function CommonElement ({
+    enableProductionMode = false,
     enableInfoLog = true,
     enableWarn0Log = false,
     enableWarn1Log = true
@@ -1340,7 +1357,7 @@ export default function CommonElement ({
     const element = Object.create(CommonElementPrototype, {
         /* this flag indicates develeopment or production status of the project */
         DEVELOPMENT: {
-            value: process.env.NODE_ENV === `development`, // eslint-disable-line
+            value: !enableProductionMode,
             writable: false,
             configurable: false,
             enumerable: true
