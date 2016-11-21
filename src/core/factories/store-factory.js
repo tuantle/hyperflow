@@ -26,9 +26,8 @@
 /* load EventStreamComposite */
 import EventStreamComposite from './composites/event-stream-composite';
 
-/* load StateReducerComposite and StateReconfigurationComposite */
-import StateReducerComposite from './composites/state-reducer-composite';
-import StateReconfigurationComposite from './composites/state-reconfiguration-composite';
+/* load StateMutationComposite */
+import StateMutationComposite from './composites/state-mutation-composite';
 
 /* load Composer */
 import Composer from '../composer';
@@ -36,13 +35,13 @@ import Composer from '../composer';
 /* load CommonElement */
 import CommonElement from '../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     STORE_FACTORY_CODE
 } from './factory-code';
+
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - An app state data store factory module.
@@ -52,8 +51,7 @@ import {
 export default Composer({
     composites: [
         EventStreamComposite,
-        StateReducerComposite,
-        StateReconfigurationComposite
+        StateMutationComposite
     ],
     state: {
         name: {
