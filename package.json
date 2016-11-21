@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta15",
+    "version": "0.1.0-beta16",
     "registry": "github",
     "description": "Hyperflow (Hf) - A toolkit & library for developing universal app.",
     "license": "MIT",
@@ -54,11 +54,12 @@
         "babel-preset-stage-1": "latest",
         "babel-preset-stage-2": "latest",
         "babel-preset-stage-3": "latest",
-        "babel-preset-react": "latest",
         "babel-plugin-transform-strict-mode": "latest",
+        "babel-preset-react": "latest",
+
+        "babel-eslint": "latest",
 
         "eslint": "latest",
-        "babel-eslint": "latest",
         "eslint-plugin-react": "latest",
         "eslint-plugin-react-native": "latest"
     },
@@ -71,6 +72,6 @@
         "/examples/"
     ],
     "scripts": {
-        "start-unit-tests": "node ./tests/test-suites"
+        "start-unit-tests": "NODE_ENV=development node ./__tests__/test-suites"
     }
 }
