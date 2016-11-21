@@ -184,3 +184,18 @@ Bug fixes:
         - Fixed warning message in stronglyTypedPreset when setting null value.
         - Added mount stage flag to ReactComponentComposite. This prevents incoming stream from calling setState when component is about to unmount.
 ```
+**Development Beta Version 0.1.0-beta16 (11/17/2016)**
+```
+    Notes:
+    New Features:
+        - Added implementations for toStandaloneComponent method for ReactAppComponentComposite (client web and native).
+    Breaking Changes:
+        - Renamed app run method to app stop in AppFactory.
+    Improvements:
+        - Added options arg start method in AppFactory and DomainFactory.
+        - Added option to skip non-mutation referrals when updating mutation map in DataElement.
+        - Improved all state reduce and reconfig methods for CompositeElement.
+    Bug fixes:
+        - Removed all delay and debounce from event stream for DomainFactory, InterfaceFactory.
+        - Fixed recallContentItem and recallAllContentItems methods in DataCursorElement.
+```
