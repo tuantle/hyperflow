@@ -34,9 +34,6 @@ import CompositeElement from '../../elements/composite-element';
 /* load CommonElement */
 import CommonElement from '../../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     FIXTURE_FACTORY_CODE,
@@ -46,15 +43,15 @@ import {
     STORE_FACTORY_CODE
 } from '../factory-code';
 
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
+
 const INCOMING_EVENT = 0;
 const OUTGOING_EVENT = 1;
 const RELAY_EVENT = 2;
 const REPEATING_EVENT = 3;
 const REPEATED_EVENT = 4;
 const LOOPBACK_EVENT = 5;
-
-/* default initial delay to all incoming event stream */
-// const DEFAULT_INCOMING_EVENT_STREAM_DELAY_IN_MS = 10;
 
 /**
  * @description - A reactive event stream composite module.
@@ -109,7 +106,7 @@ export default CompositeElement({
                  * @description - On subscription to next incoming payload...
                  *
                  * @method onNext
-                 * @param {object} payload
+                 * @param {object} payload - Incoming payload
                  * @return void
                  */
                 function onNext (payload) {
@@ -195,353 +192,425 @@ export default CompositeElement({
              * @method _createStreamOperatorFor
              * @param {string} direction
              * @return {object}
+             * @private
              */
             function _createStreamOperatorFor (direction) {
-                if (!Hf.isString(direction)) {
-                    Hf.log(`error`, `EventStreamComposite._createStreamOperatorFor - Input event stream direction is invalid.`);
-                } else {
-                    const operator = {
-                        /**
-                         * @description - At observable stream, operates delay.
-                         *
-                         * @method delay
-                         * @param {number} ms - Time in millisecond
-                         * @return {object}
-                         */
-                        delay: function delay (ms) {
-                            if (!Hf.isInteger(ms)) {
-                                Hf.log(`error`, `EventStreamComposite.delay - Input delay time is invalid.`);
-                            } else {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.delay(ms).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.delay(ms).share();
-                                    break;
-                                }
+                const operator = {
+                    /**
+                     * @description - At observable stream, operates delay.
+                     *
+                     * @method delay
+                     * @param {number} ms - Time in millisecond
+                     * @return {object}
+                     */
+                    delay: function delay (ms) {
+                        if (!Hf.isInteger(ms)) {
+                            Hf.log(`error`, `EventStreamComposite.delay - Input delay time is invalid.`);
+                        } else {
+                            if (ms < 1) {
+                                ms = 1;
+                                Hf.log(`warn1`, `EventStreamComposite.delay - Input delay time should be greater than 0. Reset to 1ms.`);
                             }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates debounce.
-                         *
-                         * @method debounce
-                         * @param {number} ms - Time in millisecond
-                         * @return {object}
-                         */
-                        debounce: function debounce (ms) {
-                            if (!Hf.isInteger(ms)) {
-                                Hf.log(`error`, `EventStreamComposite.debounce - Input debounce time is invalid.`);
-                            } else {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.debounce(ms).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.debounce(ms).share();
-                                    break;
-                                }
+
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.delay(ms).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.delay(ms).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.delay - Invalid direction:${direction}.`);
                             }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates filter.
-                         *
-                         * @method filter
-                         * @param {function} predicate
-                         * @return {object}
-                         */
-                        filter: function filter (predicate) {
-                            if (!Hf.isFunction(predicate)) {
-                                Hf.log(`error`, `EventStreamComposite.filter - Input filter predicate function is invalid.`);
-                            } else {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.filter(predicate).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.filter(predicate).share();
-                                    break;
-                                }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates debounce.
+                     *
+                     * @method debounce
+                     * @param {number} ms - Time in millisecond
+                     * @return {object}
+                     */
+                    debounce: function debounce (ms) {
+                        if (!Hf.isInteger(ms)) {
+                            Hf.log(`error`, `EventStreamComposite.debounce - Input debounce time is invalid.`);
+                        } else {
+                            if (ms < 1) {
+                                ms = 1;
+                                Hf.log(`warn1`, `EventStreamComposite.debounce - Input debounce time should be greater than 0. Reset to 1ms.`);
                             }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates map.
-                         *
-                         * @method map
-                         * @param {function} selector
-                         * @return {object}
-                         */
-                        map: function map (selector) {
-                            if (!Hf.isFunction(selector)) {
-                                Hf.log(`error`, `EventStreamComposite.map - Input map selector function is invalid.`);
-                            } else {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.select(selector).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.select(selector).share();
-                                    break;
-                                }
+
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.debounce(ms).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.debounce(ms).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.debounce - Invalid direction:${direction}.`);
                             }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates flatten and map.
-                         *
-                         * @method flatMap
-                         * @param {function} selector
-                         * @return {object}
-                         */
-                        flatMap: function flatMap (selector) {
-                            if (!Hf.isFunction(selector)) {
-                                Hf.log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
-                            } else {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.selectMany(selector).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.selectMany(selector).share();
-                                    break;
-                                }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates filter.
+                     *
+                     * @method filter
+                     * @param {function} predicate
+                     * @return {object}
+                     */
+                    filter: function filter (predicate) {
+                        if (!Hf.isFunction(predicate)) {
+                            Hf.log(`error`, `EventStreamComposite.filter - Input filter predicate function is invalid.`);
+                        } else {
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.filter(predicate).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.filter(predicate).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.filter - Invalid direction:${direction}.`);
                             }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates reduce.
-                         *
-                         * @method reduce
-                         * @param {function} accumulator
-                         * @param {object|undefined} defaultPayload
-                         * @return {object}
-                         */
-                        reduce: function reduce (accumulator, defaultPayload) {
-                            if (!Hf.isFunction(accumulator)) {
-                                Hf.log(`error`, `EventStreamComposite.reduce - Input reduce accumulator function is invalid.`);
-                            } else {
-                                if (Hf.isObject(defaultPayload)) {
-                                    if (Hf.isSchema({
-                                        eventId: `string`
-                                    }).of(defaultPayload)) {
-                                        Hf.log(`error`, `EventStreamComposite.reduce - Payload event Id is invalid.`);
-                                    } else {
-                                        switch (direction) { // eslint-disable-line
-                                        case `incoming`:
-                                            _incomingStream = _incomingStream.reduce(accumulator, defaultPayload).share();
-                                            break;
-                                        case `outgoing`:
-                                            _outgoingStream = _outgoingStream.reduce(accumulator, defaultPayload).share();
-                                            break;
-                                        }
-                                    }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates map.
+                     *
+                     * @method map
+                     * @param {function} selector
+                     * @return {object}
+                     */
+                    map: function map (selector) {
+                        if (!Hf.isFunction(selector)) {
+                            Hf.log(`error`, `EventStreamComposite.map - Input map selector function is invalid.`);
+                        } else {
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.select(selector).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.select(selector).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.map - Invalid direction:${direction}.`);
+                            }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates flatten and map.
+                     *
+                     * @method flatMap
+                     * @param {function} selector
+                     * @return {object}
+                     */
+                    flatMap: function flatMap (selector) {
+                        if (!Hf.isFunction(selector)) {
+                            Hf.log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
+                        } else {
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.selectMany(selector).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.selectMany(selector).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.flatMap - Invalid direction:${direction}.`);
+                            }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates reduce.
+                     *
+                     * @method reduce
+                     * @param {function} accumulator
+                     * @param {object|undefined} defaultPayload
+                     * @return {object}
+                     */
+                    reduce: function reduce (accumulator, defaultPayload) {
+                        if (!Hf.isFunction(accumulator)) {
+                            Hf.log(`error`, `EventStreamComposite.reduce - Input reduce accumulator function is invalid.`);
+                        } else {
+                            if (Hf.isObject(defaultPayload)) {
+                                if (Hf.isSchema({
+                                    eventId: `string`
+                                }).of(defaultPayload)) {
+                                    Hf.log(`error`, `EventStreamComposite.reduce - Payload event Id is invalid.`);
                                 } else {
                                     switch (direction) { // eslint-disable-line
                                     case `incoming`:
-                                        _incomingStream = _incomingStream.reduce(accumulator).share();
+                                        _incomingStream = _incomingStream.reduce(accumulator, defaultPayload).share();
                                         break;
                                     case `outgoing`:
-                                        _outgoingStream = _outgoingStream.reduce(accumulator).share();
+                                        _outgoingStream = _outgoingStream.reduce(accumulator, defaultPayload).share();
                                         break;
+                                    default:
+                                        Hf.log(`error`, `EventStreamComposite.reduce - Invalid direction:${direction}.`);
                                     }
                                 }
-                            }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates a transducer on the entire stream.
-                         *
-                         * @method transduce
-                         * @param {function} selector
-                         * @param {function} predicate
-                         * @return {object}
-                         */
-                        transduce: function transduce (selector, predicate) {
-                            if (!Hf.isFunction(selector)) {
-                                Hf.log(`error`, `EventStreamComposite.transduce - Input map selector function is invalid.`);
-                            } else if (!Hf.isFunction(predicate)) {
-                                Hf.log(`error`, `EventStreamComposite.transduce - Input filter predicate function is invalid.`);
                             } else {
                                 switch (direction) { // eslint-disable-line
                                 case `incoming`:
-                                    _incomingStream = _incomingStream.transduce(Transducer.comp(
-                                        Transducer.map(selector),
-                                        Transducer.filter(predicate)
-                                    )).share();
+                                    _incomingStream = _incomingStream.reduce(accumulator).share();
                                     break;
                                 case `outgoing`:
-                                    _outgoingStream = _outgoingStream.transduce(Transducer.comp(
-                                        Transducer.map(selector),
-                                        Transducer.filter(predicate)
-                                    )).share();
+                                    _outgoingStream = _outgoingStream.reduce(accumulator).share();
                                     break;
+                                default:
+                                    Hf.log(`error`, `EventStreamComposite.reduce - Invalid direction:${direction}.`);
                                 }
                             }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates a start with on the entire stream.
-                         *
-                         * @method startWith
-                         * @param {array} payloads
-                         * @return {object}
-                         */
-                        startWith: function startWith (...payloads) {
-                            // FIXME: startWith method not working? Needs testings.
-                            if (payloads.every((payload) => {
-                                if (!Hf.isSchema({
-                                    eventId: `string`
-                                }).of(payload)) {
-                                    Hf.log(`error`, `EventStreamComposite.startWith - Payload event Id is invalid.`);
-                                    return false;
-                                }
-                                return true;
-                            })) {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.startWith(...payloads).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.startWith(...payloads).share();
-                                    break;
-                                }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates a transducer on the entire stream.
+                     *
+                     * @method transduce
+                     * @param {function} selector
+                     * @param {function} predicate
+                     * @return {object}
+                     */
+                    transduce: function transduce (selector, predicate) {
+                        if (!Hf.isFunction(selector)) {
+                            Hf.log(`error`, `EventStreamComposite.transduce - Input map selector function is invalid.`);
+                        } else if (!Hf.isFunction(predicate)) {
+                            Hf.log(`error`, `EventStreamComposite.transduce - Input filter predicate function is invalid.`);
+                        } else {
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.transduce(Transducer.comp(
+                                    Transducer.map(selector),
+                                    Transducer.filter(predicate)
+                                )).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.transduce(Transducer.comp(
+                                    Transducer.map(selector),
+                                    Transducer.filter(predicate)
+                                )).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.transduce - Invalid direction:${direction}.`);
                             }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates take last.
-                         *
-                         * @method takeLast
-                         * @param {number} count
-                         * @return {object}
-                         */
-                        takeLast: function takeLast (count) {
-                            if (!Hf.isInteger(count)) {
-                                Hf.log(`error`, `EventStreamComposite.takeLast - Input count number is invalid.`);
-                            } else {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.takeLast(count).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.takeLast(count).share();
-                                    break;
-                                }
-                            }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates a throttle on the entire stream.
-                         *
-                         * @method throttle
-                         * @param {number} windowDuration - Time in ms to wait before emitting another item after emitting the last item.
-                         * @return {object}
-                         */
-                        throttle: function throttle (windowDuration) {
-                            if (!Hf.isInteger(windowDuration)) {
-                                Hf.log(`error`, `EventStreamComposite.throttle - Input throttle timw window is invalid.`);
-                            } else {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.throttle(windowDuration).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.throttle(windowDuration).share();
-                                    break;
-                                }
-                            }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates a timeout on the entire stream.
-                         *
-                         * @method timeout
-                         * @param {object} timeoutPayload
-                         * @param {number} ms
-                         * @return {object}
-                         */
-                        timeout: function timeout (timeoutPayload, ms) {
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates a start with on the entire stream.
+                     *
+                     * @method startWith
+                     * @param {array} payloads
+                     * @return {object}
+                     */
+                    startWith: function startWith (...payloads) {
+                        // FIXME: startWith method not working? Needs testings.
+                        if (payloads.every((payload) => {
                             if (!Hf.isSchema({
                                 eventId: `string`
-                            }).of(timeoutPayload)) {
-                                Hf.log(`error`, `EventStreamComposite.timeout - Input timeout payload is invalid.`);
-                            } else if (!Hf.isInteger(ms)) {
-                                Hf.log(`error`, `EventStreamComposite.timeout - Input timeout is invalid.`);
-                            } else {
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
-                                    break;
-                                }
+                            }).of(payload)) {
+                                Hf.log(`error`, `EventStreamComposite.startWith - Payload event Id is invalid.`);
+                                return false;
                             }
-                            return operator;
-                        },
-                        /**
-                         * @description - At observable stream, operates a monitor on the entire stream.
-                         *
-                         * @method monitor
-                         * @param {object} logger
-                         * @return {object}
-                         */
-                        monitor: function monitor (logger = {}) {
-                            if (!Hf.isSchema({
-                                logOnNext: `function`
-                            }).of(logger)) {
-                                Hf.log(`error`, `EventStreamComposite.monitor - Input logger object is invalid.`);
-                            } else {
-                                const {
-                                    logOnNext,
-                                    logOnError,
-                                    logOnComplete
-                                } = Hf.fallback({
-                                    /**
-                                     * @description - On subscription to error...
-                                     *
-                                     * @method logOnError
-                                     * @param {string} error
-                                     * @return void
-                                     */
-                                    logOnError: function logOnError (error) {
-                                        Hf.log(`error`, `EventStreamComposite.monitor.logOnError - ${error.message}`);
-                                    },
-                                    /**
-                                     * @description - On subscription to completion...
-                                     *
-                                     * @method logOnComplete
-                                     * @return void
-                                     */
-                                    logOnComplete: function logOnComplete () {
-                                        Hf.log(`info`, `Complete side subscription.`);
-                                    }
-                                }).of(logger);
-                                /* using a side observer for monitoring */
-                                const sideObserver = Rx.Observer.create(
-                                    logOnNext,
-                                    logOnError,
-                                    logOnComplete
-                                );
-                                switch (direction) { // eslint-disable-line
-                                case `incoming`:
-                                    _incomingStream = _incomingStream.tap(sideObserver).share();
-                                    break;
-                                case `outgoing`:
-                                    _outgoingStream = _outgoingStream.tap(sideObserver).share();
-                                    break;
-                                }
+                            return true;
+                        })) {
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.startWith(...payloads).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.startWith(...payloads).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.startWith - Invalid direction:${direction}.`);
                             }
-                            return operator;
                         }
-                    };
-                    return operator;
-                }
-            }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates take last.
+                     *
+                     * @method takeLast
+                     * @param {number} count
+                     * @return {object}
+                     */
+                    takeLast: function takeLast (count) {
+                        if (!Hf.isInteger(count)) {
+                            Hf.log(`error`, `EventStreamComposite.takeLast - Input count number is invalid.`);
+                        } else {
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.takeLast(count).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.takeLast(count).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.takeLast - Invalid direction:${direction}.`);
+                            }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates a throttle on the entire stream.
+                     *
+                     * @method throttle
+                     * @param {number} ms - Time in ms to wait before emitting another item after emitting the last item.
+                     * @return {object}
+                     */
+                    throttle: function throttle (ms) {
+                        if (!Hf.isInteger(ms)) {
+                            Hf.log(`error`, `EventStreamComposite.throttle - Input throttle timw window is invalid.`);
+                        } else {
+                            if (ms < 1) {
+                                ms = 1;
+                                Hf.log(`warn1`, `EventStreamComposite.throttle - Input throttle time should be greater than 0. Reset to 1ms.`);
+                            }
 
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.throttle(ms).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.throttle(ms).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.throttle - Invalid direction:${direction}.`);
+                            }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates a back pressure on the entire stream. Unlike throttle or debounce, this is not lossy.
+                     *
+                     * @method backPressure
+                     * @param {number} ms - Maximum time length of a buffer.
+                     * @param {number} count - Maximum element count of a buffer.
+                     * @return {object}
+                     */
+                    backPressure: function backPressure (ms, count) {
+                        if (!Hf.isInteger(ms)) {
+                            Hf.log(`error`, `EventStreamComposite.backPressure - Input throttle timw window is invalid.`);
+                        } else {
+                            if (ms < 1) {
+                                ms = 1;
+                                Hf.log(`warn1`, `EventStreamComposite.backPressure - Input buffer time span should be greater than 0. Reset to 1ms.`);
+                            }
+
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.bufferWithTimeOrCount(ms, count).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.bufferWithTimeOrCount(ms, count).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.backPressure - Invalid direction:${direction}.`);
+                            }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates a timeout on the entire stream.
+                     *
+                     * @method timeout
+                     * @param {object} timeoutPayload
+                     * @param {number} ms
+                     * @return {object}
+                     */
+                    timeout: function timeout (timeoutPayload, ms) {
+                        if (!Hf.isSchema({
+                            eventId: `string`
+                        }).of(timeoutPayload)) {
+                            Hf.log(`error`, `EventStreamComposite.timeout - Input timeout payload is invalid.`);
+                        } else if (!Hf.isInteger(ms)) {
+                            Hf.log(`error`, `EventStreamComposite.timeout - Input timeout is invalid.`);
+                        } else {
+                            if (ms < 1) {
+                                ms = 1;
+                                Hf.log(`warn1`, `EventStreamComposite.timeout - Input timeout should be greater than 0. Reset to 1ms.`);
+                            }
+
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.timeout - Invalid direction:${direction}.`);
+                            }
+                        }
+                        return operator;
+                    },
+                    /**
+                     * @description - At observable stream, operates a monitor on the entire stream.
+                     *
+                     * @method monitor
+                     * @param {object} logger
+                     * @return {object}
+                     */
+                    monitor: function monitor (logger = {}) {
+                        if (!Hf.isSchema({
+                            logOnNext: `function`
+                        }).of(logger)) {
+                            Hf.log(`error`, `EventStreamComposite.monitor - Input logger object is invalid.`);
+                        } else {
+                            const {
+                                logOnNext,
+                                logOnError,
+                                logOnComplete
+                            } = Hf.fallback({
+                                /**
+                                 * @description - On subscription to error...
+                                 *
+                                 * @method logOnError
+                                 * @param {string} error
+                                 * @return void
+                                 */
+                                logOnError: function logOnError (error) {
+                                    Hf.log(`error`, `EventStreamComposite.monitor.logOnError - ${error.message}`);
+                                },
+                                /**
+                                 * @description - On subscription to completion...
+                                 *
+                                 * @method logOnComplete
+                                 * @return void
+                                 */
+                                logOnComplete: function logOnComplete () {
+                                    Hf.log(`info`, `Complete side subscription.`);
+                                }
+                            }).of(logger);
+                            /* using a side observer for monitoring */
+                            const sideObserver = Rx.Observer.create(
+                                logOnNext,
+                                logOnError,
+                                logOnComplete
+                            );
+                            switch (direction) { // eslint-disable-line
+                            case `incoming`:
+                                _incomingStream = _incomingStream.tap(sideObserver).share();
+                                break;
+                            case `outgoing`:
+                                _outgoingStream = _outgoingStream.tap(sideObserver).share();
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.monitor - Invalid direction:${direction}.`);
+                            }
+                        }
+                        return operator;
+                    }
+                };
+                return operator;
+            }
             /* ----- Public Functions -------------- */
             /**
              * @description - Get factory outgoing event stream.
@@ -604,6 +673,11 @@ export default CompositeElement({
                             if (!Hf.isInteger(ms)) {
                                 Hf.log(`error`, `EventStreamComposite.outgoing.delay - Input wait time is invalid.`);
                             } else {
+                                if (ms < 1) {
+                                    ms = 1;
+                                    Hf.log(`warn1`, `EventStreamComposite.outgoing.delay - Input delay time should be greater than 0. Reset to 1ms.`);
+                                }
+
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
                                         arbiter[eventId].waitTime = ms;
@@ -637,6 +711,11 @@ export default CompositeElement({
                             if (!Hf.isInteger(ms)) {
                                 Hf.log(`error`, `EventStreamComposite.outgoing.interval - Input period time is invalid.`);
                             } else {
+                                if (ms < 1) {
+                                    ms = 1;
+                                    Hf.log(`warn1`, `EventStreamComposite.outgoing.interval - Input interval period time should be greater than 0. Reset to 1ms.`);
+                                }
+
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
                                         arbiter[eventId].intervalPeriod = ms;
@@ -699,11 +778,11 @@ export default CompositeElement({
                                                     _streamEmitter.onNext(payload);
                                                 }, intervalPeriod);
                                             }, waitTime);
-                                        } else if (waitTime > 0 && intervalPeriod <= 0) {
+                                        } else if (waitTime > 0 && intervalPeriod === 0) {
                                             setTimeout(() => {
                                                 _streamEmitter.onNext(payload);
                                             }, waitTime);
-                                        } else if (waitTime <= 0 && intervalPeriod > 0) {
+                                        } else if (waitTime === 0 && intervalPeriod > 0) {
                                             setInterval(() => {
                                                 _streamEmitter.onNext(payload);
                                             }, intervalPeriod);
@@ -758,6 +837,11 @@ export default CompositeElement({
                             if (!Hf.isInteger(ms)) {
                                 Hf.log(`error`, `EventStreamComposite.incoming.delay - Input wait time is invalid.`);
                             } else {
+                                if (ms < 1) {
+                                    ms = 1;
+                                    Hf.log(`warn1`, `EventStreamComposite.incoming.delay - Input delay time should be greater than 0. Reset to 1ms.`);
+                                }
+
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
                                         arbiter[eventId].waitTime = ms;
@@ -1029,16 +1113,42 @@ export default CompositeElement({
              * @description - Start the incoming event stream subscription.
              *
              * @method activateIncomingStream
+             * @param {object} option
              * @return void
              */
-            this.activateIncomingStream = function activateIncomingStream () {
+            this.activateIncomingStream = function activateIncomingStream (option = {}) {
                 const factory = this;
+                let {
+                    enableBuffering,
+                    bufferTimeSpan,
+                    bufferTimeShift
+                } = Hf.fallback({
+                    enableBuffering: false,
+                    bufferTimeSpan: 1,
+                    bufferTimeShift: 1
+                }).of(option);
+
+                if (bufferTimeSpan < 1) {
+                    bufferTimeSpan = 1;
+                    Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time span option should be greater than 0. Reset to 1ms.`);
+                }
+
+                if (bufferTimeShift < 1) {
+                    bufferTimeShift = 1;
+                    Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
+                }
+
                 if (!_incomingStreamActivated) {
                     /* first do operations on the incoming event stream */
                     factory.operateIncomingStream(_createStreamOperatorFor(`incoming`));
                     /* then do incoming event stream subscriptions */
-                    _incomingSubscription = _incomingStream.subscribe(_observer);
-
+                    if (enableBuffering) {
+                        _incomingSubscription = _incomingStream.bufferWithTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
+                            return !Hf.isEmpty(payloads);
+                        }).flatMap((payload) => payload).subscribe(_observer);
+                    } else {
+                        _incomingSubscription = _incomingStream.subscribe(_observer);
+                    }
                     _incomingStreamActivated = true;
                 } else {
                     Hf.log(`warn0`, `EventStreamComposite.activateIncomingStream - Incoming event stream subscription is already activated.`);
@@ -1048,16 +1158,42 @@ export default CompositeElement({
              * @description - Start the outgoing event stream subscription.
              *
              * @method activateOutgoingStream
+             * @param {object} option
              * @return void
              */
-            this.activateOutgoingStream = function activateOutgoingStream () {
+            this.activateOutgoingStream = function activateOutgoingStream (option = {}) {
                 const factory = this;
+                let {
+                    enableBuffering,
+                    bufferTimeSpan,
+                    bufferTimeShift
+                } = Hf.fallback({
+                    enableBuffering: false,
+                    bufferTimeSpan: 1,
+                    bufferTimeShift: 1
+                }).of(option);
+
+                if (bufferTimeSpan < 1) {
+                    bufferTimeSpan = 1;
+                    Hf.log(`warn1`, `EventStreamComposite.activateOutgoingStream - Input buffer time span option should be greater than 0. Reset to 1ms.`);
+                }
+
+                if (bufferTimeShift < 1) {
+                    bufferTimeShift = 1;
+                    Hf.log(`warn1`, `EventStreamComposite.activateOutgoingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
+                }
+
                 if (!_outgoingStreamActivated) {
                     /* first do operations on the outgoing event stream */
                     factory.operateOutgoingStream(_createStreamOperatorFor(`outgoing`));
                     /* then do outgoing event stream subscriptions */
-                    _outgoingSubscription = _outgoingStream.subscribe(_observer);
-
+                    if (enableBuffering) {
+                        _outgoingSubscription = _outgoingStream.bufferWithTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
+                            return !Hf.isEmpty(payloads);
+                        }).flatMap((payload) => payload).subscribe(_observer);
+                    } else {
+                        _outgoingSubscription = _outgoingStream.subscribe(_observer);
+                    }
                     _outgoingStreamActivated = true;
 
                     /* emit all the un-emitted payloads that were pushed to queue before activation */
@@ -1066,6 +1202,7 @@ export default CompositeElement({
                             eventId,
                             value
                         } = unemitPayload;
+                        // FIXME: unemitPayloads are being emitted multiple times.
                         factory.outgoing(eventId).emit(() => value);
                     });
                     Hf.clear(_unemitPayloads);
