@@ -64,7 +64,7 @@ import AgentFactory from './core/factories/agent-factory';
 // import TapeTestRunnerComposite from './core/factories/composites/tape-test-runner-composite';
 
 /* load state composites library */
-import StateReducerComposite from './core/factories/composites/state-reducer-composite';
+import StateMutationComposite from './core/factories/composites/state-mutation-composite';
 import StateTimeTraversalComposite from './core/factories/composites/state-time-traversal-composite';
 
 /* load React composites library */
@@ -93,20 +93,22 @@ let Hf = null;
  */
 const init = function init ({
     target = `client-web`,
+    enableProductionMode = false,
     enableInfoLog = true,
     enableWarn0Log = false,
     enableWarn1Log = true
 } = {}) {
     if (Hf === null) {
         const common = CommonElement({
+            enableProductionMode,
             enableInfoLog,
             enableWarn0Log,
             enableWarn1Log
         });
         const HfProperty = {
-            VERSION: `0.1.0-beta15`,
+            VERSION: `0.1.0-beta16`,
             TARGET: target,
-            ENV: process.env.NODE_ENV, // eslint-disable-line
+            ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : ``, // eslint-disable-line
             /* set composer factory namespace */
             Composer,
             /* set data and composite element namespaces */
@@ -239,7 +241,7 @@ const init = function init ({
             // Fixture: FixtureFactory,
             /* set state composite factory namespace */
             State: {
-                ReducerComposite: StateReducerComposite,
+                MutationComposite: StateMutationComposite,
                 TimeTraversalComposite: StateTimeTraversalComposite
             },
             /* set test fixtures composites namespace */
@@ -261,6 +263,8 @@ const init = function init ({
                         return ReactClientWebAppComponentComposite;
                     case `server`:
                         return ReactServerAppComponentComposite;
+                    default:
+                        common.log(`error`, `Hf.Init - Invalid target:${target}.`);
                     }
                 })(),
                 AppRendererComposite: (() => {
@@ -271,6 +275,8 @@ const init = function init ({
                         return ReactClientWebAppRendererComposite;
                     case `server`:
                         return ReactServerAppRendererComposite;
+                    default:
+                        common.log(`error`, `Hf.Init - Invalid target:${target}.`);
                     }
                 })()
             },
@@ -288,6 +294,8 @@ const init = function init ({
                     return {
                         PGComposite
                     };
+                default:
+                    common.log(`error`, `Hf.Init - Invalid target:${target}.`);
                 }
             })()
         };
