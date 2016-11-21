@@ -66,7 +66,56 @@ export default CompositeElement({
          * @return {object}
          */
         toStandaloneComponent: function toStandaloneComponent (property, option = {}) { // eslint-disable-line
-            // TODO: Does not have implementation yet.
+            const app = this;
+            const domain = app.getTopDomain();
+            if (!Hf.isSchema({
+                name: `string`,
+                getInterface: `function`
+            }).of(domain)) {
+                Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - App:${app.name} domain is invalid.`);
+            } else {
+                const intf = domain.getInterface();
+                if (!Hf.isSchema({
+                    getComponentLib: `function`,
+                    toComponent: `function`
+                }).of(intf)) {
+                    Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - App:${app.name} top domain:${domain.name} interface is invalid.`);
+                } else {
+                    const {
+                        React
+                    } = intf.getComponentLib();
+                    if (!Hf.isSchema({
+                        createClass: `function`
+                    }).of(React)) {
+                        Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - React is invalid.`);
+                    } else {
+                        const Component = intf.toComponent(); // eslint-disable-line
+                        const topComponent = React.createClass({
+                            componentWillMount: function componentWillMount () {
+                                app.start({
+                                    doRenderToTarget: false
+                                });
+                            },
+                            componentWillUnMount: function componentWillUnMount () {
+                                app.stop({
+                                    doRenderToTarget: false
+                                });
+                            },
+                            render: function render () {
+                                const component = this;
+                                return (
+                                    <Component { ...component.props }/>
+                                );
+                            }
+                        });
+                        if (!Hf.isFunction(topComponent)) {
+                            Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - Unable to initialize a React app top component.`);
+                        } else {
+                            return topComponent;
+                        }
+                    }
+                }
+            }
         },
         /**
          * @description - Get the composed app top interface component from domain interface.
