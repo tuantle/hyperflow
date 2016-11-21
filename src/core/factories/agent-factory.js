@@ -29,13 +29,13 @@ import Composer from '../composer';
 /* load CommonElement */
 import CommonElement from '../elements/common-element';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /* factory Ids */
 import {
     FIXTURE_FACTORY_CODE
 } from './factory-code';
+
+/* create CommonElement as Hf object */
+const Hf = CommonElement();
 
 /**
  * @description - A test agent factory module.
