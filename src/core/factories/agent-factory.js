@@ -73,7 +73,7 @@ export default Composer({
         this.register = function register (definition) {
             const agent = this;
             if (!Hf.isSchema({
-                fixtures: `array`
+                fixtures: [ `object` ]
             }).of(definition)) {
                 Hf.log(`error`, `AgentFactory.register - Input definition is invalid.`);
             } else {
