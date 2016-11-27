@@ -49,15 +49,15 @@ const factoryA = Factory.augment({
         name: `factoryA`
     },
     operateIncomingStream: function operateIncomingStream (operator) {
-        operator.monitor({
-            logOnNext: (payload) => console.log(`Monitor factory A incoming event stream -- ${payload.value}`)
-        });
+        operator.divert(`event1`, `event2`).monitor({
+            logOnNext: (payload) => console.log(`Monitor factory A incoming event stream id:${payload.eventId} -- ${payload.value}`)
+        }).recombine();
     },
-    operateOutgoingStream: function operateOutgoingStream (operator) {
-        operator.monitor({
-            logOnNext: (payload) => console.log(`Monitor factory A outgoing event stream -- ${payload.value}`)
-        });
-    },
+    // operateOutgoingStream: function operateOutgoingStream (operator) {
+    //     operator.monitor({
+    //         logOnNext: (payload) => console.log(`Monitor factory A outgoing event stream -- ${payload.value}`)
+    //     });
+    // },
     setup: function setup (done) {
         const factory = this;
         factory.incoming(
