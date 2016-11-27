@@ -106,7 +106,7 @@ const init = function init ({
             enableWarn1Log
         });
         const HfProperty = {
-            VERSION: `0.1.0-beta16`,
+            VERSION: `0.1.0-beta17`,
             TARGET: target,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : ``, // eslint-disable-line
             /* set composer factory namespace */

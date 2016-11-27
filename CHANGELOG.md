@@ -194,8 +194,23 @@ Bug fixes:
     Improvements:
         - Added options arg start method in AppFactory and DomainFactory.
         - Added option to skip non-mutation referrals when updating mutation map in DataElement.
-        - Improved all state reduce and reconfig methods for CompositeElement.
+        - Improved all state reduce and re-config methods for CompositeElement.
     Bug fixes:
         - Removed all delay and debounce from event stream for DomainFactory, InterfaceFactory.
         - Fixed recallContentItem and recallAllContentItems methods in DataCursorElement.
+```
+**Development Beta Version 0.1.0-beta17 (11/27/2016)**
+```
+Notes:
+New Features:
+    - Added new stream diversion feature for incoming and outgoing stream operator in EventStreamComposite.
+    - Added new backPressure operator to EventStreamComposite.
+Breaking Changes:
+Improvements:
+    - Added debug option to log method in CommonElement.
+Bug fixes:
+    - Added back delay to store and services event streams in DomainFactory.
+    - Fixed schema checking for register method in DomainFactory and AgentFactory.
+    - Fixed React.PropTypes creations in ReactComponentComposite.
+    - Fixed root write bug for write methods in AsyncStorageComposite and WebStorageComposite.
 ```
