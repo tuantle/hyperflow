@@ -1262,39 +1262,57 @@ const CommonElementPrototype = Object.create({}).prototype = {
     log: function log (type, message) {
         const common = this;
         if (common.DEVELOPMENT) {
+            let stringifiedMessage = ``;
+
+            if (common.isObject(message) || common.isArray(message)) {
+                stringifiedMessage = JSON.stringify(message, null, `\t`);
+            } else {
+                stringifiedMessage = message;
+            }
             const logger = {
                 error () {
                     throw new Error(`ERROR: ${message}`);
                 },
                 warn0 () {
                     if (common._consoleLog.enableWarn0Log) {
-                        console.warn(`WARNING-0: ${message}`);
+                        console.warn(`WARNING-0: ${stringifiedMessage}`);
                         common._consoleLog.history.warn0Logs.push({
                             timestamp: new Date(),
-                            message: `WARNING-0: ${message}`
+                            message: `WARNING-0: ${stringifiedMessage}`
                         });
                     }
                 },
                 warn1 () {
                     if (common._consoleLog.enableWarn1Log) {
-                        console.warn(`WARNING-1: ${message}`);
+                        console.warn(`WARNING-1: ${stringifiedMessage}`);
                         common._consoleLog.history.warn1Logs.push({
                             timestamp: new Date(),
-                            message: `WARNING-1: ${message}`
+                            message: `WARNING-1: ${stringifiedMessage}`
                         });
                     }
                 },
                 info () {
                     if (common._consoleLog.enableInfoLog) {
-                        console.info(`INFO: ${message}`);
+                        console.info(`INFO: ${stringifiedMessage}`);
                         common._consoleLog.history.infoLogs.push({
                             timestamp: new Date(),
-                            message: `INFO: ${message}`
+                            message: `INFO: ${stringifiedMessage}`
                         });
                     }
+                },
+                debug () {
+                    /* debug log is always enabled */
+                    console.log(`DEBUG: ${stringifiedMessage}`);
+                    common._consoleLog.history.debugLogs.push({
+                        timestamp: new Date(),
+                        message: `DEBUG: ${stringifiedMessage}`
+                    });
                 }
             };
             switch (type) { // eslint-disable-line
+            case `debug`:
+                logger.debug();
+                break;
             case `info`:
                 logger.info();
                 break;
@@ -1324,6 +1342,8 @@ const CommonElementPrototype = Object.create({}).prototype = {
         const common = this;
         if (common.DEVELOPMENT) {
             switch (type) { // eslint-disable-line
+            case `debug`:
+                return common._consoleLog.history.debugLogs;
             case `info`:
                 return common._consoleLog.history.infoLogs;
             case `warn0`:
@@ -1369,6 +1389,7 @@ export default function CommonElement ({
                 enableWarn0Log,
                 enableWarn1Log,
                 history: {
+                    debugLogs: [],
                     infoLogs: [],
                     warn0Logs: [],
                     warn1Logs: []
