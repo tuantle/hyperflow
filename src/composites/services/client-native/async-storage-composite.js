@@ -170,25 +170,29 @@ export default CompositeElement({
                                                     });
                                                 } else {
                                                     storage.getItem(rootKey).then((rootItem) => {
-                                                        const mutator = bundle;
-                                                        if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
-                                                            storage.setItem(
-                                                                rootKey,
-                                                                JSON.stringify(Hf.mutate(JSON.parse(rootItem)).by(mutator))
-                                                            ).then(() => {
-                                                                resolve(bundle);
-                                                            }).catch((error) => {
-                                                                reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
-                                                            });
+                                                        if (!bundle.hasOwnProperty(rootKey)) {
+                                                            reject(new Error(`ERROR: Unable to write to storage. Bundle root item key:${rootKey} is undefined.`));
                                                         } else {
-                                                            storage.setItem(
-                                                                rootKey,
-                                                                JSON.stringify(mutator)
-                                                            ).then(() => {
-                                                                resolve(bundle);
-                                                            }).catch((error) => {
-                                                                reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
-                                                            });
+                                                            const mutator = bundle[rootKey];
+                                                            if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
+                                                                storage.setItem(
+                                                                    rootKey,
+                                                                    JSON.stringify(Hf.mutate(JSON.parse(rootItem)).by(mutator))
+                                                                ).then(() => {
+                                                                    resolve(bundle);
+                                                                }).catch((error) => {
+                                                                    reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
+                                                                });
+                                                            } else {
+                                                                storage.setItem(
+                                                                    rootKey,
+                                                                    JSON.stringify(mutator)
+                                                                ).then(() => {
+                                                                    resolve(bundle);
+                                                                }).catch((error) => {
+                                                                    reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
+                                                                });
+                                                            }
                                                         }
                                                     }).catch((error) => { // eslint-disable-line
                                                         if (!bundle.hasOwnProperty(rootKey)) {

@@ -164,11 +164,15 @@ export default CompositeElement({
                                                 }
                                             } else {
                                                 if (rootItem !== null) {
-                                                    const mutator = bundle;
-                                                    if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
-                                                        storage.setItem(rootKey, JSON.stringify(Hf.mutate(rootItem).by(mutator)));
+                                                    if (!bundle.hasOwnProperty(rootKey)) {
+                                                        reject(new Error(`ERROR: Unable to write to storage. Bundle root item key:${rootKey} is undefined.`));
                                                     } else {
-                                                        storage.setItem(rootKey, JSON.stringify(mutator));
+                                                        const mutator = bundle[rootKey];
+                                                        if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
+                                                            storage.setItem(rootKey, JSON.stringify(Hf.mutate(rootItem).by(mutator)));
+                                                        } else {
+                                                            storage.setItem(rootKey, JSON.stringify(mutator));
+                                                        }
                                                     }
                                                 } else {
                                                     if (!bundle.hasOwnProperty(rootKey)) {
