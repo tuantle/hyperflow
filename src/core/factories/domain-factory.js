@@ -47,6 +47,12 @@ const Hf = CommonElement();
 const SLOW_MODE_BUFFER_TIME_SPAN_IN_MS = 450;
 const SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS = 450;
 
+/* delay all data stream from store by 1ms as default */
+const DELAY_STORE_IN_MS = 1;
+
+/* delay all data stream from service by 5ms as default */
+const DELAY_SERVICE_IN_MS = 5;
+
 /**
  * @description - A domain factory module.
  *
@@ -193,7 +199,13 @@ export default Composer({
          */
         this.register = function register (definition) {
             const domain = this;
-            if (!Hf.isObject(definition) || Hf.isEmpty(definition)) {
+            if (!Hf.isSchema({
+                intf: `object|undefined`,
+                store: `object|undefined`,
+                services: `array|undefined`,
+                peerDomains: `array|undefined`,
+                childDomains: `array|undefined`
+            }).of(definition)) {
                 Hf.log(`error`, `DomainFactory.register - Input definition is invalid.`);
             } else {
                 const {
@@ -249,7 +261,7 @@ export default Composer({
                         } else {
                             _store = store;
                             /* setup event stream observation duplex between domain and store */
-                            domain.observe(_store);
+                            domain.observe(_store).delay(DELAY_STORE_IN_MS);
                             _store.observe(domain);
                             Hf.log(`info`, `Domain:${domain.name} registered store:${store.name}.`);
                         }
@@ -287,7 +299,7 @@ export default Composer({
                             return true;
                         }));
                         /* setup event stream observation duplex between domain and servies */
-                        domain.observe(..._services);
+                        domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
                         _services.forEach((service) => service.observe(domain));
                     }
                 }
