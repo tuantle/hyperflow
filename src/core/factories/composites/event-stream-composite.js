@@ -46,6 +46,11 @@ import {
 /* create CommonElement as Hf object */
 const Hf = CommonElement();
 
+const INCOMING_DIRECTION = 0;
+const OUTGOING_DIRECTION = 1;
+const DIVERTED_INCOMING_DIRECTION = 2;
+const DIVERTED_OUTGOING_DIRECTION = 3;
+
 const INCOMING_EVENT = 0;
 const OUTGOING_EVENT = 1;
 const RELAY_EVENT = 2;
@@ -100,40 +105,55 @@ export default CompositeElement({
             /* converting event stream emitter as a subject to an observable */
             let _outgoingStream = _streamEmitter.asObservable();
 
+            let _divertedIncomingStream = Rx.Observable.never();
+            let _divertedOutgoingStream = Rx.Observable.never();
+
+
             /* creating factory event stream observer */
             const _observer = Rx.Observer.create(
                 /**
                  * @description - On subscription to next incoming payload...
                  *
                  * @method onNext
-                 * @param {object} payload - Incoming payload
+                 * @param {array} payloads - Incoming payloads
                  * @return void
                  */
-                function onNext (payload) {
-                    if (Hf.isSchema({
-                        eventId: `string`
-                    }).of(payload)) {
-                        const {
-                            eventId,
-                            value
-                        } = payload;
-                        if (_arbiter.hasOwnProperty(eventId)) {
+                function onNext (...payloads) {
+                    payloads.forEach((payload) => {
+                        if (Hf.isSchema({
+                            eventId: `string`
+                        }).of(payload)) {
                             const {
-                                eventDirectionalState,
-                                completed,
-                                waitTime,
-                                handler,
-                                relayer
-                            } = Hf.fallback({
-                                completed: false,
-                                waitTime: 0
-                            }).of((_arbiter[eventId]));
-                            if (eventDirectionalState !== REPEATED_EVENT) {
-                                if (eventDirectionalState === REPEATING_EVENT) {
-                                    _arbiter[eventId].eventDirectionalState = REPEATED_EVENT;
-                                }
-                                if (waitTime > 0) {
-                                    setTimeout(() => {
+                                eventId,
+                                value
+                            } = payload;
+                            if (_arbiter.hasOwnProperty(eventId)) {
+                                const {
+                                    eventDirectionalState,
+                                    completed,
+                                    waitTime,
+                                    handler,
+                                    relayer
+                                } = Hf.fallback({
+                                    completed: false,
+                                    waitTime: 0
+                                }).of((_arbiter[eventId]));
+                                if (eventDirectionalState !== REPEATED_EVENT) {
+                                    if (eventDirectionalState === REPEATING_EVENT) {
+                                        _arbiter[eventId].eventDirectionalState = REPEATED_EVENT;
+                                    }
+                                    if (waitTime > 0) {
+                                        setTimeout(() => {
+                                            const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
+                                            if (Hf.isFunction(relayer)) {
+                                                relayer(handledValue);
+                                            }
+                                            if (completed) {
+                                                _arbiter[eventId] = undefined;
+                                                delete _arbiter[eventId];
+                                            }
+                                        }, waitTime);
+                                    } else {
                                         const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
                                         if (Hf.isFunction(relayer)) {
                                             relayer(handledValue);
@@ -142,24 +162,15 @@ export default CompositeElement({
                                             _arbiter[eventId] = undefined;
                                             delete _arbiter[eventId];
                                         }
-                                    }, waitTime);
+                                    }
                                 } else {
-                                    const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
-                                    if (Hf.isFunction(relayer)) {
-                                        relayer(handledValue);
-                                    }
-                                    if (completed) {
-                                        _arbiter[eventId] = undefined;
-                                        delete _arbiter[eventId];
-                                    }
+                                    _arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
                                 }
-                            } else {
-                                _arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
                             }
+                        } else {
+                            Hf.log(`error`, `EventStreamComposite.onNext - Payload event Id is invalid.`);
                         }
-                    } else {
-                        Hf.log(`error`, `EventStreamComposite.onNext - Payload event Id is invalid.`);
-                    }
+                    });
                 },
                 /**
                  * @description - On subscription to error...
@@ -190,11 +201,12 @@ export default CompositeElement({
              * @description - Helper function to create stream operator object.
              *
              * @method _createStreamOperatorFor
-             * @param {string} direction
+             * @param {number} direction
              * @return {object}
              * @private
              */
             function _createStreamOperatorFor (direction) {
+                const factory = this;
                 const operator = {
                     /**
                      * @description - At observable stream, operates delay.
@@ -213,11 +225,17 @@ export default CompositeElement({
                             }
 
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.delay(ms).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.delay(ms).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.delay(ms).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.delay(ms).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.delay - Invalid direction:${direction}.`);
@@ -242,11 +260,17 @@ export default CompositeElement({
                             }
 
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.debounce(ms).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.debounce(ms).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.debounce(ms).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.debounce(ms).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.debounce - Invalid direction:${direction}.`);
@@ -266,11 +290,17 @@ export default CompositeElement({
                             Hf.log(`error`, `EventStreamComposite.filter - Input filter predicate function is invalid.`);
                         } else {
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.filter(predicate).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.filter(predicate).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.filter(predicate).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.filter(predicate).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.filter - Invalid direction:${direction}.`);
@@ -290,11 +320,17 @@ export default CompositeElement({
                             Hf.log(`error`, `EventStreamComposite.map - Input map selector function is invalid.`);
                         } else {
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.select(selector).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.select(selector).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.select(selector).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.select(selector).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.map - Invalid direction:${direction}.`);
@@ -314,11 +350,17 @@ export default CompositeElement({
                             Hf.log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
                         } else {
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.selectMany(selector).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.selectMany(selector).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.selectMany(selector).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.selectMany(selector).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.flatMap - Invalid direction:${direction}.`);
@@ -345,11 +387,17 @@ export default CompositeElement({
                                     Hf.log(`error`, `EventStreamComposite.reduce - Payload event Id is invalid.`);
                                 } else {
                                     switch (direction) { // eslint-disable-line
-                                    case `incoming`:
+                                    case INCOMING_DIRECTION:
                                         _incomingStream = _incomingStream.reduce(accumulator, defaultPayload).share();
                                         break;
-                                    case `outgoing`:
+                                    case OUTGOING_DIRECTION:
                                         _outgoingStream = _outgoingStream.reduce(accumulator, defaultPayload).share();
+                                        break;
+                                    case DIVERTED_INCOMING_DIRECTION:
+                                        _divertedIncomingStream = _divertedIncomingStream.reduce(accumulator, defaultPayload).share();
+                                        break;
+                                    case DIVERTED_OUTGOING_DIRECTION:
+                                        _divertedOutgoingStream = _divertedOutgoingStream.reduce(accumulator, defaultPayload).share();
                                         break;
                                     default:
                                         Hf.log(`error`, `EventStreamComposite.reduce - Invalid direction:${direction}.`);
@@ -357,11 +405,17 @@ export default CompositeElement({
                                 }
                             } else {
                                 switch (direction) { // eslint-disable-line
-                                case `incoming`:
+                                case INCOMING_DIRECTION:
                                     _incomingStream = _incomingStream.reduce(accumulator).share();
                                     break;
-                                case `outgoing`:
+                                case OUTGOING_DIRECTION:
                                     _outgoingStream = _outgoingStream.reduce(accumulator).share();
+                                    break;
+                                case DIVERTED_INCOMING_DIRECTION:
+                                    _divertedIncomingStream = _divertedIncomingStream.reduce(accumulator).share();
+                                    break;
+                                case DIVERTED_OUTGOING_DIRECTION:
+                                    _divertedOutgoingStream = _divertedOutgoingStream.reduce(accumulator).share();
                                     break;
                                 default:
                                     Hf.log(`error`, `EventStreamComposite.reduce - Invalid direction:${direction}.`);
@@ -385,14 +439,26 @@ export default CompositeElement({
                             Hf.log(`error`, `EventStreamComposite.transduce - Input filter predicate function is invalid.`);
                         } else {
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.transduce(Transducer.comp(
                                     Transducer.map(selector),
                                     Transducer.filter(predicate)
                                 )).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.transduce(Transducer.comp(
+                                    Transducer.map(selector),
+                                    Transducer.filter(predicate)
+                                )).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.transduce(Transducer.comp(
+                                    Transducer.map(selector),
+                                    Transducer.filter(predicate)
+                                )).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.transduce(Transducer.comp(
                                     Transducer.map(selector),
                                     Transducer.filter(predicate)
                                 )).share();
@@ -422,11 +488,17 @@ export default CompositeElement({
                             return true;
                         })) {
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.startWith(...payloads).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.startWith(...payloads).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.startWith(...payloads).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.startWith(...payloads).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.startWith - Invalid direction:${direction}.`);
@@ -446,11 +518,17 @@ export default CompositeElement({
                             Hf.log(`error`, `EventStreamComposite.takeLast - Input count number is invalid.`);
                         } else {
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.takeLast(count).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.takeLast(count).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.takeLast(count).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.takeLast(count).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.takeLast - Invalid direction:${direction}.`);
@@ -475,11 +553,17 @@ export default CompositeElement({
                             }
 
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.throttle(ms).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.throttle(ms).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.throttle(ms).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.throttle(ms).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.throttle - Invalid direction:${direction}.`);
@@ -505,11 +589,17 @@ export default CompositeElement({
                             }
 
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.bufferWithTimeOrCount(ms, count).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.bufferWithTimeOrCount(ms, count).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.bufferWithTimeOrCount(ms, count).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.bufferWithTimeOrCount(ms, count).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.backPressure - Invalid direction:${direction}.`);
@@ -539,11 +629,17 @@ export default CompositeElement({
                             }
 
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.timeout - Invalid direction:${direction}.`);
@@ -596,17 +692,79 @@ export default CompositeElement({
                                 logOnComplete
                             );
                             switch (direction) { // eslint-disable-line
-                            case `incoming`:
+                            case INCOMING_DIRECTION:
                                 _incomingStream = _incomingStream.tap(sideObserver).share();
                                 break;
-                            case `outgoing`:
+                            case OUTGOING_DIRECTION:
                                 _outgoingStream = _outgoingStream.tap(sideObserver).share();
+                                break;
+                            case DIVERTED_INCOMING_DIRECTION:
+                                _divertedIncomingStream = _divertedIncomingStream.tap(sideObserver).share();
+                                break;
+                            case DIVERTED_OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _divertedOutgoingStream.tap(sideObserver).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.monitor - Invalid direction:${direction}.`);
                             }
                         }
                         return operator;
+                    },
+                    recombine: function recombine () {
+                        switch (direction) { // eslint-disable-line
+                        case DIVERTED_INCOMING_DIRECTION:
+                            _incomingStream = _incomingStream.merge(_divertedIncomingStream).share();
+                            break;
+                        case DIVERTED_OUTGOING_DIRECTION:
+                            _outgoingStream = _outgoingStream.merge(_divertedOutgoingStream).share();
+                            break;
+                        default:
+                            Hf.log(`warn1`, `EventStreamComposite.recombine - Cannot recombine non diverted direction:${direction}.`);
+                        }
+                    },
+                    /**
+                     * @description - At observable stream, operates a diversion on the entire stream.
+                     *
+                     * @method divert
+                     * @param {array} eventIds
+                     * @return {object}
+                     */
+                    divert: function divert (...eventIds) {
+                        if (Hf.isEmpty(eventIds)) {
+                            Hf.log(`error`, `EventStreamComposite.divert - Factory:${factory.name} input eventId array is empty.`);
+                        } else if (eventIds.some((eventId) => !Hf.isString(eventId) || Hf.isEmpty(eventId))) {
+                            Hf.log(`error`, `EventStreamComposite.divert - Factory:${factory.name} input event Id is invalid.`);
+                        } else {
+                            switch (direction) { // eslint-disable-line
+                            case INCOMING_DIRECTION:
+                                _divertedIncomingStream = _incomingStream.filter((payload) => {
+                                    return eventIds.some((eventId) => eventId === payload.eventId);
+                                }).scan((payloads, payload) => {
+                                    payloads.push(payload);
+                                    return payloads;
+                                }, []).flatMap((payload) => payload);
+                                _incomingStream = _incomingStream.filter((payload) => {
+                                    return eventIds.some((eventId) => eventId !== payload.eventId);
+                                }).share();
+                                return _createStreamOperatorFor.call(factory, DIVERTED_INCOMING_DIRECTION);
+                            case OUTGOING_DIRECTION:
+                                _divertedOutgoingStream = _outgoingStream.filter((payload) => {
+                                    return eventIds.some((eventId) => eventId === payload.eventId);
+                                }).scan((payloads, payload) => {
+                                    payloads.push(payload);
+                                    return payloads;
+                                }, []).flatMap((payload) => payload);
+                                _outgoingStream = _outgoingStream.filter((payload) => {
+                                    return eventIds.some((eventId) => eventId !== payload.eventId);
+                                }).share();
+                                return _createStreamOperatorFor.call(factory, DIVERTED_OUTGOING_DIRECTION);
+                            case `diversion`:
+                                Hf.log(`error`, `EventStreamComposite.divert - Cannot divert a diverted stream.`);
+                                break;
+                            default:
+                                Hf.log(`error`, `EventStreamComposite.divert - Invalid direction:${direction}.`);
+                            }
+                        }
                     }
                 };
                 return operator;
@@ -919,7 +1077,7 @@ export default CompositeElement({
                          * @method incoming.await
                          * @return {object}
                          */
-                        await: function await () {
+                        await: function _await () {
                             if (eventIds.length > 1) {
                                 let sideSubscription;
                                 const awaitedEventId = eventIds.reduce((_awaitedEventId, eventId) => {
@@ -1140,7 +1298,7 @@ export default CompositeElement({
 
                 if (!_incomingStreamActivated) {
                     /* first do operations on the incoming event stream */
-                    factory.operateIncomingStream(_createStreamOperatorFor(`incoming`));
+                    factory.operateIncomingStream(_createStreamOperatorFor.call(factory, INCOMING_DIRECTION));
                     /* then do incoming event stream subscriptions */
                     if (enableBuffering) {
                         _incomingSubscription = _incomingStream.bufferWithTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
@@ -1185,7 +1343,7 @@ export default CompositeElement({
 
                 if (!_outgoingStreamActivated) {
                     /* first do operations on the outgoing event stream */
-                    factory.operateOutgoingStream(_createStreamOperatorFor(`outgoing`));
+                    factory.operateOutgoingStream(_createStreamOperatorFor.call(factory, OUTGOING_DIRECTION));
                     /* then do outgoing event stream subscriptions */
                     if (enableBuffering) {
                         _outgoingSubscription = _outgoingStream.bufferWithTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
@@ -1271,7 +1429,7 @@ export default CompositeElement({
                     }).concat([
                         _incomingStream
                     ]));
-                    return _createStreamOperatorFor(`incoming`);
+                    return _createStreamOperatorFor.call(factory, INCOMING_DIRECTION);
                 }
             };
         }
