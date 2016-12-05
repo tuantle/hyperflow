@@ -219,7 +219,7 @@ export function runTests () {
                 b: `b`
             }
         };
-        const results = common.collect(obj, `data1.a`, `data2.a`, `data3.a`);
+        const results = common.collect(`data1.a`, `data2.a`, `data3.a`).from(obj);
         assert.equal(results.length, 3);
         assert.equal(results[1], `a`);
         assert.end();

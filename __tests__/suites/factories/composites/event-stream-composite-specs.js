@@ -48,16 +48,23 @@ const factoryA = Factory.augment({
     state: {
         name: `factoryA`
     },
-    operateIncomingStream: function operateIncomingStream (operator) {
-        operator.divert(`event1`, `event2`).monitor({
-            logOnNext: (payload) => console.log(`Monitor factory A incoming event stream id:${payload.eventId} -- ${payload.value}`)
+    // operateIncomingStream: function operateIncomingStream (operator) {
+    //     operator.divert(`event1`, `event2`).monitor({
+    //         logOnNext: (payload) => console.log(`Monitor factory A incoming event stream id:${payload.eventId} -- ${payload.value}`)
+    //     }).recombine();
+    // },
+    operateOutgoingStream: function operateOutgoingStream (operator) {
+        operator.divert(`event3`).map((payload) => {
+            return {
+                eventId: `event3`,
+                value: payload.value[0] + payload.value[1]
+            };
+        }).monitor({
+            logOnNext: (payload) => {
+                console.log(`Monitor factory A outgoing event stream id:${payload.eventId} -- ${payload.value}`);
+            }
         }).recombine();
     },
-    // operateOutgoingStream: function operateOutgoingStream (operator) {
-    //     operator.monitor({
-    //         logOnNext: (payload) => console.log(`Monitor factory A outgoing event stream -- ${payload.value}`)
-    //     });
-    // },
     setup: function setup (done) {
         const factory = this;
         factory.incoming(
@@ -112,6 +119,16 @@ const factoryD = Factory.augment({
     state: {
         name: `factoryD`
     },
+    // operateIncomingStream: function operateIncomingStream (operator) {
+    //     operator.divert(`event3`).map((payload) => {
+    //         return {
+    //             eventId: `event3`,
+    //             value: payload.value[0] + payload.value[1]
+    //         };
+    //     }).monitor({
+    //         logOnNext: (payload) => console.log(`Monitor factory D incoming event stream id:${payload.eventId} -- ${payload.value}`)
+    //     }).recombine();
+    // },
     setup: function setup (done) {
         const factory = this;
         factory.incoming(`event3`).handle((results) => {
@@ -132,18 +149,19 @@ export function runTests () {
     factoryA.connectStream(factoryC);
     factoryA.connectStream(factoryD, true);
 
-    factoryA.activateIncomingStream();
     factoryA.setup(() => {
-        factoryD.activateIncomingStream();
+        factoryA.activateOutgoingStream();
         factoryD.setup(() => {
             factoryD.activateOutgoingStream();
         });
+        factoryD.activateIncomingStream();
         factoryB.setup(() => {
             factoryB.activateOutgoingStream();
         });
         factoryC.setup(() => {
             factoryC.activateOutgoingStream();
         });
-        factoryA.activateOutgoingStream();
     });
+    factoryA.activateIncomingStream();
+
 }

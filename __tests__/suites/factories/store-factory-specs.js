@@ -20,17 +20,40 @@ export function runTests () {
             composites: [
                 StateTimeTraversalComposite
             ],
+            static: {
+                fixed: {
+                    a: {
+                        x: 1
+                    },
+                    b: 2
+                }
+            },
             state: {
+                really: {
+                    value: `nope`,
+                    stronglyTyped: true
+                },
+                test: {
+                    value: {
+                        a: 1,
+                        b: 2
+                    },
+                    stronglyTyped: true
+                },
                 catalog: {
                     value: {
                         data: null,
+                        gameCount: 0,
+                        gameIndex: [ 1, 2, 3 ],
                         platformGroups: null
                     },
                     stronglyTyped: true
                 }
             }
         });
-        const store = TestStore();
+        const store = TestStore({
+            name: `test-store`
+        });
         let mutated = false;
 
         store.reconfig({
@@ -56,28 +79,66 @@ export function runTests () {
             }
         });
 
-        // console.log(JSON.stringify(store.catalog, null, `\t`));
-
-        store.reconfigAtPath({
-            games: {
-                x: {
-                    id: 95
-                }
-            }
-        }, `catalog.platformGroups.0`);
-
-        store.reconfigAtPath({
-            games: {
-                x: {
-                    id: 95
+        store.reconfig({
+            catalog: {
+                data: {
+                    a: [ 1, 2, 3 ],
+                    b: {
+                        x: 1,
+                        y: 2,
+                        z: 3
+                    }
                 },
-                y: {
-                    id: 105
-                }
+                platformGroups: [
+                    {
+                        ids: [
+                            {
+                                id: 1
+                            }
+                        ],
+                        games: {
+                            x: {
+                                id: 95
+                            },
+                            z: {
+                                id: 78
+                            }
+                        }
+                    }
+                ]
             }
-        }, `catalog.platformGroups.0`);
+        });
+        store.reconfig({
+            catalog: {
+                data: {
+                    a: [ 1, 2, 3 ],
+                    b: {
+                        x: 1,
+                        y: 2,
+                        z: 3
+                    }
+                },
+                platformGroups: [
+                    {
+                        ids: [
+                            {
+                                id: 1
+                            }
+                        ],
+                        games: {
+                            x: {
+                                id: 95
+                            },
+                            y: {
+                                id: 78
+                            }
+                        }
+                    }
+                ]
+            }
+        });
 
-        console.log(JSON.stringify(store.catalog, null, `\t`));
+        // store.timeTraverse(`catalog`, -1);
 
         // mutated = store.reduce({
         //     catalog: {
@@ -87,9 +148,6 @@ export function runTests () {
         //                 ids: [
         //                     {
         //                         id: 10
-        //                     },
-        //                     {
-        //                         id: 20
         //                     }
         //                 ]
         //             }
@@ -104,15 +162,26 @@ export function runTests () {
         //             {
         //                 games: {
         //                     x: {
-        //                         id: 95
+        //                         id: 915
         //                     }
         //                 }
         //             }
         //         ]
         //     }
         // });
-        // console.log(mutated);
-        console.log(JSON.stringify(store.getStateCursor().recallAllContentItems(`catalog`), null, `\t`));
+
+        mutated = store.reduce({
+            really: {
+                a: 123
+            }
+        });
+
+        console.log(mutated);
+
+        store.fixed.a.x = 123;
+
+        // console.log(JSON.stringify(store.recallAll(`test`), null, `\t`));
+        console.log(JSON.stringify(store, null, `\t`));
         assert.end();
     });
 }
