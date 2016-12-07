@@ -61,37 +61,14 @@ export default CompositeElement({
                     outgoing: `function`,
                     resetState: `function`,
                     reduceState: `function`,
-                    reduceStateAtPath: `function`,
                     reconfigState: `function`,
-                    reconfigStateAtPath: `function`,
-                    getStateAsObject: `function`,
-                    updateStateAccessor: `function`
+                    getStateAsObject: `function`
                 }).of(factory) || !(factory.fId.substr(0, SERVICE_FACTORY_CODE.length) === SERVICE_FACTORY_CODE ||
                                     factory.fId.substr(0, STORE_FACTORY_CODE.length) === STORE_FACTORY_CODE)) {
                     Hf.log(`error`, `StateMutationComposite.$init - Factory is invalid. Cannot apply composite.`);
                 }
             }
         },
-        /**
-         * @description - Pretend state has mutated and send out a force state mutation event.
-         *
-         * @method forceMutationEvent
-         * @return void
-         */
-        // TODO: remove if find no use case.
-        // forceMutationEvent: function forceMutationEvent () {
-        //     const factory = this;
-        //     const newState = Hf.mix(factory.getStateAsObject(), {
-        //         exclusion: {
-        //             keys: [
-        //                 `name`,
-        //                 `fId`
-        //             ]
-        //         }
-        //     }).with({});
-        //     factory.outgoing(`as-state-mutated`).emit(() => newState);
-        //     factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
-        // },
         /**
          * @description - Reset state to initial default.
          *
@@ -118,11 +95,20 @@ export default CompositeElement({
          *
          * @method reduce
          * @param {object|function} reducer
+         * @param {object} option
          * @return {boolean}
          */
-        reduce: function reduce (reducer) {
+        reduce: function reduce (reducer, option = {}) {
             const factory = this;
-            let mutated = false;
+            const {
+                forceMutationEvent,
+                suppressMutationEvent,
+                mutationEventDelayInMS
+            } = Hf.fallback({
+                forceMutationEvent: false,
+                suppressMutationEvent: false,
+                mutationEventDelayInMS: 0
+            }).of(option);
             const currentState = Hf.mix(factory.getStateAsObject(), {
                 exclusion: {
                     keys: [
@@ -131,15 +117,15 @@ export default CompositeElement({
                     ]
                 }
             }).with({});
+            let mutated = false;
 
             if (Hf.isFunction(reducer)) {
                 mutated = factory.reduceState(reducer(currentState));
             } else if (Hf.isObject(reducer)) {
                 mutated = factory.reduceState(reducer);
             }
-            if (mutated) {
-                factory.updateStateAccessor();
 
+            if (forceMutationEvent || (mutated && !suppressMutationEvent)) {
                 const newState = Hf.mix(factory.getStateAsObject(), {
                     exclusion: {
                         keys: [
@@ -149,8 +135,13 @@ export default CompositeElement({
                     }
                 }).with({});
                 /* emitting a mutation event to interface */
-                factory.outgoing(`as-state-mutated`).emit(() => newState);
-                factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
+                if (mutationEventDelayInMS > 0) {
+                    factory.outgoing(`as-state-mutated`).delay(mutationEventDelayInMS).emit(() => newState);
+                    factory.outgoing(`do-sync-reflected-state`).delay(mutationEventDelayInMS).emit(() => newState);
+                } else {
+                    factory.outgoing(`as-state-mutated`).emit(() => newState);
+                    factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
+                }
             }
             return mutated;
         },
@@ -159,10 +150,18 @@ export default CompositeElement({
          *
          * @method reconfig
          * @param {object|function} reconfiguration
+         * @param {object} option
          * @return void
          */
-        reconfig: function reconfig (reconfiguration) {
+        reconfig: function reconfig (reconfiguration, option = {}) {
             const factory = this;
+            const {
+                suppressMutationEvent,
+                mutationEventDelayInMS
+            } = Hf.fallback({
+                suppressMutationEvent: false,
+                mutationEventDelayInMS: 0
+            }).of(option);
             const currentState = Hf.mix(factory.getStateAsObject(), {
                 exclusion: {
                     keys: [
@@ -177,97 +176,8 @@ export default CompositeElement({
             } else if (Hf.isObject(reconfiguration)) {
                 factory.reconfigState(reconfiguration);
             }
-            factory.updateStateAccessor();
 
-            const newState = Hf.mix(factory.getStateAsObject(), {
-                exclusion: {
-                    keys: [
-                        `name`,
-                        `fId`
-                    ]
-                }
-            }).with({});
-            /* emitting a mutation event to interface */
-            factory.outgoing(`as-state-mutated`).emit(() => newState);
-            factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
-        },
-        /**
-         * @description -  Reduce and update state on state change/mutation at pathId.
-         *
-         * @method reduceAtPath
-         * @param {object|function} reducer
-         * @param {string|array} pathId - Path of the state property to reduce.
-         * @return {boolean}
-         */
-        reduceAtPath: function reduceAtPath (reducer, pathId) {
-            const factory = this;
-            pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!Hf.isNonEmptyArray(pathId)) {
-                Hf.log(`error`, `StateMutationComposite.reduceAtPath - Input pathId is invalid.`);
-            } else {
-                let mutated = false;
-                const currentState = Hf.mix(factory.getStateAsObject(), {
-                    exclusion: {
-                        keys: [
-                            `name`,
-                            `fId`
-                        ]
-                    }
-                }).with({});
-
-                if (Hf.isFunction(reducer)) {
-                    mutated = factory.reduceStateAtPath(reducer(currentState), pathId);
-                } else if (Hf.isObject(reducer)) {
-                    mutated = factory.reduceStateAtPath(reducer, pathId);
-                }
-                if (mutated) {
-                    factory.updateStateAccessor();
-
-                    const newState = Hf.mix(factory.getStateAsObject(), {
-                        exclusion: {
-                            keys: [
-                                `name`,
-                                `fId`
-                            ]
-                        }
-                    }).with({});
-                    /* emitting a mutation event to interface */
-                    factory.outgoing(`as-state-mutated`).emit(() => newState);
-                    factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
-                }
-                return mutated;
-            }
-        },
-        /**
-         * @description -  Reconfig and update state at pathId.
-         *
-         * @method reconfigAtPath
-         * @param {object|function} reconfiguration
-         * @param {string|array} pathId - Path of the state property to reconfig.
-         * @return void
-         */
-        reconfigAtPath: function reconfigAtPath (reconfiguration, pathId) {
-            const factory = this;
-            pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!Hf.isNonEmptyArray(pathId)) {
-                Hf.log(`error`, `StateMutationComposite.reconfigAtPath - Input pathId is invalid.`);
-            } else {
-                const currentState = Hf.mix(factory.getStateAsObject(), {
-                    exclusion: {
-                        keys: [
-                            `name`,
-                            `fId`
-                        ]
-                    }
-                }).with({});
-
-                if (Hf.isFunction(reconfiguration)) {
-                    factory.reconfigStateAtPath(reconfiguration(currentState), pathId);
-                } else if (Hf.isObject(reconfiguration)) {
-                    factory.reconfigStateAtPath(reconfiguration, pathId);
-                }
-                factory.updateStateAccessor();
-
+            if (!suppressMutationEvent) {
                 const newState = Hf.mix(factory.getStateAsObject(), {
                     exclusion: {
                         keys: [
@@ -276,9 +186,15 @@ export default CompositeElement({
                         ]
                     }
                 }).with({});
+
                 /* emitting a mutation event to interface */
-                factory.outgoing(`as-state-mutated`).emit(() => newState);
-                factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
+                if (mutationEventDelayInMS > 0) {
+                    factory.outgoing(`as-state-mutated`).delay(mutationEventDelayInMS).emit(() => newState);
+                    factory.outgoing(`do-sync-reflected-state`).delay(mutationEventDelayInMS).emit(() => newState);
+                } else {
+                    factory.outgoing(`as-state-mutated`).emit(() => newState);
+                    factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
+                }
             }
         }
     }
