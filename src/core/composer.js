@@ -77,22 +77,23 @@ const ComposerPrototype = Object.create({}).prototype = {
         if (Hf.isObject(definition)) {
             const composer = this;
             if (!Hf.isSchema({
-                // TODO: Add static for state that will not be modify and is not a DataElement.
-                // static: `object|undefined`,
+                static: `object|undefined`,
                 state: `object|undefined`,
                 composites: `array|undefined`
             }).of(definition)) {
                 Hf.log(`error`, `Composer.augment - Input factory definition for state object or composites array is invalid.`);
             } else {
                 const {
+                    static: _static,
                     state,
                     composites
                 } = Hf.fallback({
+                    constant: {},
                     state: {},
                     composites: []
                 }).of(definition);
                 /* collect and set method if defined */
-                const method = Object.keys(definition).filter((fnName) => {
+                const methodDefinition = Object.keys(definition).filter((fnName) => {
                     const fn = definition[fnName];
                     return Hf.isFunction(fn);
                 }).reduce((_method, fnName) => {
@@ -101,27 +102,43 @@ const ComposerPrototype = Object.create({}).prototype = {
                     return _method;
                 }, {});
                 let factory;
-                let factoryState;
+                let initialStatic;
+                let initialState;
+
+                /* set constant definition if defined and then resolve the composite into a factory */
+                if (!Hf.isEmpty(_static)) {
+                    if (Object.keys(_static).every((key) => {
+                        if (composer._static.hasOwnProperty(key)) {
+                            Hf.log(`warn1`, `Composer.augment - Cannot redefine factory statiC key:${key}.`);
+                            return false;
+                        }
+                        return true;
+                    })) {
+                        initialStatic = Hf.merge(composer._static).with(_static);
+                    }
+                } else {
+                    initialStatic = composer._static;
+                }
 
                 /* set state definition if defined and then resolve the composite into a factory */
                 if (!Hf.isEmpty(state)) {
                     if (Object.keys(state).every((key) => {
                         if (composer._state.hasOwnProperty(key)) {
-                            Hf.log(`error`, `Composer.augment - Cannot redefine factory state key:${key}.`);
+                            Hf.log(`warn1`, `Composer.augment - Cannot redefine factory state key:${key}.`);
                             return false;
                         }
                         return true;
                     })) {
-                        factoryState = Hf.merge(composer._state).with(state);
+                        initialState = Hf.merge(composer._state).with(state);
                     }
                 } else {
-                    factoryState = composer._state;
+                    initialState = composer._state;
                 }
 
                 if (!Hf.isEmpty(composites)) {
-                    factory = composer._composite.compose(...composites).mixin(method).resolve(factoryState);
+                    factory = composer._composite.compose(...composites).mixin(methodDefinition).resolve(initialStatic, initialState);
                 } else {
-                    factory = composer._composite.mixin(method).resolve(factoryState);
+                    factory = composer._composite.mixin(methodDefinition).resolve(initialStatic, initialState);
                 }
 
                 if (!Hf.isFunction(factory)) {
@@ -146,16 +163,19 @@ const ComposerPrototype = Object.create({}).prototype = {
 export default function Composer (definition) {
     if (Hf.isObject(definition)) {
         if (!Hf.isSchema({
+            static: `object|undefined`,
             state: `object|undefined`,
             composites: `array|undefined`
         }).of(definition)) {
             Hf.log(`error`, `Composer - Input factory definition for state object or composites array is invalid.`);
         } else {
             const {
+                static: _static,
                 state,
                 exclusion,
                 composites
             } = Hf.fallback({
+                static: {},
                 state: {},
                 exclusion: {},
                 composites: []
@@ -166,7 +186,7 @@ export default function Composer (definition) {
             };
 
             compositeDefinition.enclosure = Object.keys(definition).filter((key) => {
-                return key !== `state` && key !== `composites` && Hf.isFunction(definition[key]);
+                return key !== `static` && key !== `state` && key !== `composites` && Hf.isFunction(definition[key]);
             }).reduce((_enclosure, key) => {
                 _enclosure[key] = definition[key];
                 return _enclosure;
@@ -176,6 +196,12 @@ export default function Composer (definition) {
                 Hf.log(`error`, `Composer - Input enclose function is invalid.`);
             } else {
                 const composer = Object.create(ComposerPrototype, {
+                    _static: {
+                        value: _static,
+                        writable: false,
+                        configurable: false,
+                        enumerable: false
+                    },
                     _state: {
                         value: state,
                         writable: false,
