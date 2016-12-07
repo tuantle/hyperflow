@@ -47,11 +47,9 @@ const Hf = CommonElement();
 const SLOW_MODE_BUFFER_TIME_SPAN_IN_MS = 450;
 const SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS = 450;
 
-/* delay all data stream from store by 1ms as default */
-const DELAY_STORE_IN_MS = 1;
-
-/* delay all data stream from service by 5ms as default */
-const DELAY_SERVICE_IN_MS = 5;
+/* delay all data stream from service by 2ms as default */
+// FIXME: needs to know why this delay is needed!
+const DELAY_SERVICE_IN_MS = 2;
 
 /**
  * @description - A domain factory module.
@@ -182,7 +180,7 @@ export default Composer({
                     } else if (!serviceNames.every((name) => _services.hasOwnProperty(name))) {
                         Hf.log(`error`, `DomainFactory.getServices - Service is not found.`);
                     } else {
-                        services = services.concat(Hf.collect(_services, ...serviceNames));
+                        services = services.concat(Hf.collect(...serviceNames).from(_services));
                     }
                 } else {
                     services = _services;
@@ -261,7 +259,7 @@ export default Composer({
                         } else {
                             _store = store;
                             /* setup event stream observation duplex between domain and store */
-                            domain.observe(_store).delay(DELAY_STORE_IN_MS);
+                            domain.observe(_store);
                             _store.observe(domain);
                             Hf.log(`info`, `Domain:${domain.name} registered store:${store.name}.`);
                         }
@@ -398,55 +396,25 @@ export default Composer({
             let bufferTimeSpan = SLOW_MODE_BUFFER_TIME_SPAN_IN_MS;
             let bufferTimeShift = SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS;
 
-            // FIXME: Need to rethink the start up sequence as delay is needed after domain observes services or store.
             if (!Hf.isFunction(done)) {
                 Hf.log(`error`, `DomainFactory.start - Input done function is invalid.`);
             } else {
                 if (!_started) {
-                    domain.activateIncomingStream({
-                        enableBuffering: enableSlowRunMode,
-                        bufferTimeSpan,
-                        bufferTimeShift
-                    });
                     domain.setup(() => {
-                        /* first start up with child domains... */
-                        if (!Hf.isEmpty(_childDomains)) {
-                            _childDomains.forEach((childDomain) => childDomain.start(option, () => {
-                                Hf.log(`info`, `Child domain:${childDomain.name} has started.`);
-                            }));
-                        }
-                        /* then peer domains... */
-                        if (!Hf.isEmpty(_peerDomains)) {
-                            _peerDomains.forEach((peerDomain) => peerDomain.start(option, () => {
-                                Hf.log(`info`, `Peer domain:${peerDomain.name} has started.`);
-                            }));
-                        }
-                        /* then services... */
-                        if (!Hf.isEmpty(_services)) {
-                            _services.forEach((service) => {
-                                service.activateIncomingStream({
+                        /* first activate parent domain incoming stream */
+                        domain.activateIncomingStream({
+                            enableBuffering: enableSlowRunMode,
+                            bufferTimeSpan,
+                            bufferTimeShift
+                        });
+                        /* then activate store... */
+                        if (Hf.isObject(_store)) {
+                            _store.setup(() => {
+                                _store.activateIncomingStream({
                                     enableBuffering: enableSlowRunMode,
                                     bufferTimeSpan,
                                     bufferTimeShift
                                 });
-                                service.setup(() => {
-                                    service.activateOutgoingStream({
-                                        enableBuffering: enableSlowRunMode,
-                                        bufferTimeSpan,
-                                        bufferTimeShift
-                                    });
-                                    Hf.log(`info`, `Domain:${domain.name} activated service:${service.name}.`);
-                                });
-                            });
-                        }
-                        /* then store... */
-                        if (Hf.isObject(_store)) {
-                            _store.activateIncomingStream({
-                                enableBuffering: enableSlowRunMode,
-                                bufferTimeSpan,
-                                bufferTimeShift
-                            });
-                            _store.setup(() => {
                                 _store.activateOutgoingStream({
                                     enableBuffering: enableSlowRunMode,
                                     bufferTimeSpan,
@@ -455,18 +423,18 @@ export default Composer({
                                 Hf.log(`info`, `Domain:${domain.name} activated store:${_store.name}.`);
                             });
                         }
-                        /* then with parent to child interfaces... */
+                        /* then activate parent to child interfaces... */
                         if (Hf.isObject(_intf)) {
                             /* helper function to activate all child interfaces event stream */
                             const deepInterfaceActivateStream = function deepInterfaceActivateStream (intf) {
                                 if (Hf.isObject(intf)) {
-                                    intf.activateIncomingStream({
-                                        enableBuffering: enableSlowRunMode,
-                                        bufferTimeSpan,
-                                        bufferTimeShift
-                                    });
                                     intf.setup(() => {
                                         intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceActivateStream(compositeIntf));
+                                        intf.activateIncomingStream({
+                                            enableBuffering: enableSlowRunMode,
+                                            bufferTimeSpan,
+                                            bufferTimeShift
+                                        });
                                         intf.activateOutgoingStream({
                                             enableBuffering: enableSlowRunMode,
                                             bufferTimeSpan,
@@ -482,7 +450,39 @@ export default Composer({
                         } else {
                             Hf.log(`warn0`, `DomainFactory.start - Domain:${domain.name} is not registered with an interface.`);
                         }
-                        /* then finally parent domain. */
+                        /* then activate services... */
+                        if (!Hf.isEmpty(_services)) {
+                            _services.forEach((service) => {
+                                service.setup(() => {
+                                    service.activateIncomingStream({
+                                        enableBuffering: enableSlowRunMode,
+                                        bufferTimeSpan,
+                                        bufferTimeShift
+                                    });
+                                    service.activateOutgoingStream({
+                                        enableBuffering: enableSlowRunMode,
+                                        bufferTimeSpan,
+                                        bufferTimeShift
+                                    });
+                                    Hf.log(`info`, `Domain:${domain.name} activated service:${service.name}.`);
+                                });
+                            });
+                        }
+
+                        /*  then activate child domains... */
+                        if (!Hf.isEmpty(_childDomains)) {
+                            _childDomains.forEach((childDomain) => childDomain.start(option, () => {
+                                Hf.log(`info`, `Child domain:${childDomain.name} has started.`);
+                            }));
+                        }
+                        /* then activate peer domains... */
+                        if (!Hf.isEmpty(_peerDomains)) {
+                            _peerDomains.forEach((peerDomain) => peerDomain.start(option, () => {
+                                Hf.log(`info`, `Peer domain:${peerDomain.name} has started.`);
+                            }));
+                        }
+
+                        /* then finally activate peer domains... */
                         domain.activateOutgoingStream({
                             enableBuffering: enableSlowRunMode,
                             bufferTimeSpan,
