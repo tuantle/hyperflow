@@ -251,14 +251,14 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @description - At cursor, get data item accessor.
      *
      * @method getAccessor
-     * @param {boolean} skipNonmutationReferals
+     * @param {object} option
      * @return {object}
      */
-    getAccessor: function getAccessor (skipNonmutationReferals = false) {
+    getAccessor: function getAccessor (option = {}) {
         const cursor = this;
         const data = cursor._data;
 
-        return data._getAccessor(cursor._pathId, skipNonmutationReferals);
+        return data._getAccessor(cursor._pathId, option);
     },
     /**
      * @description - At cursor, get data type of content.
