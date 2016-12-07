@@ -128,28 +128,47 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         mutatorKeys.forEach((key) => {
                             const sourceItem = source[key];
                             const mutatorItem = mutator[key];
-                            if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
-                                result[key] = common._deepMutation(sourceItem, mutatorItem);
+
+                            if ((common.isObject(sourceItem) && !common.isObject(mutatorItem) || common.isArray(sourceItem) && !common.isArray(mutatorItem)) ||
+                                (!common.isObject(sourceItem) && common.isObject(mutatorItem) || !common.isArray(sourceItem) && common.isArray(mutatorItem))) {
+                                common.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
+                                common.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
+                                common.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
                             } else {
-                                result[key] = mutatorItem;
+                                if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
+                                    result[key] = common._deepMutation(sourceItem, mutatorItem);
+                                } else {
+                                    result[key] = mutatorItem;
+                                }
                             }
                         });
                     } else {
-                        common.log(`warn1`, `CommonElement._deepMutation - Input mutator object schema is not a subset of the source schema..`);
+                        common.log(`warn1`, `CommonElement._deepMutation - Input mutator object schema is not a subset of the source schema.`);
+                        common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                        common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                     }
                 } else if (common.isArray(source) && common.isArray(mutator)) {
                     result = source.slice(0);
                     if (source.length === mutator.length) {
                         source.forEach((sourceItem, key) => {
                             const mutatorItem = mutator[key];
-                            if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
-                                result[key] = common._deepMutation(sourceItem, mutatorItem);
+                            if ((common.isObject(sourceItem) && !common.isObject(mutatorItem) || common.isArray(sourceItem) && !common.isArray(mutatorItem)) ||
+                                (!common.isObject(sourceItem) && common.isObject(mutatorItem) || !common.isArray(sourceItem) && common.isArray(mutatorItem))) {
+                                common.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
+                                common.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
+                                common.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
                             } else {
-                                result[key] = mutatorItem;
+                                if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
+                                    result[key] = common._deepMutation(sourceItem, mutatorItem);
+                                } else {
+                                    result[key] = mutatorItem;
+                                }
                             }
                         });
                     } else {
                         common.log(`warn1`, `CommonElement._deepMutation - Input mutator array must be the same size as the source array.`);
+                        common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                        common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                     }
                 } else {
                     common.log(`error`, `CommonElement._deepMutation - Input source or target mutator is invalid.`);
@@ -162,7 +181,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         if (common.isObject(mutator) && mutator.hasOwnProperty(key)) {
                             result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
                         } else {
-                            common.log(`warn1`, `CommonElement._deepMutation - Key:${key} of path Id is not defined in mutator.`);
+                            common.log(`warn1`, `CommonElement._deepMutation - Key:${key} of path id:${pathId} is not defined in mutator.`);
+                            common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                            common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                         }
                     } else {
                         result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
@@ -174,6 +195,8 @@ const CommonElementPrototype = Object.create({}).prototype = {
                             result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
                         } else {
                             common.log(`warn1`, `CommonElement._deepMutation - Array index:${key} is greater than mutator array size.`);
+                            common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                            common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                         }
                     } else {
                         result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
@@ -637,23 +660,35 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @description - Collect propteries from an object or array and return those propteries as an array.
      *
      * @method collect
-     * @param {object|array} target
      * @param {array} pathIds
-     * @return {array}
+     * @return {object}
      */
-    collect: function collect (target, ...pathIds) {
+    collect: function collect (...pathIds) {
         const common = this;
 
-        if (!(common.isObject(target) || common.isArray(target))) {
-            common.log(`error`, `CommonElement.collect - Input target is invalid.`);
-        } else if (common.isEmpty(pathIds)) {
-            common.log(`error`, `CommonElement.collect - Input pathId is empty.`);
-        } else if (!pathIds.every((pathId) => common.isString(pathId) || common.isArray(pathId))) {
+        if (!pathIds.every((pathId) => common.isString(pathId) || common.isArray(pathId))) {
             common.log(`error`, `CommonElement.collect - Input pathId is invalid.`);
         } else {
-            return pathIds.map((pathId) => {
-                return common.retrieve(pathId, `.`).from(target);
-            });
+            /**
+             * @description - Collect from a target object.
+             *
+             * @method collect.from
+             * @param {object|array} target
+             * @return {array}
+             */
+            return {
+                from: function from (target) {
+                    if (!(common.isObject(target) || common.isArray(target))) {
+                        common.log(`error`, `CommonElement.collect.from - Input target is invalid.`);
+                    } else if (common.isEmpty(pathIds)) {
+                        return [];
+                    } else {
+                        return pathIds.map((pathId) => {
+                            return common.retrieve(pathId, `.`).from(target);
+                        });
+                    }
+                }
+            };
         }
     },
     /**
@@ -702,6 +737,23 @@ const CommonElementPrototype = Object.create({}).prototype = {
             return Object.isFrozen(source) ? Object.freeze(result) : result;
             // return result;
         }
+    },
+    /**
+     * @description - Deep free a source object or function.
+     *
+     * @method freeze
+     * @param {object|function} source
+     * @return {object}
+     */
+    freeze: function freeze (source) {
+        const common = this;
+
+        if ((common.isObject(source) || common.isFunction(source)) && !Object.isFrozen(source)) {
+            Object.freeze(source);
+            Object.getOwnPropertyNames(source).forEach((key) => common.freeze(source[key]));
+        }
+
+        return source;
     },
     /**
      * @description - Mutate and return an object of source that was mutated by the reference target mutator object.
@@ -1144,6 +1196,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} context - Object to become context (`this`) for the iterator function.
      * @returns void
      */
+    // TODO: remove if not being used.
     forEach: function forEach (value, iterator, context) {
         const common = this;
 
@@ -1370,6 +1423,7 @@ export default function CommonElement ({
     enableWarn0Log = false,
     enableWarn1Log = true
 } = {}) {
+    enableProductionMode = CommonElementPrototype.isBoolean(enableProductionMode) ? enableProductionMode : true;
     enableInfoLog = CommonElementPrototype.isBoolean(enableInfoLog) ? enableInfoLog : true;
     enableWarn0Log = CommonElementPrototype.isBoolean(enableWarn0Log) ? enableWarn0Log : true;
     enableWarn1Log = CommonElementPrototype.isBoolean(enableWarn1Log) ? enableWarn1Log : true;
