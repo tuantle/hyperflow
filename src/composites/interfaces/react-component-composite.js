@@ -304,7 +304,8 @@ export default CompositeElement({
                                 ReactPureDefinition: function ReactPureDefinition () {
                                     /* set react property type checking */
                                     this.propTypes = (() => {
-                                        let _propTypes = Object.keys(defaultProperty).reduce((propType, key) => {
+                                        const defaultPropertyKeys = Object.keys(defaultProperty);
+                                        let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
                                             if (stateCursor.isItemStronglyTyped(key)) {
                                                 const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
                                                 if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
@@ -318,7 +319,7 @@ export default CompositeElement({
                                             return propType;
                                         }, {});
 
-                                        return Object.keys(defaultProperty).reduce((propType, key) => {
+                                        return defaultPropertyKeys.reduce((propType, key) => {
                                             if (stateCursor.isItemOneOfValues(key)) {
                                                 const {
                                                     condition: types
@@ -407,7 +408,8 @@ export default CompositeElement({
                             ReactDefinition: function ReactDefinition () {
                                 /* set react property type checking */
                                 this.propTypes = (() => {
-                                    let _propTypes = Object.keys(defaultProperty).reduce((propType, key) => {
+                                    const defaultPropertyKeys = Object.keys(defaultProperty);
+                                    let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
                                         if (stateCursor.isItemStronglyTyped(key)) {
                                             const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
                                             if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
@@ -421,7 +423,7 @@ export default CompositeElement({
                                         return propType;
                                     }, {});
 
-                                    return Object.keys(defaultProperty).reduce((propType, key) => {
+                                    return defaultPropertyKeys.reduce((propType, key) => {
                                         if (stateCursor.isItemOneOfValues(key)) {
                                             const {
                                                 condition: types
@@ -484,6 +486,16 @@ export default CompositeElement({
 
                                     _mountStage = WILL_MOUNT_STAGE;
 
+                                    if (!stateless) {
+                                        /* this event is call ONLY when the state did mutate in store */
+                                        intf.incoming(`as-state-mutated`).handle((reflectedState) => {
+                                            if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
+                                                component.setState(reflectedState);
+                                                _mutationOccurred = true;
+                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                            }
+                                        });
+                                    }
                                     /* needs to sync up interface state and component props before mounting.
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
                                     if (intf.reduceState(Hf.fallback(defaultProperty).of(component.props))) {
@@ -523,23 +535,6 @@ export default CompositeElement({
 
                                     _mountStage = DID_MOUNT_STAGE;
 
-                                    if (!stateless) {
-                                        /* this event is call ONLY when the state did mutate in store */
-                                        intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                            // if (Hf.isObject(reflectedState) && !(_mountStage === WILL_MOUNT_STAGE || _mountStage === WILL_UNMOUNT_STAGE)) {
-                                                component.setState(reflectedState);
-                                                _mutationOccurred = true;
-                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                            }
-                                        });
-                                    }
-                                    const currentProperty = intf.getStateAsObject();
-                                    if (intf.reduceState(Hf.fallback(currentProperty).of(component.props))) {
-                                        intf.updateStateAccessor();
-                                        _mutationOccurred = true;
-                                        Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
-                                    }
                                     intf.outgoing(`on-component-did-mount`).emit(() => component);
                                 };
                                 /**

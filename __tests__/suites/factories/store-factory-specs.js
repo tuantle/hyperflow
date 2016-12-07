@@ -170,16 +170,13 @@ export function runTests () {
         //     }
         // });
 
-        mutated = store.reduce({
-            really: {
-                a: 123
-            }
-        });
+        // mutated = store.reduce({
+        //     really: {
+        //         a: 123
+        //     }
+        // });
 
         console.log(mutated);
-
-        store.fixed.a.x = 123;
-
         // console.log(JSON.stringify(store.recallAll(`test`), null, `\t`));
         console.log(JSON.stringify(store, null, `\t`));
         assert.end();
