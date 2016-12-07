@@ -287,7 +287,7 @@ export default Composer({
                     } else if (!keys.every((key) => _compositeRefCache.hasOwnProperty(key))) {
                         Hf.log(`error`, `InterfaceFactory.lookupComponentRefs - Component reference is not found.`);
                     } else {
-                        componentRefs = Hf.collect(_compositeRefCache, ...keys);
+                        componentRefs = Hf.collect(...keys).from(_compositeRefCache);
                     }
                 } else {
                     componentRefs = Object.keys(_compositeRefCache).map((name) => _compositeRefCache[name]);
@@ -317,7 +317,7 @@ export default Composer({
                     })) {
                         Hf.log(`error`, `InterfaceFactory.getComponentComposites - Component is not found.`);
                     } else {
-                        components = Hf.collect(_compositeCache, ...intfNames.map((name) => `${name}.component`));
+                        components = Hf.collect(...intfNames.map((name) => `${name}.component`)).from(_compositeCache);
                     }
                 } else {
                     components = Object.keys(_compositeCache).map((name) => _compositeCache[name].component);
@@ -341,7 +341,7 @@ export default Composer({
                     } else if (!intfNames.every((name) => _compositeCache.hasOwnProperty(name))) {
                         Hf.log(`error`, `InterfaceFactory.getInterfaceComposites - Composite is not found.`);
                     } else {
-                        intfs = Hf.collect(_compositeCache, ...intfNames.map((name) => `${name}.intf`));
+                        intfs = Hf.collect(...intfNames.map((name) => `${name}.intf`)).from(_compositeCache);
                     }
                 } else {
                     intfs = Object.keys(_compositeCache).map((name) => _compositeCache[name].intf);
@@ -363,9 +363,9 @@ export default Composer({
             } else {
                 _componentLib = componentLib;
                 if (!Hf.isEmpty(_compositeCache)) {
-                    _compositeCache = Hf.collect(_compositeCache, ...Object.keys(_compositeCache).map((name) => {
+                    _compositeCache = Hf.collect(...Object.keys(_compositeCache).map((name) => {
                         return `${name}.intf`;
-                    })).reduce((compositeBundle, compositeIntf) => {
+                    })).from(_compositeCache).reduce((compositeBundle, compositeIntf) => {
                         compositeIntf.registerComponentLib(_componentLib);
 
                         const component = compositeIntf.toComponent();
