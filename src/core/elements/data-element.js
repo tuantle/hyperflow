@@ -56,11 +56,11 @@ const DataElementPrototype = Object.create({}).prototype = {
      *
      * @method _getAccessor
      * @param {string|array} pathId
-     * @param {boolean} skipNonmutationReferals
+     * @param {object} option
      * @return {object}
      * @private
      */
-    _getAccessor: function _getAccessor (pathId, skipNonmutationReferals = false) {
+    _getAccessor: function _getAccessor (pathId, option = {}) {
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
         if (!Hf.isNonEmptyArray(pathId)) {
             Hf.log(`error`, `DataElement._getAccessor - Input pathId is invalid.`);
@@ -70,7 +70,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             const mRecords = data._mutation.records;
             const immutableRootKeys = data._mutation.immutableRootKeys;
             if (immutableRootKeys.includes(rootKey) && !Hf.isEmpty(mRecords)) {
-                data._updateMMap(rootKey, skipNonmutationReferals);
+                data._updateMMap(rootKey, option);
                 Hf.clear(data._mutation.records);
             }
             return data._mutation.mMap.select(pathId).getContent();
@@ -173,37 +173,49 @@ const DataElementPrototype = Object.create({}).prototype = {
      *
      * @method _updateMMap
      * @param {string} rootKey
-     * @param {boolean} skipNonmutationReferals
+     * @param {object} option
      * @return void
      * @private
      */
-    _updateMMap: function _updateMMap (rootKey, skipNonmutationReferals = false) {
+    _updateMMap: function _updateMMap (rootKey, option = {}) {
         const data = this;
         const mMap = data._mutation.mMap;
         const mutationHistoryDepth = data._mutation.mutationHistoryDepth;
         const rootContent = data._rootContent;
         const pathId = rootKey;
-
-        skipNonmutationReferals = Hf.isBoolean(skipNonmutationReferals) ? skipNonmutationReferals : false;
+        const {
+            /* skip referal of pathIds in the exclusion list. */
+            initialTimestampRef,
+            excludedNonmutatioReferalPathIds
+        } = Hf.fallback({
+            initialTimestampRef: INITIAL_TIMESTAMP_REF_IN_MS,
+            excludedNonmutatioReferalPathIds: []
+        }).of(option);
 
         if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
             const immutableRootKeys = data._mutation.immutableRootKeys;
 
             if (immutableRootKeys.includes(rootKey)) {
                 const mRecords = data._mutation.records;
-                const oldRootNode = mMap.select(pathId).rekey(`${rootKey}${data._mutation.timeIndex[rootKey]}`);
+                const oldRootKey = `${rootKey}${data._mutation.timeIndex[rootKey]}`;
+                const oldRootNode = mMap.select(pathId).rekey(oldRootKey);
                 const newRootNode = mMap.sproutRoot(rootKey);
-                const referingNonmutations = Hf.compose(oldRootNode.getPathId, newRootNode.refer);
 
                 data._deepUpdateMMap(newRootNode, pathId, mRecords.slice(1));
 
-                if (!skipNonmutationReferals) {
-                    referingNonmutations();
-                }
+                newRootNode.refer(oldRootNode.getPathId(), {
+                    excludedPathIds: excludedNonmutatioReferalPathIds.filter((_pathId) => Hf.isString(_pathId)).map((_pathId) => {
+                        _pathId = Hf.stringToArray(_pathId, `.`);
+                        if (_pathId[0] === rootKey) {
+                            _pathId[0] = oldRootKey;
+                            return Hf.arrayToString(_pathId, `.`);
+                        }
+                    })
+                });
 
                 newRootNode.freezeContent();
                 data._mutation.timeIndex[rootKey]++;
-                data._mutation.timestamp[rootKey].push((new Date()).getTime() - INITIAL_TIMESTAMP_REF_IN_MS);
+                data._mutation.timestamp[rootKey].push((new Date()).getTime() - initialTimestampRef);
 
                 if (mutationHistoryDepth > 0 && mMap.getRootCount() > mutationHistoryDepth) {
                     let timeIndexOffset = mutationHistoryDepth >> 1;
