@@ -509,11 +509,19 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      *
      * @method refer
      * @param {string|array} pathId - Node pathId.
+     * @param {object} option - Referal option.
      * @return void
      */
-    refer: function refer (pathId) {
+    refer: function refer (pathId, option = {}) {
         const node = this;
         const tree = node._tree;
+
+        const {
+            /* skip referal of pathIds in the exclusion list. */
+            excludedPathIds
+        } = Hf.fallback({
+            excludedPathIds: []
+        }).of(option);
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
@@ -533,16 +541,20 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
                     rtdNodes = rtNodes.filter((rtNode) => !tNodeKeys.includes(rtNode._key));
                     rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.includes(rtNode._key));
 
-                    rtsNodes.forEach((rtsNode) => {
+                    rtsNodes.filter((rtsNode) => {
+                        return !excludedPathIds.includes(rtsNode._pathId);
+                    }).forEach((rtsNode) => {
                         const [ tsNode ] = tNodes.filter((tNode) => tNode._key === rtsNode._key);
 
-                        tsNode.refer(rtsNode._pathId);
+                        tsNode.refer(rtsNode._pathId, option);
                     });
                 } else {
                     rtdNodes = rNode._getTails();
                 }
-                rtdNodes.forEach((rtdNode) => {
-                    node.branch(rtdNode._key, rtdNode._contentProxy).refer(rtdNode._pathId);
+                rtdNodes.filter((rtdNode) => {
+                    return !excludedPathIds.includes(rtdNode._pathId);
+                }).forEach((rtdNode) => {
+                    node.branch(rtdNode._key, rtdNode._contentProxy).refer(rtdNode._pathId, option);
                 });
             }
         } else {
