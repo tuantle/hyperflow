@@ -108,6 +108,7 @@ export default CompositeElement({
             let _divertedIncomingStream = Rx.Observable.never();
             let _divertedOutgoingStream = Rx.Observable.never();
 
+            let _sourceRegistrationCache = {};
 
             /* creating factory event stream observer */
             const _observer = Rx.Observer.create(
@@ -343,24 +344,27 @@ export default CompositeElement({
                      *
                      * @method flatMap
                      * @param {function} selector
+                     * @param {function} resultSelector
                      * @return {object}
                      */
-                    flatMap: function flatMap (selector) {
+                    flatMap: function flatMap (selector, resultSelector) {
                         if (!Hf.isFunction(selector)) {
                             Hf.log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
+                        } else if (!Hf.isFunction(resultSelector)) {
+                            Hf.log(`error`, `EventStreamComposite.flatMap - Input flat map result selector function is invalid.`);
                         } else {
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.selectMany(selector).share();
+                                _incomingStream = _incomingStream.selectMany(selector, resultSelector).share();
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.selectMany(selector).share();
+                                _outgoingStream = _outgoingStream.selectMany(selector, resultSelector).share();
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.selectMany(selector).share();
+                                _divertedIncomingStream = _divertedIncomingStream.selectMany(selector, resultSelector).share();
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.selectMany(selector).share();
+                                _divertedOutgoingStream = _divertedOutgoingStream.selectMany(selector, resultSelector).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.flatMap - Invalid direction:${direction}.`);
@@ -545,7 +549,7 @@ export default CompositeElement({
                      */
                     throttle: function throttle (ms) {
                         if (!Hf.isInteger(ms)) {
-                            Hf.log(`error`, `EventStreamComposite.throttle - Input throttle timw window is invalid.`);
+                            Hf.log(`error`, `EventStreamComposite.throttle - Input throttle time window is invalid.`);
                         } else {
                             if (ms < 1) {
                                 ms = 1;
@@ -581,7 +585,9 @@ export default CompositeElement({
                      */
                     backPressure: function backPressure (ms, count) {
                         if (!Hf.isInteger(ms)) {
-                            Hf.log(`error`, `EventStreamComposite.backPressure - Input throttle timw window is invalid.`);
+                            Hf.log(`error`, `EventStreamComposite.backPressure - Input buffer time window is invalid.`);
+                        } else if (!Hf.isInteger(count)) {
+                            Hf.log(`error`, `EventStreamComposite.backPressure - Input buffer count window is invalid.`);
                         } else {
                             if (ms < 1) {
                                 ms = 1;
@@ -717,6 +723,9 @@ export default CompositeElement({
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
                             _outgoingStream = _outgoingStream.merge(_divertedOutgoingStream).share();
+                            Object.keys(_sourceRegistrationCache).forEach((fId) => {
+                                _sourceRegistrationCache[fId](_divertedOutgoingStream);
+                            });
                             break;
                         default:
                             Hf.log(`warn1`, `EventStreamComposite.recombine - Cannot recombine non diverted direction:${direction}.`);
@@ -743,9 +752,10 @@ export default CompositeElement({
                                     payloads.push(payload);
                                     return payloads;
                                 }, []).flatMap((payload) => payload);
-                                _incomingStream = _incomingStream.filter((payload) => {
-                                    return eventIds.some((eventId) => eventId !== payload.eventId);
-                                }).share();
+                                // FIXME: needs to filler out diverted events from main incoming stream.
+                                // _incomingStream = _incomingStream.filter((payload) => {
+                                //     return eventIds.every((eventId) => eventId !== payload.eventId);
+                                // }).share();
                                 return _createStreamOperatorFor.call(factory, DIVERTED_INCOMING_DIRECTION);
                             case OUTGOING_DIRECTION:
                                 _divertedOutgoingStream = _outgoingStream.filter((payload) => {
@@ -754,9 +764,10 @@ export default CompositeElement({
                                     payloads.push(payload);
                                     return payloads;
                                 }, []).flatMap((payload) => payload);
-                                _outgoingStream = _outgoingStream.filter((payload) => {
-                                    return eventIds.some((eventId) => eventId !== payload.eventId);
-                                }).share();
+                                // FIXME: needs to filler out diverted events from main outgoing stream.
+                                // _outgoingStream = _outgoingStream.filter((payload) => {
+                                //     return eventIds.every((eventId) => eventId !== payload.eventId);
+                                // }).share();
                                 return _createStreamOperatorFor.call(factory, DIVERTED_OUTGOING_DIRECTION);
                             case `diversion`:
                                 Hf.log(`error`, `EventStreamComposite.divert - Cannot divert a diverted stream.`);
@@ -771,13 +782,27 @@ export default CompositeElement({
             }
             /* ----- Public Functions -------------- */
             /**
-             * @description - Get factory outgoing event stream.
+             * @description - Register factory outgoing event stream to an external observer.
              *
-             * @method getStream
-             * @return {object}
+             * @method registerStream
+             * @return void
              */
-            this.getStream = function getStream () {
-                return _outgoingStream;
+            this.registerStream = function registerStream (definition) {
+                const factory = this;
+                if (!Hf.isSchema({
+                    fId: `string`,
+                    connectStream: `function`
+                }).of(definition)) {
+                    Hf.log(`error`, `EventStreamComposite.registerStream - Factory:${factory.name} input stream definition is invalid.`);
+                } else {
+                    const {
+                        fId,
+                        connectStream
+                    } = definition;
+
+                    _sourceRegistrationCache[fId] = connectStream;
+                    connectStream(_outgoingStream);
+                }
             };
             /**
              * @description - Apply incoming event stream operators.
@@ -1075,11 +1100,14 @@ export default CompositeElement({
                          * @description - Wait for all events to arrive...
                          *
                          * @method incoming.await
+                         * @param {number} ms
+                         * @param {function} timeoutError - Time out error callback
                          * @return {object}
                          */
-                        await: function _await () {
+                        await: function _await (ms = 0, timeoutError = () => {}) {
                             if (eventIds.length > 1) {
                                 let sideSubscription;
+                                let timeout = null;
                                 const awaitedEventId = eventIds.reduce((_awaitedEventId, eventId) => {
                                     return Hf.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId}-&-${eventId}`;
                                 }, ``);
@@ -1094,7 +1122,10 @@ export default CompositeElement({
                                      */
                                     function onNext (payloadBundle) {
                                         if (Object.keys(payloadBundle).length === eventIds.length) {
-                                            factory.outgoing(awaitedEventId).emit(() => Hf.collect(payloadBundle, ...eventIds));
+                                            if (Hf.isNumeric(timeout)) {
+                                                clearTimeout(timeout);
+                                            }
+                                            factory.outgoing(awaitedEventId).emit(() => Hf.collect(...eventIds).from(payloadBundle));
                                         }
                                     },
                                     /**
@@ -1105,6 +1136,9 @@ export default CompositeElement({
                                      * @return void
                                      */
                                     function onError (error) {
+                                        if (Hf.isNumeric(timeout)) {
+                                            clearTimeout(timeout);
+                                        }
                                         Hf.log(`error`, `EventStreamComposite.incoming.await.onError - Side subscription error. ${error.message}`);
                                     },
                                     /**
@@ -1114,10 +1148,21 @@ export default CompositeElement({
                                      * @return void
                                      */
                                     function onCompleted () {
+                                        if (Hf.isNumeric(timeout)) {
+                                            clearTimeout(timeout);
+                                        }
                                         sideSubscription.dispose();
                                         Hf.log(`info`, `Side subscription completed.`);
                                     }
                                 );
+
+                                ms = Hf.isNumeric(ms) ? ms : 0;
+                                timeoutError = Hf.isFunction(timeoutError) ? timeoutError : () => {};
+
+                                if (ms > 1) {
+                                    timeout = setTimeout(() => timeoutError(), ms);
+                                }
+
                                 sideSubscription = _incomingStream.filter((payload) => {
                                     return eventIds.some((eventId) => eventId === payload.eventId);
                                 }).scan((payloadBundle, payload) => {
@@ -1413,22 +1458,24 @@ export default CompositeElement({
                 } else if (sources.some((source) => {
                     return !Hf.isSchema({
                         name: `string`,
-                        getStream: `function`
+                        registerStream: `function`
                     }).of(source);
                 })) {
                     Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
                 } else {
-                    /* merge all external incoming event streams into one */
-                    _incomingStream = Rx.Observable.merge(sources.map((source) => {
-                        // Hf.log(`info`, `Factory:${factory.name} is observing source:${source.name}.`);
-                        const stream = source.getStream();
-                        if (!Hf.isDefined(stream)) {
-                            Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
-                        }
-                        return stream;
-                    }).concat([
-                        _incomingStream
-                    ]));
+                    sources.map((source) => {
+                        source.registerStream({
+                            fId: factory.fId,
+                            connectStream: (sourceOutgoingStream) => {
+                                if (!Hf.isDefined(sourceOutgoingStream)) {
+                                    Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
+                                } else {
+                                    /* merge all external incoming event streams into one */
+                                    _incomingStream = Rx.Observable.merge(sourceOutgoingStream, _incomingStream);
+                                }
+                            }
+                        });
+                    });
                     return _createStreamOperatorFor.call(factory, INCOMING_DIRECTION);
                 }
             };
