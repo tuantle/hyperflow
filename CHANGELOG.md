@@ -214,3 +214,22 @@ Bug fixes:
     - Fixed React.PropTypes creations in ReactComponentComposite.
     - Fixed root write bug for write methods in AsyncStorageComposite and WebStorageComposite.
 ```
+**Development Beta Version 0.1.0-beta18 (12/07/2016)**
+```
+Notes:
+New Features:
+    - Added stream diversion feature to stream operator in EventStreamComposite.
+    - Added factory support for static definition.
+    - Added excludedPathIds option to skip referrals at pathIds to refer method in TreeNodeElement.
+    - Added freeze method for deep freezing object to CommonElement.
+Breaking Changes:
+    - Renames getStream to registerStream in EventStreamComposite.
+Improvements:
+    - Improved event stream activation sequence in start method for DomainFactory.
+    - Improved reconfigState and reduceState methods in CompositeElement.
+    - Removed updateStateAccessor method in CompositeElement. It is now merged into reduceState and reconfigState methods.
+    - Improved collect and _deepMutate methods for CommonElement.
+    - Moved state update into componentWillMount instead of componentDidMount for ReactComponentComposite.
+Bug fixes:
+    - Fixed bugs in timeTraverse method for StateTimeTraversalComposite.
+```
