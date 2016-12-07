@@ -94,7 +94,6 @@ export default CompositeElement({
                     incoming: `function`,
                     outgoing: `function`,
                     reduceState: `function`,
-                    updateStateAccessor: `function`,
                     getStateCursor: `function`,
                     getStateAsObject: `function`,
                     getComponentLib: `function`,
@@ -499,7 +498,6 @@ export default CompositeElement({
                                     /* needs to sync up interface state and component props before mounting.
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
                                     if (intf.reduceState(Hf.fallback(defaultProperty).of(component.props))) {
-                                        intf.updateStateAccessor();
                                         _mutationOccurred = true;
                                         Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
                                     }
@@ -519,7 +517,6 @@ export default CompositeElement({
                                     const currentProperty = intf.getStateAsObject();
                                     if (intf.reduceState(Hf.fallback(currentProperty).of(nextProperty))) {
                                         /* The interface will detect mutation when component gets new props and update accordingly */
-                                        intf.updateStateAccessor();
                                         _mutationOccurred = true;
                                         Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
                                     }
