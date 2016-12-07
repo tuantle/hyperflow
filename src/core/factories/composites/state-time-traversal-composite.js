@@ -60,10 +60,9 @@ export default CompositeElement({
                     fId: `string`,
                     name: `string`,
                     outgoing: `function`,
-                    reduceState: `function`,
+                    reconfigState: `function`,
                     getStateCursor: `function`,
-                    getStateAsObject: `function`,
-                    updateStateAccessor: `function`
+                    getStateAsObject: `function`
                 }).of(factory) || !(factory.fId.substr(0, SERVICE_FACTORY_CODE.length) === SERVICE_FACTORY_CODE ||
                                     factory.fId.substr(0, STORE_FACTORY_CODE.length) === STORE_FACTORY_CODE)) {
                     Hf.log(`error`, `StateTimeTraversalComposite.$init - Factory is invalid. Cannot apply composite.`);
@@ -83,56 +82,48 @@ export default CompositeElement({
          *                Head state cursor changes back to the previous timeIndex.
          *
          * @method timeTraverse
-         * @param {string|array} pathId
+         * @param {string} key
          * @param {number} timeIndexOffset
          * @return void
          */
-        timeTraverse: function timeTraverse (pathId, timeIndexOffset) {
+        timeTraverse: function timeTraverse (key, timeIndexOffset) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
-            pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!Hf.isNonEmptyArray(pathId)) {
-                Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Input pathId is invalid.`);
+            if (!stateCursor.hasItem(key)) {
+                Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Data item key:${key} is not defined.`);
+            } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
+                Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Input time index offset must be non-zero and negative.`);
             } else {
-                const [ key ] = pathId;
+                const {
+                    timestamp,
+                    content
+                } = stateCursor.recallContentItem(key, timeIndexOffset);
+                if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
+                    let reconfiguration = {};
 
-                if (!stateCursor.hasItem(key)) {
-                    Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Data item key:${key} is not defined.`);
-                } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
-                    Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Input time index offset must be non-zero and negative.`);
-                } else {
-                    const {
-                        timestamp,
-                        content
-                    } = stateCursor.recallContentItem(key, timeIndexOffset);
-                    if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
-                        let reducer = {};
-
-                        if (Hf.isObject(content) || Hf.isArray(content)) {
-                            reducer = Hf.retrieve(pathId, `.`, true).from(content);
-                        } else {
-                            reducer[key] = content;
-                        }
-                        if (factory.reduceState(reducer)) {
-                            factory.updateStateAccessor();
-
-                            const recalledState = Hf.mix(factory.getStateAsObject(), {
-                                exclusion: {
-                                    keys: [
-                                        `name`,
-                                        `fId`
-                                    ]
-                                }
-                            }).with({});
-
-                            /* emitting a mutation event to interface */
-                            factory.outgoing(`as-state-mutated`).emit(() => recalledState);
-                            factory.outgoing(`do-sync-reflected-state`).emit(() => recalledState);
-                            Hf.log(`info`, `Time traversing to previous state at timestamp:${timestamp} of key:${key}.`);
-                        }
+                    if (Hf.isObject(content) || Hf.isArray(content)) {
+                        reconfiguration = content;
                     } else {
-                        Hf.log(`warn1`, `StateTimeTraversalComposite.timeTraverse - Unable to time traverse to undefined state of key:${key} at time index.`);
+                        reconfiguration[key] = content;
                     }
+
+                    factory.reconfigState(reconfiguration);
+
+                    const recalledState = Hf.mix(factory.getStateAsObject(), {
+                        exclusion: {
+                            keys: [
+                                `name`,
+                                `fId`
+                            ]
+                        }
+                    }).with({});
+
+                    /* emitting a mutation event to interface */
+                    factory.outgoing(`as-state-mutated`).emit(() => recalledState);
+                    factory.outgoing(`do-sync-reflected-state`).emit(() => recalledState);
+                    Hf.log(`info`, `Time traversing to previous state at timestamp:${timestamp} of key:${key}.`);
+                } else {
+                    Hf.log(`warn1`, `StateTimeTraversalComposite.timeTraverse - Unable to time traverse to undefined state of key:${key} at time index.`);
                 }
             }
         },
@@ -141,39 +132,27 @@ export default CompositeElement({
          *                Head state cursor does not change.
          *
          * @method recall
-         * @param {string|array} pathId
+         * @param {string} key
          * @param {number} timeIndexOffset
          * @return {object}
          */
-        recall: function recall (pathId, timeIndexOffset) {
+        recall: function recall (key, timeIndexOffset) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
-            pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!Hf.isNonEmptyArray(pathId)) {
-                Hf.log(`error`, `StateTimeTraversalComposite.recall - Input pathId is invalid.`);
+            if (!stateCursor.hasItem(key)) {
+                Hf.log(`error`, `StateTimeTraversalComposite.recall - Data item key:${key} is not defined.`);
+            } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
+                Hf.log(`error`, `StateTimeTraversalComposite.recall - Input time index offset must be non-zero and negative.`);
             } else {
-                const [ key ] = pathId;
-
-                if (!stateCursor.hasItem(key)) {
-                    Hf.log(`error`, `StateTimeTraversalComposite.recall - Data item key:${key} is not defined.`);
-                } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
-                    Hf.log(`error`, `StateTimeTraversalComposite.recall - Input time index offset must be non-zero and negative.`);
-                } else {
-                    const {
-                        timestamp,
-                        content
-                    } = stateCursor.recallContentItem(key, timeIndexOffset);
-                    if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
-                        Hf.log(`info`, `Recalling previous state at timestamp:${timestamp} of key:${key}.`);
-
-                        if (Hf.isObject(content) || Hf.isArray(content)) {
-                            return Hf.retrieve(pathId, `.`, true).from(content);
-                        } else { // eslint-disable-line
-                            return content;
-                        }
-                    } else { // eslint-disable-line
-                        Hf.log(`warn1`, `StateTimeTraversalComposite.recall - Unable to recall an undefined state of key:${key} at time index.`);
-                    }
+                const {
+                    timestamp,
+                    content
+                } = stateCursor.recallContentItem(key, timeIndexOffset);
+                if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
+                    Hf.log(`info`, `Recalling previous state at timestamp:${timestamp} of key:${key}.`);
+                    return content;
+                } else { // eslint-disable-line
+                    Hf.log(`warn1`, `StateTimeTraversalComposite.recall - Unable to recall an undefined state of key:${key} at time index.`);
                 }
             }
         },
@@ -182,44 +161,21 @@ export default CompositeElement({
          *                Head state cursor does not change.
          *
          * @method recallAll
-         * @param {string|array} pathId
+         * @param {string} key
          * @return {array}
          */
-        recallAll: function recallAll (pathId) {
+        recallAll: function recallAll (key) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
-            pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-            if (!Hf.isNonEmptyArray(pathId)) {
-                Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Input pathId is invalid.`);
+            if (!stateCursor.hasItem(key)) {
+                Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Data item key:${key} is not defined.`);
             } else {
-                const [ key ] = pathId;
-                if (!stateCursor.hasItem(key)) {
-                    Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Data item key:${key} is not defined.`);
-                } else {
-                    const contentHistoryItems = stateCursor.recallAllContentItems(key);
-                    if (Hf.isArray(contentHistoryItems)) {
-                        Hf.log(`info`, `Recalling all previous states of key:${key}.`);
-                        return contentHistoryItems.map((contentHistory) => {
-                            const {
-                                timestamp,
-                                content
-                            } = contentHistory;
-
-                            if (Hf.isObject(content) || Hf.isArray(content)) {
-                                return {
-                                    timestamp,
-                                    content: Hf.retrieve(pathId, `.`, true).from(content)
-                                };
-                            } else { // eslint-disable-line
-                                return {
-                                    timestamp,
-                                    content
-                                };
-                            }
-                        });
-                    } else { // eslint-disable-line
-                        Hf.log(`warn1`, `StateTimeTraversalComposite.recallAll - Unable to recall all previous states of key:${key}.`);
-                    }
+                const contentHistoryItems = stateCursor.recallAllContentItems(key);
+                if (Hf.isArray(contentHistoryItems)) {
+                    Hf.log(`info`, `Recalling all previous states of key:${key}.`);
+                    return contentHistoryItems;
+                } else { // eslint-disable-line
+                    Hf.log(`warn1`, `StateTimeTraversalComposite.recallAll - Unable to recall all previous states of key:${key}.`);
                 }
             }
         }
