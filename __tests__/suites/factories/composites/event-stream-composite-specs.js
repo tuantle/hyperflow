@@ -53,18 +53,18 @@ const factoryA = Factory.augment({
     //         logOnNext: (payload) => console.log(`Monitor factory A incoming event stream id:${payload.eventId} -- ${payload.value}`)
     //     }).recombine();
     // },
-    operateOutgoingStream: function operateOutgoingStream (operator) {
-        operator.divert(`event3`).map((payload) => {
-            return {
-                eventId: `event3`,
-                value: payload.value[0] + payload.value[1]
-            };
-        }).monitor({
-            logOnNext: (payload) => {
-                console.log(`Monitor factory A outgoing event stream id:${payload.eventId} -- ${payload.value}`);
-            }
-        }).recombine();
-    },
+    // operateOutgoingStream: function operateOutgoingStream (operator) {
+    //     operator.divert(`event3`).map((payload) => {
+    //         return {
+    //             eventId: `event3`,
+    //             value: payload.value[0] + payload.value[1]
+    //         };
+    //     }).monitor({
+    //         logOnNext: (payload) => {
+    //             console.log(`Monitor factory A outgoing event stream id:${payload.eventId} -- ${payload.value}`);
+    //         }
+    //     }).recombine();
+    // },
     setup: function setup (done) {
         const factory = this;
         factory.incoming(
@@ -79,13 +79,13 @@ const factoryA = Factory.augment({
             `event7`,
             `event8`
         );
-        factory.incoming(
-            `event9`,
-            `event10`
-        ).await().handle((results) => {
-            console.log(results);
-            console.log(`It is Working!!!`);
-        });
+        // factory.incoming(
+        //     `event9`,
+        //     `event10`
+        // ).await().handle((results) => {
+        //     console.log(results);
+        //     console.log(`It is Working!!!`);
+        // });
         factory.incoming(`event-final`).handle((value) => console.log(value));
         done();
     }
@@ -163,5 +163,4 @@ export function runTests () {
         });
     });
     factoryA.activateIncomingStream();
-
 }

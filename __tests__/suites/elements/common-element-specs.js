@@ -422,6 +422,15 @@ export function runTests () {
         assert.equal(resultB, a);
         assert.end();
     });
+    test(`CommonElement camelcaseToDash and dashToCamelcase should work.`, (assert) => {
+        const a = `this-is-a-var`;
+        const b = `thisIsAVar`;
+        const resultA = common.dashToCamelcase(a);
+        const resultB = common.camelcaseToDash(b);
+        assert.equal(resultA, b);
+        assert.equal(resultB, a);
+        assert.end();
+    });
     test(`CommonElement forEach should be able to iterate object and array.`, (assert) => {
         const obj = {
             a: `a`,
