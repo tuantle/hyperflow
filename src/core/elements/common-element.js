@@ -1305,6 +1305,42 @@ const CommonElementPrototype = Object.create({}).prototype = {
         }
     },
     /**
+     * @description - Helper function to convert camel case str name to dash.
+     *
+     * @method camelcaseToDash
+     * @param {string} str
+     * @return {string}
+     */
+    camelcaseToDash: function camelcaseToDash (str) {
+        const common = this;
+
+        if (!common.isString(str)) {
+            common.log(`error`, `CommonElement.camelcaseToDash - Input string is invalid.`);
+        } else {
+            return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => {
+                return `-${word.toLowerCase()}`;
+            }).replace(/^-/, ``);
+        }
+    },
+    /**
+     * @description - Helper function to convert dash str name to camelcase.
+     *
+     * @method dashToCamelcase
+     * @param {string} str
+     * @return {string}
+     */
+    dashToCamelcase: function dashToCamelcase (str) {
+        const common = this;
+
+        if (!common.isString(str)) {
+            common.log(`error`, `CommonElement.dashToCamelcase - Input string is invalid.`);
+        } else {
+            return str.replace(/-([a-z])/g, (match, word) => {
+                return word.toUpperCase();
+            });
+        }
+    },
+    /**
      * @description - A simple console log wrapper. Only active in debug/development mode.
      *
      * @method log
