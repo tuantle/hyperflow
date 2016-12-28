@@ -43,6 +43,7 @@ const EXCEPTION_KEYS = [
     `setNativeProps`,
     `getDefaultProps`,
     `getInitialState`,
+    `forceUpdate`,
     `componentWillMount`,
     `componentDidMount`,
     `componentWillReceiveProps`,
@@ -492,6 +493,16 @@ export default CompositeElement({
                                                 component.setState(reflectedState);
                                                 _mutationOccurred = true;
                                                 Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                            }
+                                        });
+                                        /* this event is call ONLY when the state did mutate in store and FORCE component to update */
+                                        intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
+                                            if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
+                                                component.setState(reflectedState);
+                                                component.forceUpdate();
+                                                _mutationOccurred = true;
+                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                                Hf.log(`info`, `Forced update for component:${component.props.name}.`);
                                             }
                                         });
                                     }
