@@ -1,0 +1,14 @@
+{
+    "comments": false,
+    "only": [
+        "/src",
+        "/__tests__"
+    ],
+   "presets": [
+        "node7",
+        "react"
+    ],
+    "plugins": [
+        "transform-strict-mode"
+    ]
+}
