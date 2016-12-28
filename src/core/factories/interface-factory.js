@@ -367,12 +367,24 @@ export default Composer({
                         return `${name}.intf`;
                     })).from(_compositeCache).reduce((compositeBundle, compositeIntf) => {
                         compositeIntf.registerComponentLib(_componentLib);
-
-                        const component = compositeIntf.toComponent();
-                        if (!Hf.isFunction(component)) {
-                            Hf.log(`error`, `InterfaceFactory.registerComponentLib - Component is invalid.`);
-                        } else {
-                            compositeBundle[compositeIntf.name].component = component;
+                        if (Hf.isSchema({
+                            render: `function`
+                        }).of(compositeIntf)) {
+                            const component = compositeIntf.toComponent();
+                            if (!Hf.isFunction(component)) {
+                                Hf.log(`error`, `InterfaceFactory.registerComponentLib - Component is invalid.`);
+                            } else {
+                                compositeBundle[compositeIntf.name].component = component;
+                            }
+                        } else if (Hf.isSchema({
+                            pureRender: `function`
+                        })) {
+                            const pureComponent = compositeIntf.toPureComponent();
+                            if (!Hf.isFunction(pureComponent)) {
+                                Hf.log(`error`, `InterfaceFactory.registerComponentLib - Pure component is invalid.`);
+                            } else {
+                                compositeBundle[compositeIntf.name].component = pureComponent;
+                            }
                         }
                         return compositeBundle;
                     }, _compositeCache);
@@ -389,6 +401,7 @@ export default Composer({
          */
         this.composedOf = function composedOf (...compositeIntfs) {
             const intf = this;
+            // TODO: Allows composition of component also.
             // TODO: If possible, rename method to compose and return a newly created interface instead.
             if (Hf.isEmpty(compositeIntfs)) {
                 Hf.log(`warn0`, `InterfaceFactory.composedOf - Input composite interface array is empty.`);
@@ -398,6 +411,7 @@ export default Composer({
                         fId: `string`,
                         name: `string`,
                         toComponent: `function`,
+                        toComponentPure: `function`,
                         registerComponentLib: `function`
                     }).of(compositeIntf) && compositeIntf.fId.substr(0, INTERFACE_FACTORY_CODE.length) === INTERFACE_FACTORY_CODE;
                 })) {
