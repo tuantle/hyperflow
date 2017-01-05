@@ -1,5 +1,5 @@
 #####
-# OS X temporary files that should never be committed
+# Ignore OS X temporary files that should never be committed
 
 .DS_Store
 *.DS_Store
@@ -8,18 +8,18 @@
 profile
 
 #####
-# Windows image file caches
+# Ignore Windows image file caches
 
 Thumbs.db
 ehthumbs.db
 
 #####
-# Log files that should never be committed
+# Ignore Log files that should never be committed
 
 *.log
 
 #####
-# Xcode
+# Ignore Xcode
 
 *.pbxuser
 !default.pbxuser
@@ -39,7 +39,7 @@ DerivedData
 project.xcworkspace
 
 #####
-# Android/IJ
+# Ignore Android/IJ
 
 .idea
 .gradle
@@ -51,7 +51,7 @@ local.properties
 *bundle.js
 
 #####
-# Node or jspm modules folder should never be committed
+# Ignore Node or jspm modules folder should never be committed
 
 node_modules/
 jspm_packages/
@@ -62,14 +62,14 @@ jspm_packages/
 .Ulysses*
 
 ####
-# DB folder
+# Ignore DB folder
 
 db/
 
 ####
-# Compiled build folder
+# Ignore Compiled build folder
 
 build/
 
 #####
-# Misc folder
+# Ignore Misc folder
