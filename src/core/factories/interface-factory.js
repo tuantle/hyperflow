@@ -411,7 +411,7 @@ export default Composer({
                         fId: `string`,
                         name: `string`,
                         toComponent: `function`,
-                        toComponentPure: `function`,
+                        toPureComponent: `function`,
                         registerComponentLib: `function`
                     }).of(compositeIntf) && compositeIntf.fId.substr(0, INTERFACE_FACTORY_CODE.length) === INTERFACE_FACTORY_CODE;
                 })) {
