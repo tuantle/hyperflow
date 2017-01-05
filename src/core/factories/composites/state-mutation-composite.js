@@ -103,11 +103,11 @@ export default CompositeElement({
             const {
                 forceMutationEvent,
                 suppressMutationEvent,
-                mutationEventDelayInMS
+                delayMutationEvent
             } = Hf.fallback({
                 forceMutationEvent: false,
                 suppressMutationEvent: false,
-                mutationEventDelayInMS: 0
+                delayMutationEvent: 0
             }).of(option);
             const currentState = Hf.mix(factory.getStateAsObject(), {
                 exclusion: {
@@ -134,12 +134,14 @@ export default CompositeElement({
                         ]
                     }
                 }).with({});
+                const stateMutationEventId = !forceMutationEvent ? `as-state-mutated` : `as-state-forced-to-mutate`;
+
                 /* emitting a mutation event to interface */
-                if (mutationEventDelayInMS > 0) {
-                    factory.outgoing(`as-state-mutated`).delay(mutationEventDelayInMS).emit(() => newState);
-                    factory.outgoing(`do-sync-reflected-state`).delay(mutationEventDelayInMS).emit(() => newState);
+                if (delayMutationEvent > 0) {
+                    factory.outgoing(stateMutationEventId).delay(delayMutationEvent).emit(() => newState);
+                    factory.outgoing(`do-sync-reflected-state`).delay(delayMutationEvent).emit(() => newState);
                 } else {
-                    factory.outgoing(`as-state-mutated`).emit(() => newState);
+                    factory.outgoing(stateMutationEventId).emit(() => newState);
                     factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
                 }
             }
@@ -156,11 +158,13 @@ export default CompositeElement({
         reconfig: function reconfig (reconfiguration, option = {}) {
             const factory = this;
             const {
+                forceMutationEvent,
                 suppressMutationEvent,
-                mutationEventDelayInMS
+                delayMutationEvent
             } = Hf.fallback({
+                forceMutationEvent: false,
                 suppressMutationEvent: false,
-                mutationEventDelayInMS: 0
+                delayMutationEvent: 0
             }).of(option);
             const currentState = Hf.mix(factory.getStateAsObject(), {
                 exclusion: {
@@ -177,7 +181,7 @@ export default CompositeElement({
                 factory.reconfigState(reconfiguration);
             }
 
-            if (!suppressMutationEvent) {
+            if (forceMutationEvent || !suppressMutationEvent) {
                 const newState = Hf.mix(factory.getStateAsObject(), {
                     exclusion: {
                         keys: [
@@ -186,13 +190,14 @@ export default CompositeElement({
                         ]
                     }
                 }).with({});
+                const stateMutationEventId = !forceMutationEvent ? `as-state-mutated` : `as-state-forced-to-mutate`;
 
                 /* emitting a mutation event to interface */
-                if (mutationEventDelayInMS > 0) {
-                    factory.outgoing(`as-state-mutated`).delay(mutationEventDelayInMS).emit(() => newState);
-                    factory.outgoing(`do-sync-reflected-state`).delay(mutationEventDelayInMS).emit(() => newState);
+                if (delayMutationEvent > 0) {
+                    factory.outgoing(stateMutationEventId).delay(delayMutationEvent).emit(() => newState);
+                    factory.outgoing(`do-sync-reflected-state`).delay(delayMutationEvent).emit(() => newState);
                 } else {
-                    factory.outgoing(`as-state-mutated`).emit(() => newState);
+                    factory.outgoing(stateMutationEventId).emit(() => newState);
                     factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
                 }
             }
