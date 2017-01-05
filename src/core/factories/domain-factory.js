@@ -364,7 +364,7 @@ export default Composer({
 
                         /* setup event stream observation duplex between domain and peers */
                         let index = 0;
-                        while (index < peerDomains.length) {
+                        while (index < peerDomains.length - 1) {
                             peerDomains[index].observe(...peerDomains.slice(index + 1));
                             peerDomains.slice(index + 1).forEach((peerDomain) => peerDomain.observe(peerDomains[index])); // eslint-disable-line
                             index += 1;
