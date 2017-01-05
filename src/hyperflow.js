@@ -106,7 +106,7 @@ const init = function init ({
             enableWarn1Log
         });
         const HfProperty = {
-            VERSION: `0.1.0-beta18`,
+            VERSION: `0.1.0-beta19`,
             TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
             /* set composer factory namespace */
@@ -210,6 +210,7 @@ const init = function init ({
                                             ] = {
                                                 OK: `response-to-${_key}-ok`,
                                                 ERROR: `response-to-${_key}-error`,
+                                                CANCELED: `response-to-${_key}-canceled`,
                                                 CONFLICT: `response-to-${_key}-conflict`,
                                                 NOT_FOUND: `response-to-${_key}-not-found`,
                                                 NOT_MODIFIED: `response-to-${_key}-not-modified`,

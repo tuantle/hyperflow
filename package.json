@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta18",
+    "version": "0.1.0-beta19",
     "registry": "github",
     "description": "Hyperflow (Hf) - A toolkit & library for developing universal app.",
     "license": "MIT",
@@ -20,11 +20,8 @@
         "lib": "src"
     },
     "engines": {
-        "node": ">=5.x",
-        "npm": ">=3.x"
-    },
-    "babel": {
-        "babelrc": false
+        "node": ">=7.x",
+        "npm": ">=4.x"
     },
     "jspm": {
       "dependencies": {
@@ -40,22 +37,17 @@
     },
     "peerDependencies": {
         "react": "latest"
-}   ,
+    },
     "dependencies": {
         "rx": "latest",
         "transducers-js": "latest",
         "tape": "latest"
     },
     "devDependencies": {
-        "babel-polyfill": "latest",
         "babel-core": "latest",
-        "babel-preset-es2015": "latest",
-        "babel-preset-stage-0": "latest",
-        "babel-preset-stage-1": "latest",
-        "babel-preset-stage-2": "latest",
-        "babel-preset-stage-3": "latest",
-        "babel-plugin-transform-strict-mode": "latest",
+        "babel-preset-node7": "latest",
         "babel-preset-react": "latest",
+        "babel-plugin-transform-strict-mode": "latest",
 
         "babel-eslint": "latest",
 

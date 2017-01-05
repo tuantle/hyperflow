@@ -233,3 +233,18 @@ Improvements:
 Bug fixes:
     - Fixed bugs in timeTraverse method for StateTimeTraversalComposite.
 ```
+**Development Beta Version 0.1.0-beta19 (01/04/2017)**
+```
+Notes:
+New Features:
+    - Added camelcaseToDash and dashToCamelcase methods to CommonElement.
+Breaking Changes:
+Improvements:
+    - Updated to node 7.x preset dependencies. Added babelrc file.
+    - Added support for pure component for InterfaceFactory.
+    - Added support for force update event for ReactComponentComposite.
+    - Added forceMutationEvent option to reconfig method.
+Bug fixes:
+    - Fixed peer domains registration for DomainFactory.
+    - Added missing filter and flatMap to backPressure operator for EventStreamComposite.
+```
