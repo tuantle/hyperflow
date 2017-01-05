@@ -337,7 +337,7 @@ export default Composer({
                     }
                 }
                 if (Hf.isArray(peerDomains)) {
-                    let index = 0;
+                    // TODO: Needs testing.
                     if (!peerDomains.every((peerDomain) => {
                         return Hf.isSchema({
                             fId: `string`,
@@ -362,16 +362,13 @@ export default Composer({
                             return true;
                         }));
 
+                        /* setup event stream observation duplex between domain and peers */
+                        let index = 0;
                         while (index < peerDomains.length) {
-                            const peerDomain = peerDomains[index];
-                            peerDomains[index] = domain;
-                            peerDomain.register({
-                                peerDomains
-                            });
-                            peerDomains[index] = peerDomain;
+                            peerDomains[index].observe(...peerDomains.slice(index + 1));
+                            peerDomains.slice(index + 1).forEach((peerDomain) => peerDomain.observe(peerDomains[index])); // eslint-disable-line
                             index += 1;
                         }
-                        /* setup event stream observation duplex between domain and peers */
                         domain.observe(..._peerDomains);
                         _peerDomains.forEach((peerDomain) => peerDomain.observe(domain));
                     }
@@ -482,7 +479,7 @@ export default Composer({
                             }));
                         }
 
-                        /* then finally activate peer domains... */
+                        /* then finally activate domain... */
                         domain.activateOutgoingStream({
                             enableBuffering: enableSlowRunMode,
                             bufferTimeSpan,
