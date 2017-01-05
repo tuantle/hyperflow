@@ -24,6 +24,8 @@
 'use strict'; // eslint-disable-line
 
 /* load Rx dependency */
+// TODO: Upgrade to rxjs5
+// import rxjs from 'rxjs';
 import Rx from 'rx';
 
 /* load tranducer dependency */
@@ -594,18 +596,27 @@ export default CompositeElement({
                                 Hf.log(`warn1`, `EventStreamComposite.backPressure - Input buffer time span should be greater than 0. Reset to 1ms.`);
                             }
 
+                            // FIXME: needs to reimplement flat map the outputs of bufferWithTimeOrCount.
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.bufferWithTimeOrCount(ms, count).share();
+                                _incomingStream = _incomingStream.bufferWithTimeOrCount(ms, count).filter((payloads) => {
+                                    return !Hf.isEmpty(payloads);
+                                }).flatMap((payload) => payload).share();
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.bufferWithTimeOrCount(ms, count).share();
+                                _outgoingStream = _outgoingStream.bufferWithTimeOrCount(ms, count).filter((payloads) => {
+                                    return !Hf.isEmpty(payloads);
+                                }).flatMap((payload) => payload).share();
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.bufferWithTimeOrCount(ms, count).share();
+                                _divertedIncomingStream = _divertedIncomingStream.bufferWithTimeOrCount(ms, count).filter((payloads) => {
+                                    return !Hf.isEmpty(payloads);
+                                }).flatMap((payload) => payload).share();
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.bufferWithTimeOrCount(ms, count).share();
+                                _divertedOutgoingStream = _divertedOutgoingStream.bufferWithTimeOrCount(ms, count).filter((payloads) => {
+                                    return !Hf.isEmpty(payloads);
+                                }).flatMap((payload) => payload).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.backPressure - Invalid direction:${direction}.`);
@@ -1176,6 +1187,7 @@ export default CompositeElement({
                                 };
                             }
                             return {
+                                asPromised: incoming.asPromised,
                                 handle: incomingOperator.handle,
                                 repeat: incomingOperator.repeat,
                                 forward: incomingOperator.forward
