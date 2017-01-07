@@ -61,10 +61,11 @@ export default CompositeElement({
          * @description - Wrap and convert app to a standalone component.
          *
          * @method toStandaloneComponent
-         * @param {object} property
+         * @param {object} defaultProperty
+         * @param {object} option
          * @return {object}
          */
-        toStandaloneComponent: function toStandaloneComponent (property) { // eslint-disable-line
+        toStandaloneComponent: function toStandaloneComponent (defaultProperty = {}, option = {}) {
             const app = this;
             const domain = app.getTopDomain();
             if (!Hf.isSchema({
@@ -88,18 +89,44 @@ export default CompositeElement({
                     }).of(React)) {
                         Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - React is invalid.`);
                     } else {
-                        const Component = intf.toComponent(); // eslint-disable-line
+                        const Component = intf.toComponent();
                         const topComponent = React.createClass({
+                            /**
+                             * @description - React method for getting the default prop values.
+                             *
+                             * @method getDefaultProps
+                             * @returns {object}
+                             */
+                            getDefaultProps: function getDefaultProps () {
+                                return Hf.isObject(defaultProperty) ? defaultProperty : {};
+                            },
+                            /**
+                             * @description - React method for setting up component before mounting.
+                             *
+                             * @method componentWillMount
+                             * @returns void
+                             */
                             componentWillMount: function componentWillMount () {
                                 app.start({
+                                    ...option,
                                     doRenderToTarget: false
                                 });
                             },
+                            /**
+                             * @description - React method for tearing down component before unmounting.
+                             *
+                             * @method componentWillMount
+                             * @returns void
+                             */
                             componentWillUnMount: function componentWillUnMount () {
-                                app.stop({
-                                    doRenderToTarget: false
-                                });
+                                app.stop();
                             },
+                            /**
+                             * @description - React method for rendering.
+                             *
+                             * @method render
+                             * @returns {object}
+                             */
                             render: function render () {
                                 const component = this;
                                 return (
