@@ -41,6 +41,7 @@ const EXCEPTION_KEYS = [
     `propTypes`,
     `defaultProps`,
     `setNativeProps`,
+    `setState`,
     `getDefaultProps`,
     `getInitialState`,
     `forceUpdate`,
@@ -280,6 +281,7 @@ export default CompositeElement({
                         Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component is invalid.`);
                     } else {
                         const defaultProperty = intf.getStateAsObject();
+                        const defaultPropertyKeys = Object.keys(defaultProperty);
                         const reactPropTypeAlias = {
                             boolean: React.PropTypes.bool,
                             array: React.PropTypes.array,
@@ -304,7 +306,6 @@ export default CompositeElement({
                                 ReactPureDefinition: function ReactPureDefinition () {
                                     /* set react property type checking */
                                     this.propTypes = (() => {
-                                        const defaultPropertyKeys = Object.keys(defaultProperty);
                                         let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
                                             if (stateCursor.isItemStronglyTyped(key)) {
                                                 const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
@@ -384,6 +385,7 @@ export default CompositeElement({
                 } else {
                     const stateless = intf.isStateless();
                     const defaultProperty = intf.getStateAsObject();
+                    const defaultPropertyKeys = Object.keys(defaultProperty);
                     const reactPropTypeAlias = {
                         boolean: React.PropTypes.bool,
                         array: React.PropTypes.array,
@@ -408,7 +410,6 @@ export default CompositeElement({
                             ReactDefinition: function ReactDefinition () {
                                 /* set react property type checking */
                                 this.propTypes = (() => {
-                                    const defaultPropertyKeys = Object.keys(defaultProperty);
                                     let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
                                         if (stateCursor.isItemStronglyTyped(key)) {
                                             const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
@@ -508,7 +509,14 @@ export default CompositeElement({
                                     }
                                     /* needs to sync up interface state and component props before mounting.
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
-                                    if (intf.reduceState(Hf.fallback(defaultProperty).of(component.props))) {
+                                    if (intf.reduceState(Hf.fallback(defaultProperty).of(Hf.mix(component.props, {
+                                        exclusion: {
+                                            keys: [ `*` ],
+                                            exception: {
+                                                keys: defaultPropertyKeys.filter((key) => key !== `name` && key !== `fId`)
+                                            }
+                                        }
+                                    }).with({})))) {
                                         _mutationOccurred = true;
                                         Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
                                     }
@@ -523,10 +531,17 @@ export default CompositeElement({
                                  */
                                 this.componentWillReceiveProps = function componentWillReceiveProps (nextProperty) {
                                     const component = this;
-                                    /* The interface tracks new props mutation when component receive new props.
+                                    /* interface tracks new props mutation when component receive new props.
                                        This will do necessary mutation on interface state. */
                                     const currentProperty = intf.getStateAsObject();
-                                    if (intf.reduceState(Hf.fallback(currentProperty).of(nextProperty))) {
+                                    if (intf.reduceState(Hf.fallback(currentProperty).of(Hf.mix(nextProperty, {
+                                        exclusion: {
+                                            keys: [ `*` ],
+                                            exception: {
+                                                keys: defaultPropertyKeys.filter((key) => key !== `name` && key !== `fId`)
+                                            }
+                                        }
+                                    }).with({})))) {
                                         /* The interface will detect mutation when component gets new props and update accordingly */
                                         _mutationOccurred = true;
                                         Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
