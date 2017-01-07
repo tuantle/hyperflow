@@ -248,3 +248,13 @@ Bug fixes:
     - Fixed peer domains registration for DomainFactory.
     - Added missing filter and flatMap to backPressure operator for EventStreamComposite.
 ```
+**Development Beta Version 0.1.0-beta20 (01/07/2017)**
+```
+Notes:
+New Features:
+Breaking Changes:
+Improvements:
+Bug fixes:
+    - Fixed implementation of toStandaloneComponent method for ReactAppComponentComposite.
+    - Added property filter when updating component property during componentWillMount and componentWillReceiveProps calls for ReactComponentComposite.
+```

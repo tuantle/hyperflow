@@ -1,11 +1,10 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta19",
+    "version": "0.1.0-beta20",
     "registry": "github",
     "description": "Hyperflow (Hf) - A toolkit & library for developing universal app.",
     "license": "MIT",
     "homepage": "https://github.com/tuantle/hyperflow",
-    "main": "src/hyperflow.js",
     "authors": [
         "Tuan Le <tuan.t.lei@gmail.com> (https://github.com/tuantle)"
     ],
@@ -16,6 +15,7 @@
     "bugs": {
         "url": "https://github.com/tuantle/hyperflow/issues"
     },
+    "main": "src/hyperflow.js",
     "directories": {
         "lib": "src"
     },
@@ -23,37 +23,26 @@
         "node": ">=7.x",
         "npm": ">=4.x"
     },
-    "jspm": {
-      "dependencies": {
-        "rx": "npm:rx",
-        "tape": "npm:tape",
-        "transducers-js": "npm:transducers-js"
-      },
-      "devDependencies": {
-        "babel": "npm:babel-core",
-        "babel-runtime": "npm:babel-runtime",
-        "core-js": "npm:core-js"
-      }
-    },
     "peerDependencies": {
-        "react": "latest"
+        "react": "~15.4.1"
     },
     "dependencies": {
-        "rx": "latest",
-        "transducers-js": "latest",
-        "tape": "latest"
+        "rx": "^4.1.0",
+        "transducers-js": "0.4.180",
+        "tape": "^4.6.3"
     },
     "devDependencies": {
-        "babel-core": "latest",
-        "babel-preset-node7": "latest",
-        "babel-preset-react": "latest",
-        "babel-plugin-transform-strict-mode": "latest",
+        "babel-core": "^6.21.0",
+        "babel-preset-node7": "^1.4.0",
+        "babel-preset-react": "^6.16.0",
+        "babel-preset-react-native": "^1.9.1",
+        "babel-plugin-transform-strict-mode": "^6.18.0",
 
-        "babel-eslint": "latest",
+        "babel-eslint": "^7.1.1",
 
-        "eslint": "latest",
-        "eslint-plugin-react": "latest",
-        "eslint-plugin-react-native": "latest"
+        "eslint": "^3.13.0",
+        "eslint-plugin-react": "^6.8.0",
+        "eslint-plugin-react-native": "^2.2.1"
     },
     "modulePathIgnorePatterns": [
         "/node_modules/",
