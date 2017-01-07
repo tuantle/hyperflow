@@ -68,11 +68,6 @@ build/
 
 docs/
 
-####
-# Examples folder
-
-examples/
-
 #####
 # Tests folder
 
@@ -83,3 +78,4 @@ __tests__/
 # Misc folders
 
 assets/
+examples/

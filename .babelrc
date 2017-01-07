@@ -1,10 +1,6 @@
 {
     "comments": false,
-    "only": [
-        "/src",
-        "/__tests__"
-    ],
-   "presets": [
+    "presets": [
         "node7",
         "react"
     ],
