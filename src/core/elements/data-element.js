@@ -134,7 +134,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             let [ mutatedKeys ] = !Hf.isEmpty(records) ? records : [[]];
 
             cursor.forEach((item, key) => {
-                if (Hf.isObject(item) || Hf.isArray(item)) {
+                if (Hf.isNonEmptyObject(item) || Hf.isNonEmptyArray(item)) {
                     if (!cursor.isImmutable() || (cursor.isImmutable() && mutatedKeys.includes(key))) {
                         data._deepUpdateMMap(node.branch(key), `${pathId}.${key}`, records.slice(1));
                     }
