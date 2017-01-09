@@ -261,13 +261,13 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                                 const originalStateItem = originalState[key];
                                 const reducerItem = reducer[key];
 
-                                if ((Hf.isObject(originalStateItem) && !Hf.isObject(reducerItem) || Hf.isArray(originalStateItem) && !Hf.isArray(reducerItem)) ||
-                                    (!Hf.isObject(originalStateItem) && Hf.isObject(reducerItem) || !Hf.isArray(originalStateItem) && Hf.isArray(reducerItem))) {
+                                if ((Hf.isNonEmptyObject(originalStateItem) && !Hf.isObject(reducerItem) || Hf.isNonEmptyArray(originalStateItem) && !Hf.isArray(reducerItem)) ||
+                                    (!Hf.isNonEmptyObject(originalStateItem) && Hf.isObject(reducerItem) || !Hf.isNonEmptyArray(originalStateItem) && Hf.isArray(reducerItem))) {
                                     Hf.log(`warn1`, `Factory.deepStateReduction - Input reducer schema at key:${key} must be a subset of state schema. Use state reconfiguration instead.`);
                                     Hf.log(`debug`, `Factory.deepStateReduction - originalStateItem:${JSON.stringify(originalStateItem, null, `\t`)}`);
                                     Hf.log(`debug`, `Factory.deepStateReduction - reducerItem:${JSON.stringify(reducerItem, null, `\t`)}`);
                                 } else {
-                                    if (Hf.isObject(originalStateItem) && Hf.isObject(reducerItem) || Hf.isArray(originalStateItem) && Hf.isArray(reducerItem)) {
+                                    if (Hf.isNonEmptyObject(originalStateItem) && Hf.isObject(reducerItem) || Hf.isNonEmptyArray(originalStateItem) && Hf.isArray(reducerItem)) {
                                         deepStateReduction(originalStateItem, reducerItem);
                                     } else {
                                         originalState[key] = reducerItem;
@@ -284,13 +284,13 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                             originalState.forEach((originalStateItem, key) => {
                                 const reducerItem = reducer[key];
 
-                                if ((Hf.isObject(originalStateItem) && !Hf.isObject(reducerItem) || Hf.isArray(originalStateItem) && !Hf.isArray(reducerItem)) ||
-                                    (!Hf.isObject(originalStateItem) && Hf.isObject(reducerItem) || !Hf.isArray(originalStateItem) && Hf.isArray(reducerItem))) {
+                                if ((Hf.isNonEmptyObject(originalStateItem) && !Hf.isObject(reducerItem) || Hf.isNonEmptyArray(originalStateItem) && !Hf.isArray(reducerItem)) ||
+                                    (!Hf.isNonEmptyObject(originalStateItem) && Hf.isObject(reducerItem) || !Hf.isNonEmptyArray(originalStateItem) && Hf.isArray(reducerItem))) {
                                     Hf.log(`warn1`, `Factory.deepStateReduction - Input reducer schema at key:${key} must be a subset of state schema. Use state reconfiguration instead.`);
                                     Hf.log(`debug`, `Factory.deepStateReduction - originalStateItem:${JSON.stringify(originalStateItem, null, `\t`)}`);
                                     Hf.log(`debug`, `Factory.deepStateReduction - reducerItem:${JSON.stringify(reducerItem, null, `\t`)}`);
                                 } else {
-                                    if (Hf.isObject(originalStateItem) && Hf.isObject(reducerItem) || Hf.isArray(originalStateItem) && Hf.isArray(reducerItem)) {
+                                    if (Hf.isNonEmptyObject(originalStateItem) && Hf.isObject(reducerItem) || Hf.isNonEmptyArray(originalStateItem) && Hf.isArray(reducerItem)) {
                                         deepStateReduction(originalStateItem, reducerItem);
                                     } else {
                                         originalState[key] = reducerItem;
@@ -329,10 +329,10 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                                 const originalStateItem = originalState[key];
                                 const reconfigurationItem = reconfiguration[key];
 
-                                if (Hf.isObject(originalStateItem) && Hf.isObject(reconfigurationItem) || Hf.isArray(originalStateItem) && Hf.isArray(reconfigurationItem)) {
+                                if (Hf.isNonEmptyObject(originalStateItem) && Hf.isObject(reconfigurationItem) || Hf.isNonEmptyArray(originalStateItem) && Hf.isArray(reconfigurationItem)) {
                                     reconfigurationPathIds.concat(deepStateReconfiguration(originalStateItem, reconfigurationItem, originalState, key));
-                                } else if (Hf.isObject(originalStateItem) && !Hf.isObject(reconfigurationItem) || Hf.isArray(originalStateItem) && !Hf.isArray(reconfigurationItem)) {
-                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state object at key:${key} as it is not null initially.`);
+                                } else if (Hf.isNonEmptyObject(originalStateItem) && !Hf.isObject(reconfigurationItem) || Hf.isNonEmptyArray(originalStateItem) && !Hf.isArray(reconfigurationItem)) {
+                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state object at key:${key} as it is not null or empty initially.`);
                                 } else {
                                     originalState[key] = reconfigurationItem;
                                     reconfigurationPathIds.push(`${parentKey}.${key}`);
@@ -340,10 +340,10 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                             });
                         } else {
                             if (Hf.isObject(parentState) && parentState.hasOwnProperty(parentKey)) {
-                                if (parentState[parentKey] === null) {
+                                if (parentState[parentKey] === null || Hf.isEmpty(parentState[parentKey])) {
                                     parentState[parentKey] = reconfiguration;
                                 } else {
-                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state object at key:${parentKey} as it is not null initially.`);
+                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state object at key:${parentKey} as it is not null or empty initially.`);
                                 }
                             } else {
                                 Hf.log(`warn1`, `Factory.deepStateReconfiguration - Top level state object is non-configurable.`);
@@ -356,10 +356,10 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                             originalState.forEach((originalStateItem, key) => {
                                 const reconfigurationItem = reconfiguration[key];
 
-                                if (Hf.isObject(originalStateItem) && Hf.isObject(reconfigurationItem) || Hf.isArray(originalStateItem) && Hf.isArray(reconfigurationItem)) {
+                                if (Hf.isNonEmptyObject(originalStateItem) && Hf.isObject(reconfigurationItem) || Hf.isNonEmptyArray(originalStateItem) && Hf.isArray(reconfigurationItem)) {
                                     reconfigurationPathIds.concat(deepStateReconfiguration(originalStateItem, reconfigurationItem, originalState, key));
-                                } else if (Hf.isObject(originalStateItem) && !Hf.isObject(reconfigurationItem) || Hf.isArray(originalStateItem) && !Hf.isArray(reconfigurationItem)) {
-                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state array at key:${key} as it is not null initially.`);
+                                } else if (Hf.isNonEmptyObject(originalStateItem) && !Hf.isObject(reconfigurationItem) || Hf.isNonEmptyArray(originalStateItem) && !Hf.isArray(reconfigurationItem)) {
+                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state array at key:${key} as it is not null or empty initially.`);
                                 } else {
                                     originalState[key] = reconfigurationItem;
                                     reconfigurationPathIds.push(`${parentKey}.${key}`);
@@ -367,10 +367,10 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                             });
                         } else {
                             if (Hf.isObject(parentState) && parentState.hasOwnProperty(parentKey)) {
-                                if (parentState[parentKey] === null) {
+                                if (parentState[parentKey] === null || Hf.isEmpty(parentState[parentKey])) {
                                     parentState[parentKey] = reconfiguration;
                                 } else {
-                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state array at key:${parentKey} as it is not null initially.`);
+                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state array at key:${parentKey} as it is not null or empty initially.`);
                                 }
                             } else {
                                 Hf.log(`warn1`, `Factory.deepStateReconfiguration - Top level state array is non-configurable.`);
@@ -484,7 +484,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                                     let stateAccessorAtPath;
                                     const pathId = `state.${key}`;
 
-                                    if (originalStateAccessor[key] !== null) {
+                                    if (originalStateAccessor[key] !== null && (Hf.isNonEmptyObject(originalStateAccessor[key]) || Hf.isNonEmptyArray(originalStateAccessor[key]))) {
                                         if (!originalStateAccessorCache.hasOwnProperty(pathId)) {
                                             stateAccessorAtPath = data.select(pathId).getAccessor();
                                             originalStateAccessorCache[pathId] = stateAccessorAtPath;
