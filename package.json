@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta20",
+    "version": "0.1.0-beta21",
     "registry": "github",
     "description": "Hyperflow (Hf) - A toolkit & library for developing universal app.",
     "license": "MIT",
@@ -24,11 +24,11 @@
         "npm": ">=4.x"
     },
     "peerDependencies": {
-        "react": "~15.4.1"
+        "react": "=15.4.1"
     },
     "dependencies": {
         "rx": "^4.1.0",
-        "transducers-js": "0.4.180",
+        "transducers-js": "^0.4.174",
         "tape": "^4.6.3"
     },
     "devDependencies": {
@@ -49,8 +49,7 @@
         "/jspm_packages/"
     ],
     "testPathIgnorePatterns": [
-        "/tests/",
-        "/examples/"
+        "/tests/"
     ],
     "scripts": {
         "start-unit-tests": "NODE_ENV=development node ./__tests__/test-suites"

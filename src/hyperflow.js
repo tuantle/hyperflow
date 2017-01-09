@@ -54,14 +54,14 @@ import AppFactory from './core/factories/app-factory';
 import AgentFactory from './core/factories/agent-factory';
 
 /* load test FixtureFactory and composites */
-// import FixtureFactory from './core/factories/fixture-factory';
-// import DomainTestFixtureComposite from './core/factories/composites/test-fixtures/domain-test-fixture-composite';
-// import ServiceTestFixtureComposite from './core/factories/composites/test-fixtures/service-test-fixture-composite';
-// import StoreTestFixtureComposite from './core/factories/composites/test-fixtures/store-test-fixture-composite';
+import FixtureFactory from './core/factories/fixture-factory';
+import DomainTestFixtureComposite from './core/factories/composites/test-fixtures/domain-test-fixture-composite';
+import ServiceTestFixtureComposite from './core/factories/composites/test-fixtures/service-test-fixture-composite';
+import StoreTestFixtureComposite from './core/factories/composites/test-fixtures/store-test-fixture-composite';
 // import InterfaceTestFixtureComposite from './core/factories/composites/test-fixtures/interface-test-fixture-composite';
 
 /* load test runner composites library */
-// import TapeTestRunnerComposite from './core/factories/composites/tape-test-runner-composite';
+import TapeTestRunnerComposite from './core/factories/composites/tape-test-runner-composite';
 
 /* load state composites library */
 import StateMutationComposite from './core/factories/composites/state-mutation-composite';
@@ -106,7 +106,7 @@ const init = function init ({
             enableWarn1Log
         });
         const HfProperty = {
-            VERSION: `0.1.0-beta20`,
+            VERSION: `0.1.0-beta21`,
             TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
             /* set composer factory namespace */
@@ -239,20 +239,20 @@ const init = function init ({
             App: AppFactory,
             /* set test agent & fixtures factory namespace */
             Agent: AgentFactory,
-            // Fixture: FixtureFactory,
+            Fixture: FixtureFactory,
             /* set state composite factory namespace */
             State: {
                 MutationComposite: StateMutationComposite,
                 TimeTraversalComposite: StateTimeTraversalComposite
             },
             /* set test fixtures composites namespace */
-            // Test: {
-            //     TapeRunnerComposite: TapeTestRunnerComposite,
-            //     DomainFixtureComposite: DomainTestFixtureComposite,
-            //     StoreFixtureComposite: StoreTestFixtureComposite,
-            //     InterfaceFixtureComposite: InterfaceTestFixtureComposite,
-            //     ServiceFixtureComposite: ServiceTestFixtureComposite
-            // },
+            Test: {
+                TapeRunnerComposite: TapeTestRunnerComposite,
+                DomainFixtureComposite: DomainTestFixtureComposite,
+                StoreFixtureComposite: StoreTestFixtureComposite,
+                // InterfaceFixtureComposite: InterfaceTestFixtureComposite,
+                ServiceFixtureComposite: ServiceTestFixtureComposite
+            },
             /* set composite library namespace */
             React: {
                 ComponentComposite: ReactComponentComposite,
