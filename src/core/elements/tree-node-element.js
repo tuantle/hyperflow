@@ -330,36 +330,34 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
 
         if (Hf.isObject(content) || Hf.isArray(content)) {
             node._contentProxy = content;
-            if (!node.isSingular()) {
-                if (!node.isRoot()) {
-                    const hNode = node._getHead();
+            if (!node.isSingular() && !node.isRoot()) {
+                const hNode = node._getHead();
 
-                    if (!hNode._contentProxy) {
-                        hNode._contentProxy = Hf.isString(node._key) ? {} : [];
-                    }
-                    if (!hNode._contentProxy.hasOwnProperty(node._key)) {
-                        Object.defineProperty(hNode._contentProxy, node._key, {
-                            get: function get () {
-                                return node._contentProxy;
-                            },
-                            configurable: false,
-                            enumerable: true
-                        });
-                    }
+                if (!hNode._contentProxy) {
+                    hNode._contentProxy = Hf.isString(node._key) ? {} : [];
                 }
-                if (!node.isLeaf()) {
-                    const tNodes = node._getTails();
-
-                    tNodes.forEach((tNode) => {
-                        Object.defineProperty(node._contentProxy, tNode._key, {
-                            get: function get () {
-                                return tNode._contentProxy;
-                            },
-                            configurable: false,
-                            enumerable: true
-                        });
+                if (!hNode._contentProxy.hasOwnProperty(node._key)) {
+                    Object.defineProperty(hNode._contentProxy, node._key, {
+                        get: function get () {
+                            return node._contentProxy;
+                        },
+                        configurable: false,
+                        enumerable: true
                     });
                 }
+            }
+            if (!node.isLeaf()) {
+                const tNodes = node._getTails();
+
+                tNodes.forEach((tNode) => {
+                    Object.defineProperty(node._contentProxy, tNode._key, {
+                        get: function get () {
+                            return tNode._contentProxy;
+                        },
+                        configurable: false,
+                        enumerable: true
+                    });
+                });
             }
         } else {
             Hf.log(`error`, `TreeNodeElement.setContent - Input content must be an object or array.`);
