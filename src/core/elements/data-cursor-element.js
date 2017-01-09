@@ -298,9 +298,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         } else {
             const contentItem = cursor._content[key];
             if (Hf.isObject(contentItem) || Hf.isArray(contentItem)) {
-                // TODO: should freeze or clone the return content item?
                 return Hf.clone(contentItem);
-                // return Object.freeze(contentItem);
             }
             return contentItem;
         }
@@ -336,42 +334,38 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                         }
                     } else if (Hf.isObject(item) || Hf.isArray(item)) {
                         if (Hf.isObject(item)) {
-                            if (Hf.isEmpty(item)) {
-                                cursor._content[key] = null;
-                                Hf.log(`warn1`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be set to an empty object. Autoset to null. Ignoring all constrainable if set.`);
-                            } else {
-                                cursor._content[key] = {};
+                            cursor._content[key] = {};
+
+                            if (!Hf.isEmpty(item)) {
                                 const innerCursor = data.select(pathId);
                                 Object.keys(item).forEach((innerKey) => {
                                     innerCursor.setContentItem(item[innerKey], innerKey);
                                 });
-                                /* if data item is strongly typed and/or is required
-                                   reassign strongly typed and/or required descriptor for item and it`s nested items */
-                                if (cursor.isItemStronglyTyped(key)) {
-                                    cursor.describeItem(key).asStronglyTyped();
-                                }
-                                if (cursor.isItemRequired(key)) {
-                                    cursor.describeItem(key).asRequired();
-                                }
+                            }
+                            /* if data item is strongly typed and/or is required
+                               reassign strongly typed and/or required descriptor for item and it`s nested items */
+                            if (cursor.isItemStronglyTyped(key)) {
+                                cursor.describeItem(key).asStronglyTyped();
+                            }
+                            if (cursor.isItemRequired(key)) {
+                                cursor.describeItem(key).asRequired();
                             }
                         } else if (Hf.isArray(item)) {
-                            if (Hf.isEmpty(item)) {
-                                cursor._content[key] = null;
-                                Hf.log(`warn1`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be set to an empty array. Autoset to null. Ignoring all constrainable if set.`);
-                            } else {
-                                cursor._content[key] = [];
+                            cursor._content[key] = [];
+
+                            if (!Hf.isEmpty(item)) {
                                 const innerCursor = data.select(pathId);
                                 item.forEach((innerItem, innerKey) => {
                                     innerCursor.setContentItem(innerItem, innerKey);
                                 });
-                                /* if data item is strongly typed and/or is required
-                                   reassign strongly typed and/or required descriptor for item and it`s nested items */
-                                if (cursor.isItemStronglyTyped(key)) {
-                                    cursor.describeItem(key).asStronglyTyped();
-                                }
-                                if (cursor.isItemRequired(key)) {
-                                    cursor.describeItem(key).asRequired();
-                                }
+                            }
+                            /* if data item is strongly typed and/or is required
+                               reassign strongly typed and/or required descriptor for item and it`s nested items */
+                            if (cursor.isItemStronglyTyped(key)) {
+                                cursor.describeItem(key).asStronglyTyped();
+                            }
+                            if (cursor.isItemRequired(key)) {
+                                cursor.describeItem(key).asRequired();
                             }
                         }
                         /* save change to mutation record at cursor if immutable */
@@ -398,47 +392,45 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                 } else {
                     if (Hf.isObject(item) || Hf.isArray(item)) {
                         if (Hf.isObject(item)) {
-                            if (Hf.isEmpty(item)) {
-                                cursor._content[key] = null;
-                                Hf.log(`warn1`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty object. Autoset to null. Ignoring all constrainable if set.`);
-                            } else {
-                                cursor._content[key] = {};
+                            cursor._content[key] = {};
+
+                            if (!Hf.isEmpty(item)) {
                                 const innerCursor = data.select(pathId);
                                 Object.keys(item).forEach((innerKey) => {
                                     innerCursor.setContentItem(item[innerKey], innerKey);
                                 });
-                                /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
-                                if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
-                                    const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
+                            }
 
-                                    if (description.hasConstraint(`stronglyTyped`)) {
-                                        cursor.describeItem(key).asStronglyTyped();
-                                    }
-                                    if (description.hasConstraint(`required`)) {
-                                        cursor.describeItem(key).asRequired();
-                                    }
+                            /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
+                            if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
+                                const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
+
+                                if (description.hasConstraint(`stronglyTyped`)) {
+                                    cursor.describeItem(key).asStronglyTyped();
+                                }
+                                if (description.hasConstraint(`required`)) {
+                                    cursor.describeItem(key).asRequired();
                                 }
                             }
                         } else {
-                            if (Hf.isEmpty(item)) {
-                                cursor._content[key] = null;
-                                Hf.log(`warn1`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} cannot be an empty array. Autoset to null. Ignoring all constrainable if set.`);
-                            } else {
-                                cursor._content[key] = [];
+                            cursor._content[key] = [];
+
+                            if (!Hf.isEmpty(item)) {
                                 const innerCursor = data.select(pathId);
                                 item.forEach((innerItem, innerKey) => {
                                     innerCursor.setContentItem(innerItem, innerKey);
                                 });
-                                /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
-                                if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
-                                    const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
+                            }
 
-                                    if (description.hasConstraint(`stronglyTyped`)) {
-                                        cursor.describeItem(key).asStronglyTyped();
-                                    }
-                                    if (description.hasConstraint(`required`)) {
-                                        cursor.describeItem(key).asRequired();
-                                    }
+                            /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
+                            if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
+                                const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
+
+                                if (description.hasConstraint(`stronglyTyped`)) {
+                                    cursor.describeItem(key).asStronglyTyped();
+                                }
+                                if (description.hasConstraint(`required`)) {
+                                    cursor.describeItem(key).asRequired();
                                 }
                             }
                         }
@@ -742,7 +734,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                         }
 
                         /* recursively set requirable description to nested objects */
-                        if (Hf.isObject(_content[_key])) {
+                        if (Hf.isNonEmptyObject(_content[_key])) {
                             Object.keys(_content[_key]).forEach((innerKey) => {
                                 deepAssignDescription(`${_pathId}.${innerKey}`, _content[_key], innerKey);
                             });
@@ -780,7 +772,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                         }
 
                         /* recursively set strongly typed description to nested objects */
-                        if (Hf.isObject(_content[_key])) {
+                        if (Hf.isNonEmptyObject(_content[_key])) {
                             Object.keys(_content[_key]).forEach((innerKey) => {
                                 deepAssignDescription(`${_pathId}.${innerKey}`, _content[_key], innerKey);
                             });
