@@ -56,7 +56,7 @@ const requiredPreset = function requiredPreset () {
                 if (Hf.isString(context.newValue) || Hf.isObject(context.newValue) || Hf.isArray(context.newValue)) {
                     result.verified = !Hf.isEmpty(context.newValue);
                 } else {
-                    result.verified = context.newValue !== null;
+                    result.verified = context.newValue !== null && context.newValue !== undefined;
                 }
                 return result;
             }
