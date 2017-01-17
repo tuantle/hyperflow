@@ -51,6 +51,10 @@ const SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS = 450;
 // FIXME: needs to know why this delay is needed!
 const DELAY_SERVICE_IN_MS = 2;
 
+/* time waiting for factory setup/teardown to complete */
+const DEFAULT_SETUP_WAIT_TIME_IN_MS = 10000;
+const DEFAULT_TEARDOWN_WAIT_TIME_IN_MS = 10000;
+
 /**
  * @description - A domain factory module.
  *
@@ -379,45 +383,55 @@ export default Composer({
          * @description - Start domain.
          *
          * @method start
-         * @param {object} option
          * @param {function} done
+         * @param {object} option
          * @return void
          */
-        this.start = function start (option = {}, done) {
+        this.start = function start (done, option = {}) {
             const domain = this;
             const {
-                enableSlowRunMode
+                enableSlowRunMode,
+                waitTime
             } = Hf.fallback({
-                enableSlowRunMode: false
+                enableSlowRunMode: false,
+                waitTime: DEFAULT_SETUP_WAIT_TIME_IN_MS
             }).of(option);
-            let bufferTimeSpan = SLOW_MODE_BUFFER_TIME_SPAN_IN_MS;
-            let bufferTimeShift = SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS;
 
             if (!Hf.isFunction(done)) {
                 Hf.log(`error`, `DomainFactory.start - Input done function is invalid.`);
             } else {
                 if (!_started) {
+                    const domainSetupTimeout = setTimeout(() => {
+                        Hf.log(`warn1`, `DomainFactory.start - Domain:${domain.name} is taking longer than ${waitTime}ms to setup.`);
+                    }, waitTime);
+
+                    Hf.log(`info`, `Starting domain:${domain.name}...`);
                     domain.setup(() => {
                         /* first activate parent domain incoming stream */
                         domain.activateIncomingStream({
-                            enableBuffering: enableSlowRunMode,
-                            bufferTimeSpan,
-                            bufferTimeShift
+                            forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                            bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                            bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                         });
                         /* then activate store... */
                         if (Hf.isObject(_store)) {
+                            const storeSetupTimeout = setTimeout(() => {
+                                Hf.log(`warn1`, `DomainFactory.start - Store:${_store.name} is taking longer than ${waitTime}ms to setup.`);
+                            }, waitTime);
+
                             _store.setup(() => {
                                 _store.activateIncomingStream({
-                                    enableBuffering: enableSlowRunMode,
-                                    bufferTimeSpan,
-                                    bufferTimeShift
+                                    forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                 });
                                 _store.activateOutgoingStream({
-                                    enableBuffering: enableSlowRunMode,
-                                    bufferTimeSpan,
-                                    bufferTimeShift
+                                    forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                 });
-                                Hf.log(`info`, `Domain:${domain.name} activated store:${_store.name}.`);
+                                Hf.log(`info`, `Activated store:${_store.name}.`);
+                                clearTimeout(storeSetupTimeout);
                             });
                         }
                         /* then activate parent to child interfaces... */
@@ -425,22 +439,26 @@ export default Composer({
                             /* helper function to activate all child interfaces event stream */
                             const deepInterfaceActivateStream = function deepInterfaceActivateStream (intf) {
                                 if (Hf.isObject(intf)) {
+                                    const intfSetupTimeout = setTimeout(() => {
+                                        Hf.log(`warn1`, `DomainFactory.start - Interface:${intf.name} is taking longer than ${waitTime}ms to setup.`);
+                                    }, waitTime);
                                     intf.setup(() => {
                                         intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceActivateStream(compositeIntf));
                                         intf.activateIncomingStream({
-                                            enableBuffering: enableSlowRunMode,
-                                            bufferTimeSpan,
-                                            bufferTimeShift
+                                            forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                            bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                            bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                         });
                                         intf.activateOutgoingStream({
-                                            enableBuffering: enableSlowRunMode,
-                                            bufferTimeSpan,
-                                            bufferTimeShift
+                                            forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                            bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                            bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                         });
-                                        Hf.log(`info`, `Domain:${domain.name} activated interface:${intf.name}.`);
+                                        Hf.log(`info`, `Activated interface:${intf.name}.`);
+                                        clearTimeout(intfSetupTimeout);
                                     });
                                 } else {
-                                    Hf.log(`warn0`, `DomainFactory.start.deepInterfaceActivateStream - Input interface is invalid.`);
+                                    Hf.log(`warn0`, `DomainFactory.start - DomainFactory.start.deepInterfaceActivateStream - Input interface is invalid.`);
                                 }
                             };
                             deepInterfaceActivateStream(_intf);
@@ -450,47 +468,61 @@ export default Composer({
                         /* then activate services... */
                         if (!Hf.isEmpty(_services)) {
                             _services.forEach((service) => {
+                                const serviceSetupTimeout = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.start - Service:${service.name} is taking longer than ${waitTime}ms to setup.`);
+                                }, waitTime);
                                 service.setup(() => {
                                     service.activateIncomingStream({
-                                        enableBuffering: enableSlowRunMode,
-                                        bufferTimeSpan,
-                                        bufferTimeShift
+                                        forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                        bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                        bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                     });
                                     service.activateOutgoingStream({
-                                        enableBuffering: enableSlowRunMode,
-                                        bufferTimeSpan,
-                                        bufferTimeShift
+                                        forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                        bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                        bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                     });
-                                    Hf.log(`info`, `Domain:${domain.name} activated service:${service.name}.`);
+                                    Hf.log(`info`, `Activated service:${service.name}.`);
+                                    clearTimeout(serviceSetupTimeout);
                                 });
                             });
                         }
 
-                        /*  then activate child domains... */
+                        /*  then startup child domains... */
                         if (!Hf.isEmpty(_childDomains)) {
-                            _childDomains.forEach((childDomain) => childDomain.start(option, () => {
-                                Hf.log(`info`, `Child domain:${childDomain.name} has started.`);
-                            }));
+                            _childDomains.forEach((childDomain) => {
+                                const childDomainStartingTimeout = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.start - Child domain:${childDomain.name} is taking longer than ${waitTime}ms to start.`);
+                                }, waitTime);
+                                childDomain.start(() => clearTimeout(childDomainStartingTimeout), option);
+                            });
                         }
-                        /* then activate peer domains... */
+                        /* then startup peer domains... */
                         if (!Hf.isEmpty(_peerDomains)) {
-                            _peerDomains.forEach((peerDomain) => peerDomain.start(option, () => {
-                                Hf.log(`info`, `Peer domain:${peerDomain.name} has started.`);
-                            }));
+                            _peerDomains.forEach((peerDomain) => {
+                                const peerDomainStartingTimeout = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.start -  Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to start.`);
+                                }, waitTime);
+                                peerDomain.start(() => clearTimeout(peerDomainStartingTimeout), option);
+                            });
                         }
 
                         /* then finally activate domain... */
                         domain.activateOutgoingStream({
-                            enableBuffering: enableSlowRunMode,
-                            bufferTimeSpan,
-                            bufferTimeShift
+                            forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                            bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                            bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                         });
+
                         _started = true;
+
+                        Hf.log(`info`, `Domain:${domain.name} has started.`);
+                        clearTimeout(domainSetupTimeout);
                         done();
                     });
-                } else {
-                    domain.restart(option, done);
+                } else { // eslint-disable-line
                     Hf.log(`warn1`, `DomainFactory.start - Domain:${domain.name} is already started. Restarting...`);
+                    domain.restart(done, option);
                 }
             }
         };
@@ -499,30 +531,47 @@ export default Composer({
          *
          * @method stop
          * @param {function} done
+         * @param {object} option
          * @return void
          */
-        this.stop = function stop (done) {
-            // TODO: Needs to test domain.stop
+        this.stop = function stop (done, option = {}) {
+            const {
+                waitTime
+            } = Hf.fallback({
+                waitTime: DEFAULT_TEARDOWN_WAIT_TIME_IN_MS
+            }).of(option);
+
             const domain = this;
             if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `DomainFactory.stop - Input done function is invalid.`);
+                Hf.log(`error`, `DomainFactory.stop - DomainFactory.stop - Input done function is invalid.`);
             } else {
                 if (!_started) {
-                    Hf.log(`warn1`, `DomainFactory.stop - Domain:${domain.name} is already stopped.`);
+                    Hf.log(`warn1`, `DomainFactory.stop - DomainFactory.stop - Domain:${domain.name} is already stopped.`);
                 } else {
+                    const domainTeardownTimeout = setTimeout(() => {
+                        Hf.log(`warn1`, `DomainFactory.stop - Domain:${domain.name} is taking longer than ${waitTime}ms to teardown.`);
+                    }, waitTime);
+
+                    Hf.log(`info`, `Stopping domain:${domain.name}...`);
                     domain.teardown(() => {
                         /* first stop child domains... */
                         if (!Hf.isEmpty(_childDomains)) {
-                            _childDomains.forEach((childDomain) => childDomain.stop(() => {
-                                Hf.log(`info`, `Child domain:${childDomain.name} has stopped.`);
-                            }));
+                            _childDomains.forEach((childDomain) => {
+                                const childDomainStoppingTimeout = setTimeout(() => {
+                                    Hf.log(`warn1`, `Child domain:${childDomain.name} is taking longer than ${waitTime}ms to stop.`);
+                                }, waitTime);
+                                childDomain.stop(() => clearTimeout(childDomainStoppingTimeout), option);
+                            });
                         }
 
                         /* then peer domains... */
                         if (!Hf.isEmpty(_peerDomains)) {
-                            _peerDomains.forEach((peerDomain) => peerDomain.stop(() => {
-                                Hf.log(`info`, `Peer domain:${peerDomain.name} has stopped.`);
-                            }));
+                            _peerDomains.forEach((peerDomain) => {
+                                const peerDomainStoppingTimeout = setTimeout(() => {
+                                    Hf.log(`warn1`, `Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to stop.`);
+                                }, waitTime);
+                                peerDomain.stop(() => clearTimeout(peerDomainStoppingTimeout), option);
+                            });
                         }
 
                         /* then stop child to parent interfaces... */
@@ -530,16 +579,21 @@ export default Composer({
                             /* helper function to deactivate all child interfaces event stream */
                             const deepInterfaceDeactivateStream = function deepInterfaceDeactivateStream (intf) {
                                 if (Hf.isObject(intf)) {
+                                    const intfTeardownTimeout = setTimeout(() => {
+                                        Hf.log(`warn1`, `DomainFactory.stop - Interface:${intf.name} is taking longer than ${waitTime}ms to teardown.`);
+                                    }, waitTime);
+
                                     intf.teardown(() => {
                                         intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceDeactivateStream(compositeIntf));
                                         // TODO: compositeIntf does not or should not have incoming event stream activated.
                                         intf.deactivateIncomingStream();
                                         intf.deactivateOutgoingStream();
                                         // TODO: Un-reflect state from store?
-                                        Hf.log(`info`, `Domain:${domain.name} deactivated interface:${intf.name}.`);
+                                        Hf.log(`info`, `Deactivated interface:${intf.name}.`);
+                                        clearTimeout(intfTeardownTimeout);
                                     });
                                 } else {
-                                    Hf.log(`warn0`, `DomainFactory.stop.deepInterfaceDeactivateStream - Input interface is invalid.`);
+                                    Hf.log(`warn0`, `DomainFactory.stop - DomainFactory.stop.deepInterfaceDeactivateStream - Input interface is invalid.`);
                                 }
                             };
                             deepInterfaceDeactivateStream(_intf);
@@ -547,24 +601,36 @@ export default Composer({
 
                         /* then store... */
                         if (Hf.isObject(_store)) {
+                            const storeTeardownTimeout = setTimeout(() => {
+                                Hf.log(`warn1`, `DomainFactory.stop - Store:${_store.name} is taking longer than ${waitTime}ms to teardown.`);
+                            }, waitTime);
                             _store.teardown(() => {
                                 _store.deactivateIncomingStream();
                                 _store.deactivateOutgoingStream();
-                                // TODO: Reset store state?
-                                // _store.resetState()
-                                Hf.log(`info`, `Domain:${domain.name} deactivated store:${_store.name}.`);
+                                if (Hf.isFunction(_store.reset)) {
+                                    /* reset store state */
+                                    _store.reset();
+                                }
+                                Hf.log(`info`, `Deactivated store:${_store.name}.`);
+                                clearTimeout(storeTeardownTimeout);
                             });
                         }
 
                         /* then services... */
                         if (!Hf.isEmpty(_services)) {
                             _services.forEach((service) => {
+                                const serviceTeardownTimeout = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.stop - Service:${service.name} is taking longer than ${waitTime}ms to teardown.`);
+                                }, waitTime);
                                 service.teardown(() => {
                                     service.deactivateIncomingStream();
                                     service.deactivateOutgoingStream();
-                                    // TODO: Reset service state?
-                                    // service.resetState()
-                                    Hf.log(`info`, `Domain:${domain.name} deactivated service:${service.name}.`);
+                                    if (Hf.isFunction(service.reset)) {
+                                        /* reset service state */
+                                        service.reset();
+                                    }
+                                    Hf.log(`info`, `Deactivated service:${service.name}.`);
+                                    clearTimeout(serviceTeardownTimeout);
                                 });
                             });
                         }
@@ -574,6 +640,9 @@ export default Composer({
                         domain.deactivateOutgoingStream();
 
                         _started = false;
+
+                        Hf.log(`info`, `Domain:${domain.name} has stopped.`);
+                        clearTimeout(domainTeardownTimeout);
                         done();
                     });
                 }
@@ -583,19 +652,29 @@ export default Composer({
          * @description - Restart domain.
          *
          * @method restart
+         * @param {function} done,
          * @param {object} option,
-         * @param {function} done
          * @return void
          */
-        this.restart = function restart (option = {}, done) {
+        this.restart = function restart (done, option = {}) {
             const domain = this;
+            const {
+                waitTime
+            } = Hf.fallback({
+                waitTime: DEFAULT_SETUP_WAIT_TIME_IN_MS
+            }).of(option);
 
             if (!Hf.isFunction(done)) {
                 Hf.log(`error`, `DomainFactory.restart - Input done function is invalid.`);
             } else {
+                const domainStoppingTimeout = setTimeout(() => {
+                    Hf.log(`warn1`, `DomainFactory.restart - Domain:${domain.name} is taking longer than ${waitTime} seconds to stop and restart.`);
+                }, waitTime);
+
                 domain.stop(() => {
-                    domain.start(option, done);
-                });
+                    clearTimeout(domainStoppingTimeout);
+                    domain.start(done, option);
+                }, option);
             }
         };
     }
