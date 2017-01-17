@@ -97,7 +97,6 @@ export default Composer({
                 Hf.log(`error`, `InterfaceFactory.setup - Input done function is invalid.`);
             } else {
                 done();
-                Hf.log(`warn0`, `InterfaceFactory.setup - Method is not implemented by default.`);
             }
         };
         /**
@@ -112,7 +111,6 @@ export default Composer({
                 Hf.log(`error`, `InterfaceFactory.teardown - Input done function is invalid.`);
             } else {
                 done();
-                Hf.log(`warn0`, `InterfaceFactory.teardown - Method is not implemented by default.`);
             }
         };
         /**
