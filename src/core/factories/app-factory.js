@@ -170,36 +170,30 @@ export default Composer({
         this.start = function start (option = {}) {
             const app = this;
             const {
-                enableSlowRunMode,
                 doRenderToTarget
             } = Hf.fallback({
-                enableSlowRunMode: false,
                 doRenderToTarget: true
             }).of(option);
 
             if (!Hf.isObject(_domain)) {
                 Hf.log(`error`, `AppFactory.start - App:${app.name} is not registered with a domain.`);
             } else {
-                if (!_domain.hasStarted()) {
-                    Hf.log(`info`, `Starting app:${app.name}...`);
-                    _domain.start({
-                        enableSlowRunMode
-                    }, () => {
+                if (_domain.hasStarted()) {
+                    Hf.log(`warn1`, `AppFactory.start - App:${app.name} is already running. Restarting...`);
+                    _domain.restart(() => {
                         if (doRenderToTarget) {
                             app.renderToTarget();
                         }
-                        Hf.log(`info`, `Domain:${_domain.name} has started.`);
-                    });
+                        Hf.log(`info`, `App:${app.name} has started.`);
+                    }, option);
                 } else {
-                    Hf.log(`warn1`, `AppFactory.main - App:${app.name} is already running. Restarting...`);
-                    _domain.restart({
-                        enableSlowRunMode
-                    }, () => {
+                    Hf.log(`info`, `Starting app:${app.name}...`);
+                    _domain.start(() => {
                         if (doRenderToTarget) {
                             app.renderToTarget();
                         }
-                        Hf.log(`info`, `Domain:${_domain.name} has restarted.`);
-                    });
+                        Hf.log(`info`, `App:${app.name} has started.`);
+                    }, option);
                 }
             }
         };
@@ -207,18 +201,20 @@ export default Composer({
          * @description - Stop app.
          *
          * @method stop
+         * @param {object} option
          * @return void
          */
-        this.stop = function stop () {
+        this.stop = function stop (option = {}) {
             const app = this;
+
             if (!Hf.isObject(_domain)) {
                 Hf.log(`error`, `AppFactory.stop - App:${app.name} is not registered with a domain.`);
             } else {
                 if (_domain.hasStarted()) {
                     Hf.log(`info`, `Stopping app:${app.name}...`);
                     _domain.stop(() => {
-                        Hf.log(`info`, `Domain:${_domain.name} has stopped.`);
-                    });
+                        Hf.log(`info`, `App:${app.name} has stopped.`);
+                    }, option);
                 }
             }
         };
@@ -231,9 +227,27 @@ export default Composer({
          */
         this.restart = function restart (option = {}) {
             const app = this;
-            app.stop(() => {
-                app.start(option);
-            });
+            const {
+                doRenderToTarget
+            } = Hf.fallback({
+                doRenderToTarget: true
+            }).of(option);
+
+            if (!Hf.isObject(_domain)) {
+                Hf.log(`error`, `AppFactory.restart - App:${app.name} is not registered with a domain.`);
+            } else {
+                if (_domain.hasStarted()) {
+                    Hf.log(`info`, `Restarting app:${app.name}...`);
+                    _domain.restart(() => {
+                        if (doRenderToTarget) {
+                            app.renderToTarget();
+                        }
+                        Hf.log(`info`, `App:${app.name} has restarted.`);
+                    }, option);
+                } else {
+                    app.start(option);
+                }
+            }
         };
     }
 });
