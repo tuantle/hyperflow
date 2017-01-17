@@ -267,3 +267,13 @@ Improvements:
     - Removed no empty object or array restriction when set content item for DataElement. Empty object or array is now reconfigurable like null.  
 Bug fixes:
 ```
+**Development Beta Version 0.1.0-beta22 (01/17/2017)**
+```
+Notes:
+New Features:
+Breaking Changes:
+Improvements:
+    - Added timeout warning messages for start, stop, and restart methods in DomainFactory.
+    - Cleanup and refactored restart method in AppFactory.
+Bug fixes:
+```

@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta21",
+    "version": "0.1.0-beta22",
     "registry": "github",
     "description": "Hyperflow (Hf) - A toolkit & library for developing universal app.",
     "license": "MIT",
@@ -24,7 +24,8 @@
         "npm": ">=4.x"
     },
     "peerDependencies": {
-        "react": "=15.4.1"
+        "react": "=15.4.2",
+        "react-dom": "=15.4.2"
     },
     "dependencies": {
         "rx": "^4.1.0",
@@ -42,7 +43,10 @@
 
         "eslint": "^3.13.0",
         "eslint-plugin-react": "^6.8.0",
-        "eslint-plugin-react-native": "^2.2.1"
+        "eslint-plugin-react-native": "^2.2.1",
+
+        "react": "=15.4.2",
+        "react-dom": "=15.4.2"
     },
     "modulePathIgnorePatterns": [
         "/node_modules/",
