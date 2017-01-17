@@ -42,10 +42,10 @@ export function runTests () {
                 },
                 catalog: {
                     value: {
-                        data: null,
+                        data: {},
                         gameCount: 0,
                         gameIndex: [ 1, 2, 3 ],
-                        platformGroups: null
+                        platformGroups: []
                     },
                     stronglyTyped: true
                 }
