@@ -1334,30 +1334,28 @@ export default CompositeElement({
             this.activateIncomingStream = function activateIncomingStream (option = {}) {
                 const factory = this;
                 let {
-                    enableBuffering,
+                    forceBufferingOnAllOutgoingStreams,
                     bufferTimeSpan,
                     bufferTimeShift
                 } = Hf.fallback({
-                    enableBuffering: false,
+                    forceBufferingOnAllOutgoingStreams: false,
                     bufferTimeSpan: 1,
                     bufferTimeShift: 1
                 }).of(option);
-
-                if (bufferTimeSpan < 1) {
-                    bufferTimeSpan = 1;
-                    Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time span option should be greater than 0. Reset to 1ms.`);
-                }
-
-                if (bufferTimeShift < 1) {
-                    bufferTimeShift = 1;
-                    Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
-                }
 
                 if (!_incomingStreamActivated) {
                     /* first do operations on the incoming event stream */
                     factory.operateIncomingStream(_createStreamOperatorFor.call(factory, INCOMING_DIRECTION));
                     /* then do incoming event stream subscriptions */
-                    if (enableBuffering) {
+                    if (forceBufferingOnAllOutgoingStreams) {
+                        if (bufferTimeSpan < 1) {
+                            bufferTimeSpan = 1;
+                            Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time span option should be greater than 0. Reset to 1ms.`);
+                        }
+                        if (bufferTimeShift < 1) {
+                            bufferTimeShift = 1;
+                            Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
+                        }
                         _incomingSubscription = _incomingStream.bufferWithTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
                             return !Hf.isEmpty(payloads);
                         }).flatMap((payload) => payload).subscribe(_observer);
@@ -1379,30 +1377,28 @@ export default CompositeElement({
             this.activateOutgoingStream = function activateOutgoingStream (option = {}) {
                 const factory = this;
                 let {
-                    enableBuffering,
+                    forceBufferingOnAllOutgoingStreams,
                     bufferTimeSpan,
                     bufferTimeShift
                 } = Hf.fallback({
-                    enableBuffering: false,
+                    forceBufferingOnAllOutgoingStreams: false,
                     bufferTimeSpan: 1,
                     bufferTimeShift: 1
                 }).of(option);
-
-                if (bufferTimeSpan < 1) {
-                    bufferTimeSpan = 1;
-                    Hf.log(`warn1`, `EventStreamComposite.activateOutgoingStream - Input buffer time span option should be greater than 0. Reset to 1ms.`);
-                }
-
-                if (bufferTimeShift < 1) {
-                    bufferTimeShift = 1;
-                    Hf.log(`warn1`, `EventStreamComposite.activateOutgoingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
-                }
 
                 if (!_outgoingStreamActivated) {
                     /* first do operations on the outgoing event stream */
                     factory.operateOutgoingStream(_createStreamOperatorFor.call(factory, OUTGOING_DIRECTION));
                     /* then do outgoing event stream subscriptions */
-                    if (enableBuffering) {
+                    if (forceBufferingOnAllOutgoingStreams) {
+                        if (bufferTimeSpan < 1) {
+                            bufferTimeSpan = 1;
+                            Hf.log(`warn1`, `EventStreamComposite.activateOutgoingStream - Input buffer time span option should be greater than 0. Reset to 1ms.`);
+                        }
+                        if (bufferTimeShift < 1) {
+                            bufferTimeShift = 1;
+                            Hf.log(`warn1`, `EventStreamComposite.activateOutgoingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
+                        }
                         _outgoingSubscription = _outgoingStream.bufferWithTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
                             return !Hf.isEmpty(payloads);
                         }).flatMap((payload) => payload).subscribe(_observer);
