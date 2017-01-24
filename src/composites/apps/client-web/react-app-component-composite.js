@@ -119,7 +119,7 @@ export default CompositeElement({
                              * @returns void
                              */
                             componentWillUnMount: function componentWillUnMount () {
-                                app.stop();
+                                app.stop(option);
                             },
                             /**
                              * @description - React method for rendering.
