@@ -66,8 +66,8 @@ export default CompositeElement({
          */
         renderToTarget: function renderToTarget () {
             const app = this;
-            const appComponent = app.getTopComponent();
-            if (!(Hf.isObject(appComponent) || Hf.isFunction(appComponent))) {
+            const AppComponent = app.getTopComponent();
+            if (!(Hf.isObject(AppComponent) || Hf.isFunction(AppComponent))) {
                 Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
             } else {
                 const ReactDOMRenderer = app.getRenderer();
@@ -82,7 +82,7 @@ export default CompositeElement({
                     }).of(domain)) {
                         Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - App:${app.name} domain is invalid.`);
                     } else {
-                        const renderedMarkup = ReactDOMRenderer.renderToString(appComponent);
+                        const renderedMarkup = ReactDOMRenderer.renderToString(AppComponent);
                         if (Hf.isNonEmptyString(renderedMarkup)) {
                             domain.outgoing(`on-render-markup-to-string`).emit(() => renderedMarkup);
                         } else {

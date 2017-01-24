@@ -89,11 +89,11 @@ export default CompositeElement({
                     }).of(React)) {
                         Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
                     } else {
-                        const topComponent = intf.toComponent();
-                        if (!Hf.isFunction(topComponent)) {
+                        const TopComponent = intf.toComponent();
+                        if (!Hf.isFunction(TopComponent)) {
                             Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
                         } else {
-                            return React.createElement(topComponent);
+                            return React.createElement(TopComponent);
                         }
                     }
                 }
