@@ -64,8 +64,8 @@ export default CompositeElement({
          */
         renderToTarget: function renderToTarget () {
             const app = this;
-            const appComponent = app.getTopComponent();
-            if (!(Hf.isObject(appComponent) || Hf.isFunction(appComponent))) {
+            const AppComponent = app.getTopComponent();
+            if (!(Hf.isObject(AppComponent) || Hf.isFunction(AppComponent))) {
                 Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
             } else {
                 const ReactNativeRenderer = app.getRenderer();
@@ -76,7 +76,7 @@ export default CompositeElement({
                 }).of(ReactNativeRenderer)) {
                     Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React renderer is invalid.`);
                 } else {
-                    ReactNativeRenderer.AppRegistry.registerComponent(app.name, () => appComponent);
+                    ReactNativeRenderer.AppRegistry.registerComponent(app.name, () => AppComponent);
                 }
             }
         }
