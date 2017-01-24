@@ -279,3 +279,13 @@ Improvements:
     - Cleanup and refactored restart method in AppFactory.
 Bug fixes:
 ```
+**Development Beta Version 0.1.0-beta23 (01/24/2017)**
+```
+Notes:
+New Features:
+Breaking Changes:
+    - Removed toStandaloneComponent method from ReactAppComponentComposite. Reimplemented getTopComponent with option to covert to standalone component.
+Improvements:
+    - Added option to covert to standalone component for toComponent method in ReactComponentComposite.
+Bug fixes:
+```
