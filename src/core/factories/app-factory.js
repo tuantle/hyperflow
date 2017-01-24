@@ -91,9 +91,10 @@ export default Composer({
          * @description - Get the composed app top interface component from top level domain.
          *
          * @method getTopComponent
+         * @param {object} option
          * @return {object|function}
          */
-        this.getTopComponent = function getTopComponent () {
+        this.getTopComponent = function getTopComponent (option = {}) { // eslint-disable-line
             Hf.log(`warn0`, `AppFactory.getTopComponent - Method is not implemented by default.`);
         };
         /**
