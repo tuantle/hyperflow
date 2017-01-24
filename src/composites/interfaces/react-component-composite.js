@@ -36,7 +36,7 @@ const WILL_MOUNT_STAGE = 0;
 const DID_MOUNT_STAGE = 1;
 const WILL_UNMOUNT_STAGE = 2;
 
-const EXCEPTION_KEYS = [
+const DEFAULT_EXCEPTION_KEYS = [
     /* react specific methods and properties */
     `propTypes`,
     `defaultProps`,
@@ -60,7 +60,7 @@ const EXCEPTION_KEYS = [
     `getComponentComposites`
 ];
 
-const PURE_EXCEPTION_KEYS = [
+const DEFAULT_PURE_EXCEPTION_KEYS = [
     /* react specific methods and properties */
     `propTypes`,
     `defaultProps`,
@@ -296,10 +296,11 @@ export default CompositeElement({
                                 exception: {
                                     prefixes: [
                                         `on`,
+                                        `do`,
                                         `handle`,
                                         `render`
                                     ],
-                                    keys: PURE_EXCEPTION_KEYS
+                                    keys: DEFAULT_PURE_EXCEPTION_KEYS
                                 }
                             },
                             enclosure: {
@@ -349,18 +350,18 @@ export default CompositeElement({
                             Hf.log(`error`, `ReactComponentComposite.toPureComponent - React pure component definition is invalid.`);
                         } else {
                             let {
-                                pureRender: reactPureFunctionalComponent
+                                pureRender: PureComponent
                             } = reactPureDefinition;
 
-                            reactPureFunctionalComponent = reactPureFunctionalComponent.bind(reactPureDefinition);
+                            PureComponent = PureComponent.bind(reactPureDefinition);
 
                             /* allow React pure component function access to React propTypes */
-                            reactPureFunctionalComponent.propTypes = reactPureDefinition.propTypes;
+                            PureComponent.propTypes = reactPureDefinition.propTypes;
 
                             /* allow React pure component function access to default property */
-                            reactPureFunctionalComponent.defaultProps = reactPureDefinition.defaultProps;
+                            PureComponent.defaultProps = reactPureDefinition.defaultProps;
 
-                            return reactPureFunctionalComponent;
+                            return PureComponent;
                         }
                     }
                 }
@@ -369,19 +370,31 @@ export default CompositeElement({
              * @description - Convert composite to a renderable component.
              *
              * @method toComponent
+             * @param {object} applet
+             * @param {object} option
              * @returns {object}
              */
-            this.toComponent = function toComponent () {
+            this.toComponent = function toComponent (applet, option = {}) {
                 const intf = this;
                 const stateCursor = intf.getStateCursor();
                 const {
                     React
                 } = intf.getComponentLib();
+                const {
+                    exceptionKeys
+                } = Hf.fallback({
+                    exceptionKeys: []
+                }).of(option);
                 if (!Hf.isSchema({
                     PropTypes: `object`,
                     createClass: `function`
                 }).of(React)) {
                     Hf.log(`error`, `ReactComponentComposite.toComponent - React component is invalid.`);
+                } else if (Hf.isObject(applet) && !Hf.isSchema({
+                    start: `function`,
+                    stop: `function`
+                }).of(applet)) {
+                    Hf.log(`error`, `ReactComponentComposite.toComponent - Applet is invalid.`);
                 } else {
                     const stateless = intf.isStateless();
                     const defaultProperty = intf.getStateAsObject();
@@ -400,10 +413,11 @@ export default CompositeElement({
                             exception: {
                                 prefixes: [
                                     `on`,
+                                    `do`,
                                     `handle`,
                                     `render`
                                 ],
-                                keys: EXCEPTION_KEYS
+                                keys: DEFAULT_EXCEPTION_KEYS.concat(exceptionKeys)
                             }
                         },
                         enclosure: {
@@ -486,6 +500,10 @@ export default CompositeElement({
                                     const component = this;
 
                                     _mountStage = WILL_MOUNT_STAGE;
+
+                                    if (Hf.isObject(applet)) {
+                                        applet.start(option);
+                                    }
 
                                     if (!stateless) {
                                         /* this event is call ONLY when the state did mutate in store */
@@ -571,6 +589,10 @@ export default CompositeElement({
 
                                     _mountStage = WILL_UNMOUNT_STAGE;
 
+                                    if (Hf.isObject(applet)) {
+                                        applet.stop(option);
+                                    }
+
                                     intf.outgoing(`on-component-will-unmount`).emit(() => component);
                                 };
                                 /**
@@ -614,15 +636,15 @@ export default CompositeElement({
                             }
                         }
                     }).mixin(intf).resolve())();
-                    let reactComponent = React.createClass(reactDefinition);
+                    let Component = React.createClass(reactDefinition);
 
-                    /* allow React factory function access to the get interface function */
-                    reactComponent.getInterface = reactDefinition.getInterface;
+                    /* allow React factory function access to getInterface function */
+                    Component.getInterface = reactDefinition.getInterface;
 
-                    if (!Hf.isFunction(reactComponent)) {
+                    if (!Hf.isFunction(Component)) {
                         Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component definition is invalid.`);
                     } else {
-                        return reactComponent;
+                        return Component;
                     }
                 }
             };
