@@ -58,99 +58,19 @@ export default CompositeElement({
             }
         },
         /**
-         * @description - Wrap and convert app to a standalone component.
-         *
-         * @method toStandaloneComponent
-         * @param {object} defaultProperty
-         * @param {object} option
-         * @return {object}
-         */
-        toStandaloneComponent: function toStandaloneComponent (defaultProperty = {}, option = {}) {
-            const app = this;
-            const domain = app.getTopDomain();
-            if (!Hf.isSchema({
-                name: `string`,
-                getInterface: `function`
-            }).of(domain)) {
-                Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - App:${app.name} domain is invalid.`);
-            } else {
-                const intf = domain.getInterface();
-                if (!Hf.isSchema({
-                    getComponentLib: `function`,
-                    toComponent: `function`
-                }).of(intf)) {
-                    Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - App:${app.name} top domain:${domain.name} interface is invalid.`);
-                } else {
-                    const {
-                        React
-                    } = intf.getComponentLib();
-                    if (!Hf.isSchema({
-                        createClass: `function`
-                    }).of(React)) {
-                        Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - React is invalid.`);
-                    } else {
-                        const Component = intf.toComponent();
-                        const topComponent = React.createClass({
-                            /**
-                             * @description - React method for getting the default prop values.
-                             *
-                             * @method getDefaultProps
-                             * @returns {object}
-                             */
-                            getDefaultProps: function getDefaultProps () {
-                                return Hf.isObject(defaultProperty) ? defaultProperty : {};
-                            },
-                            /**
-                             * @description - React method for setting up component before mounting.
-                             *
-                             * @method componentWillMount
-                             * @returns void
-                             */
-                            componentWillMount: function componentWillMount () {
-                                app.start({
-                                    ...option,
-                                    doRenderToTarget: false
-                                });
-                            },
-                            /**
-                             * @description - React method for tearing down component before unmounting.
-                             *
-                             * @method componentWillMount
-                             * @returns void
-                             */
-                            componentWillUnMount: function componentWillUnMount () {
-                                app.stop(option);
-                            },
-                            /**
-                             * @description - React method for rendering.
-                             *
-                             * @method render
-                             * @returns {object}
-                             */
-                            render: function render () {
-                                const component = this;
-                                return (
-                                    <Component { ...component.props }/>
-                                );
-                            }
-                        });
-                        if (!Hf.isFunction(topComponent)) {
-                            Hf.log(`error`, `ReactAppComponentComposite.toStandaloneComponent - Unable to initialize a React app top component.`);
-                        } else {
-                            return topComponent;
-                        }
-                    }
-                }
-            }
-        },
-        /**
          * @description - Get the composed app top interface component from domain interface.
          *
          * @method getTopComponent
+         * @param {object} option
          * @return {object|function}
          */
-        getTopComponent: function getTopComponent () {
+        getTopComponent: function getTopComponent (option = {}) {
             const app = this;
+            const {
+                doConvertToStandaloneComponent
+            } = Hf.fallback({
+                doConvertToStandaloneComponent: false
+            }).of(option);
             const domain = app.getTopDomain();
             if (!Hf.isSchema({
                 name: `string`,
@@ -160,31 +80,26 @@ export default CompositeElement({
             } else {
                 const intf = domain.getInterface();
                 if (!Hf.isSchema({
-                    getComponentLib: `function`,
                     toComponent: `function`
                 }).of(intf)) {
                     Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} top domain:${domain.name} interface is invalid.`);
                 } else {
-                    const {
-                        React
-                    } = intf.getComponentLib();
-                    if (!Hf.isSchema({
-                        createClass: `function`
-                    }).of(React)) {
-                        Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
-                    } else {
-                        const Component = intf.toComponent(); // eslint-disable-line
-                        const topComponent = React.createClass({
-                            render: function render () {
-                                return (
-                                    <Component/>
-                                );
-                            }
+                    if (doConvertToStandaloneComponent) {
+                        const StandaloneComponent = intf.toComponent(app, {
+                            ...option,
+                            doRenderToTarget: false
                         });
-                        if (!Hf.isFunction(topComponent)) {
+                        if (!Hf.isFunction(StandaloneComponent)) {
+                            Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app standalone component.`);
+                        } else {
+                            return StandaloneComponent;
+                        }
+                    } else {
+                        const TopComponent = intf.toComponent();
+                        if (!Hf.isFunction(TopComponent)) {
                             Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
                         } else {
-                            return topComponent;
+                            return TopComponent;
                         }
                     }
                 }
