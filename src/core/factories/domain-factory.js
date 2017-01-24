@@ -371,7 +371,7 @@ export default Composer({
                         while (index < peerDomains.length - 1) {
                             peerDomains[index].observe(...peerDomains.slice(index + 1));
                             peerDomains.slice(index + 1).forEach((peerDomain) => peerDomain.observe(peerDomains[index])); // eslint-disable-line
-                            index += 1;
+                            index++;
                         }
                         domain.observe(..._peerDomains);
                         _peerDomains.forEach((peerDomain) => peerDomain.observe(domain));
@@ -536,8 +536,12 @@ export default Composer({
          */
         this.stop = function stop (done, option = {}) {
             const {
-                waitTime
+                waitTime,
+                resetStoreState,
+                resetAllServiceStates
             } = Hf.fallback({
+                resetStoreState: true,
+                resetAllServiceStates: true,
                 waitTime: DEFAULT_TEARDOWN_WAIT_TIME_IN_MS
             }).of(option);
 
@@ -607,7 +611,7 @@ export default Composer({
                             _store.teardown(() => {
                                 _store.deactivateIncomingStream();
                                 _store.deactivateOutgoingStream();
-                                if (Hf.isFunction(_store.reset)) {
+                                if (resetStoreState && Hf.isFunction(_store.reset)) {
                                     /* reset store state */
                                     _store.reset();
                                 }
@@ -625,7 +629,7 @@ export default Composer({
                                 service.teardown(() => {
                                     service.deactivateIncomingStream();
                                     service.deactivateOutgoingStream();
-                                    if (Hf.isFunction(service.reset)) {
+                                    if (resetAllServiceStates && Hf.isFunction(service.reset)) {
                                         /* reset service state */
                                         service.reset();
                                     }
