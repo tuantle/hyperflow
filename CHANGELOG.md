@@ -273,6 +273,8 @@ Notes:
 New Features:
 Breaking Changes:
 Improvements:
+    - Added options to reset store & service state when stopping domain in DomainFactory.
+    - Added option to app.stop when un-mounting component for toStandaloneComponent method in ReactAppComponentComposite.
     - Added timeout warning messages for start, stop, and restart methods in DomainFactory.
     - Cleanup and refactored restart method in AppFactory.
 Bug fixes:
