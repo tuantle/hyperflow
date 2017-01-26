@@ -32,6 +32,10 @@ import DataElement from './data-element';
 const PRIVATE_PREFIX = `_`;
 const INITIALIZATION_PREFIX = `$`;
 const DEFAULT_EXCLUSION_PREFIXES = [ PRIVATE_PREFIX, INITIALIZATION_PREFIX ];
+
+/* number mutations to persist in mutation map before roll-over */
+const DEFAULT_MUTATION_HISTORY_DEPTH = 20;
+
 /**
  * @description - A composite element prototypes.
  *
@@ -423,18 +427,25 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                         nextStateAccessor = originalStateAccessor;
 
                         Hf.clear(originalStateAccessorCache);
-                        /* reset all state data element mutation history recorded */
-                        data.flush(`state`);
                     },
                     /**
                      * @description - Clear all state mutation history.
                      *
                      * @method flushState
+                     * @param {object} option
                      * @return void
                      */
-                    flushState: function flushState () {
+                    flushState: function flushState (option = {}) {
+                        const {
+                            /* skip referal of pathIds in the exclusion list. */
+                            mutationHistoryDepth
+                        } = Hf.fallback({
+                            mutationHistoryDepth: DEFAULT_MUTATION_HISTORY_DEPTH
+                        }).of(option);
+
                         Hf.clear(originalStateAccessorCache);
                         /* reset all state data element mutation history recorded */
+                        data.setMutationHistoryDepth(mutationHistoryDepth);
                         data.flush(`state`);
                     },
                     /**
@@ -530,6 +541,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                 }, product);
 
                 /* reset all state data element mutation history recorded during init */
+                data.setMutationHistoryDepth(DEFAULT_MUTATION_HISTORY_DEPTH);
                 data.flush(`state`);
             } else {
                 product = composite.mixin(...Hf.collect(...Object.keys(enclosure)).from(enclosure)).getTemplate();
