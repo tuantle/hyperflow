@@ -9,34 +9,26 @@
  */
 'use strict'; // eslint-disable-line
 
+import { Hf } from '../../../src/hyperflow';
+
 import React from 'react';
 
 import ReactDOMServer from 'react-dom/server';
 
 import test from 'tape';
 
-import AppFactory from '../../../src/core/factories/app-factory';
-import DomainFactory from '../../../src/core/factories/domain-factory';
-import ServiceFactory from '../../../src/core/factories/service-factory';
-import StoreFactory from '../../../src/core/factories/store-factory';
-import IntfFactory from '../../../src/core/factories/interface-factory';
-
-import IntfComponentComposite from '../../../src/composites/interfaces/react-component-composite';
-import AppRendererComposite from '../../../src/composites/apps/server/react-app-component-composite';
-import AppComponentComposite from '../../../src/composites/apps/server/react-app-renderer-composite';
-
 export function runTests () {
     test(`AppFactory should work with all its features.`, (assert) => {
-        const TestStoreA = StoreFactory.augment({
+        const TestStoreA = Hf.Store.augment({
             setup: function setup (done) {
                 setTimeout(() => {
                     done();
                 }, 20000);
             }
         });
-        const TestInterfaceA = IntfFactory.augment({
+        const TestInterfaceA = Hf.Interface.augment({
             composites: [
-                IntfComponentComposite
+                Hf.React.ComponentComposite
             ],
             setup: function setup (done) {
                 done();
@@ -60,9 +52,9 @@ export function runTests () {
                 );
             }
         });
-        const TestInterfaceB = IntfFactory.augment({
+        const TestInterfaceB = Hf.Interface.augment({
             composites: [
-                IntfComponentComposite
+                Hf.React.ComponentComposite
             ],
             setup: function setup (done) {
                 done();
@@ -73,9 +65,9 @@ export function runTests () {
                 );
             }
         });
-        const TestInterfaceC = IntfFactory.augment({
+        const TestInterfaceC = Hf.Interface.augment({
             composites: [
-                IntfComponentComposite
+                Hf.React.ComponentComposite
             ],
             setup: function setup (done) {
                 done();
@@ -86,17 +78,17 @@ export function runTests () {
                 );
             }
         });
-        const TestServiceA = ServiceFactory.augment({
+        const TestServiceA = Hf.Service.augment({
             setup: function setup (done) {
                 done();
             }
         });
-        const TestServiceB = ServiceFactory.augment({
+        const TestServiceB = Hf.Service.augment({
             setup: function setup (done) {
                 done();
             }
         });
-        const TestPeerDomain = DomainFactory.augment({
+        const TestPeerDomain = Hf.Domain.augment({
             $init: function $init () {
                 const domain = this;
                 domain.register({
@@ -111,7 +103,7 @@ export function runTests () {
                 done();
             }
         });
-        const TestChildDomainA = DomainFactory.augment({
+        const TestChildDomainA = Hf.Domain.augment({
             $init: function $init () {
                 const domain = this;
                 domain.register({
@@ -124,7 +116,7 @@ export function runTests () {
                 done();
             }
         });
-        const TestChildDomainB = DomainFactory.augment({
+        const TestChildDomainB = Hf.Domain.augment({
             $init: function $init () {
                 const domain = this;
                 domain.register({
@@ -134,7 +126,7 @@ export function runTests () {
                 });
             }
         });
-        const TestDomain = DomainFactory.augment({
+        const TestDomain = Hf.Domain.augment({
             $init: function $init () {
                 const domain = this;
                 domain.register({
@@ -168,10 +160,10 @@ export function runTests () {
                 done();
             }
         });
-        const testApp = AppFactory.augment({
+        const testApp = Hf.App.augment({
             composites: [
-                AppRendererComposite,
-                AppComponentComposite
+                Hf.React.AppRendererComposite,
+                Hf.React.AppComponentComposite
             ],
             $init: function $init () {
                 const app = this;

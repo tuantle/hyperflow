@@ -19,11 +19,11 @@ require('../src/hyperflow').init({
 });
 
 /* load test specs for Hf modules */
-// var commonElementSpecs = require('./suites/elements/common-element-specs'); // eslint-disable-line
-// var dataElementSpecs = require('./suites/elements/data-element-specs'); // eslint-disable-line
-// var composerSpecs = require('./suites/composer-specs'); // eslint-disable-line
-// var eventStreamCompositeSpecs = require('./suites/factories/composites/event-stream-composite-specs'); // eslint-disable-line
-// var storeFactorySpecs = require('./suites/factories/store-factory-specs'); // eslint-disable-line
+var commonElementSpecs = require('./suites/elements/common-element-specs'); // eslint-disable-line
+var dataElementSpecs = require('./suites/elements/data-element-specs'); // eslint-disable-line
+var composerSpecs = require('./suites/composer-specs'); // eslint-disable-line
+var eventStreamCompositeSpecs = require('./suites/factories/composites/event-stream-composite-specs'); // eslint-disable-line
+var storeFactorySpecs = require('./suites/factories/store-factory-specs'); // eslint-disable-line
 var appFactorySpecs = require('./suites/factories/app-factory-specs'); // eslint-disable-line
 
 // commonElementSpecs.runTests();

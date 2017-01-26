@@ -11,14 +11,13 @@
 
 import test from 'tape';
 
-import StoreFactory from '../../../src/core/factories/store-factory';
-import StateTimeTraversalComposite from '../../../src/core/factories/composites/state-time-traversal-composite';
+import { Hf } from '../../../src/hyperflow';
 
 export function runTests () {
     test(`StoreFactory should work with all its features.`, (assert) => {
-        const TestStore = StoreFactory.augment({
+        const TestStore = Hf.Store.augment({
             composites: [
-                StateTimeTraversalComposite
+                Hf.State.TimeTraversalComposite
             ],
             static: {
                 fixed: {
