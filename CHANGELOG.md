@@ -1,5 +1,5 @@
 # [Hyperflow](https://github.com/tuantle/hyperflow)
-## A toolkit & library for developing universal app.
+## A state flow and mutation management toolkit & library for developing universal app
 
 ----
 
@@ -288,4 +288,14 @@ Breaking Changes:
 Improvements:
     - Added option to covert to standalone component for toComponent method in ReactComponentComposite.
 Bug fixes:
+```
+**Development Beta Version 0.1.0-beta24 (01/25/2017)**
+```
+Notes:
+New Features:
+Breaking Changes:
+Improvements:
+    - Code refactoring of how module dependencies are imported.
+Bug fixes:
+    - Hf.DEVELOPMENT flag should have the correct value after Hf.init is called.
 ```
