@@ -15,7 +15,7 @@
  *
  *------------------------------------------------------------------------
  *
- * @module Hyperflow (Hf) (A toolkit & library for developing universal app)
+ * @module Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.
  * @description - Hf namespace setup. Initialize Hf, adding core modules, and apply settings.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
@@ -24,62 +24,7 @@
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
-import CommonElement from './core/elements/common-element';
-
-/* load DataElement */
-import DataElement from './core/elements/data-element';
-
-/* load CompositeElement */
-import CompositeElement from './core/elements/composite-element';
-
-/* load Composer */
-import Composer from './core/composer';
-
-/* load StoreFactory */
-import StoreFactory from './core/factories/store-factory';
-
-/* load DomainFactory */
-import DomainFactory from './core/factories/domain-factory';
-
-/* load InterfaceFactory */
-import InterfaceFactory from './core/factories/interface-factory';
-
-/* load ServiceFactory */
-import ServiceFactory from './core/factories/service-factory';
-
-/* load AppFactory */
-import AppFactory from './core/factories/app-factory';
-
-/* load test AgentFactory */
-// import AgentFactory from './core/factories/agent-factory';
-
-/* load test FixtureFactory and composites */
-// import FixtureFactory from './core/factories/fixture-factory';
-// import DomainTestFixtureComposite from './core/factories/composites/test-fixtures/domain-test-fixture-composite';
-// import ServiceTestFixtureComposite from './core/factories/composites/test-fixtures/service-test-fixture-composite';
-// import StoreTestFixtureComposite from './core/factories/composites/test-fixtures/store-test-fixture-composite';
-// import InterfaceTestFixtureComposite from './core/factories/composites/test-fixtures/interface-test-fixture-composite';
-
-/* load test runner composites library */
-// import TapeTestRunnerComposite from './core/factories/composites/tape-test-runner-composite';
-
-/* load state composites library */
-import StateMutationComposite from './core/factories/composites/state-mutation-composite';
-import StateTimeTraversalComposite from './core/factories/composites/state-time-traversal-composite';
-
-/* load React composites library */
-import ReactComponentComposite from './composites/interfaces/react-component-composite';
-import ReactClientNativeAppComponentComposite from './composites/apps/client-native/react-app-component-composite';
-import ReactClientWebAppComponentComposite from './composites/apps/client-web/react-app-component-composite';
-import ReactServerAppComponentComposite from './composites/apps/server/react-app-component-composite';
-import ReactClientWebAppRendererComposite from './composites/apps/client-web/react-app-renderer-composite';
-import ReactClientNativeAppRendererComposite from './composites/apps/client-native/react-app-renderer-composite';
-import ReactServerAppRendererComposite from './composites/apps/server/react-app-renderer-composite';
-
-/* load service library */
-import WebStorageComposite from './composites/services/client-web/web-storage-composite';
-import ASyncStorageComposite from './composites/services/client-native/async-storage-composite';
-import PGComposite from './composites/services/server/pg-composite';
+const CommonElement = require(`./core/elements/common-element`).default;
 
 /* hyperflow global object */
 let Hf = null;
@@ -99,39 +44,55 @@ const init = function init ({
     enableWarn1Log = true
 } = {}) {
     if (Hf === null) {
-        const common = CommonElement({
+        Hf = CommonElement({
             enableProductionMode,
             enableInfoLog,
             enableWarn0Log,
             enableWarn1Log
         });
-        const HfProperty = {
-            VERSION: `0.1.0-beta23`,
+
+        /* Hyperflow core libraries */
+        const HfCoreProperty = {
+            VERSION: `0.1.0-beta24`,
             TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
-            /* set composer factory namespace */
-            Composer,
-            /* set data and composite element namespaces */
-            Data: DataElement,
-            Composite: CompositeElement,
-            /* set factory event stream Ids creator */
+            /* load Composer & set composer factory namespace */
+            Composer: require(`./core/composer`).default,
+            /* load DataElement & set data element namespaces */
+            Data: require(`./core/elements/data-element`).default,
+            /* load CompositeElement & set composite element namespaces */
+            Composite: require(`./core/elements/composite-element`).default
+        };
+
+        Hf = Hf.mix(Hf).with(HfCoreProperty);
+
+        /* Hyperflow core factory libraries */
+        const HfCoreFactoryProperty = {
+            /* set store, interface, domain, and service factory namespaces */
+            Domain: require(`./core/factories/domain-factory`).default,
+            Store: require(`./core/factories/store-factory`).default,
+            Interface: require(`./core/factories/interface-factory`).default,
+            Service: require(`./core/factories/service-factory`).default,
+            /* load test AgentFactory & set app factory namespace */
+            App: require(`./core/factories/app-factory`).default,
+            /* set factory event stream id map creator */
             Event: {
                 /**
-                 * @description - Function to contruct an event Id structure for factory event stream.
+                 * @description - Function to contruct an event id map for factory event stream.
                  *
                  * @function eventIdCreate
-                 * @param {object} eventIdObj - Event Id contructor object
+                 * @param {object} sourceEventMap - Event Id map contructor object
                  * @returns {object}
                  */
                 create: function create (sourceEventMap) {
-                    if (!common.isSchema({
+                    if (!Hf.isSchema({
                         asEvents: `array|undefined`,
                         onEvents: `array|undefined`,
                         doEvents: `array|undefined`,
                         requestEvents: `array|undefined`,
                         broadcastEvents: `array|undefined`
                     }).of(sourceEventMap)) {
-                        common.log(`error`, `Event.create - Input event map is invalid.`);
+                        Hf.log(`error`, `Event.create - Input event map is invalid.`);
                     } else {
                         /* helper function to convert dash to uppercase underscore */
                         const dashToUpperCaseUnderscore = function dashToUpperCaseUnderscore (str) {
@@ -142,7 +103,7 @@ const init = function init ({
 
                         const outputEventMap = Object.keys(sourceEventMap).reduce((_outputEventMap, key) => {
                             if (key === `asEvents`) {
-                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
                                     _outputEventMap[`AS`] = sourceEventMap[key].reduce((asEventMap, _key) => {
                                         asEventMap[
                                             dashToUpperCaseUnderscore(_key)
@@ -150,11 +111,11 @@ const init = function init ({
                                         return asEventMap;
                                     }, {});
                                 } else {
-                                    common.log(`error`, `Event.create - Input 'as' event keys are invalid.`);
+                                    Hf.log(`error`, `Event.create - Input 'as' event keys are invalid.`);
                                 }
                             }
                             if (key === `onEvents`) {
-                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
                                     _outputEventMap[`ON`] = sourceEventMap[key].reduce((onEventMap, _key) => {
                                         onEventMap[
                                             dashToUpperCaseUnderscore(_key)
@@ -162,11 +123,11 @@ const init = function init ({
                                         return onEventMap;
                                     }, {});
                                 } else {
-                                    common.log(`error`, `Event.create - Input 'on' event keys are invalid.`);
+                                    Hf.log(`error`, `Event.create - Input 'on' event keys are invalid.`);
                                 }
                             }
                             if (key === `doEvents`) {
-                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
                                     _outputEventMap[`DO`] = sourceEventMap[key].reduce((doEventMap, _key) => {
                                         doEventMap[
                                             dashToUpperCaseUnderscore(_key)
@@ -174,11 +135,11 @@ const init = function init ({
                                         return doEventMap;
                                     }, {});
                                 } else {
-                                    common.log(`error`, `Event.create - Input 'do' event keys are invalid.`);
+                                    Hf.log(`error`, `Event.create - Input 'do' event keys are invalid.`);
                                 }
                             }
                             if (key === `broadcastEvents`) {
-                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
                                     _outputEventMap[`BROADCAST`] = sourceEventMap[key].reduce((broadcastEventMap, _key) => {
                                         broadcastEventMap[
                                             dashToUpperCaseUnderscore(_key)
@@ -186,11 +147,11 @@ const init = function init ({
                                         return broadcastEventMap;
                                     }, {});
                                 } else {
-                                    common.log(`error`, `Event.create - Input 'broadcast' event keys are invalid.`);
+                                    Hf.log(`error`, `Event.create - Input 'broadcast' event keys are invalid.`);
                                 }
                             }
                             if (key === `requestEvents`) {
-                                if (sourceEventMap[key].every((_key) => common.isString(_key))) {
+                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
                                     _outputEventMap[`REQUEST`] = sourceEventMap[key].reduce((requestForEventMap, _key) => {
                                         requestForEventMap[
                                             dashToUpperCaseUnderscore(_key)
@@ -220,7 +181,7 @@ const init = function init ({
                                         }, {})
                                     };
                                 } else {
-                                    common.log(`error`, `Event.create - Input 'request-for' event keys are invalid.`);
+                                    Hf.log(`error`, `Event.create - Input 'request-for' event keys are invalid.`);
                                 }
                             }
                             return _outputEventMap;
@@ -229,87 +190,88 @@ const init = function init ({
                         return outputEventMap;
                     }
                 }
-            },
-            /* set store, interface, domain, and service factory namespaces */
-            Domain: DomainFactory,
-            Store: StoreFactory,
-            Interface: InterfaceFactory,
-            Service: ServiceFactory,
-            /* set app factory namespace */
-            App: AppFactory,
-            /* set test agent & fixtures factory namespace */
-            // Agent: AgentFactory,
-            // Fixture: FixtureFactory,
-            /* set state composite factory namespace */
+            }
+        };
+
+        Hf = Hf.mix(Hf).with(HfCoreFactoryProperty);
+
+        /* Hyperflow core factory composite libraries */
+        const HfCoreCompositeProperty = {
+            /* load state composites library & set state composite factory namespace */
             State: {
-                MutationComposite: StateMutationComposite,
-                TimeTraversalComposite: StateTimeTraversalComposite
-            },
-            /* set test fixtures composites namespace */
+                MutationComposite: require(`./core/factories/composites/state-mutation-composite`).default,
+                TimeTraversalComposite: require(`./core/factories/composites/state-time-traversal-composite`).default
+            }
+            /* load test FixtureFactory and AgentFactory & set test agent & fixtures factory namespace */
+            // Agent: require(`./core/factories/agent-factory`).default,
+            // Fixture: require(`./core/factories/fixture-factory`).default,
+            /* load & set test fixtures composites namespace */
             // Test: {
-            //     TapeRunnerComposite: TapeTestRunnerComposite,
-            //     DomainFixtureComposite: DomainTestFixtureComposite,
-            //     StoreFixtureComposite: StoreTestFixtureComposite,
-            //     InterfaceFixtureComposite: InterfaceTestFixtureComposite,
-            //     ServiceFixtureComposite: ServiceTestFixtureComposite
-            // },
-            /* set composite library namespace */
+            //     TapeRunnerComposite: require(`./core/factories/composites/tape-test-runner-composite`).default,
+            //     DomainFixtureComposite: require(`./core/factories/composites/test-fixtures/domain-test-fixture-composite`).default,
+            //     StoreFixtureComposite: require(`./core/factories/composites/test-fixtures/store-test-fixture-composite`).default,
+            //     InterfaceFixtureComposite: require(`./core/factories/composites/test-fixtures/interface-test-fixture-composite`).default,
+            //     ServiceFixtureComposite: require(`./core/factories/composites/test-fixtures/service-test-fixture-composite`).default
+            // }
+        };
+
+        Hf = Hf.mix(Hf).with(HfCoreCompositeProperty);
+
+        /* Hyperflow vendor factory composite libraries */
+        const HfCompositeProperty = {
+            /* load React composites library & set composite library namespace */
             React: {
-                ComponentComposite: ReactComponentComposite,
+                ComponentComposite: require(`./composites/interfaces/react-component-composite`).default,
                 AppComponentComposite: (() => {
                     switch (target) { // eslint-disable-line
                     case `client-native`:
-                        return ReactClientNativeAppComponentComposite;
+                        return require(`./composites/apps/client-native/react-app-component-composite`).default;
                     case `client-web`:
-                        return ReactClientWebAppComponentComposite;
+                        return require(`./composites/apps/client-web/react-app-component-composite`).default;
                     case `server`:
-                        return ReactServerAppComponentComposite;
+                        return require(`./composites/apps/server/react-app-component-composite`).default;
                     default:
-                        common.log(`error`, `Hf.Init - Invalid target:${target}.`);
+                        Hf.log(`error`, `Hf.Init - Invalid target:${target}.`);
                     }
                 })(),
                 AppRendererComposite: (() => {
                     switch (target) { // eslint-disable-line
                     case `client-native`:
-                        return ReactClientNativeAppRendererComposite;
+                        return require(`./composites/apps/client-native/react-app-renderer-composite`).default;
                     case `client-web`:
-                        return ReactClientWebAppRendererComposite;
+                        return require(`./composites/apps/client-web/react-app-renderer-composite`).default;
                     case `server`:
-                        return ReactServerAppRendererComposite;
+                        return require(`./composites/apps/server/react-app-renderer-composite`).default;
                     default:
-                        common.log(`error`, `Hf.Init - Invalid target:${target}.`);
+                        Hf.log(`error`, `Hf.Init - Invalid target:${target}.`);
                     }
                 })()
             },
+            /* load service library & set composite library namespace  */
             Storage: (() => {
                 switch (target) { // eslint-disable-line
                 case `client-native`:
                     return {
-                        ASyncStorageComposite
+                        ASyncStorageComposite: require(`./composites/services/client-native/async-storage-composite`).default
                     };
                 case `client-web`:
                     return {
-                        WebStorageComposite
+                        WebStorageComposite: require(`./composites/services/client-web/web-storage-composite`).default
                     };
                 case `server`:
                     return {
-                        PGComposite
+                        PGComposite: require(`./composites/services/server/pg-composite`).default
                     };
                 default:
-                    common.log(`error`, `Hf.Init - Invalid target:${target}.`);
+                    Hf.log(`error`, `Hf.Init - Invalid target:${target}.`);
                 }
             })()
         };
 
+        Hf = Hf.mix(Hf).with(HfCompositeProperty);
+
         /* create an initialized Hf object */
-        Hf = Object.freeze(common.mix(common, {
-            exclusion: {
-                /* hide reveal method, reveal is for internal use only */
-                keys: [
-                    `reveal`
-                ]
-            }
-        }).with(HfProperty));
+        Hf = Object.freeze(Hf);
     }
     return Hf;
 };
