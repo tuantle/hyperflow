@@ -30,7 +30,7 @@ const WILL_MOUNT_STAGE = 0;
 const DID_MOUNT_STAGE = 1;
 const WILL_UNMOUNT_STAGE = 2;
 
-const DEFAULT_EXCEPTION_KEYS = [
+const DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
     /* react specific methods and properties */
     `propTypes`,
     `defaultProps`,
@@ -54,7 +54,7 @@ const DEFAULT_EXCEPTION_KEYS = [
     `getComponentComposites`
 ];
 
-const DEFAULT_PURE_EXCEPTION_KEYS = [
+const DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
     /* react specific methods and properties */
     `propTypes`,
     `defaultProps`,
@@ -294,7 +294,7 @@ export default Hf.Composite({
                                         `handle`,
                                         `render`
                                     ],
-                                    keys: DEFAULT_PURE_EXCEPTION_KEYS
+                                    keys: DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS
                                 }
                             },
                             enclosure: {
@@ -375,9 +375,9 @@ export default Hf.Composite({
                     React
                 } = intf.getComponentLib();
                 const {
-                    exceptionKeys
+                    componentMethodAndPropertyInclusions
                 } = Hf.fallback({
-                    exceptionKeys: []
+                    componentMethodAndPropertyInclusions: []
                 }).of(option);
                 if (!Hf.isSchema({
                     PropTypes: `object`,
@@ -411,7 +411,7 @@ export default Hf.Composite({
                                     `handle`,
                                     `render`
                                 ],
-                                keys: DEFAULT_EXCEPTION_KEYS.concat(exceptionKeys)
+                                keys: DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS.concat(componentMethodAndPropertyInclusions)
                             }
                         },
                         enclosure: {
@@ -523,6 +523,7 @@ export default Hf.Composite({
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
                                     if (intf.reduceState(Hf.fallback(defaultProperty).of(Hf.mix(component.props, {
                                         exclusion: {
+                                            enumerablePropertiesOnly: true,
                                             keys: [ `*` ],
                                             exception: {
                                                 keys: defaultPropertyKeys.filter((key) => key !== `name` && key !== `fId`)
@@ -548,6 +549,7 @@ export default Hf.Composite({
                                     const currentProperty = intf.getStateAsObject();
                                     if (intf.reduceState(Hf.fallback(currentProperty).of(Hf.mix(nextProperty, {
                                         exclusion: {
+                                            enumerablePropertiesOnly: true,
                                             keys: [ `*` ],
                                             exception: {
                                                 keys: defaultPropertyKeys.filter((key) => key !== `name` && key !== `fId`)
