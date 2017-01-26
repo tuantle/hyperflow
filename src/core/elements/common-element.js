@@ -906,6 +906,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
             exclusion: {
                 prototypes: false,
                 properties: false,
+                enumerablePropertiesOnly: false,
                 prefixes: [ PRIVATE_PREFIX ],
                 postfixes: [],
                 keys: [],
@@ -990,7 +991,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
             }
 
             if (!exclusion.properties) {
-                result = Object.keys(Object.getPrototypeOf(source)).concat(Object.getOwnPropertyNames(source)).filter((key) => {
+                result = Object.keys(Object.getPrototypeOf(source)).concat(
+                    exclusion.enumerablePropertiesOnly ? Object.keys(source) : Object.getOwnPropertyNames(source)
+                ).filter((key) => {
                     return !common.isFunction(source[key]) && isIncluded(key);
                 }).reduce((_result, key) => {
                     const sourceObjDesc = Object.getOwnPropertyDescriptor(source, key);
@@ -1081,7 +1084,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         }
 
                         if (!exclusion.properties) {
-                            result = Object.keys(Object.getPrototypeOf(target)).concat(Object.getOwnPropertyNames(target)).filter((key) => {
+                            result = Object.keys(Object.getPrototypeOf(target)).concat(
+                                exclusion.enumerablePropertiesOnly ? Object.keys(target) : Object.getOwnPropertyNames(target)
+                            ).filter((key) => {
                                 return !common.isFunction(target[key]) && target.hasOwnProperty(key) && !result.hasOwnProperty(key) && isIncluded(key);
                             }).reduce((_result, key) => {
                                 const targetObjDesc = Object.getOwnPropertyDescriptor(target, key);
