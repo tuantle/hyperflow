@@ -23,14 +23,8 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
-/* load CompositeElement */
-import CompositeElement from '../../../core/elements/composite-element';
-
-/* load CommonElement */
-import CommonElement from '../../../core/elements/common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
+/* load Hyperflow */
+import { Hf } from '../../../hyperflow';
 
 /**
  * @description - A React client web component composite module.
@@ -38,7 +32,7 @@ const Hf = CommonElement();
  * @module ReactAppComponentComposite
  * @return {object}
  */
-export default CompositeElement({
+export default Hf.Composite({
     template: {
         /**
          * @description - Initialized and check that factory is valid for this composite.

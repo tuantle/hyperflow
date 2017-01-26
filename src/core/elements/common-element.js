@@ -1459,7 +1459,7 @@ export default function CommonElement ({
     enableWarn0Log = false,
     enableWarn1Log = true
 } = {}) {
-    enableProductionMode = CommonElementPrototype.isBoolean(enableProductionMode) ? enableProductionMode : true;
+    enableProductionMode = CommonElementPrototype.isBoolean(enableProductionMode) ? enableProductionMode : false;
     enableInfoLog = CommonElementPrototype.isBoolean(enableInfoLog) ? enableInfoLog : true;
     enableWarn0Log = CommonElementPrototype.isBoolean(enableWarn0Log) ? enableWarn0Log : true;
     enableWarn1Log = CommonElementPrototype.isBoolean(enableWarn1Log) ? enableWarn1Log : true;

@@ -23,6 +23,9 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../../hyperflow';
+
 /* load Rx dependency */
 // TODO: Upgrade to rxjs5
 // import rxjs from 'rxjs';
@@ -30,11 +33,6 @@ import Rx from 'rx';
 
 /* load tranducer dependency */
 import Transducer from 'transducers-js';
-
-import CompositeElement from '../../elements/composite-element';
-
-/* load CommonElement */
-import CommonElement from '../../elements/common-element';
 
 /* factory Ids */
 import {
@@ -44,9 +42,6 @@ import {
     SERVICE_FACTORY_CODE,
     STORE_FACTORY_CODE
 } from '../factory-code';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 const INCOMING_DIRECTION = 0;
 const OUTGOING_DIRECTION = 1;
@@ -66,7 +61,7 @@ const LOOPBACK_EVENT = 5;
  * @module EventStreamComposite
  * @return {object}
  */
-export default CompositeElement({
+export default Hf.Composite({
     template: {
         /**
          * @description - Initialized composite.

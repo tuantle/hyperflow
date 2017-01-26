@@ -26,16 +26,13 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
+
 /* load descriptors */
 import ConstrainableDescriptor from './descriptors/constrainable-descriptor';
 import ObservableDescriptor from './descriptors/observable-descriptor';
 import ComputableDescriptor from './descriptors/computable-descriptor';
-
-/* load CommonElement */
-import CommonElement from './common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /**
  * @description - A data descriptor element prototypes.

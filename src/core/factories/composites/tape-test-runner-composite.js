@@ -25,19 +25,13 @@
 
 import tape from 'tape';
 
-/* load CompositeElement */
-import CompositeElement from '../../elements/composite-element';
-
-/* load CommonElement */
-import CommonElement from '../../elements/common-element';
+/* load Hyperflow */
+import { Hf } from '../../../hyperflow';
 
 /* factory Ids */
 import {
     FIXTURE_FACTORY_CODE
 } from '../factory-code';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /**
  * @description - A tape test runner composite module.
@@ -45,7 +39,7 @@ const Hf = CommonElement();
  * @module TapeTestRunnerComposite
  * @return {object}
  */
-export default CompositeElement({
+export default Hf.Composite({
     template: {
         /**
          * @description - Initialized and check that factory is valid for this composite.

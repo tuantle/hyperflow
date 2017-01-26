@@ -23,14 +23,11 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
+
 /* load DataElement */
 import DataElement from './data-element';
-
-/* load CommonElement */
-import CommonElement from './common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 const PRIVATE_PREFIX = `_`;
 const INITIALIZATION_PREFIX = `$`;

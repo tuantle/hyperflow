@@ -24,14 +24,13 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../../hyperflow';
+
 /* load RxJs dependency */
+// TODO: Upgrade to rxjs5
+// import rxjs from 'rxjs';
 import Rx from 'rx';
-
-/* load CommonElement */
-import CommonElement from '../common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /**
  * @description - A emitter descriptor prototypes.

@@ -23,14 +23,11 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
+
 /* load undirected node */
 import TreeNodeElement from './tree-node-element';
-
-/* load CommonElement */
-import CommonElement from './common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /**
  * @description - An undirected tree element prototypes.

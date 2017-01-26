@@ -23,11 +23,8 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
-/* load CompositeElement */
-import CompositeElement from '../../elements/composite-element';
-
-/* load CommonElement */
-import CommonElement from '../../elements/common-element';
+/* load Hyperflow */
+import { Hf } from '../../../hyperflow';
 
 /* factory Ids */
 import {
@@ -35,16 +32,13 @@ import {
     STORE_FACTORY_CODE
 } from '../factory-code';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
-
 /**
  * @description - A persistent state time traversal composite module.
  *
  * @module StateTimeTraversalComposite
  * @return {object}
  */
-export default CompositeElement({
+export default Hf.Composite({
     // TODO: Needs more testing. Possible bug in resert and recall methods.
     template: {
         /**

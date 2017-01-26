@@ -23,20 +23,14 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
-/* load CompositeElement */
-import CompositeElement from '../../../elements/composite-element';
-
-/* load CommonElement */
-import CommonElement from '../../../elements/common-element';
+/* load Hyperflow */
+import { Hf } from '../../../../hyperflow';
 
 /* factory Ids */
 import {
     FIXTURE_FACTORY_CODE,
     INTERFACE_FACTORY_CODE
 } from '../../factory-code';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /* delay all data stream from intf by 1s as default */
 const DELAY_INTERFACE_IN_MS = 1000;
@@ -47,7 +41,7 @@ const DELAY_INTERFACE_IN_MS = 1000;
  * @module InterfaceTestFixtureComposite
  * @return {object}
  */
-export default CompositeElement({
+export default Hf.Composite({
     template: {
         /**
          * @description - Initialized and check that provider is valid for this composite.

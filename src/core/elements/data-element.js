@@ -24,6 +24,9 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
+
 /* load descriptor element */
 import DescriptorElement from './descriptor-element';
 
@@ -32,12 +35,6 @@ import DataCursorElement from './data-cursor-element';
 
 /* load undirected data tree element */
 import TreeElement from './tree-element';
-
-/* load CommonElement */
-import CommonElement from './common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /* the max number mutations to persist in mutation map before roll-over */
 const DEFAULT_MUTATION_HISTORY_DEPTH = 20;

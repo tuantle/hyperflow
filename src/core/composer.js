@@ -23,14 +23,11 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../hyperflow';
+
 /* load CompositeElement */
 import CompositeElement from './elements/composite-element';
-
-/* load CommonElement */
-import CommonElement from './elements/common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /**
  * @description - A composer factory prototypes.

@@ -23,11 +23,8 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
-/* load CommonElement */
-import CommonElement from '../common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
+/* load Hyperflow */
+import { Hf } from '../../../hyperflow';
 
 /**
  * @description - A constraint descriptor prototypes.

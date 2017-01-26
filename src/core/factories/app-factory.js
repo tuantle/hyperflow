@@ -23,19 +23,16 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
+
 /* load Composer */
 import Composer from '../composer';
-
-/* load CommonElement */
-import CommonElement from '../elements/common-element';
 
 /* factory Ids */
 import {
     DOMAIN_FACTORY_CODE
 } from './factory-code';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /**
  * @description - An app factory module.

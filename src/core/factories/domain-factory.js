@@ -23,14 +23,14 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
+
 /* load EventStreamComposite */
 import EventStreamComposite from './composites/event-stream-composite';
 
 /* load Composer */
 import Composer from '../composer';
-
-/* load CommonElement */
-import CommonElement from '../elements/common-element';
 
 /* factory Ids */
 import {
@@ -40,8 +40,6 @@ import {
     INTERFACE_FACTORY_CODE
 } from './factory-code';
 
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /* slow mode buffer timings */
 const SLOW_MODE_BUFFER_TIME_SPAN_IN_MS = 450;

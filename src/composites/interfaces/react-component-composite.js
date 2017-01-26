@@ -23,14 +23,8 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
-/* load CompositeElement */
-import CompositeElement from '../../core/elements/composite-element';
-
-/* load CommonElement */
-import CommonElement from '../../core/elements/common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
 
 const WILL_MOUNT_STAGE = 0;
 const DID_MOUNT_STAGE = 1;
@@ -79,7 +73,7 @@ const DEFAULT_PURE_EXCEPTION_KEYS = [
  * @module ReactComponentComposite
  * @return {object}
  */
-export default CompositeElement({
+export default Hf.Composite({
     template: {
         /**
          * @description - Initialized and check that factory is valid for this composite.
@@ -290,7 +284,7 @@ export default CompositeElement({
                             string: React.PropTypes.string,
                             number: React.PropTypes.number
                         };
-                        const reactPureDefinition = (CompositeElement({
+                        const reactPureDefinition = (Hf.Composite({
                             exclusion: {
                                 keys: [ `*` ],
                                 exception: {
@@ -407,7 +401,7 @@ export default CompositeElement({
                         string: React.PropTypes.string,
                         number: React.PropTypes.number
                     };
-                    const reactDefinition = (CompositeElement({
+                    const reactDefinition = (Hf.Composite({
                         exclusion: {
                             keys: [ `*` ],
                             exception: {

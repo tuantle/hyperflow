@@ -23,18 +23,15 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
+
 /* load default constrainable descriptor presets */
 import requiredPreset from './descriptors/presets/required-constrainable-preset';
 import boundedPreset from './descriptors/presets/bounded-constrainable-preset';
 import oneOfValuesPreset from './descriptors/presets/one-of-values-constrainable-preset';
 import oneOfTypesPreset from './descriptors/presets/one-of-types-constrainable-preset';
 import stronglyTypedPreset from './descriptors/presets/strongly-typed-constrainable-preset';
-
-/* load CommonElement */
-import CommonElement from './common-element';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /**
  * @description - A data cursor prototypes.

@@ -23,19 +23,16 @@
 /* @flow */
 'use strict'; // eslint-disable-line
 
+/* load Hyperflow */
+import { Hf } from '../../hyperflow';
+
 /* load Composer */
 import Composer from '../composer';
-
-/* load CommonElement */
-import CommonElement from '../elements/common-element';
 
 /* factory Ids */
 import {
     FIXTURE_FACTORY_CODE
 } from './factory-code';
-
-/* create CommonElement as Hf object */
-const Hf = CommonElement();
 
 /**
  * @description - A test agent factory module.
@@ -118,21 +115,18 @@ export default Composer({
         this.run = function run (option = {}) {
             const agent = this;
 
-            // TODO: Implement use case for agent run option.
-            option = Hf.isObject(option) ? option : {};
-
             if (Hf.isEmpty(_fixtures)) {
                 Hf.log(`error`, `AgentFactory.run - Test agent:${agent.name} is not registered with a test fixture.`);
             } else {
                 _fixtures.forEach((fixture) => {
                     if (!fixture.hasStarted()) {
-                        fixture.start(option, () => {
+                        fixture.start(() => {
                             Hf.log(`info`, `Running test fixture:${fixture.name}...`);
-                        });
+                        }, option);
                     } else {
-                        fixture.restart(option, () => {
+                        fixture.restart(() => {
                             Hf.log(`info`, `Rerunning test fixture:${fixture.name}...`);
-                        });
+                        }, option);
                         Hf.log(`warn1`, `AgentFactory.run - Test fixture:${fixture.name} is already running. Restarting...`);
                     }
                 });
