@@ -15,7 +15,6 @@
  *
  *------------------------------------------------------------------------
  *
- * @module Factory
  * @description - Factory prefix Id code.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
