@@ -36,10 +36,8 @@ import DataCursorElement from './data-cursor-element';
 /* load undirected data tree element */
 import TreeElement from './tree-element';
 
-/* the max number mutations to persist in mutation map before roll-over */
+/* number mutations to persist in mutation map before roll-over */
 const DEFAULT_MUTATION_HISTORY_DEPTH = 20;
-
-const INITIAL_TIMESTAMP_REF_IN_MS = (new Date().getTime());
 
 /**
  * @description - A data element prototypes.
@@ -177,15 +175,13 @@ const DataElementPrototype = Object.create({}).prototype = {
     _updateMMap: function _updateMMap (rootKey, option = {}) {
         const data = this;
         const mMap = data._mutation.mMap;
-        const mutationHistoryDepth = data._mutation.mutationHistoryDepth;
+        const mutationHistoryDepth = data._mutation.historyDepth;
         const rootContent = data._rootContent;
         const pathId = rootKey;
         const {
             /* skip referal of pathIds in the exclusion list. */
-            initialTimestampRef,
             excludedNonmutatioReferalPathIds
         } = Hf.fallback({
-            initialTimestampRef: INITIAL_TIMESTAMP_REF_IN_MS,
             excludedNonmutatioReferalPathIds: []
         }).of(option);
 
@@ -212,7 +208,7 @@ const DataElementPrototype = Object.create({}).prototype = {
 
                 newRootNode.freezeContent();
                 data._mutation.timeIndex[rootKey]++;
-                data._mutation.timestamp[rootKey].push((new Date()).getTime() - initialTimestampRef);
+                data._mutation.timestamp[rootKey].push((new Date()).getTime() - data._mutation.timestampRef);
 
                 if (mutationHistoryDepth > 0 && mMap.getRootCount() > mutationHistoryDepth) {
                     let timeIndexOffset = mutationHistoryDepth >> 1;
@@ -376,7 +372,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                 if (!immutableRootKeys.includes(rootKey)) {
                     immutableRootKeys.push(rootKey);
                     data._mutation.timeIndex[rootKey] = 0;
-                    data._mutation.timestamp[rootKey] = [ (new Date()).getTime() - INITIAL_TIMESTAMP_REF_IN_MS ];
+                    data._mutation.timestamp[rootKey] = [ (new Date()).getTime() - data._mutation.timestampRef ];
                 }
             } else {
                 // TODO: Test if setImmutability(false) would throw an error.
@@ -392,6 +388,24 @@ const DataElementPrototype = Object.create({}).prototype = {
             }
         } else {
             Hf.log(`error`, `DataElement.setImmutability - Root data content key:${rootKey} is undefined.`);
+        }
+    },
+    /**
+     * @description - Set the max number of mutation before roll over is occured.
+     *
+     * @method setMutationHistoryDepth
+     * @param {number} mutationHistoryDepth
+     * @return void
+     */
+    setMutationHistoryDepth: function setMutationHistoryDepth (mutationHistoryDepth) {
+        const data = this;
+        if (!Hf.isNumeric(mutationHistoryDepth) && mutationHistoryDepth > 1) {
+            Hf.log(`error`, `DataElement.select - Input mutation history depth is invalid.`);
+        } else {
+            if (mutationHistoryDepth < DEFAULT_MUTATION_HISTORY_DEPTH) {
+                Hf.log(`warn1`, `DataElement.select - Input mutation history depth value:${mutationHistoryDepth} is less than default value of:${DEFAULT_MUTATION_HISTORY_DEPTH}.`);
+            }
+            data._mutation.historyDepth = mutationHistoryDepth;
         }
     },
     /**
@@ -415,8 +429,9 @@ const DataElementPrototype = Object.create({}).prototype = {
                     timeIndexOffset--;
                     mMap.cutRoot(`${rootKey}${timeIndexOffset}`);
                 }
+                data._mutation.timestampRef = new Date().getTime();
                 data._mutation.timeIndex[rootKey] = 0;
-                data._mutation.timestamp[rootKey] = [ (new Date()).getTime() - INITIAL_TIMESTAMP_REF_IN_MS ];
+                data._mutation.timestamp[rootKey] = [ 0 ];
             }
         } else {
             Hf.log(`warn0`, `DataElement.flush - Root data content key:${rootKey} is undefined.`);
@@ -656,11 +671,9 @@ const DataElementPrototype = Object.create({}).prototype = {
  * @description - A data element module.
  * @module DataElement
  * @description - A component`s data element module.
- * @param {object} mutationHistoryDepth - The max depth of mutation history record.
  * @return {object}
  */
-export default function DataElement (mutationHistoryDepth = DEFAULT_MUTATION_HISTORY_DEPTH) {
-    mutationHistoryDepth = Hf.isInteger(mutationHistoryDepth) ? mutationHistoryDepth : DEFAULT_MUTATION_HISTORY_DEPTH;
+export default function DataElement () {
     const element = Object.create(DataElementPrototype, {
         _descriptor: {
             value: DescriptorElement(),
@@ -681,7 +694,8 @@ export default function DataElement (mutationHistoryDepth = DEFAULT_MUTATION_HIS
                 mMap: TreeElement(),
                 timeIndex: {},
                 timestamp: {},
-                mutationHistoryDepth
+                historyDepth: DEFAULT_MUTATION_HISTORY_DEPTH,
+                timestampRef: new Date().getTime()
             },
             writable: false,
             configurable: true,
