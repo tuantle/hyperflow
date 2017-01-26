@@ -1,5 +1,5 @@
 # [Hyperflow](https://github.com/tuantle/hyperflow)
-## A toolkit & library for developing universal app.
+## A state flow and mutation management toolkit & library for developing universal app
 
 Hyperflow enables you to build universal application experiences on client (native or browser) and server platforms using a consistent developer experience based on JavaScript.
 
