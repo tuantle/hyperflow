@@ -72,6 +72,17 @@ export default Hf.Composite({
             }
         },
         /**
+         * @description - Clear all state mutation history.
+         *
+         * @method flush
+         * @param {object} option
+         * @return void
+         */
+        flush: function flush (option = {}) {
+            const factory = this;
+            factory.flushState(option);
+        },
+        /**
          * @description - Time traverse to the previous state mutation from time history at path Id.
          *                Head state cursor changes back to the previous timeIndex.
          *
