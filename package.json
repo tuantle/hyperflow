@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta24",
+    "version": "0.1.0-beta25",
     "registry": "github",
     "description": "Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",
@@ -48,13 +48,6 @@
         "react": "=15.4.2",
         "react-dom": "=15.4.2"
     },
-    "modulePathIgnorePatterns": [
-        "/node_modules/",
-        "/jspm_packages/"
-    ],
-    "testPathIgnorePatterns": [
-        "/tests/"
-    ],
     "scripts": {
         "start-unit-tests": "NODE_ENV=development node ./__tests__/test-suites"
     }

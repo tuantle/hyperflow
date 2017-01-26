@@ -51,9 +51,9 @@ const init = function init ({
             enableWarn1Log
         });
 
-        /* Hyperflow core libraries */
+        /* Hyperflow core element libraries */
         const HfCoreProperty = {
-            VERSION: `0.1.0-beta24`,
+            VERSION: `0.1.0-beta25`,
             TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
             /* load Composer & set composer factory namespace */
@@ -76,121 +76,7 @@ const init = function init ({
             /* load test AgentFactory & set app factory namespace */
             App: require(`./core/factories/app-factory`).default,
             /* set factory event stream id map creator */
-            Event: {
-                /**
-                 * @description - Function to contruct an event id map for factory event stream.
-                 *
-                 * @function eventIdCreate
-                 * @param {object} sourceEventMap - Event Id map contructor object
-                 * @returns {object}
-                 */
-                create: function create (sourceEventMap) {
-                    if (!Hf.isSchema({
-                        asEvents: `array|undefined`,
-                        onEvents: `array|undefined`,
-                        doEvents: `array|undefined`,
-                        requestEvents: `array|undefined`,
-                        broadcastEvents: `array|undefined`
-                    }).of(sourceEventMap)) {
-                        Hf.log(`error`, `Event.create - Input event map is invalid.`);
-                    } else {
-                        /* helper function to convert dash to uppercase underscore */
-                        const dashToUpperCaseUnderscore = function dashToUpperCaseUnderscore (str) {
-                            return str.replace(/-([a-z])/g, (match, word) => {
-                                return `_${word}`;
-                            }).toUpperCase();
-                        };
-
-                        const outputEventMap = Object.keys(sourceEventMap).reduce((_outputEventMap, key) => {
-                            if (key === `asEvents`) {
-                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
-                                    _outputEventMap[`AS`] = sourceEventMap[key].reduce((asEventMap, _key) => {
-                                        asEventMap[
-                                            dashToUpperCaseUnderscore(_key)
-                                        ] = `as-${_key}`;
-                                        return asEventMap;
-                                    }, {});
-                                } else {
-                                    Hf.log(`error`, `Event.create - Input 'as' event keys are invalid.`);
-                                }
-                            }
-                            if (key === `onEvents`) {
-                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
-                                    _outputEventMap[`ON`] = sourceEventMap[key].reduce((onEventMap, _key) => {
-                                        onEventMap[
-                                            dashToUpperCaseUnderscore(_key)
-                                        ] = `on-${_key}`;
-                                        return onEventMap;
-                                    }, {});
-                                } else {
-                                    Hf.log(`error`, `Event.create - Input 'on' event keys are invalid.`);
-                                }
-                            }
-                            if (key === `doEvents`) {
-                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
-                                    _outputEventMap[`DO`] = sourceEventMap[key].reduce((doEventMap, _key) => {
-                                        doEventMap[
-                                            dashToUpperCaseUnderscore(_key)
-                                        ] = `do-${_key}`;
-                                        return doEventMap;
-                                    }, {});
-                                } else {
-                                    Hf.log(`error`, `Event.create - Input 'do' event keys are invalid.`);
-                                }
-                            }
-                            if (key === `broadcastEvents`) {
-                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
-                                    _outputEventMap[`BROADCAST`] = sourceEventMap[key].reduce((broadcastEventMap, _key) => {
-                                        broadcastEventMap[
-                                            dashToUpperCaseUnderscore(_key)
-                                        ] = `broadcast-${_key}`;
-                                        return broadcastEventMap;
-                                    }, {});
-                                } else {
-                                    Hf.log(`error`, `Event.create - Input 'broadcast' event keys are invalid.`);
-                                }
-                            }
-                            if (key === `requestEvents`) {
-                                if (sourceEventMap[key].every((_key) => Hf.isString(_key))) {
-                                    _outputEventMap[`REQUEST`] = sourceEventMap[key].reduce((requestForEventMap, _key) => {
-                                        requestForEventMap[
-                                            dashToUpperCaseUnderscore(_key)
-                                        ] = `request-for-${_key}`;
-                                        return requestForEventMap;
-                                    }, {});
-                                    _outputEventMap[`RESPONSE`] = {
-                                        WITH: sourceEventMap[key].reduce((responseToEventMap, _key) => {
-                                            responseToEventMap[
-                                                dashToUpperCaseUnderscore(_key)
-                                            ] = `response-with-${_key}`;
-                                            return responseToEventMap;
-                                        }, {}),
-                                        TO: sourceEventMap[key].reduce((responseToEventMap, _key) => {
-                                            responseToEventMap[
-                                                dashToUpperCaseUnderscore(_key)
-                                            ] = {
-                                                OK: `response-to-${_key}-ok`,
-                                                ERROR: `response-to-${_key}-error`,
-                                                CANCELED: `response-to-${_key}-canceled`,
-                                                CONFLICT: `response-to-${_key}-conflict`,
-                                                NOT_FOUND: `response-to-${_key}-not-found`,
-                                                NOT_MODIFIED: `response-to-${_key}-not-modified`,
-                                                UNAUTHORIZED: `response-to-${_key}-unauthorized`
-                                            };
-                                            return responseToEventMap;
-                                        }, {})
-                                    };
-                                } else {
-                                    Hf.log(`error`, `Event.create - Input 'request-for' event keys are invalid.`);
-                                }
-                            }
-                            return _outputEventMap;
-                        }, {});
-                        // return Object.freeze(outputEventMap);
-                        return outputEventMap;
-                    }
-                }
-            }
+            Event: require(`./core/factories/factory-event`).default
         };
 
         Hf = Hf.mix(Hf).with(HfCoreFactoryProperty);

@@ -299,3 +299,17 @@ Improvements:
 Bug fixes:
     - Hf.DEVELOPMENT flag should have the correct value after Hf.init is called.
 ```
+**Development Beta Version 0.1.0-beta25 (01/26/2017)**
+```
+Notes:
+New Features:
+    - Added flush alias method for flushState in StateTimeTraversalComposite.
+    - Added enumerablePropertiesOnly exclusion option to mix method in CommonElement.
+    - Added option param to flushState method in CompositeElement, flushState now will not reset current state. Calling resetState now will not flush mutation history.
+    - Add setMutationHistoryDepth method to DataElement, allowing setting of number mutations to persist in mutation map before roll-over.
+    - Improved mutation history timestamp recording. Mutation history timestamp reference is reset when flush is called for DataElement.
+Breaking Changes:
+Improvements:
+Bug fixes:
+    - Fixed React "ref" warning when interface is updating properties from component during componentWillMount and componentWillReceiveProps for ReactComponentComposite.
+```
