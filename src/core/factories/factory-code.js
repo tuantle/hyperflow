@@ -23,13 +23,17 @@
 'use strict'; // eslint-disable-line
 
 /* factory Ids */
-const DOMAIN_FACTORY_CODE = `d-rh4vs7`;
-const SERVICE_FACTORY_CODE = `s-2x9fte`;
-const STORE_FACTORY_CODE = `s-frw4p7`;
-const INTERFACE_FACTORY_CODE = `i-bthq44`;
-const FIXTURE_FACTORY_CODE = `t-aer6x2`;
+const APP_FACTORY_CODE = `a-rDE8KtzgYxpmdvaauLUXdejw`;
+const AGENT_FACTORY_CODE = `a-xvnQscHyjmnDXknijYzNaK8d`;
+const DOMAIN_FACTORY_CODE = `d-MbzAUNsGCWVRN4cYnnKMXrhH`;
+const SERVICE_FACTORY_CODE = `s-VTnf9gRpwsoApZTNYnAiJKDh`;
+const STORE_FACTORY_CODE = `s-VxiQKJivmJBQetNCsF9sbwyn`;
+const INTERFACE_FACTORY_CODE = `i-oUdiaxwfDYzG3WGTwBHhWHmH`;
+const FIXTURE_FACTORY_CODE = `t-uThfPdhtQXJGvX8fbHPYLaNy`;
 
 export {
+    APP_FACTORY_CODE,
+    AGENT_FACTORY_CODE,
     DOMAIN_FACTORY_CODE,
     SERVICE_FACTORY_CODE,
     STORE_FACTORY_CODE,
