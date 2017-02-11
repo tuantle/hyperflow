@@ -26,6 +26,11 @@
 /* load Hyperflow */
 import { Hf } from '../../hyperflow';
 
+/* factory Ids */
+import {
+    APP_FACTORY_CODE
+} from '../../core/factories/factory-code';
+
 const WILL_MOUNT_STAGE = 0;
 const DID_MOUNT_STAGE = 1;
 const WILL_UNMOUNT_STAGE = 2;
@@ -384,10 +389,13 @@ export default Hf.Composite({
                     createClass: `function`
                 }).of(React)) {
                     Hf.log(`error`, `ReactComponentComposite.toComponent - React component is invalid.`);
-                } else if (Hf.isObject(applet) && !Hf.isSchema({
+                } else if (Hf.isObject(applet) && (!Hf.isSchema({
+                    fId: `string`,
+                    name: `string`,
+                    hasStarted: `function`,
                     start: `function`,
                     stop: `function`
-                }).of(applet)) {
+                }).of(applet) || applet.fId.substr(0, APP_FACTORY_CODE.length) !== APP_FACTORY_CODE)) {
                     Hf.log(`error`, `ReactComponentComposite.toComponent - Applet is invalid.`);
                 } else {
                     const stateless = intf.isStateless();
@@ -496,7 +504,12 @@ export default Hf.Composite({
                                     _mountStage = WILL_MOUNT_STAGE;
 
                                     if (Hf.isObject(applet)) {
-                                        applet.start(option);
+                                        if (applet.hasStarted()) {
+                                            Hf.log(`warn1`, `ReactComponentComposite.toComponent - Interface:${intf.name} of applet:${applet.name} is still mounted.`);
+                                            applet.restart(option);
+                                        } else {
+                                            applet.start(option);
+                                        }
                                     }
 
                                     if (!stateless) {
