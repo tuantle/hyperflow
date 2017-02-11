@@ -53,7 +53,7 @@ export function runTests () {
         const store = TestStore({
             name: `test-store`
         });
-        let mutated = false;
+        // let mutated = false;
 
         store.reconfig({
             catalog: {
@@ -175,9 +175,11 @@ export function runTests () {
         //     }
         // });
 
-        console.log(mutated);
-        // console.log(JSON.stringify(store.recallAll(`test`), null, `\t`));
-        console.log(JSON.stringify(store, null, `\t`));
+        // console.log(mutated);
+        console.log(JSON.stringify(store.recallAll(`catalog`), null, `\t`));
+        store.flush();
+        console.log(JSON.stringify(store.recallAll(`catalog`), null, `\t`));
+        // console.log(JSON.stringify(store, null, `\t`));
         assert.end();
     });
 }
