@@ -31,6 +31,7 @@ import Composer from '../composer';
 
 /* factory Ids */
 import {
+    APP_FACTORY_CODE,
     DOMAIN_FACTORY_CODE
 } from './factory-code';
 
@@ -45,6 +46,16 @@ export default Composer({
             value: `unnamed`,
             stronglyTyped: true,
             required: true
+        },
+        fId: {
+            computable: {
+                contexts: [
+                    `name`
+                ],
+                compute () {
+                    return `${APP_FACTORY_CODE}-${this.name}`;
+                }
+            }
         }
     },
     AppFactory: function AppFactory () {
@@ -60,6 +71,20 @@ export default Composer({
          */
         this.$init = function $init () {
             Hf.log(`warn0`, `AppFactory.$init - Method is not implemented by default.`);
+        };
+        /**
+         * @description - Check if app has started.
+         *
+         * @method hasStarted
+         * @return {boolean}
+         */
+        this.hasStarted = function hasStarted () {
+            const app = this;
+            if (!Hf.isObject(_domain)) {
+                Hf.log(`error`, `AppFactory.hasStarted - App:${app.name} is not registered with a domain.`);
+            } else {
+                return _domain.hasStarted();
+            }
         };
         /**
          * @description - Render app top level component to the target env.
