@@ -1,5 +1,7 @@
-# [Hyperflow](https://github.com/tuantle/hyperflow) [![npm version](https://img.shields.io/npm/v/hyperflow.svg?style=flat)](https://www.npmjs.com/package/hyperflow)
+# [Hyperflow](https://github.com/tuantle/hyperflow)
 ## A state flow and mutation management toolkit & library for developing universal app
+[![npm version](https://img.shields.io/npm/v/hyperflow.svg?style=flat)](https://www.npmjs.com/package/hyperflow)
+[![npm downloads](https://img.shields.io/npm/dm/hyperflow.svg?style=flat-square)](https://www.npmjs.com/package/hyperflow)
 
 Hyperflow enables you to build universal application experiences on client (native or browser) and server platforms using a consistent developer experience based on JavaScript.
 
