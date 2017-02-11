@@ -175,7 +175,6 @@ export function runTests () {
         //     }
         // });
 
-        // console.log(mutated);
         console.log(JSON.stringify(store.recallAll(`catalog`), null, `\t`));
         store.flush();
         console.log(JSON.stringify(store.recallAll(`catalog`), null, `\t`));
