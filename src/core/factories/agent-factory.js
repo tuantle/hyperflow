@@ -31,6 +31,7 @@ import Composer from '../composer';
 
 /* factory Ids */
 import {
+    AGENT_FACTORY_CODE,
     FIXTURE_FACTORY_CODE
 } from './factory-code';
 
@@ -45,6 +46,16 @@ export default Composer({
             value: `unnamed`,
             stronglyTyped: true,
             required: true
+        },
+        fId: {
+            computable: {
+                contexts: [
+                    `name`
+                ],
+                compute () {
+                    return `${AGENT_FACTORY_CODE}-${this.name}`;
+                }
+            }
         }
     },
     AgentFactory: function AgentFactory () {
