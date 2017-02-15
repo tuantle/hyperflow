@@ -2,6 +2,17 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Beta Version 0.1.0-beta27 (02/14/2017)**
+```
+Notes:
+New Features:
+    - Upgrades even stream to use rxjs version 5.
+Breaking Changes:
+Improvements:
+Bug fixes:
+    - Removed stream emitter onCompleted call in deactivateOutgoingStream method for EventStreamComposite.
+    - Removed postDismountStage template method in ReactComponentComposite.
+```
 **Development Beta Version 0.1.0-beta26 (02/09/2017)**
 ```
 Notes:
