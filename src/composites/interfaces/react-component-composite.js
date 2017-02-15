@@ -185,28 +185,6 @@ export default Hf.Composite({
             }
         },
         /**
-         * @description - Handle logic at component postdismounting stage.
-         *
-         * @method postDismountStage
-         * @param {function} handler
-         * @return void
-         */
-        postDismountStage: function postDismountStage (handler) {
-            const intf = this;
-            if (!Hf.isFunction(handler)) {
-                Hf.log(`error`, `ReactComponentComposite.postDismountStage - Input handler function is invalid.`);
-            } else {
-                // intf.incoming(`on-component-did-unmount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
-                //     handler(component);
-                // });
-                intf.incoming(`on-component-did-unmount`).handle((component) => {
-                    if (component.props.fId === intf.fId) {
-                        handler(component);
-                    }
-                });
-            }
-        },
-        /**
          * @description - Handle logic at component prepare to update stage.
          *
          * @method preUpdateStage
@@ -598,11 +576,11 @@ export default Hf.Composite({
 
                                     _mountStage = WILL_UNMOUNT_STAGE;
 
+                                    intf.outgoing(`on-component-will-unmount`).emit(() => component);
+
                                     if (Hf.isObject(applet)) {
                                         applet.stop(option);
                                     }
-
-                                    intf.outgoing(`on-component-will-unmount`).emit(() => component);
                                 };
                                 /**
                                  * @description - React method for preparing component before updating.
