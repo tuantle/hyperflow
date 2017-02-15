@@ -27,12 +27,7 @@
 import { Hf } from '../../../hyperflow';
 
 /* load Rx dependency */
-// TODO: Upgrade to rxjs5
-// import rxjs from 'rxjs';
-import Rx from 'rx';
-
-/* load tranducer dependency */
-import Transducer from 'transducers-js';
+import Rx from 'rxjs/Rx';
 
 /* factory Ids */
 import {
@@ -108,15 +103,15 @@ export default Hf.Composite({
             let _sourceRegistrationCache = {};
 
             /* creating factory event stream observer */
-            const _observer = Rx.Observer.create(
+            const _observer = Rx.Subscriber.create(
                 /**
                  * @description - On subscription to next incoming payload...
                  *
-                 * @method onNext
+                 * @method next
                  * @param {array} payloads - Incoming payloads
                  * @return void
                  */
-                function onNext (...payloads) {
+                function next (...payloads) {
                     payloads.forEach((payload) => {
                         if (Hf.isSchema({
                             eventId: `string`
@@ -166,27 +161,27 @@ export default Hf.Composite({
                                 }
                             }
                         } else {
-                            Hf.log(`error`, `EventStreamComposite.onNext - Payload event Id is invalid.`);
+                            Hf.log(`error`, `EventStreamComposite.next - Payload event Id is invalid.`);
                         }
                     });
                 },
                 /**
                  * @description - On subscription to error...
                  *
-                 * @method onError
+                 * @method next
                  * @param {string} error
                  * @return void
                  */
-                function onError (error) {
-                    Hf.log(`error`, `EventStreamComposite.onError - Subscription error. ${error.message}`);
+                function next (error) {
+                    Hf.log(`error`, `EventStreamComposite.next - Subscription error. ${error.message}`);
                 },
                 /**
                  * @description - On subscription to completion...
                  *
-                 * @method onCompleted
+                 * @method complete
                  * @return void
                  */
-                function onCompleted () {
+                function complete () {
                     Hf.log(`info`, `Subscription completed.`);
                 }
             );
@@ -319,16 +314,16 @@ export default Hf.Composite({
                         } else {
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.select(selector).share();
+                                _incomingStream = _incomingStream.map(selector).share();
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.select(selector).share();
+                                _outgoingStream = _outgoingStream.map(selector).share();
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.select(selector).share();
+                                _divertedIncomingStream = _divertedIncomingStream.map(selector).share();
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.select(selector).share();
+                                _divertedOutgoingStream = _divertedOutgoingStream.map(selector).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.map - Invalid direction:${direction}.`);
@@ -352,16 +347,16 @@ export default Hf.Composite({
                         } else {
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.selectMany(selector, resultSelector).share();
+                                _incomingStream = _incomingStream.flatMap(selector, resultSelector).share();
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.selectMany(selector, resultSelector).share();
+                                _outgoingStream = _outgoingStream.flatMap(selector, resultSelector).share();
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.selectMany(selector, resultSelector).share();
+                                _divertedIncomingStream = _divertedIncomingStream.flatMap(selector, resultSelector).share();
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.selectMany(selector, resultSelector).share();
+                                _divertedOutgoingStream = _divertedOutgoingStream.flatMap(selector, resultSelector).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.flatMap - Invalid direction:${direction}.`);
@@ -421,51 +416,6 @@ export default Hf.Composite({
                                 default:
                                     Hf.log(`error`, `EventStreamComposite.reduce - Invalid direction:${direction}.`);
                                 }
-                            }
-                        }
-                        return operator;
-                    },
-                    /**
-                     * @description - At observable stream, operates a transducer on the entire stream.
-                     *
-                     * @method transduce
-                     * @param {function} selector
-                     * @param {function} predicate
-                     * @return {object}
-                     */
-                    transduce: function transduce (selector, predicate) {
-                        if (!Hf.isFunction(selector)) {
-                            Hf.log(`error`, `EventStreamComposite.transduce - Input map selector function is invalid.`);
-                        } else if (!Hf.isFunction(predicate)) {
-                            Hf.log(`error`, `EventStreamComposite.transduce - Input filter predicate function is invalid.`);
-                        } else {
-                            switch (direction) { // eslint-disable-line
-                            case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.transduce(Transducer.comp(
-                                    Transducer.map(selector),
-                                    Transducer.filter(predicate)
-                                )).share();
-                                break;
-                            case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.transduce(Transducer.comp(
-                                    Transducer.map(selector),
-                                    Transducer.filter(predicate)
-                                )).share();
-                                break;
-                            case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.transduce(Transducer.comp(
-                                    Transducer.map(selector),
-                                    Transducer.filter(predicate)
-                                )).share();
-                                break;
-                            case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.transduce(Transducer.comp(
-                                    Transducer.map(selector),
-                                    Transducer.filter(predicate)
-                                )).share();
-                                break;
-                            default:
-                                Hf.log(`error`, `EventStreamComposite.transduce - Invalid direction:${direction}.`);
                             }
                         }
                         return operator;
@@ -577,39 +527,36 @@ export default Hf.Composite({
                      *
                      * @method backPressure
                      * @param {number} ms - Maximum time length of a buffer.
-                     * @param {number} count - Maximum element count of a buffer.
                      * @return {object}
                      */
-                    backPressure: function backPressure (ms, count) {
+                    backPressure: function backPressure (ms) {
                         if (!Hf.isInteger(ms)) {
                             Hf.log(`error`, `EventStreamComposite.backPressure - Input buffer time window is invalid.`);
-                        } else if (!Hf.isInteger(count)) {
-                            Hf.log(`error`, `EventStreamComposite.backPressure - Input buffer count window is invalid.`);
                         } else {
                             if (ms < 1) {
                                 ms = 1;
                                 Hf.log(`warn1`, `EventStreamComposite.backPressure - Input buffer time span should be greater than 0. Reset to 1ms.`);
                             }
 
-                            // FIXME: needs to reimplement flat map the outputs of bufferWithTimeOrCount.
+                            // FIXME: needs to reimplement flat map the outputs of bufferTime.
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.bufferWithTimeOrCount(ms, count).filter((payloads) => {
+                                _incomingStream = _incomingStream.bufferTime(ms).filter((payloads) => {
                                     return !Hf.isEmpty(payloads);
                                 }).flatMap((payload) => payload).share();
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.bufferWithTimeOrCount(ms, count).filter((payloads) => {
+                                _outgoingStream = _outgoingStream.bufferTime(ms).filter((payloads) => {
                                     return !Hf.isEmpty(payloads);
                                 }).flatMap((payload) => payload).share();
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.bufferWithTimeOrCount(ms, count).filter((payloads) => {
+                                _divertedIncomingStream = _divertedIncomingStream.bufferTime(ms).filter((payloads) => {
                                     return !Hf.isEmpty(payloads);
                                 }).flatMap((payload) => payload).share();
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.bufferWithTimeOrCount(ms, count).filter((payloads) => {
+                                _divertedOutgoingStream = _divertedOutgoingStream.bufferTime(ms).filter((payloads) => {
                                     return !Hf.isEmpty(payloads);
                                 }).flatMap((payload) => payload).share();
                                 break;
@@ -642,16 +589,16 @@ export default Hf.Composite({
 
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                _incomingStream = _incomingStream.timeout(ms, Rx.Observable.of(timeoutPayload)).share();
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                _outgoingStream = _outgoingStream.timeout(ms, Rx.Observable.of(timeoutPayload)).share();
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                _divertedIncomingStream = _divertedIncomingStream.timeout(ms, Rx.Observable.of(timeoutPayload)).share();
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.timeout(ms, Rx.Observable.just(timeoutPayload)).share();
+                                _divertedOutgoingStream = _divertedOutgoingStream.timeout(ms, Rx.Observable.of(timeoutPayload)).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.timeout - Invalid direction:${direction}.`);
@@ -675,7 +622,7 @@ export default Hf.Composite({
                             const {
                                 logOnNext,
                                 logOnError,
-                                logOnComplete
+                                logOnCompleted
                             } = Hf.fallback({
                                 /**
                                  * @description - On subscription to error...
@@ -690,31 +637,31 @@ export default Hf.Composite({
                                 /**
                                  * @description - On subscription to completion...
                                  *
-                                 * @method logOnComplete
+                                 * @method logOnCompleted
                                  * @return void
                                  */
-                                logOnComplete: function logOnComplete () {
+                                logOnCompleted: function logOnCompleted () {
                                     Hf.log(`info`, `Complete side subscription.`);
                                 }
                             }).of(logger);
                             /* using a side observer for monitoring */
-                            const sideObserver = Rx.Observer.create(
+                            const sideObserver = Rx.Subscriber.create(
                                 logOnNext,
                                 logOnError,
-                                logOnComplete
+                                logOnCompleted
                             );
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.tap(sideObserver).share();
+                                _incomingStream = _incomingStream.do(sideObserver).share();
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.tap(sideObserver).share();
+                                _outgoingStream = _outgoingStream.do(sideObserver).share();
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.tap(sideObserver).share();
+                                _divertedIncomingStream = _divertedIncomingStream.do(sideObserver).share();
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.tap(sideObserver).share();
+                                _divertedOutgoingStream = _divertedOutgoingStream.do(sideObserver).share();
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.monitor - Invalid direction:${direction}.`);
@@ -945,9 +892,7 @@ export default Hf.Composite({
                                     eventId
                                 } = payload;
                                 if (!_outgoingStreamActivated) {
-                                    if (!_unemitPayloads.some((unemitPayload) => unemitPayload.eventId === eventId)) {
-                                        _unemitPayloads.push(payload);
-                                    }
+                                    _unemitPayloads.push(payload);
                                     Hf.log(`warn0`, `EventStreamComposite.outgoing.emit - Emitting payload with eventId:${eventId} before observer activation.`);
                                 } else {
                                     if (_arbiter.hasOwnProperty(eventId)) {
@@ -964,19 +909,19 @@ export default Hf.Composite({
                                         if (waitTime > 0 && intervalPeriod > 0) {
                                             setTimeout(() => {
                                                 setInterval(() => {
-                                                    _streamEmitter.onNext(payload);
+                                                    _streamEmitter.next(payload);
                                                 }, intervalPeriod);
                                             }, waitTime);
                                         } else if (waitTime > 0 && intervalPeriod === 0) {
                                             setTimeout(() => {
-                                                _streamEmitter.onNext(payload);
+                                                _streamEmitter.next(payload);
                                             }, waitTime);
                                         } else if (waitTime === 0 && intervalPeriod > 0) {
                                             setInterval(() => {
-                                                _streamEmitter.onNext(payload);
+                                                _streamEmitter.next(payload);
                                             }, intervalPeriod);
                                         } else {
-                                            _streamEmitter.onNext(payload);
+                                            _streamEmitter.next(payload);
                                         }
                                     } else {
                                         _arbiter[eventId] = {
@@ -984,7 +929,7 @@ export default Hf.Composite({
                                             handler: null,
                                             relayer: null
                                         };
-                                        _streamEmitter.onNext(payload);
+                                        _streamEmitter.next(payload);
                                     }
                                     // Hf.log(`info`, `Factory:${factory.name} is emitting eventIds:[${eventIds}].`);
                                 }
@@ -1118,15 +1063,15 @@ export default Hf.Composite({
                                     return Hf.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId}-&-${eventId}`;
                                 }, ``);
                                 const incomingAWaitOperator = factory.incoming(awaitedEventId);
-                                const sideObserver = Rx.Observer.create(
+                                const sideObserver = Rx.Subscriber.create(
                                     /**
                                      * @description - On subscription to next incoming side value...
                                      *
-                                     * @method onNext
+                                     * @method next
                                      * @param {object} payloadBundle
                                      * @return void
                                      */
-                                    function onNext (payloadBundle) {
+                                    function next (payloadBundle) {
                                         if (Object.keys(payloadBundle).length === eventIds.length) {
                                             if (Hf.isNumeric(timeout)) {
                                                 clearTimeout(timeout);
@@ -1137,27 +1082,27 @@ export default Hf.Composite({
                                     /**
                                      * @description - On subscription to side error...
                                      *
-                                     * @method onError
+                                     * @method error
                                      * @param {string} error
                                      * @return void
                                      */
-                                    function onError (error) {
+                                    function error (_error) {
                                         if (Hf.isNumeric(timeout)) {
                                             clearTimeout(timeout);
                                         }
-                                        Hf.log(`error`, `EventStreamComposite.incoming.await.onError - Side subscription error. ${error.message}`);
+                                        Hf.log(`error`, `EventStreamComposite.incoming.await.next - Side subscription error. ${_error.message}`);
                                     },
                                     /**
                                      * @description - On subscription to side completion...
                                      *
-                                     * @method onCompleted
+                                     * @method complete
                                      * @return void
                                      */
-                                    function onCompleted () {
+                                    function complete () {
                                         if (Hf.isNumeric(timeout)) {
                                             clearTimeout(timeout);
                                         }
-                                        sideSubscription.dispose();
+                                        sideSubscription.unsubscribe();
                                         Hf.log(`info`, `Side subscription completed.`);
                                     }
                                 );
@@ -1351,7 +1296,7 @@ export default Hf.Composite({
                             bufferTimeShift = 1;
                             Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
                         }
-                        _incomingSubscription = _incomingStream.bufferWithTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
+                        _incomingSubscription = _incomingStream.bufferTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
                             return !Hf.isEmpty(payloads);
                         }).flatMap((payload) => payload).subscribe(_observer);
                     } else {
@@ -1394,7 +1339,7 @@ export default Hf.Composite({
                             bufferTimeShift = 1;
                             Hf.log(`warn1`, `EventStreamComposite.activateOutgoingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
                         }
-                        _outgoingSubscription = _outgoingStream.bufferWithTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
+                        _outgoingSubscription = _outgoingStream.bufferTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
                             return !Hf.isEmpty(payloads);
                         }).flatMap((payload) => payload).subscribe(_observer);
                     } else {
@@ -1424,7 +1369,7 @@ export default Hf.Composite({
              */
             this.deactivateIncomingStream = function deactivateIncomingStream () {
                 if (_incomingStreamActivated) {
-                    _incomingSubscription.dispose();
+                    _incomingSubscription.unsubscribe();
                     _incomingSubscription = undefined;
                     _incomingStreamActivated = false;
                 } else {
@@ -1439,8 +1384,7 @@ export default Hf.Composite({
              */
             this.deactivateOutgoingStream = function deactivateOutgoingStream () {
                 if (_outgoingStreamActivated) {
-                    _streamEmitter.onCompleted();
-                    _outgoingSubscription.dispose();
+                    _outgoingSubscription.unsubscribe();
                     _outgoingSubscription = undefined;
                     _outgoingStreamActivated = false;
                 } else {
