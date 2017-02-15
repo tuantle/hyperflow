@@ -28,9 +28,7 @@
 import { Hf } from '../../../hyperflow';
 
 /* load RxJs dependency */
-// TODO: Upgrade to rxjs5
-// import rxjs from 'rxjs';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 
 /**
  * @description - A emitter descriptor prototypes.
@@ -202,15 +200,15 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                 });
             }
 
-            observable._observer = Rx.Observer.create(
+            observable._observer = Rx.Subscriber.create(
                 /**
                  * @description - On subscription to next incoming payload...
                  *
-                 * @method onNext
+                 * @method next
                  * @param {object} payload
                  * @return void
                  */
-                function onNext (payload) {
+                function next (payload) {
                     if (Hf.isSchema({
                         eventId: `string`
                     }).of(payload)) {
@@ -223,26 +221,26 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                             handler(value);
                         }
                     } else {
-                        Hf.log(`error`, `ObservableDescriptor.onNext - Payload event Id is invalid.`);
+                        Hf.log(`error`, `ObservableDescriptor.next - Payload event Id is invalid.`);
                     }
                 },
                 /**
                  * @description - On subscription to error...
                  *
-                 * @method onError
+                 * @method error
                  * @param {string} error
                  * @return void
                  */
-                function onError (error) {
-                    Hf.log(`error`, `ObservableDescriptor.onError - Subscription error. ${error.message}`);
+                function error (_error) {
+                    Hf.log(`error`, `ObservableDescriptor.error - Subscription error. ${_error.message}`);
                 },
                 /**
                  * @description - On subscription to completion...
                  *
-                 * @method onCompleted
+                 * @method complete
                  * @return void
                  */
-                function onCompleted () {
+                function complete () {
                     Hf.log(`info`, `Subscription completed.`);
                 }
             );
@@ -281,12 +279,12 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
 
                                         try {
                                             if (observable._description.orgDesc.hasOwnProperty(`get`)) {
-                                                streamEmitter.onNext(observable._description.orgDesc.get());
+                                                streamEmitter.next(observable._description.orgDesc.get());
                                             } else {
-                                                streamEmitter.onNext(value);
+                                                streamEmitter.next(value);
                                             }
                                         } catch (error) {
-                                            streamEmitter.onError(error);
+                                            streamEmitter.error(error);
                                         }
                                     },
                                     configurable: true,
