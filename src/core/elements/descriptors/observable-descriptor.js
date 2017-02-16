@@ -337,8 +337,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
         if (observable._description.assigned) {
             const key = observable._description.key;
 
-            observable._observer.onComplete();
-            observable._subscription.dispose();
+            observable._observer.complete();
+            observable._subscription.unsubscribe();
 
             /* delete current property */
             observable._description.proxy[key] = undefined;
