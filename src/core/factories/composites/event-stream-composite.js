@@ -87,66 +87,58 @@ export default Hf.Composite({
             let _incomingStreamActivated = false;
 
             let _arbiter = {};
+            let _sourceRegistrationCache = {};
+            /* a queue for payloads emitted before activation */
+            let _unemitPayloads = [];
 
-            let _incomingSubscription;
+            let _observer;
+
             let _outgoingSubscription;
+            let _incomingSubscription;
             /* creating factory event stream emitter */
             let _streamEmitter = new Rx.Subject();
-            /* creating factory incoming and outgoing event stream */
-            let _incomingStream = Rx.Observable.never();
             /* converting event stream emitter as a subject to an observable */
             let _outgoingStream = _streamEmitter.asObservable();
+            /* creating factory incoming and outgoing event stream */
+            let _incomingStream = Rx.Observable.never();
 
-            let _divertedIncomingStream = Rx.Observable.never();
             let _divertedOutgoingStream = Rx.Observable.never();
-
-            let _sourceRegistrationCache = {};
-
-            /* creating factory event stream observer */
-            const _observer = Rx.Subscriber.create(
-                /**
-                 * @description - On subscription to next incoming payload...
-                 *
-                 * @method next
-                 * @param {array} payloads - Incoming payloads
-                 * @return void
-                 */
-                function next (...payloads) {
-                    payloads.forEach((payload) => {
-                        if (Hf.isSchema({
-                            eventId: `string`
-                        }).of(payload)) {
+            let _divertedIncomingStream = Rx.Observable.never();
+            /* ----- Private FUnctions ------------- */
+            /**
+             * @description - On subscription to next incoming payload...
+             *
+             * @method _next
+             * @param {array} payloads - Incoming payloads
+             * @return void
+             * @private
+             */
+            function _next (...payloads) {
+                payloads.forEach((payload) => {
+                    if (Hf.isSchema({
+                        eventId: `string`
+                    }).of(payload)) {
+                        const {
+                            eventId,
+                            value
+                        } = payload;
+                        if (_arbiter.hasOwnProperty(eventId)) {
                             const {
-                                eventId,
-                                value
-                            } = payload;
-                            if (_arbiter.hasOwnProperty(eventId)) {
-                                const {
-                                    eventDirectionalState,
-                                    completed,
-                                    waitTime,
-                                    handler,
-                                    relayer
-                                } = Hf.fallback({
-                                    completed: false,
-                                    waitTime: 0
-                                }).of((_arbiter[eventId]));
-                                if (eventDirectionalState !== REPEATED_EVENT) {
-                                    if (eventDirectionalState === REPEATING_EVENT) {
-                                        _arbiter[eventId].eventDirectionalState = REPEATED_EVENT;
-                                    }
-                                    if (waitTime > 0) {
-                                        setTimeout(() => {
-                                            const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
-                                            if (Hf.isFunction(relayer)) {
-                                                relayer(handledValue);
-                                            }
-                                            if (completed) {
-                                                _arbiter[eventId] = undefined;
-                                                delete _arbiter[eventId];
-                                            }
-                                        }, waitTime);
-                                    } else {
+                                eventDirectionalState,
+                                completed,
+                                waitTime,
+                                handler,
+                                relayer
+                            } = Hf.fallback({
+                                completed: false,
+                                waitTime: 0
+                            }).of((_arbiter[eventId]));
+                            if (eventDirectionalState !== REPEATED_EVENT) {
+                                if (eventDirectionalState === REPEATING_EVENT) {
+                                    _arbiter[eventId].eventDirectionalState = REPEATED_EVENT;
+                                }
+                                if (waitTime > 0) {
+                                    setTimeout(() => {
                                         const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
                                         if (Hf.isFunction(relayer)) {
                                             relayer(handledValue);
@@ -155,41 +147,47 @@ export default Hf.Composite({
                                             _arbiter[eventId] = undefined;
                                             delete _arbiter[eventId];
                                         }
-                                    }
+                                    }, waitTime);
                                 } else {
-                                    _arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
+                                    const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
+                                    if (Hf.isFunction(relayer)) {
+                                        relayer(handledValue);
+                                    }
+                                    if (completed) {
+                                        _arbiter[eventId] = undefined;
+                                        delete _arbiter[eventId];
+                                    }
                                 }
+                            } else {
+                                _arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
                             }
-                        } else {
-                            Hf.log(`error`, `EventStreamComposite.next - Payload event Id is invalid.`);
                         }
-                    });
-                },
-                /**
-                 * @description - On subscription to error...
-                 *
-                 * @method next
-                 * @param {string} error
-                 * @return void
-                 */
-                function next (error) {
-                    Hf.log(`error`, `EventStreamComposite.next - Subscription error. ${error.message}`);
-                },
-                /**
-                 * @description - On subscription to completion...
-                 *
-                 * @method complete
-                 * @return void
-                 */
-                function complete () {
-                    Hf.log(`info`, `Subscription completed.`);
-                }
-            );
-
-            /* a queue for payloads emitted before activation */
-            let _unemitPayloads = [];
-
-            /* ----- Private FUnctions ------------- */
+                    } else {
+                        Hf.log(`error`, `EventStreamComposite._next - Payload event Id is invalid.`);
+                    }
+                });
+            }
+            /**
+             * @description - On subscription to error...
+             *
+             * @method _error
+             * @param {string} error
+             * @return void
+             * @private
+             */
+            function _error (error) {
+                Hf.log(`error`, `EventStreamComposite._error - Subscription error. ${error.message}`);
+            }
+            /**
+             * @description - On subscription to completion...
+             *
+             * @method _complete
+             * @return void
+             * @private
+             */
+            function _complete () {
+                Hf.log(`info`, `Subscription completed.`);
+            }
             /**
              * @description - Helper function to create stream operator object.
              *
@@ -1086,11 +1084,11 @@ export default Hf.Composite({
                                      * @param {string} error
                                      * @return void
                                      */
-                                    function error (_error) {
+                                    function error (__error) {
                                         if (Hf.isNumeric(timeout)) {
                                             clearTimeout(timeout);
                                         }
-                                        Hf.log(`error`, `EventStreamComposite.incoming.await.next - Side subscription error. ${_error.message}`);
+                                        Hf.log(`error`, `EventStreamComposite.incoming.await.next - Side subscription error. ${__error.message}`);
                                     },
                                     /**
                                      * @description - On subscription to side completion...
@@ -1284,6 +1282,14 @@ export default Hf.Composite({
                 }).of(option);
 
                 if (!_incomingStreamActivated) {
+                    if (!Hf.isDefined(_observer)) {
+                        /* creating factory event stream observer */
+                        _observer = Rx.Subscriber.create(
+                            _next,
+                            _error,
+                            _complete
+                        );
+                    }
                     /* first do operations on the incoming event stream */
                     factory.operateIncomingStream(_createStreamOperatorFor.call(factory, INCOMING_DIRECTION));
                     /* then do incoming event stream subscriptions */
@@ -1327,6 +1333,14 @@ export default Hf.Composite({
                 }).of(option);
 
                 if (!_outgoingStreamActivated) {
+                    if (!Hf.isDefined(_observer)) {
+                        /* creating factory event stream observer */
+                        _observer = Rx.Subscriber.create(
+                            _next,
+                            _error,
+                            _complete
+                        );
+                    }
                     /* first do operations on the outgoing event stream */
                     factory.operateOutgoingStream(_createStreamOperatorFor.call(factory, OUTGOING_DIRECTION));
                     /* then do outgoing event stream subscriptions */
@@ -1371,6 +1385,16 @@ export default Hf.Composite({
                 if (_incomingStreamActivated) {
                     _incomingSubscription.unsubscribe();
                     _incomingSubscription = undefined;
+                    _observer = undefined;
+                    _incomingStream = undefined;
+                    _divertedIncomingStream = undefined;
+
+                    Hf.clear(_arbiter);
+                    Hf.clear(_sourceRegistrationCache);
+
+                    _incomingStream = Rx.Observable.never();
+                    _divertedIncomingStream = Rx.Observable.never();
+
                     _incomingStreamActivated = false;
                 } else {
                     Hf.log(`warn0`, `EventStreamComposite.deactivateIncomingStream - Incoming event stream subscription is not activated.`);
@@ -1384,8 +1408,23 @@ export default Hf.Composite({
              */
             this.deactivateOutgoingStream = function deactivateOutgoingStream () {
                 if (_outgoingStreamActivated) {
+                    _streamEmitter.complete();
                     _outgoingSubscription.unsubscribe();
                     _outgoingSubscription = undefined;
+                    _observer = undefined;
+                    _streamEmitter = undefined;
+                    _outgoingStream = undefined;
+                    _divertedOutgoingStream = undefined;
+
+                    Hf.clear(_arbiter);
+                    Hf.clear(_sourceRegistrationCache);
+                    Hf.clear(_unemitPayloads);
+
+                    _streamEmitter = new Rx.Subject();
+                    /* converting event stream emitter as a subject to an observable */
+                    _outgoingStream = _streamEmitter.asObservable();
+                    _divertedOutgoingStream = Rx.Observable.never();
+
                     _outgoingStreamActivated = false;
                 } else {
                     Hf.log(`warn0`, `EventStreamComposite.deactivateOutgoingStream - Outgoing event stream subscription is not activated.`);
@@ -1411,18 +1450,20 @@ export default Hf.Composite({
                     Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
                 } else {
                     sources.map((source) => {
+                        const connectStream = function (sourceOutgoingStream) {
+                            if (!Hf.isDefined(sourceOutgoingStream)) {
+                                Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
+                            } else {
+                                /* merge all external incoming event streams into one */
+                                _incomingStream = Rx.Observable.merge(sourceOutgoingStream, _incomingStream).share();
+                            }
+                        };
                         source.registerStream({
                             fId: factory.fId,
-                            connectStream: (sourceOutgoingStream) => {
-                                if (!Hf.isDefined(sourceOutgoingStream)) {
-                                    Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
-                                } else {
-                                    /* merge all external incoming event streams into one */
-                                    _incomingStream = Rx.Observable.merge(sourceOutgoingStream, _incomingStream);
-                                }
-                            }
+                            connectStream: connectStream.bind(source)
                         });
                     });
+
                     return _createStreamOperatorFor.call(factory, INCOMING_DIRECTION);
                 }
             };
