@@ -2,6 +2,18 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Beta Version 0.1.0-beta28 (02/16/2017)**
+```
+Notes:
+    - Major event stream bug fixes during AppFactory & DomainFactory start/stop/restart.
+New Features:
+Breaking Changes:
+Improvements:
+Bug fixes:
+    - Added outgoing method to component inclusion list. Fixed setState call only when component did mount for ReactComponentComposite.
+    - Fixed implementation issue with deactivateIncomingStream and deactivateOutgoingStream methods for EventStreamComposite.
+    - Moved event stream observe call from register to start method. Fixed event stream issue with domain start/stop/restart for DomainFactory.
+```
 **Development Beta Version 0.1.0-beta27 (02/14/2017)**
 ```
 Notes:

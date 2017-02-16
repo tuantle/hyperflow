@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-beta27",
+    "version": "0.1.0-beta28",
     "registry": "github",
     "description": "Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",
@@ -24,8 +24,7 @@
         "npm": ">=4.x"
     },
     "peerDependencies": {
-        "react": "=15.4.2",
-        "react-dom": "=15.4.2"
+        "react": "=15.4.2"
     },
     "dependencies": {
         "rxjs": "^5.1.1",
