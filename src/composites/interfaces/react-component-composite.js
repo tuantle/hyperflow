@@ -53,6 +53,7 @@ const DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
     `componentWillUnmount`,
     `shouldComponentUpdate`,
     /* interface specific methods and properties */
+    `outgoing`,
     `getInterface`,
     `assignComponentRef`,
     `lookupComponentRefs`,
@@ -66,6 +67,7 @@ const DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
     `setNativeProps`,
     `pureRender`,
     /* interface specific methods and properties */
+    `outgoing`,
     `getInterface`,
     `assignComponentRef`,
     `lookupComponentRefs`,
@@ -493,7 +495,7 @@ export default Hf.Composite({
                                     if (!stateless) {
                                         /* this event is call ONLY when the state did mutate in store */
                                         intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
+                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
                                                 component.setState(reflectedState);
                                                 _mutationOccurred = true;
                                                 Hf.log(`info`, `State mutated for component:${component.props.name}.`);
@@ -501,7 +503,7 @@ export default Hf.Composite({
                                         });
                                         /* this event is call ONLY when the state did mutate in store and FORCE component to update */
                                         intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
+                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
                                                 component.setState(reflectedState);
                                                 component.forceUpdate();
                                                 _mutationOccurred = true;
