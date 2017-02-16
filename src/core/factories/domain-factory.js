@@ -235,8 +235,6 @@ export default Composer({
                         Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered interface:${intf.name}.`);
                     } else {
                         _intf = intf;
-                        /* setup event stream with domain observing interface */
-                        domain.observe(_intf);
                         Hf.log(`info`, `Domain:${domain.name} registered interface:${intf.name}.`);
                     }
                 }
@@ -260,19 +258,13 @@ export default Composer({
                             Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered store:${store.name}.`);
                         } else {
                             _store = store;
-                            /* setup event stream observation duplex between domain and store */
-                            domain.observe(_store);
-                            _store.observe(domain);
                             Hf.log(`info`, `Domain:${domain.name} registered store:${store.name}.`);
                         }
                     }
                 }
                 if (Hf.isObject(_store) && Hf.isObject(_intf)) {
-                    /* setup event stream with interface observing store */
-                    _intf.observe(_store);
-                    /* interface is now un-pure and mirror its state with a store */
+                    /* interface is now stateful and reflecting its state with a store */
                     _intf.reflectStateOf(_store);
-                    Hf.log(`info`, `Interface:${intf.name} reflecting store:${_store.name}.`);
                 }
                 if (Hf.isArray(services)) {
                     if (!services.every((service) => {
@@ -298,9 +290,6 @@ export default Composer({
                             Hf.log(`info`, `Domain:${domain.name} registered service:${service.name}.`);
                             return true;
                         }));
-                        /* setup event stream observation duplex between domain and servies */
-                        domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
-                        _services.forEach((service) => service.observe(domain));
                     }
                 }
                 if (Hf.isArray(childDomains)) {
@@ -329,17 +318,12 @@ export default Composer({
                         }));
                         if (Hf.isObject(_intf)) {
                             _intf.composedOf(
-                                ..._childDomains.map((childDomain) => childDomain.getInterface())
-                                                .filter((compositeIntfintf) => Hf.isObject(compositeIntfintf))
+                                ..._childDomains.map((childDomain) => childDomain.getInterface()).filter((compositeIntf) => Hf.isObject(compositeIntf))
                             );
                         }
-                        /* setup event stream observation duplex between domain and children */
-                        domain.observe(..._childDomains);
-                        _childDomains.forEach((childDomain) => childDomain.observe(domain));
                     }
                 }
                 if (Hf.isArray(peerDomains)) {
-                    // TODO: Needs testing.
                     if (!peerDomains.every((peerDomain) => {
                         return Hf.isSchema({
                             fId: `string`,
@@ -363,16 +347,6 @@ export default Composer({
                             Hf.log(`info`, `Domain:${domain.name} registered peer domain:${peerDomain.name}.`);
                             return true;
                         }));
-
-                        /* setup event stream observation duplex between domain and peers */
-                        let index = 0;
-                        while (index < peerDomains.length - 1) {
-                            peerDomains[index].observe(...peerDomains.slice(index + 1));
-                            peerDomains.slice(index + 1).forEach((peerDomain) => peerDomain.observe(peerDomains[index])); // eslint-disable-line
-                            index++;
-                        }
-                        domain.observe(..._peerDomains);
-                        _peerDomains.forEach((peerDomain) => peerDomain.observe(domain));
                     }
                 }
             }
@@ -404,6 +378,42 @@ export default Composer({
                     }, waitTime);
 
                     Hf.log(`info`, `Starting domain:${domain.name}...`);
+
+                    /* setup event stream with domain observing interface */
+                    if (Hf.isObject(_intf)) {
+                        domain.observe(_intf);
+                    }
+                    /* setup event stream observation duplex between domain and store */
+                    if (Hf.isObject(_store)) {
+                        domain.observe(_store);
+                        _store.observe(domain);
+                    }
+                    /* setup event stream with interface observing store */
+                    if (Hf.isObject(_store) && Hf.isObject(_intf)) {
+                        _intf.observe(_store);
+                    }
+                    /* setup event stream observation duplex between domain and servies */
+                    if (!Hf.isEmpty(_services)) {
+                        domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
+                        _services.forEach((service) => service.observe(domain));
+                    }
+                    /* setup event stream observation duplex between domain and children */
+                    if (!Hf.isEmpty(_childDomains)) {
+                        domain.observe(..._childDomains);
+                        _childDomains.forEach((childDomain) => childDomain.observe(domain));
+                    }
+                    /* setup event stream observation duplex between domain and peers */
+                    if (!Hf.isEmpty(_peerDomains)) {
+                        let index = 0;
+                        while (index < _peerDomains.length - 1) {
+                            _peerDomains[index].observe(..._peerDomains.slice(index + 1));
+                            _peerDomains.slice(index + 1).forEach((peerDomain) => peerDomain.observe(_peerDomains[index])); // eslint-disable-line
+                            index++;
+                        }
+                        domain.observe(..._peerDomains);
+                        _peerDomains.forEach((peerDomain) => peerDomain.observe(domain));
+                    }
+
                     domain.setup(() => {
                         /* first activate parent domain incoming stream */
                         domain.activateIncomingStream({
