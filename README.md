@@ -46,34 +46,11 @@ That’s it!
 
 ### Documentations
 
-Documentations can be found at [Hyperflow wiki page](https://github.com/tuantle/hyperflow/wiki).
+(comming soon...)
 
 ### Client Examples
 
-To run client examples, you need to have npm, jspm or webpack, and live-server installed. All client code examples can be found at
-[/examples/client](https://github.com/tuantle/hyperflow/tree/master/examples/client)
-
-```
-npm install -g live-server
-git clone https://github.com/tuantle/hyperflow.git
-cd ./hyperflow/examples/client
-jspm install
-npm run start-*
-```
-Note: * is the name of the example project. For example, npm run start-counter
-
-Make sure that base URL is set to "/" in jspm config.js file.
-
-```
-{
-    baseURL: "/"
-}
-```
-
-- Click to run [Counter](http://localhost:8080/counter) app at localhost:8080/counter
-
-- Click to run [Calculator](http://localhost:8080/calculator) app at localhost:8080/calculator
-
+(comming soon...)
 
 ### Native Examples
 
