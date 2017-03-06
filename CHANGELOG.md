@@ -2,6 +2,17 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Beta Version 0.1.0-beta29 (03/06/2017)**
+```
+Notes:
+New Features:
+    - Added isActivated and cancelLatest methods to EventStreamComposite. Outgoing event stream is cancellable now with cancelLatest call.
+Breaking Changes:
+Improvements:
+    - Moved incoming state mutation event stream to componentDidMount for ReactComponentComposite.
+Bug fixes:
+    - Fixed startup order for DomainFactory. Child domains should startup properly now.
+```
 **Development Beta Version 0.1.0-beta28 (02/16/2017)**
 ```
 Notes:
