@@ -248,7 +248,7 @@ export default Hf.Composite({
                 const stateless = intf.isStateless();
                 const stateCursor = intf.getStateCursor();
                 if (!stateless) {
-                    Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React compoenent.`);
+                    Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React component.`);
                 } else {
                     const {
                         React
@@ -492,26 +492,6 @@ export default Hf.Composite({
                                         }
                                     }
 
-                                    if (!stateless) {
-                                        /* this event is call ONLY when the state did mutate in store */
-                                        intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                                component.setState(reflectedState);
-                                                _mutationOccurred = true;
-                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                            }
-                                        });
-                                        /* this event is call ONLY when the state did mutate in store and FORCE component to update */
-                                        intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                                component.setState(reflectedState);
-                                                component.forceUpdate();
-                                                _mutationOccurred = true;
-                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                                Hf.log(`info`, `Forced update for component:${component.props.name}.`);
-                                            }
-                                        });
-                                    }
                                     /* needs to sync up interface state and component props before mounting.
                                        This is needed because componentWillReceiveProps is not called right after mounting. */
                                     if (intf.reduceState(Hf.fallback(defaultProperty).of(Hf.mix(component.props, {
@@ -564,6 +544,27 @@ export default Hf.Composite({
                                     const component = this;
 
                                     _mountStage = DID_MOUNT_STAGE;
+
+                                    if (!stateless) {
+                                        /* this event is call ONLY when the state did mutate in store */
+                                        intf.incoming(`as-state-mutated`).handle((reflectedState) => {
+                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
+                                                component.setState(reflectedState);
+                                                _mutationOccurred = true;
+                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                            }
+                                        });
+                                        /* this event is call ONLY when the state did mutate in store and FORCE component to update */
+                                        intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
+                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
+                                                component.setState(reflectedState);
+                                                component.forceUpdate();
+                                                _mutationOccurred = true;
+                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                                Hf.log(`info`, `Forced update for component:${component.props.name}.`);
+                                            }
+                                        });
+                                    }
 
                                     intf.outgoing(`on-component-did-mount`).emit(() => component);
                                 };
