@@ -86,7 +86,12 @@ const factoryA = Factory.augment({
         //     console.log(results);
         //     console.log(`It is Working!!!`);
         // });
+
+        factory.incoming(`cancellable-eventA`).forward(`forwarded-cancellable-eventA`);
+        factory.incoming(`cancellable-eventB`).forward(`forwarded-cancellable-eventB`);
+
         factory.incoming(`event-final`).handle((value) => console.log(value));
+
         done();
     }
 })();
@@ -141,6 +146,56 @@ const factoryD = Factory.augment({
         factory.incoming(`event7`).forward(`event9`);
         factory.incoming(`event8`).forward(`event10`);
         factory.outgoing(`event-final`).emit(() => `DONE!`);
+
+        factory.incoming(
+            `forwarded-cancellable-eventA`,
+            `forwarded-cancellable-eventB`
+        ).await().handle((values, onCancel) => {
+            let intervalA;
+            let intervalB;
+            if (values) {
+                let iA = 0;
+                let iB = 0;
+                const [
+                    valueA,
+                    valueB
+                ] = values;
+                intervalA = setInterval(() => {
+                    for (let x = 0; x < 9; x++) {
+                        console.log(`A-${iA++}`);
+                    }
+                    if (iA > 99) {
+                        clearInterval(intervalA);
+                        console.log(valueA);
+                    }
+                }, 1);
+                intervalB = setInterval(() => {
+                    for (let x = 0; x < 9; x++) {
+                        console.log(`B-${iB++}`);
+                    }
+                    if (iB > 99) {
+                        clearInterval(intervalB);
+                        console.log(valueB);
+                    }
+                }, 1);
+            }
+
+            onCancel(() => {
+                clearInterval(intervalA);
+                console.log(`A cancelled!!!`);
+                clearInterval(intervalB);
+                console.log(`B cancelled!!!`);
+            });
+
+            // const timeout = setTimeout(() => {
+            //     console.log(value);
+            // }, 10000);
+            //
+            // onCancel(() => {
+            //     clearTimeout(timeout);
+            //     console.log(`cancelled!!!`);
+            // });
+        });
     }
 })();
 
@@ -160,6 +215,11 @@ export function runTests () {
         });
         factoryC.setup(() => {
             factoryC.activateOutgoingStream();
+
+            factoryC.outgoing(`cancellable-eventA`).delay(1000).emit(() => `A completed!!!`);
+            factoryC.outgoing(`cancellable-eventB`).delay(2000).emit(() => `B completed!!!`);
+
+            factoryC.outgoing(`cancellable-eventA`).delay(2010).cancelLatest();
         });
     });
     factoryA.activateIncomingStream();

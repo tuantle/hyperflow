@@ -29,6 +29,6 @@ var appFactorySpecs = require('./suites/factories/app-factory-specs'); // eslint
 // commonElementSpecs.runTests();
 // dataElementSpecs.runTests();
 // composerSpecs.runTests();
-// eventStreamCompositeSpecs.runTests();
+eventStreamCompositeSpecs.runTests();
 // storeFactorySpecs.runTests();
 // appFactorySpecs.runTests();
