@@ -231,8 +231,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                  * @param {string} error
                  * @return void
                  */
-                function error (_error) {
-                    Hf.log(`error`, `ObservableDescriptor.error - Subscription error. ${_error.message}`);
+                function error (errorMessage) {
+                    Hf.log(`error`, `ObservableDescriptor.error - Subscription error. ${errorMessage}`);
                 },
                 /**
                  * @description - On subscription to completion...
