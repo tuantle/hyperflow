@@ -387,10 +387,11 @@ export default Composer({
                     if (Hf.isObject(_store)) {
                         domain.observe(_store);
                         _store.observe(domain);
-                    }
-                    /* setup event stream with interface observing store */
-                    if (Hf.isObject(_store) && Hf.isObject(_intf)) {
-                        _intf.observe(_store);
+
+                        /* setup event stream with interface observing store */
+                        if (Hf.isObject(_intf)) {
+                            _intf.observe(_store);
+                        }
                     }
                     /* setup event stream observation duplex between domain and servies */
                     if (!Hf.isEmpty(_services)) {
@@ -421,6 +422,26 @@ export default Composer({
                             bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
                             bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                         });
+
+                        /*  then startup child domains... */
+                        if (!Hf.isEmpty(_childDomains)) {
+                            _childDomains.forEach((childDomain) => {
+                                const childDomainStartingTimeout = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.start - Child domain:${childDomain.name} is taking longer than ${waitTime}ms to start.`);
+                                }, waitTime);
+                                childDomain.start(() => clearTimeout(childDomainStartingTimeout), option);
+                            });
+                        }
+                        /* then startup peer domains... */
+                        if (!Hf.isEmpty(_peerDomains)) {
+                            _peerDomains.forEach((peerDomain) => {
+                                const peerDomainStartingTimeout = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.start -  Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to start.`);
+                                }, waitTime);
+                                peerDomain.start(() => clearTimeout(peerDomainStartingTimeout), option);
+                            });
+                        }
+
                         /* then activate store... */
                         if (Hf.isObject(_store)) {
                             const storeSetupTimeout = setTimeout(() => {
@@ -493,25 +514,6 @@ export default Composer({
                                     Hf.log(`info`, `Activated service:${service.name}.`);
                                     clearTimeout(serviceSetupTimeout);
                                 });
-                            });
-                        }
-
-                        /*  then startup child domains... */
-                        if (!Hf.isEmpty(_childDomains)) {
-                            _childDomains.forEach((childDomain) => {
-                                const childDomainStartingTimeout = setTimeout(() => {
-                                    Hf.log(`warn1`, `DomainFactory.start - Child domain:${childDomain.name} is taking longer than ${waitTime}ms to start.`);
-                                }, waitTime);
-                                childDomain.start(() => clearTimeout(childDomainStartingTimeout), option);
-                            });
-                        }
-                        /* then startup peer domains... */
-                        if (!Hf.isEmpty(_peerDomains)) {
-                            _peerDomains.forEach((peerDomain) => {
-                                const peerDomainStartingTimeout = setTimeout(() => {
-                                    Hf.log(`warn1`, `DomainFactory.start -  Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to start.`);
-                                }, waitTime);
-                                peerDomain.start(() => clearTimeout(peerDomainStartingTimeout), option);
                             });
                         }
 
