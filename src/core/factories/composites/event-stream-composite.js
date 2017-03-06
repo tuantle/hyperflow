@@ -28,6 +28,7 @@ import { Hf } from '../../../hyperflow';
 
 /* load Rx dependency */
 import Rx from 'rxjs/Rx';
+// TODO: Only import part of Rx that is needed.
 
 /* factory Ids */
 import {
@@ -87,7 +88,7 @@ export default Hf.Composite({
             let _incomingStreamActivated = false;
 
             let _arbiter = {};
-            let _sourceRegistrationCache = {};
+            let _targetRegistrationCache = {};
             /* a queue for payloads emitted before activation */
             let _unemitPayloads = [];
 
@@ -120,14 +121,32 @@ export default Hf.Composite({
                     }).of(payload)) {
                         const {
                             eventId,
-                            value
-                        } = payload;
+                            value,
+                            cancelled
+                        } = Hf.fallback({
+                            cancelled: false
+                        }).of(payload);
                         if (_arbiter.hasOwnProperty(eventId)) {
+                            /**
+                             * @description - Called on cancellation to assign/regsiter a canceller callback.
+                             *
+                             * @method onCancel
+                             * @param {function} canceller
+                             * @return void
+                             */
+                            const onCancel = function onCancel (canceller) {
+                                if (!Hf.isFunction(canceller)) {
+                                    Hf.log(`error`, `EventStreamComposite._next.onCancel - Input canceller callback is invalid.`);
+                                } else {
+                                    _arbiter[eventId].canceller = canceller;
+                                }
+                            };
                             const {
                                 eventDirectionalState,
                                 completed,
                                 waitTime,
                                 handler,
+                                canceller,
                                 relayer
                             } = Hf.fallback({
                                 completed: false,
@@ -139,9 +158,13 @@ export default Hf.Composite({
                                 }
                                 if (waitTime > 0) {
                                     setTimeout(() => {
-                                        const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
+                                        const handledValue = Hf.isFunction(handler) ? handler(value, onCancel) : undefined;
+
+                                        if (cancelled && Hf.isFunction(canceller)) {
+                                            canceller();
+                                        }
                                         if (Hf.isFunction(relayer)) {
-                                            relayer(handledValue);
+                                            relayer(handledValue, cancelled);
                                         }
                                         if (completed) {
                                             _arbiter[eventId] = undefined;
@@ -149,9 +172,13 @@ export default Hf.Composite({
                                         }
                                     }, waitTime);
                                 } else {
-                                    const handledValue = Hf.isFunction(handler) ? handler(value) : undefined;
+                                    const handledValue = Hf.isFunction(handler) ? handler(value, onCancel) : undefined;
+
+                                    if (cancelled && Hf.isFunction(canceller)) {
+                                        canceller();
+                                    }
                                     if (Hf.isFunction(relayer)) {
-                                        relayer(handledValue);
+                                        relayer(handledValue, cancelled);
                                     }
                                     if (completed) {
                                         _arbiter[eventId] = undefined;
@@ -171,12 +198,12 @@ export default Hf.Composite({
              * @description - On subscription to error...
              *
              * @method _error
-             * @param {string} error
+             * @param {string} errorMessage
              * @return void
              * @private
              */
-            function _error (error) {
-                Hf.log(`error`, `EventStreamComposite._error - Subscription error. ${error.message}`);
+            function _error (errorMessage) {
+                Hf.log(`error`, `EventStreamComposite._error - Subscription error. ${errorMessage}`);
             }
             /**
              * @description - On subscription to completion...
@@ -674,8 +701,8 @@ export default Hf.Composite({
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
                             _outgoingStream = _outgoingStream.merge(_divertedOutgoingStream).share();
-                            Object.keys(_sourceRegistrationCache).forEach((fId) => {
-                                _sourceRegistrationCache[fId](_divertedOutgoingStream);
+                            Object.keys(_targetRegistrationCache).forEach((fId) => {
+                                _targetRegistrationCache[fId].connectStream(_divertedOutgoingStream);
                             });
                             break;
                         default:
@@ -733,6 +760,15 @@ export default Hf.Composite({
             }
             /* ----- Public Functions -------------- */
             /**
+             * @description - Check if both outgoing and incoming stream are activated.
+             *
+             * @method isActivated
+             * @return {boolean}
+             */
+            this.isActivated = function isActivated () {
+                return _outgoingStreamActivated && _incomingStreamActivated;
+            };
+            /**
              * @description - Register factory outgoing event stream to an external observer.
              *
              * @method registerStream
@@ -751,7 +787,9 @@ export default Hf.Composite({
                         connectStream
                     } = definition;
 
-                    _sourceRegistrationCache[fId] = connectStream;
+                    _targetRegistrationCache[fId] = {
+                        connectStream
+                    };
                     connectStream(_outgoingStream);
                 }
             };
@@ -823,6 +861,7 @@ export default Hf.Composite({
                                             eventDirectionalState: OUTGOING_EVENT,
                                             waitTime: ms,
                                             handler: null,
+                                            canceller: null,
                                             relayer: null
                                         };
                                     }
@@ -831,6 +870,7 @@ export default Hf.Composite({
                             }
                             return {
                                 emit: outgoingOperator.emit,
+                                cancelLatest: outgoingOperator.cancelLatest,
                                 interval: outgoingOperator.interval
                             };
                         },
@@ -861,6 +901,7 @@ export default Hf.Composite({
                                             eventDirectionalState: OUTGOING_EVENT,
                                             intervalPeriod: ms,
                                             handler: null,
+                                            canceller: null,
                                             relayer: null
                                         };
                                     }
@@ -882,6 +923,7 @@ export default Hf.Composite({
                             eventIds.map((eventId) => {
                                 const payload = {
                                     eventId,
+                                    cancelled: false,
                                     value: Hf.isFunction(emitter) ? emitter() : undefined
                                 };
                                 return payload;
@@ -925,11 +967,68 @@ export default Hf.Composite({
                                         _arbiter[eventId] = {
                                             eventDirectionalState: OUTGOING_EVENT,
                                             handler: null,
+                                            canceller: null,
                                             relayer: null
                                         };
                                         _streamEmitter.next(payload);
                                     }
                                     // Hf.log(`info`, `Factory:${factory.name} is emitting eventIds:[${eventIds}].`);
+                                }
+                            });
+                        },
+                        /**
+                         * @description - Cancel the latest outgoing events...
+                         *
+                         * @method outgoing.cancelLatest
+                         * @return void
+                         */
+                        cancelLatest: function cancelLatest () {
+                            eventIds.map((eventId) => {
+                                const payload = {
+                                    eventId,
+                                    cancelled: true,
+                                    value: undefined
+                                };
+                                return payload;
+                            }).forEach((payload) => {
+                                const {
+                                    eventId
+                                } = payload;
+                                if (!_outgoingStreamActivated) {
+                                    _unemitPayloads = _unemitPayloads.filter((unemitPayload) => unemitPayload.eventId !== eventId);
+                                } else {
+                                    if (_arbiter.hasOwnProperty(eventId)) {
+                                        const {
+                                            waitTime,
+                                            intervalPeriod
+                                        } = Hf.fallback({
+                                            waitTime: 0,
+                                            intervalPeriod: 0
+                                        }).of((_arbiter[eventId]));
+                                        if (_arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
+                                            _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
+                                        }
+                                        if (waitTime > 0 && intervalPeriod > 0) {
+                                            setTimeout(() => {
+                                                setInterval(() => {
+                                                    _streamEmitter.next(payload);
+                                                }, intervalPeriod);
+                                            }, waitTime);
+                                        } else if (waitTime > 0 && intervalPeriod === 0) {
+                                            setTimeout(() => {
+                                                _streamEmitter.next(payload);
+                                            }, waitTime);
+                                        } else if (waitTime === 0 && intervalPeriod > 0) {
+                                            setInterval(() => {
+                                                _streamEmitter.next(payload);
+                                            }, intervalPeriod);
+                                        } else {
+                                            _streamEmitter.next(payload);
+                                        }
+                                    } else {
+                                        Hf.log(`warn1`, `EventStreamComposite.outgoing.cancelLatest - Cancelling payload with eventId:${eventId} before emitting.`);
+                                    }
+                                    // Hf.log(`info`, `Factory:${factory.name} is cancelling eventIds:[${eventIds}].`);
                                 }
                             });
                         }
@@ -985,6 +1084,7 @@ export default Hf.Composite({
                                             eventDirectionalState: INCOMING_EVENT,
                                             waitTime: ms,
                                             handler: null,
+                                            canceller: null,
                                             relayer: null
                                         };
                                     }
@@ -1023,6 +1123,7 @@ export default Hf.Composite({
                                         _arbiter[eventId] = {
                                             eventDirectionalState: INCOMING_EVENT,
                                             handler: (value) => resolve(value),
+                                            canceller: null,
                                             relayer: null
                                         };
                                     }
@@ -1039,6 +1140,7 @@ export default Hf.Composite({
                                         _arbiter[eventId] = {
                                             eventDirectionalState: INCOMING_EVENT,
                                             handler: (value) => resolve(value),
+                                            canceller: null,
                                             relayer: null
                                         };
                                     }
@@ -1056,9 +1158,10 @@ export default Hf.Composite({
                         await: function _await (ms = 0, timeoutError = () => {}) {
                             if (eventIds.length > 1) {
                                 let sideSubscription;
+                                let sideStream = Rx.Observable.never();
                                 let timeout = null;
                                 const awaitedEventId = eventIds.reduce((_awaitedEventId, eventId) => {
-                                    return Hf.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId}-&-${eventId}`;
+                                    return Hf.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId},${eventId}`;
                                 }, ``);
                                 const incomingAWaitOperator = factory.incoming(awaitedEventId);
                                 const sideObserver = Rx.Subscriber.create(
@@ -1066,29 +1169,40 @@ export default Hf.Composite({
                                      * @description - On subscription to next incoming side value...
                                      *
                                      * @method next
-                                     * @param {object} payloadBundle
+                                     * @param {object} awaitedPayloadBundle
                                      * @return void
                                      */
-                                    function next (payloadBundle) {
-                                        if (Object.keys(payloadBundle).length === eventIds.length) {
+                                    function next (awaitedPayloadBundle) {
+                                        const awaitedBundleEventIds = Object.keys(awaitedPayloadBundle).filter((eventId) => !awaitedPayloadBundle[eventId].cancelled);
+                                        const cancelledBundleEventIds = Object.keys(awaitedPayloadBundle).filter((eventId) => awaitedPayloadBundle[eventId].cancelled);
+
+                                        if (awaitedBundleEventIds.toString() === eventIds.toString()) {
                                             if (Hf.isNumeric(timeout)) {
                                                 clearTimeout(timeout);
                                             }
-                                            factory.outgoing(awaitedEventId).emit(() => Hf.collect(...eventIds).from(payloadBundle));
+                                            factory.outgoing(awaitedEventId).emit(() => {
+                                                return awaitedBundleEventIds.map((awaitedBundleEventId) => awaitedPayloadBundle[awaitedBundleEventId].value);
+                                            });
+                                        }
+
+                                        if (!Hf.isEmpty(cancelledBundleEventIds)) {
+                                            cancelledBundleEventIds.forEach(() => {
+                                                factory.outgoing(awaitedEventId).cancelLatest();
+                                            });
                                         }
                                     },
                                     /**
                                      * @description - On subscription to side error...
                                      *
                                      * @method error
-                                     * @param {string} error
+                                     * @param {string} errorMessage
                                      * @return void
                                      */
-                                    function error (__error) {
+                                    function error (errorMessage) {
                                         if (Hf.isNumeric(timeout)) {
                                             clearTimeout(timeout);
                                         }
-                                        Hf.log(`error`, `EventStreamComposite.incoming.await.next - Side subscription error. ${__error.message}`);
+                                        Hf.log(`error`, `EventStreamComposite.incoming.await.error - Side subscription error. ${errorMessage}`);
                                     },
                                     /**
                                      * @description - On subscription to side completion...
@@ -1112,22 +1226,27 @@ export default Hf.Composite({
                                     timeout = setTimeout(() => timeoutError(), ms);
                                 }
 
-                                sideSubscription = _incomingStream.filter((payload) => {
+                                sideStream = _incomingStream.filter((payload) => {
                                     return eventIds.some((eventId) => eventId === payload.eventId);
-                                }).scan((payloadBundle, payload) => {
-                                    payloadBundle[payload.eventId] = payload.value;
-                                    return payloadBundle;
-                                }, {}).share().subscribe(sideObserver);
+                                }).scan((awaitedPayloadBundle, payload) => {
+                                    awaitedPayloadBundle[payload.eventId] = {
+                                        cancelled: payload.cancelled,
+                                        value: payload.value
+                                    };
+                                    return awaitedPayloadBundle;
+                                }, {}).share();
+
+                                sideSubscription = sideStream.subscribe(sideObserver);
 
                                 return {
+                                    // asPromised: incoming.asPromised,
                                     handle: incomingAWaitOperator.handle,
                                     forward: incomingAWaitOperator.forward
                                 };
                             }
                             return {
-                                asPromised: incoming.asPromised,
+                                // asPromised: incoming.asPromised,
                                 handle: incomingOperator.handle,
-                                repeat: incomingOperator.repeat,
                                 forward: incomingOperator.forward
                             };
                         },
@@ -1152,6 +1271,7 @@ export default Hf.Composite({
                                         arbiter[eventId] = {
                                             eventDirectionalState: INCOMING_EVENT,
                                             handler,
+                                            canceller: null,
                                             relayer: null
                                         };
                                     }
@@ -1181,8 +1301,12 @@ export default Hf.Composite({
                                             });
                                             _arbiter = eventIds.reduce((arbiter, eventId) => {
                                                 arbiter[eventId].eventDirectionalState = RELAY_EVENT;
-                                                arbiter[eventId].relayer = (handledValue) => {
-                                                    factory.outgoing(...relayEventIds).emit(() => handledValue);
+                                                arbiter[eventId].relayer = (handledValue, cancelled) => {
+                                                    if (!cancelled) {
+                                                        factory.outgoing(...relayEventIds).emit(() => handledValue);
+                                                    } else {
+                                                        factory.outgoing(...relayEventIds).cancelLatest();
+                                                    }
                                                     // Hf.log(`info`, `Factory:${factory.name} is relaying eventIds:[${relayEventIds}].`);
                                                 };
                                                 return arbiter;
@@ -1217,16 +1341,25 @@ export default Hf.Composite({
                                 if (arbiter.hasOwnProperty(eventId)) {
                                     arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
                                     arbiter[eventId].handler = (value) => value;
-                                    arbiter[eventId].relayer = (handledValue) => {
-                                        factory.outgoing(eventId).emit(() => handledValue);
+                                    arbiter[eventId].relayer = (handledValue, cancelled) => {
+                                        if (!cancelled) {
+                                            factory.outgoing(eventId).emit(() => handledValue);
+                                        } else {
+                                            factory.outgoing(eventId).cancelLatest();
+                                        }
                                         // Hf.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
                                     };
                                 } else {
                                     arbiter[eventId] = {
                                         eventDirectionalState: REPEATING_EVENT,
                                         handler: (value) => value,
-                                        relayer: (handledValue) => {
-                                            factory.outgoing(eventId).emit(() => handledValue);
+                                        canceller: null,
+                                        relayer: (handledValue, cancelled) => {
+                                            if (!cancelled) {
+                                                factory.outgoing(eventId).emit(() => handledValue);
+                                            } else {
+                                                factory.outgoing(eventId).cancelLatest();
+                                            }
                                             // Hf.log(`info`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
                                         }
                                     };
@@ -1390,7 +1523,7 @@ export default Hf.Composite({
                     _divertedIncomingStream = undefined;
 
                     Hf.clear(_arbiter);
-                    Hf.clear(_sourceRegistrationCache);
+                    Hf.clear(_targetRegistrationCache);
 
                     _incomingStream = Rx.Observable.never();
                     _divertedIncomingStream = Rx.Observable.never();
@@ -1417,7 +1550,7 @@ export default Hf.Composite({
                     _divertedOutgoingStream = undefined;
 
                     Hf.clear(_arbiter);
-                    Hf.clear(_sourceRegistrationCache);
+                    Hf.clear(_targetRegistrationCache);
                     Hf.clear(_unemitPayloads);
 
                     _streamEmitter = new Rx.Subject();
@@ -1450,6 +1583,12 @@ export default Hf.Composite({
                     Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
                 } else {
                     sources.map((source) => {
+                        /**
+                         * @description -
+                         *
+                         * @method connectStream
+                         * @return void
+                         */
                         const connectStream = function (sourceOutgoingStream) {
                             if (!Hf.isDefined(sourceOutgoingStream)) {
                                 Hf.log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
