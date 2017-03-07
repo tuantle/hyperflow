@@ -418,7 +418,7 @@ export default Composer({
                     domain.setup(() => {
                         /* first activate parent domain incoming stream */
                         domain.activateIncomingStream({
-                            forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                            forceBufferingOnAllIncomingStreams: enableSlowRunMode,
                             bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
                             bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                         });
@@ -432,6 +432,7 @@ export default Composer({
                                 childDomain.start(() => clearTimeout(childDomainStartingTimeout), option);
                             });
                         }
+
                         /* then startup peer domains... */
                         if (!Hf.isEmpty(_peerDomains)) {
                             _peerDomains.forEach((peerDomain) => {
@@ -442,27 +443,6 @@ export default Composer({
                             });
                         }
 
-                        /* then activate store... */
-                        if (Hf.isObject(_store)) {
-                            const storeSetupTimeout = setTimeout(() => {
-                                Hf.log(`warn1`, `DomainFactory.start - Store:${_store.name} is taking longer than ${waitTime}ms to setup.`);
-                            }, waitTime);
-
-                            _store.setup(() => {
-                                _store.activateIncomingStream({
-                                    forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
-                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
-                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
-                                });
-                                _store.activateOutgoingStream({
-                                    forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
-                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
-                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
-                                });
-                                Hf.log(`info`, `Activated store:${_store.name}.`);
-                                clearTimeout(storeSetupTimeout);
-                            });
-                        }
                         /* then activate parent to child interfaces... */
                         if (Hf.isObject(_intf)) {
                             /* helper function to activate all child interfaces event stream */
@@ -472,12 +452,12 @@ export default Composer({
                                         Hf.log(`warn1`, `DomainFactory.start - Interface:${intf.name} is taking longer than ${waitTime}ms to setup.`);
                                     }, waitTime);
                                     intf.setup(() => {
-                                        intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceActivateStream(compositeIntf));
                                         intf.activateIncomingStream({
-                                            forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                            forceBufferingOnAllIncomingStreams: enableSlowRunMode,
                                             bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
                                             bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                         });
+                                        intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceActivateStream(compositeIntf));
                                         intf.activateOutgoingStream({
                                             forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
                                             bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
@@ -494,6 +474,29 @@ export default Composer({
                         } else {
                             Hf.log(`warn0`, `DomainFactory.start - Domain:${domain.name} is not registered with an interface.`);
                         }
+
+                        /* then activate store... */
+                        if (Hf.isObject(_store)) {
+                            const storeSetupTimeout = setTimeout(() => {
+                                Hf.log(`warn1`, `DomainFactory.start - Store:${_store.name} is taking longer than ${waitTime}ms to setup.`);
+                            }, waitTime);
+
+                            _store.setup(() => {
+                                _store.activateIncomingStream({
+                                    forceBufferingOnAllIncomingStreams: enableSlowRunMode,
+                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                                });
+                                _store.activateOutgoingStream({
+                                    forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                                });
+                                Hf.log(`info`, `Activated store:${_store.name}.`);
+                                clearTimeout(storeSetupTimeout);
+                            });
+                        }
+
                         /* then activate services... */
                         if (!Hf.isEmpty(_services)) {
                             _services.forEach((service) => {
@@ -502,7 +505,7 @@ export default Composer({
                                 }, waitTime);
                                 service.setup(() => {
                                     service.activateIncomingStream({
-                                        forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                        forceBufferingOnAllIncomingStreams: enableSlowRunMode,
                                         bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
                                         bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                     });
