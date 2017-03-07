@@ -13,6 +13,7 @@ Improvements:
 Bug fixes:
     - Fixed startup order for DomainFactory. Child domains should startup properly now.
     - Fixed option naming typo (forceBufferingOnAllOutgoingStreams -> forceBufferingOnAllIncomingStreams) of activateIncomingStream method for EventStreamComposite.
+    - Chanced activation order from store->interface to interface->store in start method for DomainFactory.
     - Added alwaysUpdateAsParent option to toComponent method force component with children to update for ReactComponentComposite.
 ```
 **Development Beta Version 0.1.0-beta28 (02/16/2017)**
