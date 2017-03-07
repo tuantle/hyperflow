@@ -1405,11 +1405,11 @@ export default Hf.Composite({
             this.activateIncomingStream = function activateIncomingStream (option = {}) {
                 const factory = this;
                 let {
-                    forceBufferingOnAllOutgoingStreams,
+                    forceBufferingOnAllIncomingStreams,
                     bufferTimeSpan,
                     bufferTimeShift
                 } = Hf.fallback({
-                    forceBufferingOnAllOutgoingStreams: false,
+                    forceBufferingOnAllIncomingStreams: false,
                     bufferTimeSpan: 1,
                     bufferTimeShift: 1
                 }).of(option);
@@ -1426,7 +1426,7 @@ export default Hf.Composite({
                     /* first do operations on the incoming event stream */
                     factory.operateIncomingStream(_createStreamOperatorFor.call(factory, INCOMING_DIRECTION));
                     /* then do incoming event stream subscriptions */
-                    if (forceBufferingOnAllOutgoingStreams) {
+                    if (forceBufferingOnAllIncomingStreams) {
                         if (bufferTimeSpan < 1) {
                             bufferTimeSpan = 1;
                             Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time span option should be greater than 0. Reset to 1ms.`);
