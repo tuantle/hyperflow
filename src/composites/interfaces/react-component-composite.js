@@ -360,8 +360,10 @@ export default Hf.Composite({
                     React
                 } = intf.getComponentLib();
                 const {
+                    alwaysUpdateAsParent,
                     componentMethodAndPropertyInclusions
                 } = Hf.fallback({
+                    alwaysUpdateAsParent: false,
                     componentMethodAndPropertyInclusions: []
                 }).of(option);
                 if (!Hf.isSchema({
@@ -485,7 +487,7 @@ export default Hf.Composite({
 
                                     if (Hf.isObject(applet)) {
                                         if (applet.hasStarted()) {
-                                            Hf.log(`warn1`, `ReactComponentComposite.toComponent - Interface:${intf.name} of applet:${applet.name} is still mounted.`);
+                                            Hf.log(`warn1`, `ReactComponentComposite.toComponent - Applet:${applet.name} of nterface:${intf.name} has already started.`);
                                             applet.restart(option);
                                         } else {
                                             applet.start(option);
@@ -520,6 +522,11 @@ export default Hf.Composite({
                                     /* interface tracks new props mutation when component receive new props.
                                        This will do necessary mutation on interface state. */
                                     const currentProperty = intf.getStateAsObject();
+
+                                    if (alwaysUpdateAsParent && Hf.isNonEmptyArray(component.props.children)) {
+                                        _mutationOccurred = true;
+                                    }
+
                                     if (intf.reduceState(Hf.fallback(currentProperty).of(Hf.mix(nextProperty, {
                                         exclusion: {
                                             enumerablePropertiesOnly: true,
@@ -582,7 +589,11 @@ export default Hf.Composite({
                                     intf.outgoing(`on-component-will-unmount`).emit(() => component);
 
                                     if (Hf.isObject(applet)) {
-                                        applet.stop(option);
+                                        if (applet.hasStarted()) {
+                                            applet.stop(option);
+                                        } else {
+                                            Hf.log(`warn1`, `ReactComponentComposite.toComponent - Applet:${applet.name} of interface:${intf.name} never started.`);
+                                        }
                                     }
                                 };
                                 /**
@@ -614,12 +625,13 @@ export default Hf.Composite({
                                 this.shouldComponentUpdate = function shouldComponentUpdate () {
                                     const component = this;
                                     let shouldUpdate = false;
+
                                     if (_mutationOccurred) {
                                         _mutationOccurred = false;
                                         shouldUpdate = true;
-                                        Hf.log(`info`, `Render updated for component:${component.props.name}.`);
+                                        Hf.log(`info`, `Rendering component:${component.props.name}.`);
                                     } else {
-                                        // Hf.log(`info`, `Render skipped update for component:${component.props.name}.`);
+                                        // Hf.log(`info`, `Skipped rendering for component:${component.props.name}.`);
                                     }
                                     return shouldUpdate;
                                 };
