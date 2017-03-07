@@ -24,7 +24,9 @@
         "npm": ">=4.x"
     },
     "peerDependencies": {
-        "react": "=15.4.2"
+        "react": "=15.4.2",
+        "react-dom": "=15.4.2",
+        "react-native": "=0.42"
     },
     "dependencies": {
         "rxjs": "^5.1.1",
