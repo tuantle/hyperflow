@@ -130,6 +130,7 @@ export default {
                                     CANCELED: `response-to-${_key}-canceled`,
                                     CONFLICT: `response-to-${_key}-conflict`,
                                     NOT_FOUND: `response-to-${_key}-not-found`,
+                                    NOT_AVAILABLE: `response-to-${_key}-not-available`,
                                     NOT_MODIFIED: `response-to-${_key}-not-modified`,
                                     UNAUTHORIZED: `response-to-${_key}-unauthorized`
                                 };
