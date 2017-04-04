@@ -297,28 +297,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
         const common = this;
         let result;
         if (common.isObject(source) && common.isObject(target)) {
-            result = {};
-            /* shallow copy target to result object */
-            Object.keys(target).forEach((key) => {
-                const targetItemDesc = Object.getOwnPropertyDescriptor(target, key);
-                Object.defineProperty(result, key, {
-                    get: function get () {
-                        if (targetItemDesc.hasOwnProperty(`get`)) {
-                            return targetItemDesc.get();
-                        }
-                        return targetItemDesc.value;
-                    },
-                    set: function set (value) {
-                        if (targetItemDesc.hasOwnProperty(`set`)) {
-                            targetItemDesc.set(value);
-                        } else {
-                            targetItemDesc.value = value;
-                        }
-                    },
-                    configurable: true,
-                    enumerable: true
-                });
-            });
+            result = common.clone(target);
             common.forEach(source, (sourceItem, key) => {
                 if (target.hasOwnProperty(key)) {
                     const targetItem = target[key];
@@ -340,7 +319,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                 }
             });
         } else if (common.isArray(source) && common.isArray(target)) {
-            result = target.slice(0);
+            result = common.clone(target);
             common.forEach(source, (sourceItem, key) => {
                 if (key >= 0 && key < target.length) {
                     const targetItem = target[key];
@@ -734,8 +713,8 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     return common.isObject(value) || common.isArray(value) ? common.clone(value) : value;
                 }).slice(0);
             }
-            return Object.isFrozen(source) ? Object.freeze(result) : result;
-            // return result;
+            // return Object.isFrozen(source) ? Object.freeze(result) : result;
+            return result;
         }
     },
     /**
