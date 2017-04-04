@@ -556,7 +556,7 @@ export default Hf.Composite({
                                         /* this event is call ONLY when the state did mutate in store */
                                         intf.incoming(`as-state-mutated`).handle((reflectedState) => {
                                             if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                                component.setState(reflectedState);
+                                                component.setState(() => reflectedState);
                                                 _mutationOccurred = true;
                                                 Hf.log(`info`, `State mutated for component:${component.props.name}.`);
                                             }
@@ -564,7 +564,7 @@ export default Hf.Composite({
                                         /* this event is call ONLY when the state did mutate in store and FORCE component to update */
                                         intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
                                             if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                                component.setState(reflectedState);
+                                                component.setState(() => reflectedState);
                                                 component.forceUpdate();
                                                 _mutationOccurred = true;
                                                 Hf.log(`info`, `State mutated for component:${component.props.name}.`);
