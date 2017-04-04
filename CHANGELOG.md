@@ -2,6 +2,17 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Beta Version 0.1.0-beta30 (04/03/2017)**
+```
+Notes:
+New Features:
+    - Added NOT_AVAILABLE to list of factory response events on FactoryEvent.
+Breaking Changes:
+Improvements:
+    - In componentDidMount method, setState call now returns a function instead of an object in ReactComponentComposite.
+Bug fixes:
+    - Fixed a bug in _deepCompareAndFallback method on how result object is cloned from target object in CommonElement.
+```
 **Development Beta Version 0.1.0-beta29 (03/07/2017)**
 ```
 Notes:
