@@ -34,7 +34,7 @@ const INITIALIZATION_PREFIX = `$`;
 const DEFAULT_EXCLUSION_PREFIXES = [ PRIVATE_PREFIX, INITIALIZATION_PREFIX ];
 
 /* number mutations to persist in mutation map before roll-over */
-const DEFAULT_MUTATION_HISTORY_DEPTH = 20;
+const DEFAULT_MUTATION_HISTORY_DEPTH = 128;
 
 /**
  * @description - A composite element prototypes.
@@ -248,7 +248,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                     if (Hf.isObject(originalState) && Hf.isObject(reducer)) {
                         const originalStateKeys = Object.keys(originalState);
                         const reducerKeys = Object.keys(reducer);
-                        if (originalStateKeys.length >= reducerKeys.length && reducerKeys.every((key) => originalStateKeys.some((_key) => _key === key))) {
+                        if (originalStateKeys.length >= reducerKeys.length && reducerKeys.every((key) => originalStateKeys.includes(key))) {
                             reducerKeys.filter((key) => {
                                 if (stateCursor.isItemComputable(key)) {
                                     Hf.log(`warn0`, `Factory.deepStateReduction - Ignore mutation of computable key:${key}.`);
@@ -316,7 +316,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                         const originalStateKeys = Object.keys(originalState);
                         const reconfigurationKeys = Object.keys(reconfiguration);
 
-                        if (originalStateKeys.length >= reconfigurationKeys.length && reconfigurationKeys.every((key) => originalStateKeys.some((_key) => _key === key))) {
+                        if (originalStateKeys.length >= reconfigurationKeys.length && reconfigurationKeys.every((key) => originalStateKeys.includes(key))) {
                             reconfigurationKeys.filter((key) => {
                                 if (stateCursor.isItemComputable(key)) {
                                     Hf.log(`warn0`, `Factory.deepStateReconfiguration - Ignore mutation of computable key:${key}.`);
@@ -485,7 +485,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                             const reconfigurationKeys = Object.keys(reconfiguration);
                             const originalStateKeys = Object.keys(originalStateAccessor);
 
-                            if (originalStateKeys.length >= reconfigurationKeys.length && reconfigurationKeys.every((key) => originalStateKeys.some((_key) => _key === key))) {
+                            if (originalStateKeys.length >= reconfigurationKeys.length && reconfigurationKeys.every((key) => originalStateKeys.includes(key))) {
                                 let reconfigurationPathIds = [];
 
                                 reconfigurationKeys.forEach((key) => {

@@ -58,7 +58,7 @@ const oneOfTypesPreset = function oneOfTypesPreset (_types) {
                             Hf.log(`warn1`, `oneTypeOf - Property key:${context.key} value is not one type of ${types}`);
                         }
                     };
-                    result.verified = types.some((type) => (oldValueType === type)) && types.some((type) => (newValueType === type));
+                    result.verified = types.includes(oldValueType) && types.includes(newValueType);
                     return result;
                 }
             }

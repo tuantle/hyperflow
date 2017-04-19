@@ -58,9 +58,9 @@ const oneOfValuesPreset = function oneOfValuesPreset (_values) {
                     };
                     if (Hf.isArray(context.newValue)) {
                         const newValues = context.newValue;
-                        result.verified = newValues.every((newValue) => values.some((value) => newValue === value));
+                        result.verified = newValues.every((newValue) => values.includes(newValue));
                     } else if (Hf.isString(context.newValue) || Hf.isNumeric(context.newValue)) {
-                        result.verified = values.some((value) => context.newValue === value);
+                        result.verified = values.includes(context.newValue);
                     } else {
                         result.verified = false;
                     }

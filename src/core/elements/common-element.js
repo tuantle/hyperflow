@@ -124,7 +124,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     result = Object.assign({}, source);
                     const sourceKeys = Object.keys(source);
                     const mutatorKeys = Object.keys(mutator);
-                    if (sourceKeys.length >= mutatorKeys.length && mutatorKeys.every((key) => sourceKeys.some((_key) => _key === key))) {
+                    if (sourceKeys.length >= mutatorKeys.length && mutatorKeys.every((key) => sourceKeys.includes(key))) {
                         mutatorKeys.forEach((key) => {
                             const sourceItem = source[key];
                             const mutatorItem = mutator[key];
