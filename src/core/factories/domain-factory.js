@@ -283,7 +283,7 @@ export default Composer({
                         Hf.log(`error`, `DomainFactory.register - Input services are invalid.`);
                     } else {
                         _services = _services.concat(services.filter((service) => {
-                            if (_services.some((_service) => _service.name === service.name)) {
+                            if (_services.includes(service.name)) {
                                 Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered service:${service.name}.`);
                                 return false;
                             }
@@ -309,7 +309,7 @@ export default Composer({
                             if (domain.name === childDomain.name) {
                                 Hf.log(`warn1`, `DomainFactory.register - Cannot register domain:${childDomain.name} as a child of itself.`);
                                 return false;
-                            } else if (_peerDomains.some((peerDomain) => peerDomain.name === childDomain.name)) {
+                            } else if (_peerDomains.includes(childDomain.name)) {
                                 Hf.log(`warn1`, `DomainFactory.register - Child domain:${childDomain.name} is already registered as a peer.`);
                                 return false;
                             }
@@ -340,7 +340,7 @@ export default Composer({
                             if (domain.name === peerDomain.name) {
                                 Hf.log(`warn1`, `DomainFactory.register - Cannot register domain:${peerDomain.name} as a peer of itself.`);
                                 return false;
-                            } else if (_childDomains.some((childDomain) => childDomain.name === peerDomain.name)) {
+                            } else if (_childDomains.includes(peerDomain.name)) {
                                 Hf.log(`warn1`, `DomainFactory.register - Peer domain:${peerDomain.name} is already registered as a child.`);
                                 return false;
                             }
