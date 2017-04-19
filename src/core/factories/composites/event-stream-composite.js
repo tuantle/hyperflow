@@ -638,7 +638,7 @@ export default Hf.Composite({
                      * @param {object} logger
                      * @return {object}
                      */
-                    monitor: function monitor (logger = {}) {
+                    monitor: function monitor (logger) {
                         if (!Hf.isSchema({
                             logOnNext: `function`
                         }).of(logger)) {
@@ -725,7 +725,7 @@ export default Hf.Composite({
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
                                 _divertedIncomingStream = _incomingStream.filter((payload) => {
-                                    return eventIds.some((eventId) => eventId === payload.eventId);
+                                    return eventIds.includes(payload.eventId);
                                 }).scan((payloads, payload) => {
                                     payloads.push(payload);
                                     return payloads;
@@ -737,7 +737,7 @@ export default Hf.Composite({
                                 return _createStreamOperatorFor.call(factory, DIVERTED_INCOMING_DIRECTION);
                             case OUTGOING_DIRECTION:
                                 _divertedOutgoingStream = _outgoingStream.filter((payload) => {
-                                    return eventIds.some((eventId) => eventId === payload.eventId);
+                                    return eventIds.includes(payload.eventId);
                                 }).scan((payloads, payload) => {
                                     payloads.push(payload);
                                     return payloads;
@@ -879,12 +879,15 @@ export default Hf.Composite({
                          *
                          * @method outgoing.interval
                          * @param {number} ms - Period in millisecond
+                         * @param {number} lifeSpan - Life time counter of the interval, -1 = indefinite
                          * @return {object}
                          */
-                        interval: function interval (ms) {
+                        interval: function interval (ms, lifeSpan = -1) {
                             if (!Hf.isInteger(ms)) {
                                 Hf.log(`error`, `EventStreamComposite.outgoing.interval - Input period time is invalid.`);
                             } else {
+                                lifeSpan = Hf.isNumeric(lifeSpan) ? lifeSpan : -1;
+
                                 if (ms < 1) {
                                     ms = 1;
                                     Hf.log(`warn1`, `EventStreamComposite.outgoing.interval - Input interval period time should be greater than 0. Reset to 1ms.`);
@@ -893,6 +896,7 @@ export default Hf.Composite({
                                 _arbiter = eventIds.reduce((arbiter, eventId) => {
                                     if (arbiter.hasOwnProperty(eventId)) {
                                         arbiter[eventId].intervalPeriod = ms;
+                                        arbiter[eventId].lifeSpan = lifeSpan;
                                         if (arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
                                             arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
                                         }
@@ -900,6 +904,7 @@ export default Hf.Composite({
                                         arbiter[eventId] = {
                                             eventDirectionalState: OUTGOING_EVENT,
                                             intervalPeriod: ms,
+                                            lifeSpan,
                                             handler: null,
                                             canceller: null,
                                             relayer: null
@@ -938,18 +943,28 @@ export default Hf.Composite({
                                     if (_arbiter.hasOwnProperty(eventId)) {
                                         const {
                                             waitTime,
-                                            intervalPeriod
+                                            intervalPeriod,
+                                            lifeSpan
                                         } = Hf.fallback({
                                             waitTime: 0,
-                                            intervalPeriod: 0
+                                            intervalPeriod: 0,
+                                            lifeSpan: -1
                                         }).of((_arbiter[eventId]));
+                                        let lifeSpanCounter = 0;
+                                        let interval;
+
                                         if (_arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
                                             _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
                                         }
+
                                         if (waitTime > 0 && intervalPeriod > 0) {
                                             setTimeout(() => {
-                                                setInterval(() => {
+                                                interval = setInterval(() => {
                                                     _streamEmitter.next(payload);
+                                                    lifeSpanCounter++;
+                                                    if (lifeSpan !== -1 && lifeSpanCounter === lifeSpan) {
+                                                        clearInterval(interval);
+                                                    }
                                                 }, intervalPeriod);
                                             }, waitTime);
                                         } else if (waitTime > 0 && intervalPeriod === 0) {
@@ -957,8 +972,12 @@ export default Hf.Composite({
                                                 _streamEmitter.next(payload);
                                             }, waitTime);
                                         } else if (waitTime === 0 && intervalPeriod > 0) {
-                                            setInterval(() => {
+                                            interval = setInterval(() => {
                                                 _streamEmitter.next(payload);
+                                                lifeSpanCounter++;
+                                                if (lifeSpan !== -1 && lifeSpanCounter === lifeSpan) {
+                                                    clearInterval(interval);
+                                                }
                                             }, intervalPeriod);
                                         } else {
                                             _streamEmitter.next(payload);
@@ -1227,7 +1246,7 @@ export default Hf.Composite({
                                 }
 
                                 sideStream = _incomingStream.filter((payload) => {
-                                    return eventIds.some((eventId) => eventId === payload.eventId);
+                                    return eventIds.includes(payload.eventId);
                                 }).scan((awaitedPayloadBundle, payload) => {
                                     awaitedPayloadBundle[payload.eventId] = {
                                         cancelled: payload.cancelled,
@@ -1292,7 +1311,7 @@ export default Hf.Composite({
                                             Hf.log(`error`, `EventStreamComposite.incoming.handle.relay - Factory:${factory.name} input event Id is invalid.`);
                                         } else {
                                             relayEventIds = relayEventIds.filter((relayEventId) => {
-                                                if (eventIds.some((eventId) => eventId === relayEventId)) {
+                                                if (eventIds.includes(relayEventId)) {
                                                     /* relaying the same eventIds will cause infinite loop error */
                                                     Hf.log(`warn1`, `EventStreamComposite.incoming.handle.relay - Cannot relay the same eventId:${relayEventId}.`);
                                                     return false;
@@ -1381,7 +1400,7 @@ export default Hf.Composite({
                                 Hf.log(`error`, `EventStreamComposite.incoming.forward - Factory:${factory.name} input event Id is invalid.`);
                             } else {
                                 forwardEventIds = forwardEventIds.filter((forwardEventId) => {
-                                    if (eventIds.some((eventId) => eventId === forwardEventId)) {
+                                    if (eventIds.includes(forwardEventId)) {
                                         /* forwarding the same eventIds will cause infinite loop error */
                                         Hf.log(`warn1`, `EventStreamComposite.incoming.forward - Cannot forward the same eventId:${forwardEventId}.`);
                                         return false;
