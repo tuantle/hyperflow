@@ -81,6 +81,7 @@ export default Hf.Composite({
                     if (doConvertToStandaloneComponent) {
                         const StandaloneComponent = intf.toComponent(app, {
                             ...option,
+                            alwaysUpdateAsParent: true,
                             doRenderToTarget: false
                         });
                         if (!Hf.isFunction(StandaloneComponent)) {
@@ -89,7 +90,10 @@ export default Hf.Composite({
                             return StandaloneComponent;
                         }
                     } else {
-                        const TopComponent = intf.toComponent();
+                        const TopComponent = intf.toComponent(null, {
+                            ...option,
+                            alwaysUpdateAsParent: true
+                        });
                         if (!Hf.isFunction(TopComponent)) {
                             Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
                         } else {

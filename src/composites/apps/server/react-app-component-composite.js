@@ -55,10 +55,14 @@ export default Hf.Composite({
          * @description - Get the composed app top interface component from domain interface.
          *
          * @method getTopComponent
+         * @param {object} option
          * @return {object|function}
          */
-        getTopComponent: function getTopComponent () {
+        getTopComponent: function getTopComponent (option = {}) {
             const app = this;
+
+            option = Hf.isObject(option) ? option : {};
+
             const domain = app.getTopDomain();
             if (!Hf.isSchema({
                 name: `string`,
@@ -83,7 +87,10 @@ export default Hf.Composite({
                     }).of(React)) {
                         Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
                     } else {
-                        const TopComponent = intf.toComponent();
+                        const TopComponent = intf.toComponent(null, {
+                            ...option,
+                            alwaysUpdateAsParent: true
+                        });
                         if (!Hf.isFunction(TopComponent)) {
                             Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
                         } else {
