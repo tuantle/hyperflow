@@ -487,11 +487,37 @@ export default Hf.Composite({
 
                                     if (Hf.isObject(applet)) {
                                         if (applet.hasStarted()) {
-                                            Hf.log(`warn1`, `ReactComponentComposite.toComponent - Applet:${applet.name} of nterface:${intf.name} has already started.`);
+                                            Hf.log(`warn1`, `ReactComponentComposite.toComponent - Applet:${applet.name} of interface:${intf.name} has already started.`);
                                             applet.restart(option);
                                         } else {
                                             applet.start(option);
                                         }
+                                    }
+
+                                    if (!stateless) {
+                                        /* this event is call ONLY when the state did mutate in store */
+                                        intf.incoming(`as-state-mutated`).handle((reflectedState) => {
+                                            if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
+                                                component.setState(() => reflectedState);
+                                                _mutationOccurred = true;
+                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                            }
+                                        });
+                                        /* this event is call ONLY when the state did mutate in store and FORCE component to update */
+                                        intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
+                                            if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
+                                                component.setState(() => reflectedState);
+                                                component.forceUpdate();
+                                                _mutationOccurred = true;
+                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                                Hf.log(`info`, `Forced update for component:${component.props.name}.`);
+                                            }
+                                        });
+                                    }
+
+                                    // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
+                                    if (alwaysUpdateAsParent) {
+                                        _mutationOccurred = true;
                                     }
 
                                     /* needs to sync up interface state and component props before mounting.
@@ -523,7 +549,8 @@ export default Hf.Composite({
                                        This will do necessary mutation on interface state. */
                                     const currentProperty = intf.getStateAsObject();
 
-                                    if (alwaysUpdateAsParent && Hf.isNonEmptyArray(component.props.children)) {
+                                    // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
+                                    if (alwaysUpdateAsParent) {
                                         _mutationOccurred = true;
                                     }
 
@@ -552,26 +579,27 @@ export default Hf.Composite({
 
                                     _mountStage = DID_MOUNT_STAGE;
 
-                                    if (!stateless) {
-                                        /* this event is call ONLY when the state did mutate in store */
-                                        intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                                component.setState(() => reflectedState);
-                                                _mutationOccurred = true;
-                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                            }
-                                        });
-                                        /* this event is call ONLY when the state did mutate in store and FORCE component to update */
-                                        intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                                component.setState(() => reflectedState);
-                                                component.forceUpdate();
-                                                _mutationOccurred = true;
-                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                                Hf.log(`info`, `Forced update for component:${component.props.name}.`);
-                                            }
-                                        });
-                                    }
+                                    // NOTE: using component.setState here will cause ui flickering. Use component.setState in componentWillMount instead.
+                                    // if (!stateless) {
+                                    //     /* this event is call ONLY when the state did mutate in store */
+                                    //     intf.incoming(`as-state-mutated`).handle((reflectedState) => {
+                                    //         if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
+                                    //             component.setState(() => reflectedState);
+                                    //             _mutationOccurred = true;
+                                    //             Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                    //         }
+                                    //     });
+                                    //     /* this event is call ONLY when the state did mutate in store and FORCE component to update */
+                                    //     intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
+                                    //         if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
+                                    //             component.setState(() => reflectedState);
+                                    //             component.forceUpdate();
+                                    //             _mutationOccurred = true;
+                                    //             Hf.log(`info`, `State mutated for component:${component.props.name}.`);
+                                    //             Hf.log(`info`, `Forced update for component:${component.props.name}.`);
+                                    //         }
+                                    //     });
+                                    // }
 
                                     intf.outgoing(`on-component-did-mount`).emit(() => component);
                                 };
@@ -624,16 +652,15 @@ export default Hf.Composite({
                                  */
                                 this.shouldComponentUpdate = function shouldComponentUpdate () {
                                     const component = this;
-                                    let shouldUpdate = false;
 
                                     if (_mutationOccurred) {
                                         _mutationOccurred = false;
-                                        shouldUpdate = true;
                                         Hf.log(`info`, `Rendering component:${component.props.name}.`);
-                                    } else {
-                                        // Hf.log(`info`, `Skipped rendering for component:${component.props.name}.`);
+                                        return true;
+                                    } else { // eslint-disable-line
+                                        Hf.log(`info`, `Skipped rendering for component:${component.props.name}.`);
+                                        return false;
                                     }
-                                    return shouldUpdate;
                                 };
                             }
                         }
