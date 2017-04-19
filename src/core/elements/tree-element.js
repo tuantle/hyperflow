@@ -142,7 +142,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
-        return tree._node.hasOwnProperty(pathId);
+        return tree._node.hasOwnProperty(pathId) && Hf.isDefined(tree._node[pathId]);
     },
     /**
      * @description - Get the number of root nodes.
@@ -152,7 +152,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      */
     getRootCount: function getRootCount () {
         const tree = this;
-        return Object.keys(tree._node).reduce((count, pathId) => {
+        return Object.keys(tree._node).filter((pathId) => Hf.isDefined(tree._node[pathId])).reduce((count, pathId) => {
             return tree._node[pathId].isRoot() ? count++ : count;
         }, 0);
     },
