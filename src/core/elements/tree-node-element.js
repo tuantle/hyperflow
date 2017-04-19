@@ -510,16 +510,19 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     refer: function refer (pathId, option = {}) {
         const node = this;
         const tree = node._tree;
-
         const {
+            maxReferDepth,
             /* skip referal of pathIds in the exclusion list. */
             excludedPathIds
         } = Hf.fallback({
+            maxReferDepth: -1,
             excludedPathIds: []
         }).of(option);
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
+
+        const depth = pathId.length - pathId.replace(/\./g, ``).length;
 
         if (tree.hasNode(pathId)) {
             const rNode = tree._getNode(pathId);
@@ -536,20 +539,30 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
                     rtdNodes = rtNodes.filter((rtNode) => !tNodeKeys.includes(rtNode._key));
                     rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.includes(rtNode._key));
 
-                    rtsNodes.filter((rtsNode) => {
-                        return !excludedPathIds.includes(rtsNode._pathId);
-                    }).forEach((rtsNode) => {
+                    rtsNodes.filter((rtsNode) => !excludedPathIds.includes(rtsNode._pathId)).forEach((rtsNode) => {
                         const [ tsNode ] = tNodes.filter((tNode) => tNode._key === rtsNode._key);
 
-                        tsNode.refer(rtsNode._pathId, option);
+                        if ((maxReferDepth === -1 || depth <= maxReferDepth)) {
+                            tsNode.refer(rtsNode._pathId, option);
+                        }
                     });
                 } else {
                     rtdNodes = rNode._getTails();
                 }
-                rtdNodes.filter((rtdNode) => {
-                    return !excludedPathIds.includes(rtdNode._pathId);
-                }).forEach((rtdNode) => {
-                    node.branch(rtdNode._key, rtdNode._contentProxy).refer(rtdNode._pathId, option);
+                rtdNodes.filter((rtdNode) => !excludedPathIds.includes(rtdNode._pathId)).forEach((rtdNode) => {
+                    // let ts = new Date().getTime();
+
+                    // TODO: needs optimization. Performance issue with deep object & array, especially for large array of objects.
+                    if ((maxReferDepth === -1 || depth <= maxReferDepth)) {
+                        node.branch(rtdNode._key, rtdNode._contentProxy).refer(rtdNode._pathId, option);
+                    } else {
+                        node.branch(rtdNode._key, rtdNode._contentProxy);
+                    }
+                    // let te = new Date().getTime();
+                    // console.log(`TEST execution time: ${te - ts} ms.`);
+                    // if (te - ts > 20) {
+                    //     console.log(`TEST1 pathId: ${rtdNode._pathId}.`);
+                    // }
                 });
             }
         } else {
