@@ -2,6 +2,21 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development RC Version 0.1.0-rc1 (04/18/2017)**
+```
+Notes:
+    - Release candidate 1
+New Features:
+Breaking Changes:
+Improvements:
+    - Added maxReferDepth option to refer method for TreeNodeElement.
+    - Added lifeSpan option to outgoing.interval method for EventStreamComposite.
+Bug fixes:
+    - Added alwaysUpdateAsParent: true option passing to toComponent when calling registerComponentLib for InterfaceFactory.
+    - Fixed missing option passing to toComponent method when calling getTopComponent for ReactAppComponentComposite.
+    - Moved state update from componentDidMount to componentWillMount. Fixed update issue when using alwaysUpdateAsParent option for ReactComponentComposite.
+    - Check that node at pathId is defined for hasNode and getNodeCount methods for TreeElement.
+```
 **Development Beta Version 0.1.0-beta30 (04/03/2017)**
 ```
 Notes:
