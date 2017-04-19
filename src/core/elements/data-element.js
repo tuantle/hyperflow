@@ -197,7 +197,7 @@ const DataElementPrototype = Object.create({}).prototype = {
                 data._deepUpdateMMap(newRootNode, pathId, mRecords.slice(1));
 
                 newRootNode.refer(oldRootNode.getPathId(), {
-                    excludedPathIds: excludedNonmutatioReferalPathIds.filter((_pathId) => Hf.isString(_pathId)).map((_pathId) => {
+                    excludedPathIds: excludedNonmutatioReferalPathIds.filter((_pathId) => Hf.isNonEmptyString(_pathId)).map((_pathId) => {
                         _pathId = Hf.stringToArray(_pathId, `.`);
                         if (_pathId[0] === rootKey) {
                             _pathId[0] = oldRootKey;
