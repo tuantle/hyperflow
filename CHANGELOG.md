@@ -2,6 +2,17 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development RC Version 0.1.0-rc2 (05/26/2017)**
+```
+Notes:
+    - Release candidate 2
+New Features:
+Breaking Changes:
+Improvements:
+    - Updated package dependencies.
+    - Updated React PropTypes as it is now a separate NPM package in ReactComponentComposite.
+Bug fixes:
+```
 **Development RC Version 0.1.0-rc1 (04/18/2017)**
 ```
 Notes:
