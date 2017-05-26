@@ -251,23 +251,34 @@ export default Hf.Composite({
                     Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React component.`);
                 } else {
                     const {
-                        React
+                        React,
+                        PropTypes
                     } = intf.getComponentLib();
                     if (!Hf.isSchema({
-                        PropTypes: `object`,
                         createClass: `function`
                     }).of(React)) {
-                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component is invalid.`);
+                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component library is invalid.`);
+                    } else if (!Hf.isSchema({
+                        bool: `function`,
+                        array: `function`,
+                        object: `function`,
+                        func: `function`,
+                        string: `function`,
+                        number: `function`,
+                        oneOf: `function`,
+                        oneOfType: `function`
+                    }).of(PropTypes)) {
+                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - React prop-types library is invalid.`);
                     } else {
                         const defaultProperty = intf.getStateAsObject();
                         const defaultPropertyKeys = Object.keys(defaultProperty);
                         const reactPropTypeAlias = {
-                            boolean: React.PropTypes.bool,
-                            array: React.PropTypes.array,
-                            object: React.PropTypes.object,
-                            function: React.PropTypes.func,
-                            string: React.PropTypes.string,
-                            number: React.PropTypes.number
+                            boolean: PropTypes.bool,
+                            array: PropTypes.array,
+                            object: PropTypes.object,
+                            function: PropTypes.func,
+                            string: PropTypes.string,
+                            number: PropTypes.number
                         };
                         const reactPureDefinition = (Hf.Composite({
                             exclusion: {
@@ -305,13 +316,13 @@ export default Hf.Composite({
                                                 const {
                                                     condition: types
                                                 } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
-                                                propType[key] = React.PropTypes.oneOf(types);
+                                                propType[key] = PropTypes.oneOf(types);
                                             }
                                             if (stateCursor.isItemOneOfTypes(key)) {
                                                 const {
                                                     condition: types
                                                 } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
-                                                propType[key] = React.PropTypes.oneOfType(types.map((typeAliasKey) => {
+                                                propType[key] = PropTypes.oneOfType(types.map((typeAliasKey) => {
                                                     return reactPropTypeAlias[typeAliasKey];
                                                 }));
                                             }
@@ -357,7 +368,8 @@ export default Hf.Composite({
                 const intf = this;
                 const stateCursor = intf.getStateCursor();
                 const {
-                    React
+                    React,
+                    PropTypes
                 } = intf.getComponentLib();
                 const {
                     alwaysUpdateAsParent,
@@ -367,10 +379,20 @@ export default Hf.Composite({
                     componentMethodAndPropertyInclusions: []
                 }).of(option);
                 if (!Hf.isSchema({
-                    PropTypes: `object`,
                     createClass: `function`
                 }).of(React)) {
                     Hf.log(`error`, `ReactComponentComposite.toComponent - React component is invalid.`);
+                } else if (!Hf.isSchema({
+                    bool: `function`,
+                    array: `function`,
+                    object: `function`,
+                    func: `function`,
+                    string: `function`,
+                    number: `function`,
+                    oneOf: `function`,
+                    oneOfType: `function`
+                }).of(PropTypes)) {
+                    Hf.log(`error`, `ReactComponentComposite.toComponent - React prop-types library is invalid.`);
                 } else if (Hf.isObject(applet) && (!Hf.isSchema({
                     fId: `string`,
                     name: `string`,
@@ -384,12 +406,12 @@ export default Hf.Composite({
                     const defaultProperty = intf.getStateAsObject();
                     const defaultPropertyKeys = Object.keys(defaultProperty);
                     const reactPropTypeAlias = {
-                        boolean: React.PropTypes.bool,
-                        array: React.PropTypes.array,
-                        object: React.PropTypes.object,
-                        function: React.PropTypes.func,
-                        string: React.PropTypes.string,
-                        number: React.PropTypes.number
+                        boolean: PropTypes.bool,
+                        array: PropTypes.array,
+                        object: PropTypes.object,
+                        function: PropTypes.func,
+                        string: PropTypes.string,
+                        number: PropTypes.number
                     };
                     const reactDefinition = (Hf.Composite({
                         exclusion: {
@@ -427,13 +449,13 @@ export default Hf.Composite({
                                             const {
                                                 condition: types
                                             } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
-                                            propType[key] = React.PropTypes.oneOf(types);
+                                            propType[key] = PropTypes.oneOf(types);
                                         }
                                         if (stateCursor.isItemOneOfTypes(key)) {
                                             const {
                                                 condition: types
                                             } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
-                                            propType[key] = React.PropTypes.oneOfType(types.map((typeAliasKey) => {
+                                            propType[key] = PropTypes.oneOfType(types.map((typeAliasKey) => {
                                                 return reactPropTypeAlias[typeAliasKey];
                                             }));
                                         }
