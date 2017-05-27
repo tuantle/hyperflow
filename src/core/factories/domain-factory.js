@@ -232,10 +232,10 @@ export default Composer({
                     }).of(intf) || intf.fId.substr(0, INTERFACE_FACTORY_CODE.length) !== INTERFACE_FACTORY_CODE) {
                         Hf.log(`error`, `DomainFactory.register - Input interface is invalid.`);
                     } else if (Hf.isObject(_intf)) {
-                        Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered interface:${intf.name}.`);
+                        Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered interface:${_intf.name}.`);
                     } else {
                         _intf = intf;
-                        Hf.log(`info`, `Domain:${domain.name} registered interface:${intf.name}.`);
+                        Hf.log(`info`, `Domain:${domain.name} registered interface:${_intf.name}.`);
                     }
                 }
                 if (Hf.isObject(store)) {
@@ -255,10 +255,10 @@ export default Composer({
                         }).of(store) || store.fId.substr(0, STORE_FACTORY_CODE.length) !== STORE_FACTORY_CODE) {
                             Hf.log(`error`, `DomainFactory.register - Input store is invalid.`);
                         } else if (Hf.isObject(_store)) {
-                            Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered store:${store.name}.`);
+                            Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered store:${_store.name}.`);
                         } else {
                             _store = store;
-                            Hf.log(`info`, `Domain:${domain.name} registered store:${store.name}.`);
+                            Hf.log(`info`, `Domain:${domain.name} registered store:${_store.name}.`);
                         }
                     }
                 }

@@ -165,7 +165,7 @@ export default Composer({
                 }).of(domain) || domain.fId.substr(0, DOMAIN_FACTORY_CODE.length) !== DOMAIN_FACTORY_CODE) {
                     Hf.log(`error`, `AppFactory.register - Input domain is invalid.`);
                 } else if (Hf.isObject(_domain)) {
-                    Hf.log(`warn1`, `AppFactory.register - App:${app.name} registered domain:${domain.name}.`);
+                    Hf.log(`warn1`, `AppFactory.register - App:${app.name} already registered domain:${_domain.name}.`);
                 } else {
                     _domain = domain;
                     _renderer = component.renderer;

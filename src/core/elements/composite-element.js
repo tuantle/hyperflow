@@ -341,11 +341,12 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                             });
                         } else {
                             if (Hf.isObject(parentState) && parentState.hasOwnProperty(parentKey)) {
-                                if (parentState[parentKey] === null || Hf.isEmpty(parentState[parentKey])) {
-                                    parentState[parentKey] = reconfiguration;
-                                } else {
-                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state object at key:${parentKey} as it is not null or empty initially.`);
-                                }
+                                parentState[parentKey] = reconfiguration;
+                                // if (parentState[parentKey] === null || Hf.isEmpty(parentState[parentKey])) {
+                                //     parentState[parentKey] = reconfiguration;
+                                // } else {
+                                //     Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state object at key:${parentKey} as it is not null or empty initially.`);
+                                // }
                             } else {
                                 Hf.log(`warn1`, `Factory.deepStateReconfiguration - Top level state object is non-configurable.`);
                                 Hf.log(`debug`, `Factory.deepStateReconfiguration - originalState:${JSON.stringify(originalState, null, `\t`)}`);
@@ -368,11 +369,12 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                             });
                         } else {
                             if (Hf.isObject(parentState) && parentState.hasOwnProperty(parentKey)) {
-                                if (parentState[parentKey] === null || Hf.isEmpty(parentState[parentKey])) {
-                                    parentState[parentKey] = reconfiguration;
-                                } else {
-                                    Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state array at key:${parentKey} as it is not null or empty initially.`);
-                                }
+                                parentState[parentKey] = reconfiguration;
+                                // if (parentState[parentKey] === null || Hf.isEmpty(parentState[parentKey])) {
+                                //     parentState[parentKey] = reconfiguration;
+                                // } else {
+                                //     Hf.log(`warn1`, `Factory.deepStateReconfiguration - Cannot reconfig state array at key:${parentKey} as it is not null or empty initially.`);
+                                // }
                             } else {
                                 Hf.log(`warn1`, `Factory.deepStateReconfiguration - Top level state array is non-configurable.`);
                                 Hf.log(`debug`, `Factory.deepStateReconfiguration - originalState:${JSON.stringify(originalState, null, `\t`)}`);
