@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-rc2",
+    "version": "0.1.0-rc3",
     "registry": "github",
     "description": "Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",

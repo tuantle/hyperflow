@@ -2,6 +2,16 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development RC Version 0.1.0-rc3 (05/27/2017)**
+```
+Notes:
+    - Release candidate 3
+New Features:
+Breaking Changes:
+Improvements:
+    - Cleaned up warning & info messages for AppFactory, DomainFactory, and CompositeElement.
+Bug fixes:
+```
 **Development RC Version 0.1.0-rc2 (05/26/2017)**
 ```
 Notes:

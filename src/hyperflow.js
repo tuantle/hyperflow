@@ -18,7 +18,7 @@
  * @module Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.
  * @description - Hf namespace setup. Initialize Hf, adding core modules, and apply settings.
  *
- * @author Tuan Le (tuan.t.lei@gmail.com)
+ * @author Tuan Le (tuan.t.lei@gmail.com) 
  */
 /* @flow */
 'use strict'; // eslint-disable-line
