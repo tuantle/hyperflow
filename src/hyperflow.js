@@ -22,7 +22,7 @@
  *
  * @flow
  */
-'use strict'; // eslint-disable-line
+'use strict'; // eslint-disable-line 
 
 /* load CommonElement */
 const CommonElement = require(`./core/elements/common-element`).default;

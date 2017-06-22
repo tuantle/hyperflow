@@ -2,6 +2,17 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development RC Version 0.1.0-rc4 (06/22/2017)**
+```
+Notes:
+    - Release candidate 4
+    - Updated compatibility to latest React.
+New Features:
+Breaking Changes:
+    - Using create-react-class package instead of React.creatClass
+Improvements:
+Bug fixes:
+```
 **Development RC Version 0.1.0-rc3 (05/27/2017)**
 ```
 Notes:
