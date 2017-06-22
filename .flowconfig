@@ -1,6 +1,9 @@
 [ignore]
 
 # Ignore examples
+.*/node_modules
+
+# Ignore examples
 .*/examples
 
 # Ignore tests
