@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0-rc3",
+    "version": "0.1.0-rc4",
     "registry": "github",
     "description": "Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",
@@ -12,8 +12,7 @@
         "type": "git",
         "url": "https://github.com/tuantle/hyperflow.git"
     },
-    "keywords": [
-    ],
+    "keywords": [],
     "bugs": {
         "url": "https://github.com/tuantle/hyperflow/issues"
     },
@@ -26,30 +25,31 @@
         "npm": ">=4.x"
     },
     "peerDependencies": {
-        "react": "=16.0.0-alpha.6",
-        "react-dom": "=16.0.0-alpha.6",
-        "react-native": "=0.44.0",
-        "prop-types": "^15.5.10"
+        "react": "^16.0.0-alpha.12",
+        "react-dom": "^16.0.0-alpha.12",
+        "react-native": "^0.45.1",
+        "prop-types": "^15.5.10",
+        "create-react-class": "^15.6.0"
     },
     "dependencies": {
-        "rxjs": "^5.4.0",
+        "rxjs": "^5.4.1",
         "tape": "^4.6.3"
     },
     "devDependencies": {
         "babel-core": "^6.24.0",
-        "babel-preset-node7": "^1.5.0",
+        "babel-preset-env": "^1.5.2",
         "babel-preset-react": "^6.22.0",
-        "babel-preset-react-native": "^1.9.2",
+        "babel-preset-react-native": "^2.0.0",
         "babel-plugin-transform-strict-mode": "^6.22.0",
-
         "babel-eslint": "^7.2.3",
-
         "eslint": "^3.19.0",
         "eslint-plugin-react": "^7.0.1",
         "eslint-plugin-react-native": "^2.3.2",
-
-        "react": "=16.0.0-alpha.6",
-        "react-dom": "=16.0.0-alpha.6"
+        "react": "^16.0.0-alpha.12",
+        "react-dom": "^16.0.0-alpha.12",
+        "react-native": "^0.45.1",
+        "prop-types": "^15.5.10",
+        "create-react-class": "^15.6.0"
     },
     "scripts": {
         "start-unit-tests": "NODE_ENV=development node ./__tests__/test-suites"
