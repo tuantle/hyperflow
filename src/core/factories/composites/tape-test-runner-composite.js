@@ -19,8 +19,9 @@
  * @description - A tape test runner composite.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 import tape from 'tape';

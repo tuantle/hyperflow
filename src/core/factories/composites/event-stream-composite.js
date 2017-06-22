@@ -19,8 +19,9 @@
  * @description - A reactive event stream composite, based on rxjs.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Hyperflow */

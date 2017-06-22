@@ -19,8 +19,9 @@
  * @description -  A constraint descriptor that applies constraint functions to an object property.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Hyperflow */

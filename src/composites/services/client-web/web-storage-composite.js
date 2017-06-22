@@ -19,8 +19,9 @@
  * @description - A web storage composite. Compatible with local or session storage.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Hyperflow */

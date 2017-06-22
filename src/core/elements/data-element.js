@@ -19,9 +19,9 @@
  * @description -  A data element that is used for defining component state.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
- * @version 0.0
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Hyperflow */

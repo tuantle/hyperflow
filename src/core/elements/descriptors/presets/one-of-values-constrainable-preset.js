@@ -19,8 +19,9 @@
  * @description - One of values constrainable descriptor.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Hyperflow */

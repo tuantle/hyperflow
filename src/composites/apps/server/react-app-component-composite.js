@@ -19,8 +19,9 @@
  * @description - A React app component composite for server environment.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Hyperflow */
@@ -81,8 +82,6 @@ export default Hf.Composite({
                         React
                     } = intf.getComponentLib();
                     if (!Hf.isSchema({
-                        PropTypes: `object`,
-                        createClass: `function`,
                         createElement: `function`
                     }).of(React)) {
                         Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);

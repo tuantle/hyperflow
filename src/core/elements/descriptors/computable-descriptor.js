@@ -17,11 +17,12 @@
  *
  * @module ComputableDescriptor
  * @description -  A descriptor for describing a computable property
-               and assigns that to an object property.
+ *                 and assigns that to an object property.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Hyperflow */

@@ -20,8 +20,9 @@
  * throughout Hf toolkit.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 const PRIVATE_PREFIX = `_`;

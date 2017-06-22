@@ -18,9 +18,10 @@
  * @module Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.
  * @description - Hf namespace setup. Initialize Hf, adding core modules, and apply settings.
  *
- * @author Tuan Le (tuan.t.lei@gmail.com) 
+ * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load CommonElement */
@@ -53,7 +54,7 @@ const init = function init ({
 
         /* Hyperflow core element libraries */
         const HfCoreProperty = {
-            VERSION: `0.1.0-rc3`,
+            VERSION: `0.1.0-rc4`,
             TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
             /* load Composer & set composer factory namespace */

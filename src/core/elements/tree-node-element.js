@@ -19,8 +19,9 @@
  * @description - An simple implementation of an undirected data tree node.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
+ *
+ * @flow
  */
-/* @flow */
 'use strict'; // eslint-disable-line
 
 /* load Hyperflow */
