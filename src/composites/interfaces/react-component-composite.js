@@ -251,14 +251,9 @@ export default Hf.Composite({
                     Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React component.`);
                 } else {
                     const {
-                        React,
                         PropTypes
                     } = intf.getComponentLib();
                     if (!Hf.isSchema({
-                        createClass: `function`
-                    }).of(React)) {
-                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component library is invalid.`);
-                    } else if (!Hf.isSchema({
                         bool: `function`,
                         array: `function`,
                         object: `function`,
@@ -280,7 +275,7 @@ export default Hf.Composite({
                             string: PropTypes.string,
                             number: PropTypes.number
                         };
-                        const reactPureDefinition = (Hf.Composite({
+                        const intfPureComponentDefinition = (Hf.Composite({
                             exclusion: {
                                 keys: [ `*` ],
                                 exception: {
@@ -294,7 +289,7 @@ export default Hf.Composite({
                                 }
                             },
                             enclosure: {
-                                ReactPureDefinition: function ReactPureDefinition () {
+                                IntfPureComponentDefinition: function IntfPureComponentDefinition () {
                                     /* set react property type checking */
                                     this.propTypes = (() => {
                                         let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
@@ -336,20 +331,20 @@ export default Hf.Composite({
                         }).mixin(intf).resolve())();
                         if (!Hf.isSchema({
                             pureRender: `function`
-                        }).of(reactPureDefinition)) {
-                            Hf.log(`error`, `ReactComponentComposite.toPureComponent - React pure component definition is invalid.`);
+                        }).of(intfPureComponentDefinition)) {
+                            Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} pure component definition is invalid.`);
                         } else {
                             let {
                                 pureRender: PureComponent
-                            } = reactPureDefinition;
+                            } = intfPureComponentDefinition;
 
-                            PureComponent = PureComponent.bind(reactPureDefinition);
+                            PureComponent = PureComponent.bind(intfPureComponentDefinition);
 
                             /* allow React pure component function access to React propTypes */
-                            PureComponent.propTypes = reactPureDefinition.propTypes;
+                            PureComponent.propTypes = intfPureComponentDefinition.propTypes;
 
                             /* allow React pure component function access to default property */
-                            PureComponent.defaultProps = reactPureDefinition.defaultProps;
+                            PureComponent.defaultProps = intfPureComponentDefinition.defaultProps;
 
                             return PureComponent;
                         }
@@ -368,7 +363,7 @@ export default Hf.Composite({
                 const intf = this;
                 const stateCursor = intf.getStateCursor();
                 const {
-                    React,
+                    CreateReactClass,
                     PropTypes
                 } = intf.getComponentLib();
                 const {
@@ -378,10 +373,9 @@ export default Hf.Composite({
                     alwaysUpdateAsParent: false,
                     componentMethodAndPropertyInclusions: []
                 }).of(option);
-                if (!Hf.isSchema({
-                    createClass: `function`
-                }).of(React)) {
-                    Hf.log(`error`, `ReactComponentComposite.toComponent - React component is invalid.`);
+
+                if (!Hf.isFunction(CreateReactClass)) {
+                    Hf.log(`error`, `ReactComponentComposite.toComponent - React create class library is invalid.`);
                 } else if (!Hf.isSchema({
                     bool: `function`,
                     array: `function`,
@@ -413,7 +407,7 @@ export default Hf.Composite({
                         string: PropTypes.string,
                         number: PropTypes.number
                     };
-                    const reactDefinition = (Hf.Composite({
+                    const intfComponentDefinition = (Hf.Composite({
                         exclusion: {
                             keys: [ `*` ],
                             exception: {
@@ -687,13 +681,10 @@ export default Hf.Composite({
                             }
                         }
                     }).mixin(intf).resolve())();
-                    let Component = React.createClass(reactDefinition);
-
-                    /* allow React factory function access to getInterface function */
-                    Component.getInterface = reactDefinition.getInterface;
+                    let Component = CreateReactClass(intfComponentDefinition);
 
                     if (!Hf.isFunction(Component)) {
-                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - React component definition is invalid.`);
+                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} React component is invalid.`);
                     } else {
                         return Component;
                     }
