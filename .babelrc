@@ -3,7 +3,8 @@
     "sourceMaps": "inline",
     "presets": [
         "react",
-        [ "env",
+        [
+            "env",
             {
                 "targets": {
                     "node": "current"
