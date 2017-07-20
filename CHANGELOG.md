@@ -2,6 +2,7 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Released Version 0.1.0 (07/20/2017)**
 **Development RC Version 0.1.0-rc4 (06/22/2017)**
 ```
 Notes:

@@ -22,7 +22,7 @@
  *
  * @flow
  */
-'use strict'; // eslint-disable-line 
+'use strict'; // eslint-disable-line
 
 /* load CommonElement */
 const CommonElement = require(`./core/elements/common-element`).default;
@@ -54,7 +54,7 @@ const init = function init ({
 
         /* Hyperflow core element libraries */
         const HfCoreProperty = {
-            VERSION: `0.1.0-rc4`,
+            VERSION: `0.1.0`,
             TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
             /* load Composer & set composer factory namespace */
