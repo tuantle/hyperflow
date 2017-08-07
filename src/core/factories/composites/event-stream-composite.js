@@ -881,9 +881,10 @@ export default Hf.Composite({
                          * @method outgoing.interval
                          * @param {number} ms - Period in millisecond
                          * @param {number} lifeSpan - Life time counter of the interval, -1 = indefinite
+                         * @param {function} stopper - Interval stopper
                          * @return {object}
                          */
-                        interval: function interval (ms, lifeSpan = -1) {
+                        interval: function interval (ms, lifeSpan = -1, stopper = () => false) {
                             if (!Hf.isInteger(ms)) {
                                 Hf.log(`error`, `EventStreamComposite.outgoing.interval - Input period time is invalid.`);
                             } else {
@@ -898,6 +899,7 @@ export default Hf.Composite({
                                     if (arbiter.hasOwnProperty(eventId)) {
                                         arbiter[eventId].intervalPeriod = ms;
                                         arbiter[eventId].lifeSpan = lifeSpan;
+                                        arbiter[eventId].stopper = stopper;
                                         if (arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
                                             arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
                                         }
@@ -906,6 +908,7 @@ export default Hf.Composite({
                                             eventDirectionalState: OUTGOING_EVENT,
                                             intervalPeriod: ms,
                                             lifeSpan,
+                                            stopper,
                                             handler: null,
                                             canceller: null,
                                             relayer: null
@@ -945,14 +948,16 @@ export default Hf.Composite({
                                         const {
                                             waitTime,
                                             intervalPeriod,
-                                            lifeSpan
+                                            lifeSpan,
+                                            stopper
                                         } = Hf.fallback({
                                             waitTime: 0,
                                             intervalPeriod: 0,
                                             lifeSpan: -1
                                         }).of((_arbiter[eventId]));
                                         let lifeSpanCounter = 0;
-                                        let interval;
+                                        let intervalId;
+                                        let intervalStopped = false;
 
                                         if (_arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
                                             _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
@@ -960,11 +965,15 @@ export default Hf.Composite({
 
                                         if (waitTime > 0 && intervalPeriod > 0) {
                                             setTimeout(() => {
-                                                interval = setInterval(() => {
+                                                intervalId = setInterval(() => {
                                                     _streamEmitter.next(payload);
                                                     lifeSpanCounter++;
-                                                    if (lifeSpan !== -1 && lifeSpanCounter === lifeSpan) {
-                                                        clearInterval(interval);
+                                                    if (Hf.isFunction(stopper)) {
+                                                        intervalStopped = stopper(lifeSpanCounter);
+                                                        intervalStopped = Hf.isBoolean(intervalStopped) ? intervalStopped : false;
+                                                    }
+                                                    if (intervalStopped || (lifeSpan !== -1 && lifeSpanCounter === lifeSpan)) {
+                                                        clearInterval(intervalId);
                                                     }
                                                 }, intervalPeriod);
                                             }, waitTime);
@@ -973,11 +982,17 @@ export default Hf.Composite({
                                                 _streamEmitter.next(payload);
                                             }, waitTime);
                                         } else if (waitTime === 0 && intervalPeriod > 0) {
-                                            interval = setInterval(() => {
+                                            intervalId = setInterval(() => {
                                                 _streamEmitter.next(payload);
                                                 lifeSpanCounter++;
+                                                if (Hf.isFunction(stopper)) {
+                                                    const stopped = stopper(lifeSpanCounter);
+                                                    if (stopped) {
+                                                        lifeSpanCounter = lifeSpan;
+                                                    }
+                                                }
                                                 if (lifeSpan !== -1 && lifeSpanCounter === lifeSpan) {
-                                                    clearInterval(interval);
+                                                    clearInterval(intervalId);
                                                 }
                                             }, intervalPeriod);
                                         } else {
