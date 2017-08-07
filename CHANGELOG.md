@@ -2,6 +2,16 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.1.1 (08/07/2017)**
+```
+Notes:
+    - Updated react & react-native peer dependencies to latest version.
+New Features:
+    - Added a stopper callback outgoing.interval method for EventStreamComposite.
+Breaking Changes:
+Improvements:
+Bug fixes:
+```
 **Released Version 0.1.0 (07/20/2017)**
 **Development RC Version 0.1.0-rc4 (06/22/2017)**
 ```
@@ -10,7 +20,7 @@ Notes:
     - Updated compatibility to latest React.
 New Features:
 Breaking Changes:
-    - Using create-react-class package instead of React.creatClass
+    - Using create-react-class package instead of React.creatClass.
 Improvements:
 Bug fixes:
 ```

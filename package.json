@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "registry": "github",
     "description": "Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",
@@ -33,7 +33,7 @@
     },
     "dependencies": {
         "rxjs": "^5.4.2",
-        "tape": "^4.7.0"
+        "tape": "^4.8.0"
     },
     "devDependencies": {
         "babel-core": "^6.24.0",
@@ -45,7 +45,7 @@
         "babel-eslint": "^7.2.3",
         "eslint": "^4.1.0",
         "eslint-plugin-react": "^7.0.1",
-        "eslint-plugin-react-native": "^2.3.2"
+        "eslint-plugin-react-native": "^3.0.1"
     },
     "scripts": {
         "start-unit-tests": "NODE_ENV=development node ./__tests__/test-suites"
