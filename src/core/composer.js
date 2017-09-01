@@ -91,11 +91,15 @@ const ComposerPrototype = Object.create({}).prototype = {
                     composites: []
                 }).of(definition);
                 /* collect and set method if defined */
-                const methodDefinition = Object.keys(definition).filter((fnName) => {
-                    const fn = definition[fnName];
-                    return Hf.isFunction(fn);
-                }).reduce((_method, fnName) => {
-                    const fn = definition[fnName];
+                // const methodDefinition = Object.keys(definition).filter((fnName) => {
+                //     const fn = definition[fnName];
+                //     return Hf.isFunction(fn);
+                // }).reduce((_method, fnName) => {
+                //     const fn = definition[fnName];
+                //     _method[fnName] = fn;
+                //     return _method;
+                // }, {});
+                const methodDefinition = Object.entries(definition).filter(([ fnName, fn ]) => Hf.isFunction(fn)).reduce((_method, [ fnName, fn ]) => { // eslint-disable-line
                     _method[fnName] = fn;
                     return _method;
                 }, {});
@@ -183,10 +187,16 @@ export default function Composer (definition) {
                 enclosure: {}
             };
 
-            compositeDefinition.enclosure = Object.keys(definition).filter((key) => {
-                return key !== `static` && key !== `state` && key !== `composites` && Hf.isFunction(definition[key]);
-            }).reduce((_enclosure, key) => {
-                _enclosure[key] = definition[key];
+            // compositeDefinition.enclosure = Object.keys(definition).filter((key) => {
+            //     return key !== `static` && key !== `state` && key !== `composites` && Hf.isFunction(definition[key]);
+            // }).reduce((_enclosure, key) => {
+            //     _enclosure[key] = definition[key];
+            //     return _enclosure;
+            // }, {});
+            compositeDefinition.enclosure = Object.entries(definition).filter(([ key, value ]) => {
+                return key !== `static` && key !== `state` && key !== `composites` && Hf.isFunction(value);
+            }).reduce((_enclosure, [ key, value ]) => {
+                _enclosure[key] = value;
                 return _enclosure;
             }, {});
 
