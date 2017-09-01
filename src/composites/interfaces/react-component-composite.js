@@ -35,8 +35,16 @@ const WILL_MOUNT_STAGE = 0;
 const DID_MOUNT_STAGE = 1;
 const WILL_UNMOUNT_STAGE = 2;
 
+const DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS = [
+    /* interface reserved method prefixes */
+    `on`,
+    `do`,
+    `handle`,
+    `render`
+];
+
 const DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
-    /* react specific methods and properties */
+    /* react reserved methods and properties */
     `propTypes`,
     `defaultProps`,
     `setNativeProps`,
@@ -52,7 +60,7 @@ const DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
     `componentDidUpdate`,
     `componentWillUnmount`,
     `shouldComponentUpdate`,
-    /* interface specific methods and properties */
+    /* interface reserved methods and properties */
     `outgoing`,
     `getInterface`,
     `assignComponentRef`,
@@ -61,12 +69,12 @@ const DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
 ];
 
 const DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
-    /* react specific methods and properties */
+    /* react reserved methods and properties */
     `propTypes`,
     `defaultProps`,
     `setNativeProps`,
     `pureRender`,
-    /* interface specific methods and properties */
+    /* interface reserved methods and properties */
     `outgoing`,
     `getInterface`,
     `assignComponentRef`,
@@ -279,12 +287,7 @@ export default Hf.Composite({
                             exclusion: {
                                 keys: [ `*` ],
                                 exception: {
-                                    prefixes: [
-                                        `on`,
-                                        `do`,
-                                        `handle`,
-                                        `render`
-                                    ],
+                                    prefixes: DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS,
                                     keys: DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS
                                 }
                             },
@@ -368,9 +371,11 @@ export default Hf.Composite({
                 } = intf.getComponentLib();
                 const {
                     alwaysUpdateAsParent,
+                    componentMethodPrefixInclusions,
                     componentMethodAndPropertyInclusions
                 } = Hf.fallback({
                     alwaysUpdateAsParent: false,
+                    componentMethodPrefixInclusions: [],
                     componentMethodAndPropertyInclusions: []
                 }).of(option);
 
@@ -411,12 +416,7 @@ export default Hf.Composite({
                         exclusion: {
                             keys: [ `*` ],
                             exception: {
-                                prefixes: [
-                                    `on`,
-                                    `do`,
-                                    `handle`,
-                                    `render`
-                                ],
+                                prefixes: DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS.concat(componentMethodPrefixInclusions),
                                 keys: DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS.concat(componentMethodAndPropertyInclusions)
                             }
                         },
