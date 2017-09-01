@@ -2,6 +2,18 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.1.2 (09/01/2017)**
+```
+Notes:
+New Features:
+    Using Object.entries & Object.values features.
+Changes:
+    - Strongly type constrainable is set to true by default if not set in DataElement.
+Breaking Changes:
+Improvements:
+Bug fixes:
+    - Fixed a bug in stopper callback outgoing.interval method for EventStreamComposite.
+```
 **Development Version 0.1.1 (08/07/2017)**
 ```
 Notes:
