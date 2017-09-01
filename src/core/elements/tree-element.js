@@ -153,8 +153,11 @@ const TreeElementPrototype = Object.create({}).prototype = {
      */
     getRootCount: function getRootCount () {
         const tree = this;
-        return Object.keys(tree._node).filter((pathId) => Hf.isDefined(tree._node[pathId])).reduce((count, pathId) => {
-            return tree._node[pathId].isRoot() ? count++ : count;
+        // return Object.keys(tree._node).filter((pathId) => Hf.isDefined(tree._node[pathId])).reduce((count, pathId) => {
+        //     return tree._node[pathId].isRoot() ? count++ : count;
+        // }, 0);
+        return Object.values(tree._node).filter((node) => Hf.isDefined(node)).reduce((count, node) => {
+            return node.isRoot() ? count++ : count;
         }, 0);
     },
     /**

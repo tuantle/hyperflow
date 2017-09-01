@@ -54,8 +54,27 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         if (!(Hf.isObject(source) || Hf.isArray(source))) {
             Hf.log(`error`, `DataCursorElement._createSchema - Input source object is invalid.`);
         } else {
-            return Object.keys(source).reduce((schema, key) => {
-                const value = source[key];
+            // return Object.keys(source).reduce((schema, key) => {
+            //     const value = source[key];
+            //     if (Hf.isObject(value)) {
+            //         schema[key] = cursor._createSchema(value);
+            //     } else if (Hf.isArray(value)) {
+            //         schema[key] = value.map((arrayItem) => {
+            //             if (Hf.isObject(arrayItem)) {
+            //                 return cursor._createSchema(arrayItem);
+            //             }
+            //             return Hf.typeOf(arrayItem);
+            //         });
+            //     } else if (cursor.isItemComputable(key)) {
+            //         schema[key] = `computable`;
+            //     } else if (cursor.isItemObservable(key)) {
+            //         schema[key] = `observable`;
+            //     } else {
+            //         schema[key] = Hf.typeOf(value);
+            //     }
+            //     return schema;
+            // }, {});
+            return Object.entries(source).reduce((schema, [ key, value ]) => {
                 if (Hf.isObject(value)) {
                     schema[key] = cursor._createSchema(value);
                 } else if (Hf.isArray(value)) {
@@ -336,8 +355,11 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
 
                             if (!Hf.isEmpty(item)) {
                                 const innerCursor = data.select(pathId);
-                                Object.keys(item).forEach((innerKey) => {
-                                    innerCursor.setContentItem(item[innerKey], innerKey);
+                                // Object.keys(item).forEach((innerKey) => {
+                                //     innerCursor.setContentItem(item[innerKey], innerKey);
+                                // });
+                                Object.entries(item).forEach(([ innerKey, innerItem ]) => {
+                                    innerCursor.setContentItem(innerItem, innerKey);
                                 });
                             }
                             /* if data item is strongly typed and/or is required
@@ -394,8 +416,11 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
 
                             if (!Hf.isEmpty(item)) {
                                 const innerCursor = data.select(pathId);
-                                Object.keys(item).forEach((innerKey) => {
-                                    innerCursor.setContentItem(item[innerKey], innerKey);
+                                // Object.keys(item).forEach((innerKey) => {
+                                //     innerCursor.setContentItem(item[innerKey], innerKey);
+                                // });
+                                Object.entries(item).forEach(([ innerKey, innerItem ]) => {
+                                    innerCursor.setContentItem(innerItem, innerKey);
                                 });
                             }
 
@@ -844,10 +869,17 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                                 };
                                 descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                             } else {
-                                Object.keys(constraint).forEach((constraintKey) => {
+                                // Object.keys(constraint).forEach((constraintKey) => {
+                                //     descriptor.getDescription(pathId).addConstraint(
+                                //         constraint[constraintKey].contrainer,
+                                //         constraint[constraintKey].condition,
+                                //         constraintKey
+                                //     );
+                                // });
+                                Object.entries(constraint).forEach(([ constraintKey, constraintValue ]) => {
                                     descriptor.getDescription(pathId).addConstraint(
-                                        constraint[constraintKey].contrainer,
-                                        constraint[constraintKey].condition,
+                                        constraintValue.contrainer,
+                                        constraintValue.condition,
                                         constraintKey
                                     );
                                 });

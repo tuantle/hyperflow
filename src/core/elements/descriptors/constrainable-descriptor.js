@@ -128,10 +128,15 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
             constraint: `object`
         }).of(descPreset)) {
             Hf.log(`error`, `ConstrainableDescriptor.assign - Input descriptor preset object is invalid.`);
-        } else if (Object.keys(descPreset.constraint).forEach((constraintKey) => {
+        // } else if (Object.keys(descPreset.constraint).forEach((constraintKey) => {
+        //     return Hf.isSchema({
+        //         constrainer: `function`
+        //     }).of(descPreset.constraint[constraintKey]);
+        // })) {
+        } else if (Object.values(descPreset.constraint).forEach((constraintValue) => {
             return Hf.isSchema({
                 constrainer: `function`
-            }).of(descPreset.constraint[constraintKey]);
+            }).of(constraintValue);
         })) {
             Hf.log(`error`, `ConstrainableDescriptor.assign - Input descriptor constraint is invalid.`);
         } else {
@@ -199,11 +204,23 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                                         configurable: false,
                                         enumerable: true
                                     });
-                                    results = Object.keys(constrainable._description.constraint).map((constraintKey) => {
+                                    // results = Object.keys(constrainable._description.constraint).map((constraintKey) => {
+                                    //     const {
+                                    //         constrainer,
+                                    //         condition
+                                    //     } = constrainable._description.constraint[constraintKey];
+                                    //     return Hf.fallback({
+                                    //         verified: true,
+                                    //         reject: function reject () {}
+                                    //     }, (_key) => {
+                                    //         Hf.log(`error`, `ConstrainableDescriptor.assign.to - Constraint callback returns invalid result object key${_key}.`);
+                                    //     }).of(constrainer.call(context, condition));
+                                    // });
+                                    results = Object.values(constrainable._description.constraint).map((constraintValue) => {
                                         const {
                                             constrainer,
                                             condition
-                                        } = constrainable._description.constraint[constraintKey];
+                                        } = constraintValue;
                                         return Hf.fallback({
                                             verified: true,
                                             reject: function reject () {}
@@ -227,11 +244,18 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                                 enumerable: true
                             });
                             /* add new constraints to constraint set */
-                            Object.keys(constraint).forEach((constraintKey) => {
+                            // Object.keys(constraint).forEach((constraintKey) => {
+                            //     const {
+                            //         constrainer,
+                            //         condition
+                            //     } = constraint[constraintKey];
+                            //     constrainable.addConstraint(constrainer, condition, constraintKey);
+                            // });
+                            Object.entries(constraint).forEach(([ constraintKey, constraintValue ]) => {
                                 const {
                                     constrainer,
                                     condition
-                                } = constraint[constraintKey];
+                                } = constraintValue;
                                 constrainable.addConstraint(constrainer, condition, constraintKey);
                             });
                         } else {

@@ -551,15 +551,25 @@ const CompositeElementPrototype = Object.create({}).prototype = {
             }
 
             if (!Hf.isEmpty(initialStatic)) {
-                product = Object.keys(initialStatic).reduce((productConstant, key) => {
-                    Object.defineProperty(productConstant, key, {
+                // product = Object.keys(initialStatic).reduce((productStatic, key) => {
+                //     Object.defineProperty(productStatic, key, {
+                //         get: function get () {
+                //             return Hf.freeze(initialStatic[key]);
+                //         },
+                //         configurable: false,
+                //         enumerable: true
+                //     });
+                //     return productStatic;
+                // }, product);
+                product = Object.entries(initialStatic).reduce((productStatic, [ key, value ]) => {
+                    Object.defineProperty(productStatic, key, {
                         get: function get () {
-                            return Hf.freeze(initialStatic[key]);
+                            return Hf.freeze(value);
                         },
                         configurable: false,
                         enumerable: true
                     });
-                    return productConstant;
+                    return productStatic;
                 }, product);
             }
 
@@ -568,9 +578,24 @@ const CompositeElementPrototype = Object.create({}).prototype = {
             });
 
             /* if a function with initialization prefix is defined, call it once at init */
-            Object.keys(product).filter((key) => {
-                return Hf.isFunction(product[key]) && key.charAt(0) === INITIALIZATION_PREFIX;
-            }).sort((fnNameA, fnNameB) => {
+            // Object.keys(product).filter((key) => {
+            //     return Hf.isFunction(product[key]) && key.charAt(0) === INITIALIZATION_PREFIX;
+            // }).sort((fnNameA, fnNameB) => {
+            //     if (fnNameA < fnNameB) {
+            //         return -1;
+            //     }
+            //     if (fnNameA > fnNameB) {
+            //         return 1;
+            //     }
+            //     return 0;
+            // }).map((fnName) => {
+            //     return product[fnName];
+            // }).forEach((fn) => {
+            //     fn.call(revealedProduct);
+            // });
+            Object.entries(product).filter(([ fnName, fn ]) => {
+                return Hf.isFunction(fn) && fnName.charAt(0) === INITIALIZATION_PREFIX;
+            }).sort(([ fnNameA, fnA ], [ fnNameB, fnB ]) => { // eslint-disable-line
                 if (fnNameA < fnNameB) {
                     return -1;
                 }
@@ -578,9 +603,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                     return 1;
                 }
                 return 0;
-            }).map((fnName) => {
-                return product[fnName];
-            }).forEach((fn) => {
+            }).forEach(([ fnName, fn ]) => { // eslint-disable-line
                 fn.call(revealedProduct);
             });
 
@@ -619,7 +642,8 @@ export default function CompositeElement (definition) {
             return !exclusion.prefixes.includes(prefix);
         }));
 
-        if (!Object.keys(enclosure).every((fnName) => Hf.isFunction(enclosure[fnName]))) {
+        // if (!Object.keys(enclosure).every((fnName) => Hf.isFunction(enclosure[fnName]))) {
+        if (!Object.values(enclosure).every((fn) => Hf.isFunction(fn))) {
             Hf.log(`error`, `CompositeElement - Input composite definition for enclosure object is invalid.`);
         } else {
             const element = Object.create(CompositeElementPrototype, {

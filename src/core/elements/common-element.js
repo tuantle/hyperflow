@@ -243,15 +243,26 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     if (common.isObject(source)) {
                         result = Object.assign({}, source);
                     }
-                    Object.keys(target).forEach((key) => {
-                        if (common.isObject(target[key]) || common.isArray(target[key])) {
+                    // Object.keys(target).forEach((key) => {
+                    //     if (common.isObject(target[key]) || common.isArray(target[key])) {
+                    //         if (!common.isDefined(source[key])) {
+                    //             result[key] = target[key];
+                    //         } else {
+                    //             result[key] = common._deepMerge(source[key], target[key]);
+                    //         }
+                    //     } else {
+                    //         result[key] = target[key];
+                    //     }
+                    // });
+                    Object.entries(target).forEach(([ key, targetValue ]) => {
+                        if (common.isObject(targetValue) || common.isArray(targetValue)) {
                             if (!common.isDefined(source[key])) {
-                                result[key] = target[key];
+                                result[key] = targetValue;
                             } else {
-                                result[key] = common._deepMerge(source[key], target[key]);
+                                result[key] = common._deepMerge(source[key], targetValue);
                             }
                         } else {
-                            result[key] = target[key];
+                            result[key] = targetValue;
                         }
                     });
                 }
@@ -944,27 +955,41 @@ const CommonElementPrototype = Object.create({}).prototype = {
 
             if (!exclusion.prototypes) {
                 /* copy source object prototypes to new mixed result object */
-                result = Object.keys(Object.getPrototypeOf(source)).filter((fnName) => {
-                    const fn = source[fnName];
-
+                // result = Object.keys(Object.getPrototypeOf(source)).filter((fnName) => {
+                //     const fn = source[fnName];
+                //
+                //     return common.isFunction(fn) && isIncluded(fnName);
+                // }).reduce((_result, fnName) => {
+                //     /* bind the prototype to source object */
+                //     const fn = source[fnName];
+                //
+                //     _result[fnName] = fn.bind(source);
+                //     return _result;
+                // }, result);
+                result = Object.entries(Object.getPrototypeOf(source)).filter(([ fnName, fn ]) => {
                     return common.isFunction(fn) && isIncluded(fnName);
-                }).reduce((_result, fnName) => {
+                }).reduce((_result, [ fnName, fn ]) => {
                     /* bind the prototype to source object */
-                    const fn = source[fnName];
-
                     _result[fnName] = fn.bind(source);
                     return _result;
                 }, result);
 
                 /* copy source object functions to new mixed result object */
-                result = Object.keys(source).filter((fnName) => {
-                    const fn = source[fnName];
-
+                // result = Object.keys(source).filter((fnName) => {
+                //     const fn = source[fnName];
+                //
+                //     return common.isFunction(fn) && isIncluded(fnName);
+                // }).reduce((_result, fnName) => {
+                //     /* bind the prototype to source object */
+                //     const fn = source[fnName];
+                //
+                //     _result[fnName] = fn;
+                //     return _result;
+                // }, result);
+                result = Object.entries(source).filter(([ fnName, fn ]) => {
                     return common.isFunction(fn) && isIncluded(fnName);
-                }).reduce((_result, fnName) => {
+                }).reduce((_result, [ fnName, fn ]) => {
                     /* bind the prototype to source object */
-                    const fn = source[fnName];
-
                     _result[fnName] = fn;
                     return _result;
                 }, result);
@@ -1020,9 +1045,27 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     } else {
                         if (!exclusion.prototypes) {
                             /* copy target object prototypes to new mixed result object */
-                            result = Object.keys(Object.getPrototypeOf(target)).filter((fnName) => {
-                                const fn = target[fnName];
-
+                            // result = Object.keys(Object.getPrototypeOf(target)).filter((fnName) => {
+                            //     const fn = target[fnName];
+                            //
+                            //     if (common.isFunction(fn) && isIncluded(fnName)) {
+                            //         if (!fnOverrided) {
+                            //             if (!result.hasOwnProperty(fnName)) {
+                            //                 return true;
+                            //             }
+                            //             return false;
+                            //         }
+                            //         return true;
+                            //     }
+                            //     return false;
+                            // }).reduce((_result, fnName) => {
+                            //     /* bind the prototype to target object */
+                            //     const fn = target[fnName];
+                            //
+                            //     _result[fnName] = fn.bind(target);
+                            //     return _result;
+                            // }, result);
+                            result = Object.entries(Object.getPrototypeOf(target)).filter(([ fnName, fn ]) => {
                                 if (common.isFunction(fn) && isIncluded(fnName)) {
                                     if (!fnOverrided) {
                                         if (!result.hasOwnProperty(fnName)) {
@@ -1033,18 +1076,33 @@ const CommonElementPrototype = Object.create({}).prototype = {
                                     return true;
                                 }
                                 return false;
-                            }).reduce((_result, fnName) => {
+                            }).reduce((_result, [ fnName, fn ]) => {
                                 /* bind the prototype to target object */
-                                const fn = target[fnName];
-
                                 _result[fnName] = fn.bind(target);
                                 return _result;
                             }, result);
 
                             /* copy target object functions to new mixed result object */
-                            result = Object.keys(target).filter((fnName) => {
-                                const fn = target[fnName];
-
+                            // result = Object.keys(target).filter((fnName) => {
+                            //     const fn = target[fnName];
+                            //
+                            //     if (common.isFunction(fn) && isIncluded(fnName)) {
+                            //         /* mix prototypes only */
+                            //         if (!fnOverrided) {
+                            //             if (!result.hasOwnProperty(fnName)) {
+                            //                 return true;
+                            //             }
+                            //             return false;
+                            //         }
+                            //         return true;
+                            //     }
+                            //     return false;
+                            // }).reduce((_result, fnName) => {
+                            //     const fn = target[fnName];
+                            //     _result[fnName] = fn;
+                            //     return _result;
+                            // }, result);
+                            result = Object.entries(target).filter(([ fnName, fn ]) => {
                                 if (common.isFunction(fn) && isIncluded(fnName)) {
                                     /* mix prototypes only */
                                     if (!fnOverrided) {
@@ -1056,8 +1114,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                                     return true;
                                 }
                                 return false;
-                            }).reduce((_result, fnName) => {
-                                const fn = target[fnName];
+                            }).reduce((_result, [ fnName, fn ]) => {
                                 _result[fnName] = fn;
                                 return _result;
                             }, result);
@@ -1193,8 +1250,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
             if (common.isObject(value)) {
                 const obj = value;
 
-                Object.keys(obj).forEach((key) => {
-                    iterator.call(context, obj[key], key);
+                // Object.keys(obj).forEach((key) => {
+                //     iterator.call(context, obj[key], key);
+                // });
+                Object.entries(obj).forEach(([ key, _value ]) => {
+                    iterator.call(context, _value, key);
                 });
             }
             if (common.isArray(value)) {
