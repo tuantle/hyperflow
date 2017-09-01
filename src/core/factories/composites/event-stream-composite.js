@@ -986,12 +986,10 @@ export default Hf.Composite({
                                                 _streamEmitter.next(payload);
                                                 lifeSpanCounter++;
                                                 if (Hf.isFunction(stopper)) {
-                                                    const stopped = stopper(lifeSpanCounter);
-                                                    if (stopped) {
-                                                        lifeSpanCounter = lifeSpan;
-                                                    }
+                                                    intervalStopped = stopper(lifeSpanCounter);
+                                                    intervalStopped = Hf.isBoolean(intervalStopped) ? intervalStopped : false;
                                                 }
-                                                if (lifeSpan !== -1 && lifeSpanCounter === lifeSpan) {
+                                                if (intervalStopped || (lifeSpan !== -1 && lifeSpanCounter === lifeSpan)) {
                                                     clearInterval(intervalId);
                                                 }
                                             }, intervalPeriod);
