@@ -285,7 +285,8 @@ export default Composer({
                         componentRefs = Hf.collect(...keys).from(_compositeRefCache);
                     }
                 } else {
-                    componentRefs = Object.keys(_compositeRefCache).map((name) => _compositeRefCache[name]);
+                    // componentRefs = Object.keys(_compositeRefCache).map((name) => _compositeRefCache[name]);
+                    componentRefs = Object.values(_compositeRefCache);
                 }
             }
             return componentRefs;
@@ -315,7 +316,8 @@ export default Composer({
                         components = Hf.collect(...intfNames.map((name) => `${name}.component`)).from(_compositeCache);
                     }
                 } else {
-                    components = Object.keys(_compositeCache).map((name) => _compositeCache[name].component);
+                    // components = Object.keys(_compositeCache).map((name) => _compositeCache[name].component);
+                    components = Object.values(_compositeCache).map((composite) => composite.component);
                 }
             }
             return components;
@@ -339,7 +341,8 @@ export default Composer({
                         intfs = Hf.collect(...intfNames.map((name) => `${name}.intf`)).from(_compositeCache);
                     }
                 } else {
-                    intfs = Object.keys(_compositeCache).map((name) => _compositeCache[name].intf);
+                    // intfs = Object.keys(_compositeCache).map((name) => _compositeCache[name].intf);
+                    intfs = Object.values(_compositeCache).map((composite) => composite.intf);
                 }
             }
             return intfs;
@@ -353,6 +356,7 @@ export default Composer({
          */
         this.registerComponentLib = function registerComponentLib (componentLib) {
             const intf = this;
+            // TODO: Throw error if called outside of $init.
             if (!Hf.isObject(componentLib)) {
                 Hf.log(`error`, `InterfaceFactory.registerComponentLib - Input component library is invalid.`);
             } else {
@@ -398,6 +402,7 @@ export default Composer({
          */
         this.composedOf = function composedOf (...compositeIntfs) {
             const intf = this;
+            // TODO: Throw error if called outside of $init.
             // TODO: Allows composition of component also.
             // TODO: If possible, rename method to compose and return a newly created interface instead.
             if (Hf.isEmpty(compositeIntfs)) {
