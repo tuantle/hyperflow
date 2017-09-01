@@ -290,8 +290,22 @@ const DataElementPrototype = Object.create({}).prototype = {
                 } = constrainable;
 
                 if (!Hf.isEmpty(target)) {
-                    Object.keys(target).filter((constraintKey) => constraint.hasOwnProperty(constraintKey)).reduce((targetPaths, constraintKey) => {
-                        return targetPaths.concat(target[constraintKey]);
+                    // Object.keys(target).filter((constraintKey) => constraint.hasOwnProperty(constraintKey)).reduce((targetPaths, constraintKey) => {
+                    //     return targetPaths.concat(target[constraintKey]);
+                    // }, []).filter((targetPath) => {
+                    //     return Hf.isString(targetPath) || Hf.isArray(targetPath);
+                    // }).map((targetPath) => {
+                    //     return Hf.isString(targetPath) ? Hf.stringToArray(targetPath, `.`) : targetPath;
+                    // }).forEach((targetPath) => {
+                    //     const targetKey = targetPath.pop();
+                    //     const pathId = `${cursor.pathId}.${bundleKey}.${Hf.arrayToString(targetPath, `.`)}`;
+                    //
+                    //     data.select(pathId).describeItem(targetKey).asConstrainable(constraint);
+                    // });
+                    Object.entries(target).filter(([ constraintKey, constraintValue ]) => { // eslint-disable-line
+                        return constraint.hasOwnProperty(constraintKey);
+                    }).reduce((targetPaths, [ constraintKey, constraintValue ]) => { // eslint-disable-line
+                        return targetPaths.concat(constraintValue);
                     }, []).filter((targetPath) => {
                         return Hf.isString(targetPath) || Hf.isArray(targetPath);
                     }).map((targetPath) => {
@@ -496,6 +510,9 @@ const DataElementPrototype = Object.create({}).prototype = {
                             } else {
                                 Hf.log(`error`, `DataElement.format - Bundle constrainable strongly typed for key:${bundleKey} is invalid.`);
                             }
+                        } else {
+                            formatedBundleItem.stronglyTyped = true;
+                            Hf.log(`warn0`, `DataElement.format - Bundle constrainable strongly typed for key:${bundleKey} is set to true by default if not set.`);
                         }
                         if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
                             if (Hf.isSchema({
