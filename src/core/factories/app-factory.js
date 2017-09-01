@@ -143,6 +143,7 @@ export default Composer({
          */
         this.register = function register (definition) {
             const app = this;
+            // TODO: Throw error if called outside of $init.
             if (!Hf.isSchema({
                 domain: `object`,
                 component: {
