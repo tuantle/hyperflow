@@ -19,12 +19,14 @@ For situations where request/response type messaging is needed. The prefixes are
 
 When the response event has success or error type. Use postfix _\*-success_ or _\*-error_. See the example below.
 > **Outgoing**: _request-for-data-write_  
-> **Incoming**: _response-to-data-write-ok  
+> **Incoming**: _response-to-data-write-ok_  
 > **Incoming**: _response-to-data-write-error_
 
 Use present tense verb for action for request and response types.  
 
 # Domain:
 For domain to store/service, it has to maintain the conventions for incoming and outgoing events from store/service.
-For domain to domain, use prefix _broadcast-\*_. . See the example below.\*
+For domain to domain, generally use prefix _broadcast-\*_.
+Incase of domain sending outgoing event that looks like it is coming from an interface, then use prefix _do-\*_. See the example below.\*
 > **Outgoing**: _broadcast-data_
+#
