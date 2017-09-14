@@ -2,6 +2,18 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.1.3 (09/13/2017)**
+```
+Notes:
+New Features:
+Changes:
+Breaking Changes:
+Improvements:
+    - Removed overheads to for performance improvements in production mode.
+    - Added conflict error when having stronglyTyped and oneOfTypes together in DataElement.
+    - Added TIMED_OUT to factory request response event id.
+Bug fixes:
+```
 **Development Version 0.1.2 (09/01/2017)**
 ```
 Notes:
