@@ -57,19 +57,23 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     _getAccessor: function _getAccessor (pathId, option = {}) {
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-        if (!Hf.isNonEmptyArray(pathId)) {
-            Hf.log(`error`, `DataElement._getAccessor - Input pathId is invalid.`);
-        } else {
-            const data = this;
-            const [ rootKey ] = pathId;
-            const mRecords = data._mutation.records;
-            const immutableRootKeys = data._mutation.immutableRootKeys;
-            if (immutableRootKeys.includes(rootKey) && !Hf.isEmpty(mRecords)) {
-                data._updateMMap(rootKey, option);
-                Hf.clear(data._mutation.records);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isNonEmptyArray(pathId)) {
+                Hf.log(`error`, `DataElement._getAccessor - Input pathId is invalid.`);
             }
-            return data._mutation.mMap.select(pathId).getContent();
         }
+
+        const data = this;
+        const [ rootKey ] = pathId;
+        const mRecords = data._mutation.records;
+        const immutableRootKeys = data._mutation.immutableRootKeys;
+
+        if (immutableRootKeys.includes(rootKey) && !Hf.isEmpty(mRecords)) {
+            data._updateMMap(rootKey, option);
+            Hf.clear(data._mutation.records);
+        }
+
+        return data._mutation.mMap.select(pathId).getContent();
     },
     /**
      * @description - Record a mutatable at pathId.
@@ -81,28 +85,31 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     _recordMutation: function _recordMutation (pathId) {
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-        if (!Hf.isNonEmptyArray(pathId)) {
-            Hf.log(`error`, `DataElement._recordMutation - Input pathId is invalid.`);
-        } else {
-            const data = this;
-            const [ rootKey ] = pathId;
-            const immutableRootKeys = data._mutation.immutableRootKeys;
-            const mRecords = data._mutation.records;
 
-            if (immutableRootKeys.includes(rootKey)) {
-                data._mutation.records = mRecords.concat(pathId.filter((key, index) => {
-                    return mRecords.length <= index;
-                }).map((key) => [ key ])).map((layers, index) => {
-                    if (pathId.length > index) {
-                        const key = pathId[index];
-
-                        if (!layers.includes(key)) {
-                            layers.push(key);
-                        }
-                    }
-                    return layers;
-                });
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isNonEmptyArray(pathId)) {
+                Hf.log(`error`, `DataElement._recordMutation - Input pathId is invalid.`);
             }
+        }
+
+        const data = this;
+        const [ rootKey ] = pathId;
+        const immutableRootKeys = data._mutation.immutableRootKeys;
+        const mRecords = data._mutation.records;
+
+        if (immutableRootKeys.includes(rootKey)) {
+            data._mutation.records = mRecords.concat(pathId.filter((key, index) => {
+                return mRecords.length <= index;
+            }).map((key) => [ key ])).map((layers, index) => {
+                if (pathId.length > index) {
+                    const key = pathId[index];
+
+                    if (!layers.includes(key)) {
+                        layers.push(key);
+                    }
+                }
+                return layers;
+            });
         }
     },
     /**
@@ -117,51 +124,54 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     _deepUpdateMMap: function _deepUpdateMMap (node, pathId, records) {
         const data = this;
-        if (!Hf.isObject(node)) {
-            Hf.log(`error`, `DataElement._deepUpdateMMap - Input node is invalid.`);
-        } else if (!Hf.isString(pathId)) {
-            Hf.log(`error`, `DataElement._deepUpdateMMap - Input pathId is invalid.`);
-        } else if (!Hf.isArray(records)) {
-            Hf.log(`error`, `DataElement._deepUpdateMMap - Input records is invalid.`);
-        } else {
-            const cursor = data.select(pathId);
-            let accessor = cursor.getContentType() === `object` ? {} : [];
-            let [ mutatedKeys ] = !Hf.isEmpty(records) ? records : [[]];
-
-            cursor.forEach((item, key) => {
-                if (Hf.isNonEmptyObject(item) || Hf.isNonEmptyArray(item)) {
-                    if (!cursor.isImmutable() || (cursor.isImmutable() && mutatedKeys.includes(key))) {
-                        data._deepUpdateMMap(node.branch(key), `${pathId}.${key}`, records.slice(1));
-                    }
-                } else {
-                    if (cursor.isItemComputable(key)) {
-                        Object.defineProperty(accessor, key, {
-                            get: function get () {
-                                return cursor.getContentItem(key);
-                            },
-                            configurable: false,
-                            enumerable: true
-                        });
-                    // } else if (cursor.isItemObservable(key)) {
-                    // TODO: handle for case where key is an observable.
-                    //
-                    } else {
-                        const cachedItem = item;
-                        Object.defineProperty(accessor, key, {
-                            get: function get () {
-                                return cursor.isImmutable() ? cachedItem : cursor.getContentItem(key);
-                            },
-                            set: function set (value) {
-                                cursor.setContentItem(value, key);
-                            },
-                            configurable: true,
-                            enumerable: true
-                        });
-                    }
-                }
-            });
-            node.setContent(accessor);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isObject(node)) {
+                Hf.log(`error`, `DataElement._deepUpdateMMap - Input node is invalid.`);
+            } else if (!Hf.isString(pathId)) {
+                Hf.log(`error`, `DataElement._deepUpdateMMap - Input pathId is invalid.`);
+            } else if (!Hf.isArray(records)) {
+                Hf.log(`error`, `DataElement._deepUpdateMMap - Input records is invalid.`);
+            }
         }
+
+        const cursor = data.select(pathId);
+        let accessor = cursor.getContentType() === `object` ? {} : [];
+        let [ mutatedKeys ] = !Hf.isEmpty(records) ? records : [[]];
+
+        cursor.forEach((item, key) => {
+            if (Hf.isNonEmptyObject(item) || Hf.isNonEmptyArray(item)) {
+                if (!cursor.isImmutable() || (cursor.isImmutable() && mutatedKeys.includes(key))) {
+                    data._deepUpdateMMap(node.branch(key), `${pathId}.${key}`, records.slice(1));
+                }
+            } else {
+                if (cursor.isItemComputable(key)) {
+                    Object.defineProperty(accessor, key, {
+                        get: function get () {
+                            return cursor.getContentItem(key);
+                        },
+                        configurable: false,
+                        enumerable: true
+                    });
+                // } else if (cursor.isItemObservable(key)) {
+                // TODO: handle for case where key is an observable.
+                //
+                } else {
+                    const cachedItem = item;
+                    Object.defineProperty(accessor, key, {
+                        get: function get () {
+                            return cursor.isImmutable() ? cachedItem : cursor.getContentItem(key);
+                        },
+                        set: function set (value) {
+                            cursor.setContentItem(value, key);
+                        },
+                        configurable: true,
+                        enumerable: true
+                    });
+                }
+            }
+        });
+
+        node.setContent(accessor);
     },
     /**
      * @description - Update the mutation map for a root content.
@@ -185,47 +195,49 @@ const DataElementPrototype = Object.create({}).prototype = {
             excludedNonmutatioReferalPathIds: []
         }).of(option);
 
-        if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
-            const immutableRootKeys = data._mutation.immutableRootKeys;
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(rootKey) || !rootContent.hasOwnProperty(rootKey)) {
+                Hf.log(`error`, `DataElement._updateMMap - Root data content key:${rootKey} is undefined.`);
+            }
+        }
 
-            if (immutableRootKeys.includes(rootKey)) {
-                const mRecords = data._mutation.records;
-                const oldRootKey = `${rootKey}${data._mutation.timeIndex[rootKey]}`;
-                const oldRootNode = mMap.select(pathId).rekey(oldRootKey);
-                const newRootNode = mMap.sproutRoot(rootKey);
+        const immutableRootKeys = data._mutation.immutableRootKeys;
 
-                data._deepUpdateMMap(newRootNode, pathId, mRecords.slice(1));
+        if (immutableRootKeys.includes(rootKey)) {
+            const mRecords = data._mutation.records;
+            const oldRootKey = `${rootKey}${data._mutation.timeIndex[rootKey]}`;
+            const oldRootNode = mMap.select(pathId).rekey(oldRootKey);
+            const newRootNode = mMap.sproutRoot(rootKey);
 
-                newRootNode.refer(oldRootNode.getPathId(), {
-                    excludedPathIds: excludedNonmutatioReferalPathIds.filter((_pathId) => Hf.isNonEmptyString(_pathId)).map((_pathId) => {
-                        _pathId = Hf.stringToArray(_pathId, `.`);
-                        if (_pathId[0] === rootKey) {
-                            _pathId[0] = oldRootKey;
-                            return Hf.arrayToString(_pathId, `.`);
-                        }
-                    })
-                });
+            data._deepUpdateMMap(newRootNode, pathId, mRecords.slice(1));
 
-                newRootNode.freezeContent();
-                data._mutation.timeIndex[rootKey]++;
-                data._mutation.timestamp[rootKey].push((new Date()).getTime() - data._mutation.timestampRef);
-
-                if (mutationHistoryDepth > 0 && mMap.getRootCount() > mutationHistoryDepth) {
-                    let timeIndexOffset = mutationHistoryDepth >> 1;
-                    const startingTimeIndex = data._mutation.timeIndex[rootKey] - (mutationHistoryDepth >> 1);
-                    while (timeIndexOffset > 0) {
-                        timeIndexOffset--;
-                        mMap.cutRoot(`${rootKey}${startingTimeIndex - timeIndexOffset}`);
+            newRootNode.refer(oldRootNode.getPathId(), {
+                excludedPathIds: excludedNonmutatioReferalPathIds.filter((_pathId) => Hf.isNonEmptyString(_pathId)).map((_pathId) => {
+                    _pathId = Hf.stringToArray(_pathId, `.`);
+                    if (_pathId[0] === rootKey) {
+                        _pathId[0] = oldRootKey;
+                        return Hf.arrayToString(_pathId, `.`);
                     }
-                }
-            } else {
-                const rootNode = mMap.sproutRoot(rootKey);
+                })
+            });
 
-                data._deepUpdateMMap(rootNode, pathId, []);
-                rootNode.freezeContent();
+            newRootNode.freezeContent();
+            data._mutation.timeIndex[rootKey]++;
+            data._mutation.timestamp[rootKey].push((new Date()).getTime() - data._mutation.timestampRef);
+
+            if (mutationHistoryDepth > 0 && mMap.getRootCount() > mutationHistoryDepth) {
+                let timeIndexOffset = mutationHistoryDepth >> 1;
+                const startingTimeIndex = data._mutation.timeIndex[rootKey] - (mutationHistoryDepth >> 1);
+                while (timeIndexOffset > 0) {
+                    timeIndexOffset--;
+                    mMap.cutRoot(`${rootKey}${startingTimeIndex - timeIndexOffset}`);
+                }
             }
         } else {
-            Hf.log(`error`, `DataElement._updateMMap - Root data content key:${rootKey} is undefined.`);
+            const rootNode = mMap.sproutRoot(rootKey);
+
+            data._deepUpdateMMap(rootNode, pathId, []);
+            rootNode.freezeContent();
         }
     },
     /**
@@ -239,111 +251,101 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _assignDescription: function _assignDescription (cursor, bundleItem, bundleKey) {
-        if (!Hf.isObject(cursor)) {
-            Hf.log(`error`, `DataElement._assignDescription - Input cursor object is invalid.`);
-        } else if (!Hf.isObject(bundleItem)) {
-            Hf.log(`error`, `DataElement._assignDescription - Input bundle item object is invalid.`);
-        } else if (!Hf.isString(bundleKey)) {
-            Hf.log(`error`, `DataElement._assignDescription - Input bundle key is invalid.`);
-        } else {
-            const data = this;
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isObject(cursor)) {
+                Hf.log(`error`, `DataElement._assignDescription - Input cursor object is invalid.`);
+            } else if (!Hf.isObject(bundleItem)) {
+                Hf.log(`error`, `DataElement._assignDescription - Input bundle item object is invalid.`);
+            } else if (!Hf.isString(bundleKey)) {
+                Hf.log(`error`, `DataElement._assignDescription - Input bundle key is invalid.`);
+            }
+        }
+
+        const data = this;
+        const {
+            required,
+            stronglyTyped,
+            oneOfTypes,
+            oneOfValues,
+            boundarydValues,
+            constrainable,
+            observable,
+            computable
+        } = bundleItem;
+
+        /* description for required item */
+        if (required) {
+            cursor.describeItem(bundleKey).asRequired();
+        }
+        /* description for strongly type item */
+        if (stronglyTyped) {
+            cursor.describeItem(bundleKey).asStronglyTyped();
+        }
+        /* description for one of types item */
+        if (Hf.isArray(oneOfTypes)) {
+            cursor.describeItem(bundleKey).asOneOfTypes(oneOfTypes);
+        }
+        /* description for one of values item */
+        if (Hf.isArray(oneOfValues)) {
+            cursor.describeItem(bundleKey).asOneOfValues(oneOfValues);
+        }
+        /* description for bounded item */
+        if (Hf.isArray(boundarydValues)) {
+            const [
+                lowerBound,
+                upperBound
+            ] = boundarydValues;
+            cursor.describeItem(bundleKey).asBounded(lowerBound, upperBound);
+        }
+        /* description for constrainable item */
+        if (Hf.isObject(constrainable)) {
             const {
-                required,
-                stronglyTyped,
-                oneOfTypes,
-                oneOfValues,
-                boundarydValues,
-                constrainable,
-                observable,
-                computable
-            } = bundleItem;
+                constraint,
+                target
+            } = constrainable;
 
-            /* description for required item */
-            if (required) {
-                cursor.describeItem(bundleKey).asRequired();
+            if (!Hf.isEmpty(target)) {
+                Object.entries(target).filter(([ constraintKey, constraintValue ]) => { // eslint-disable-line
+                    return constraint.hasOwnProperty(constraintKey);
+                }).reduce((targetPaths, [ constraintKey, constraintValue ]) => { // eslint-disable-line
+                    return targetPaths.concat(constraintValue);
+                }, []).filter((targetPath) => {
+                    return Hf.isString(targetPath) || Hf.isArray(targetPath);
+                }).map((targetPath) => {
+                    return Hf.isString(targetPath) ? Hf.stringToArray(targetPath, `.`) : targetPath;
+                }).forEach((targetPath) => {
+                    const targetKey = targetPath.pop();
+                    const pathId = `${cursor.pathId}.${bundleKey}.${Hf.arrayToString(targetPath, `.`)}`;
+
+                    data.select(pathId).describeItem(targetKey).asConstrainable(constraint);
+                });
+            } else {
+                cursor.describeItem(bundleKey).asConstrainable(constraint);
             }
-            /* description for strongly type item */
-            if (stronglyTyped) {
-                cursor.describeItem(bundleKey).asStronglyTyped();
-            }
-            /* description for one of types item */
-            if (Hf.isArray(oneOfTypes)) {
-                cursor.describeItem(bundleKey).asOneOfTypes(oneOfTypes);
-            }
-            /* description for one of values item */
-            if (Hf.isArray(oneOfValues)) {
-                cursor.describeItem(bundleKey).asOneOfValues(oneOfValues);
-            }
-            /* description for bounded item */
-            if (Hf.isArray(boundarydValues)) {
-                const [
-                    lowerBound,
-                    upperBound
-                ] = boundarydValues;
-                cursor.describeItem(bundleKey).asBounded(lowerBound, upperBound);
-            }
-            /* description for constrainable item */
-            if (Hf.isObject(constrainable)) {
+        }
+        /* description for observable item */
+        if (Hf.isObject(observable)) {
+            if (Hf.isBoolean(observable) && observable) {
+                cursor.describeItem(bundleKey).asObservable();
+            } else if (Hf.isObject(observable)) {
                 const {
-                    constraint,
-                    target
-                } = constrainable;
+                    condition,
+                    subscriber
+                } = observable;
 
-                if (!Hf.isEmpty(target)) {
-                    // Object.keys(target).filter((constraintKey) => constraint.hasOwnProperty(constraintKey)).reduce((targetPaths, constraintKey) => {
-                    //     return targetPaths.concat(target[constraintKey]);
-                    // }, []).filter((targetPath) => {
-                    //     return Hf.isString(targetPath) || Hf.isArray(targetPath);
-                    // }).map((targetPath) => {
-                    //     return Hf.isString(targetPath) ? Hf.stringToArray(targetPath, `.`) : targetPath;
-                    // }).forEach((targetPath) => {
-                    //     const targetKey = targetPath.pop();
-                    //     const pathId = `${cursor.pathId}.${bundleKey}.${Hf.arrayToString(targetPath, `.`)}`;
-                    //
-                    //     data.select(pathId).describeItem(targetKey).asConstrainable(constraint);
-                    // });
-                    Object.entries(target).filter(([ constraintKey, constraintValue ]) => { // eslint-disable-line
-                        return constraint.hasOwnProperty(constraintKey);
-                    }).reduce((targetPaths, [ constraintKey, constraintValue ]) => { // eslint-disable-line
-                        return targetPaths.concat(constraintValue);
-                    }, []).filter((targetPath) => {
-                        return Hf.isString(targetPath) || Hf.isArray(targetPath);
-                    }).map((targetPath) => {
-                        return Hf.isString(targetPath) ? Hf.stringToArray(targetPath, `.`) : targetPath;
-                    }).forEach((targetPath) => {
-                        const targetKey = targetPath.pop();
-                        const pathId = `${cursor.pathId}.${bundleKey}.${Hf.arrayToString(targetPath, `.`)}`;
-
-                        data.select(pathId).describeItem(targetKey).asConstrainable(constraint);
-                    });
-                } else {
-                    cursor.describeItem(bundleKey).asConstrainable(constraint);
-                }
+                cursor.describeItem(bundleKey).asObservable(condition, subscriber);
             }
-            /* description for observable item */
-            if (Hf.isObject(observable)) {
-                if (Hf.isBoolean(observable) && observable) {
-                    cursor.describeItem(bundleKey).asObservable();
-                } else if (Hf.isObject(observable)) {
-                    const {
-                        condition,
-                        subscriber
-                    } = observable;
-
-                    cursor.describeItem(bundleKey).asObservable(condition, subscriber);
-                }
-            }
-            /* description for computable item */
-            if (Hf.isObject(computable)) {
-                const computeName = bundleKey;
-                const {
-                    contexts,
-                    compute
-                } = computable;
-                /* create a null item that will be descriped as computable */
-                cursor.setContentItem(null, computeName);
-                cursor.describeItem(computeName).asComputable(contexts, compute);
-            }
+        }
+        /* description for computable item */
+        if (Hf.isObject(computable)) {
+            const computeName = bundleKey;
+            const {
+                contexts,
+                compute
+            } = computable;
+            /* create a null item that will be descriped as computable */
+            cursor.setContentItem(null, computeName);
+            cursor.describeItem(computeName).asComputable(contexts, compute);
         }
     },
     /**
@@ -381,27 +383,29 @@ const DataElementPrototype = Object.create({}).prototype = {
 
         immutable = Hf.isBoolean(immutable) ? immutable : true;
 
-        if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
-            if (immutable) {
-                if (!immutableRootKeys.includes(rootKey)) {
-                    immutableRootKeys.push(rootKey);
-                    data._mutation.timeIndex[rootKey] = 0;
-                    data._mutation.timestamp[rootKey] = [ (new Date()).getTime() - data._mutation.timestampRef ];
-                }
-            } else {
-                // TODO: Test if setImmutability(false) would throw an error.
-                const index = immutableRootKeys.indexOf(rootKey);
-                if (index !== -1) {
-                    immutableRootKeys.splice(index, 1);
-                    data.flush(rootKey);
-                    data._mutation.timeIndex[rootKey] = undefined;
-                    data._mutation.timestamp[rootKey] = undefined;
-                    delete data._mutation.timeIndex[rootKey];
-                    delete data._mutation.timestamp[rootKey];
-                }
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(rootKey) || !rootContent.hasOwnProperty(rootKey)) {
+                Hf.log(`error`, `DataElement.setImmutability - Root data content key:${rootKey} is undefined.`);
+            }
+        }
+
+        if (immutable) {
+            if (!immutableRootKeys.includes(rootKey)) {
+                immutableRootKeys.push(rootKey);
+                data._mutation.timeIndex[rootKey] = 0;
+                data._mutation.timestamp[rootKey] = [ (new Date()).getTime() - data._mutation.timestampRef ];
             }
         } else {
-            Hf.log(`error`, `DataElement.setImmutability - Root data content key:${rootKey} is undefined.`);
+            // TODO: Test if setImmutability(false) would throw an error.
+            const index = immutableRootKeys.indexOf(rootKey);
+            if (index !== -1) {
+                immutableRootKeys.splice(index, 1);
+                data.flush(rootKey);
+                data._mutation.timeIndex[rootKey] = undefined;
+                data._mutation.timestamp[rootKey] = undefined;
+                delete data._mutation.timeIndex[rootKey];
+                delete data._mutation.timestamp[rootKey];
+            }
         }
     },
     /**
@@ -413,14 +417,16 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     setMutationHistoryDepth: function setMutationHistoryDepth (mutationHistoryDepth) {
         const data = this;
-        if (!Hf.isNumeric(mutationHistoryDepth) && mutationHistoryDepth > 1) {
-            Hf.log(`error`, `DataElement.select - Input mutation history depth is invalid.`);
-        } else {
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isNumeric(mutationHistoryDepth) && mutationHistoryDepth > 1) {
+                Hf.log(`error`, `DataElement.select - Input mutation history depth is invalid.`);
+            }
             if (mutationHistoryDepth < DEFAULT_MUTATION_HISTORY_DEPTH) {
                 Hf.log(`warn1`, `DataElement.select - Input mutation history depth value:${mutationHistoryDepth} is less than default value of:${DEFAULT_MUTATION_HISTORY_DEPTH}.`);
             }
-            data._mutation.historyDepth = mutationHistoryDepth;
         }
+
+        data._mutation.historyDepth = mutationHistoryDepth;
     },
     /**
      * @description - Flush all history of mutations of a root content.
@@ -433,22 +439,24 @@ const DataElementPrototype = Object.create({}).prototype = {
         const data = this;
         const rootContent = data._rootContent;
 
-        if (Hf.isString(rootKey) && rootContent.hasOwnProperty(rootKey)) {
-            const mMap = data._mutation.mMap;
-            const immutableRootKeys = data._mutation.immutableRootKeys;
-
-            if (immutableRootKeys.includes(rootKey)) {
-                let timeIndexOffset = data._mutation.timeIndex[rootKey];
-                while (timeIndexOffset > 0) {
-                    timeIndexOffset--;
-                    mMap.cutRoot(`${rootKey}${timeIndexOffset}`);
-                }
-                data._mutation.timestampRef = new Date().getTime();
-                data._mutation.timeIndex[rootKey] = 0;
-                data._mutation.timestamp[rootKey] = [ 0 ];
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(rootKey) || !rootContent.hasOwnProperty(rootKey)) {
+                Hf.log(`error`, `DataElement.flush - Root data content key:${rootKey} is undefined.`);
             }
-        } else {
-            Hf.log(`warn0`, `DataElement.flush - Root data content key:${rootKey} is undefined.`);
+        }
+
+        const mMap = data._mutation.mMap;
+        const immutableRootKeys = data._mutation.immutableRootKeys;
+
+        if (immutableRootKeys.includes(rootKey)) {
+            let timeIndexOffset = data._mutation.timeIndex[rootKey];
+            while (timeIndexOffset > 0) {
+                timeIndexOffset--;
+                mMap.cutRoot(`${rootKey}${timeIndexOffset}`);
+            }
+            data._mutation.timestampRef = new Date().getTime();
+            data._mutation.timeIndex[rootKey] = 0;
+            data._mutation.timestamp[rootKey] = [ 0 ];
         }
     },
     /**
@@ -460,20 +468,25 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     select: function select (pathId) {
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
-        if (!Hf.isNonEmptyArray(pathId)) {
-            Hf.log(`error`, `DataElement.select - Input pathId is invalid.`);
-        } else {
-            const data = this;
-            const cursor = DataCursorElement(data, pathId);
 
-            if (!Hf.isObject(cursor)) {
-                Hf.log(`error`, `DataElement.select - Unable to create a data content cursor instance.`);
-            } else {
-                const revealFrozen = Hf.compose(Object.freeze, Hf.reveal);
-                /* reveal only the public properties and functions */
-                return revealFrozen(cursor);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isNonEmptyArray(pathId)) {
+                Hf.log(`error`, `DataElement.select - Input pathId is invalid.`);
             }
         }
+
+        const data = this;
+        const cursor = DataCursorElement(data, pathId);
+
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isObject(cursor)) {
+                Hf.log(`error`, `DataElement.select - Unable to create a data content cursor instance.`);
+            }
+        }
+
+        const revealFrozen = Hf.compose(Object.freeze, Hf.reveal);
+        /* reveal only the public properties and functions */
+        return revealFrozen(cursor);
     },
     /**
      * @description - Helper function to format an object to DataElement bundles.
@@ -483,131 +496,150 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     format: function format (bundle) {
-        if (!Hf.isObject(bundle)) {
-            Hf.log(`error`, `DataElement.format - Input bundle object is invalid.`);
-        } else {
-            let formatedBundle = {};
-            let formatedBundleItem;
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isObject(bundle)) {
+                Hf.log(`error`, `DataElement.format - Input bundle object is invalid.`);
+            }
+        }
 
-            Hf.forEach(bundle, (bundleItem, bundleKey) => {
-                if (Hf.isDefined(bundleItem)) {
-                    formatedBundle[bundleKey] = {};
-                    formatedBundleItem = formatedBundle[bundleKey];
+        let formatedBundle = {};
+        let formatedBundleItem;
 
-                    if (Hf.isSchema({
-                        value: `defined`
-                    }).of(bundleItem)) {
-                        if (bundleItem.hasOwnProperty(`required`)) {
-                            if (Hf.isBoolean(bundleItem.required)) {
-                                formatedBundleItem.required = bundleItem.required;
-                            } else {
+        Hf.forEach(bundle, (bundleItem, bundleKey) => {
+            if (Hf.isDefined(bundleItem)) {
+                formatedBundle[bundleKey] = {};
+                formatedBundleItem = formatedBundle[bundleKey];
+
+                if (Hf.isSchema({
+                    value: `defined`
+                }).of(bundleItem)) {
+                    if (bundleItem.hasOwnProperty(`required`)) {
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isBoolean(bundleItem.required)) {
                                 Hf.log(`error`, `DataElement.format - Bundle constrainable required for key:${bundleKey} is invalid.`);
                             }
                         }
-                        if (bundleItem.hasOwnProperty(`stronglyTyped`)) {
-                            if (Hf.isBoolean(bundleItem.stronglyTyped)) {
-                                formatedBundleItem.stronglyTyped = bundleItem.stronglyTyped;
-                            } else {
+                        formatedBundleItem.required = bundleItem.required;
+                    }
+                    if (bundleItem.hasOwnProperty(`stronglyTyped`)) {
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isBoolean(bundleItem.stronglyTyped)) {
                                 Hf.log(`error`, `DataElement.format - Bundle constrainable strongly typed for key:${bundleKey} is invalid.`);
+                            } else if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable for key:${bundleKey} is conflicted with one of types.`);
                             }
-                        } else {
+                        }
+                        formatedBundleItem.stronglyTyped = bundleItem.stronglyTyped;
+                    } else {
+                        if (!bundleItem.hasOwnProperty(`oneTypeOf`)) {
                             formatedBundleItem.stronglyTyped = true;
                             Hf.log(`warn0`, `DataElement.format - Bundle constrainable strongly typed for key:${bundleKey} is set to true by default if not set.`);
                         }
-                        if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
-                            if (Hf.isSchema({
+                    }
+                    if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isSchema({
                                 oneTypeOf: [ `string` ]
                             }).of(bundleItem)) {
-                                if (!Hf.isEmpty(bundleItem.oneTypeOf)) {
-                                    formatedBundleItem.oneOfTypes = bundleItem.oneTypeOf;
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is empty.`);
-                                }
-                            } else {
                                 Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is invalid.`);
+                            } else if (Hf.isEmpty(bundleItem.oneTypeOf)) {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable one of types for key:${bundleKey} is empty.`);
+                            } else if (bundleItem.hasOwnProperty(`stronglyTyped`)) {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable for key:${bundleKey} is conflicted with strongly typed.`);
                             }
                         }
-                        if (bundleItem.hasOwnProperty(`oneOf`)) {
-                            if (Hf.isSchema({
+
+                        formatedBundleItem.oneOfTypes = bundleItem.oneTypeOf;
+                    }
+                    if (bundleItem.hasOwnProperty(`oneOf`)) {
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isSchema({
                                 oneOf: [ `number|string` ]
                             }).of(bundleItem)) {
-                                if (!Hf.isEmpty(bundleItem.oneOf)) {
-                                    formatedBundleItem.oneOfValues = bundleItem.oneOf;
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is empty.`);
-                                }
-                            } else {
                                 Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is invalid.`);
+                            } else if (Hf.isEmpty(bundleItem.oneOf)) {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable one of values for key:${bundleKey} is empty.`);
                             }
                         }
-                        if (bundleItem.hasOwnProperty(`bounded`)) {
-                            if (Hf.isSchema({
+
+                        formatedBundleItem.oneOfValues = bundleItem.oneOf;
+                    }
+                    if (bundleItem.hasOwnProperty(`bounded`)) {
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isSchema({
                                 bounded: [
                                     `number`
                                 ]
                             }).of(bundleItem)) {
-                                if (bundleItem.bounded.length === 2) {
-                                    formatedBundleItem.boundarydValues = bundleItem.bounded;
-                                } else {
-                                    Hf.log(`error`, `DataElement.format - Bundle constrainable bounding range for key:${bundleKey} is invalid.`);
-                                }
-                            } else {
                                 Hf.log(`error`, `DataElement.format - Bundle constrainable bounded range for key:${bundleKey} is invalid.`);
+                            } else if (bundleItem.bounded.length !== 2) {
+                                Hf.log(`error`, `DataElement.format - Bundle constrainable bounding range for key:${bundleKey} is invalid.`);
                             }
                         }
-                        if (bundleItem.hasOwnProperty(`constrainable`)) {
-                            if (Hf.isSchema({
+
+                        formatedBundleItem.boundarydValues = bundleItem.bounded;
+                    }
+                    if (bundleItem.hasOwnProperty(`constrainable`)) {
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isSchema({
                                 constrainable: {
                                     constraint: `object`,
                                     target: `object`
                                 }
                             }).of(bundleItem)) {
-                                formatedBundleItem.constrainable = bundleItem.constrainable;
-                            } else {
                                 Hf.log(`error`, `DataElement.format - Bundle constrainable for key:${bundleKey} is invalid.`);
                             }
                         }
-                        if (bundleItem.hasOwnProperty(`observable`)) {
-                            if (Hf.isSchema({
+
+                        formatedBundleItem.constrainable = bundleItem.constrainable;
+                    }
+                    if (bundleItem.hasOwnProperty(`observable`)) {
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isSchema({
                                 observable: {
                                     condition: `object`,
                                     subscriber: `object`
                                 }
                             }).of(bundleItem)) {
-                                formatedBundleItem.observable = bundleItem.observable;
-                            } else {
                                 Hf.log(`error`, `DataElement.format - Bundle observable for key:${bundleKey} is invalid.`);
                             }
                         }
-                        formatedBundleItem.value = bundleItem.value;
-                    } else if (Hf.isObject(bundleItem) && bundleItem.hasOwnProperty(`computable`)) {
-                        if (Hf.isSchema({
+
+                        formatedBundleItem.observable = bundleItem.observable;
+                    }
+
+                    formatedBundleItem.value = bundleItem.value;
+                } else if (Hf.isObject(bundleItem) && bundleItem.hasOwnProperty(`computable`)) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!Hf.isSchema({
                             computable: {
                                 contexts: `array`,
                                 compute: `function`
                             }
                         }).of(bundleItem)) {
-                            formatedBundleItem.computable = bundleItem.computable;
-                        } else {
                             Hf.log(`error`, `DataElement.format - Bundle computable for key:${bundleKey} is invalid.`);
                         }
-                    } else {
-                        formatedBundleItem.value = bundleItem;
-                        // if (Hf.isObject(bundleItem)) {
-                        //     if (!Hf.isEmpty(bundleItem)) {
-                        //         formatedBundleItem.value = bundleItem;
-                        //     } else {
-                        //         Hf.log(`error`, `DataElement.format - Bundle key:${bundleKey} is empty.`);
-                        //     }
-                        // } else {
-                        //     formatedBundleItem.value = bundleItem;
-                        // }
                     }
-                }
-            });
 
-            return formatedBundle;
-        }
+                    formatedBundleItem.computable = bundleItem.computable;
+                } else {
+                    formatedBundleItem.value = bundleItem;
+
+                    // if (Hf.isObject(bundleItem)) {
+                    //     if (Hf.DEVELOPMENT) {
+                    //         if (Hf.isEmpty(bundleItem)) {
+                    //             Hf.log(`error`, `DataElement.format - Bundle key:${bundleKey} is empty.`);
+                    //         }
+                    //     }
+                    //     formatedBundleItem.value = bundleItem;
+                    // } else {
+                    //     formatedBundleItem.value = bundleItem;
+                    // }
+                }
+            }
+        });
+
+        return formatedBundle;
     },
     /**
      * @description - Read a data bundle.
@@ -621,55 +653,62 @@ const DataElementPrototype = Object.create({}).prototype = {
         // FIXME: Crash occurs when bundle object has circular reference.
         const data = this;
 
-        if (!Hf.isObject(bundle)) {
-            Hf.log(`error`, `DataElement.read - Input data content bundle is invalid.`);
-        } else if (!Hf.isString(bundleName)) {
-            Hf.log(`error`, `DataElement.read - Input data content bundle name is invalid.`);
-        } else {
-            const pathId = bundleName;
-            const rootKey = bundleName;
-            /* format bundle to correct format */
-            const formatedBundle = data.format(bundle);
-            let cursor;
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isObject(bundle)) {
+                Hf.log(`error`, `DataElement.read - Input data content bundle is invalid.`);
+            } else if (!Hf.isString(bundleName)) {
+                Hf.log(`error`, `DataElement.read - Input data content bundle name is invalid.`);
+            }
+        }
 
-            /* create a root data content for bundle */
-            data._rootContent[bundleName] = {};
-            cursor = data.select(pathId);
+        const pathId = bundleName;
+        const rootKey = bundleName;
+        /* format bundle to correct format */
+        const formatedBundle = data.format(bundle);
+        let cursor;
 
-            /* read bundle and assign descriptors */
-            Hf.forEach(formatedBundle, (bundleItem, bundleKey) => {
-                if (bundleItem.hasOwnProperty(`value`)) {
-                    const value = bundleItem.value;
-                    if (Hf.isDefined(value)) {
-                        cursor.setContentItem(value, bundleKey);
-                    } else {
+        /* create a root data content for bundle */
+        data._rootContent[bundleName] = {};
+        cursor = data.select(pathId);
+
+        /* read bundle and assign descriptors */
+        Hf.forEach(formatedBundle, (bundleItem, bundleKey) => {
+            if (bundleItem.hasOwnProperty(`value`)) {
+                const value = bundleItem.value;
+
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isDefined(value)) {
                         Hf.log(`error`, `DataElement.read - Cannot set undefined data bundle item key:${bundleKey}.`);
                     }
                 }
-                data._assignDescription(cursor, bundleItem, bundleKey);
-            });
 
+                cursor.setContentItem(value, bundleKey);
+            }
+            data._assignDescription(cursor, bundleItem, bundleKey);
+        });
+
+        if (Hf.DEVELOPMENT) {
             if (Hf.isEmpty(data._rootContent[bundleName])) {
                 Hf.log(`error`, `DataElement.read - Root data content item name:${bundleName} is empty.`);
-            } else {
-                data._updateMMap(rootKey);
-
-                return {
-                    /**
-                     * @description - Set data immutability after reading.
-                     *
-                     * @method asImmutable
-                     * @param {boolean} immutable
-                     * @return {object}
-                     */
-                    asImmutable: function asImmutable (immutable = true) {
-                        immutable = Hf.isBoolean(immutable) ? immutable : true;
-                        data.setImmutability(rootKey, immutable);
-                        return data;
-                    }
-                };
             }
         }
+
+        data._updateMMap(rootKey);
+
+        return {
+            /**
+             * @description - Set data immutability after reading.
+             *
+             * @method asImmutable
+             * @param {boolean} immutable
+             * @return {object}
+             */
+            asImmutable: function asImmutable (immutable = true) {
+                immutable = Hf.isBoolean(immutable) ? immutable : true;
+                data.setImmutability(rootKey, immutable);
+                return data;
+            }
+        };
     }
     /**
      * @description - Log data element as a string for debuging.
@@ -680,7 +719,7 @@ const DataElementPrototype = Object.create({}).prototype = {
     // DEBUG_LOG: function DEBUG_LOG () {
     //     const data = this;
     //     data._mutation.mMap.DEBUG_LOG();
-    //     Hf.log(`info`, JSON.stringify(data._mutation.records, null, `\t`));
+    //     Hf.log(`debug`, JSON.stringify(data._mutation.records, null, `\t`));
     // }
 };
 
@@ -720,11 +759,13 @@ export default function DataElement () {
         }
     });
 
-    if (!Hf.isObject(element)) {
-        Hf.log(`error`, `DataElement - Unable to create a data element instance.`);
-    } else {
-        const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
-        /* reveal only the public properties and functions */
-        return revealFrozen(element);
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(element)) {
+            Hf.log(`error`, `DataElement - Unable to create a data element instance.`);
+        }
     }
+
+    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+    /* reveal only the public properties and functions */
+    return revealFrozen(element);
 }
