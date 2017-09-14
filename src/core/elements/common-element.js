@@ -116,98 +116,100 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     _deepMutation: function _deepMutation (source, mutator, pathId = []) {
         const common = this;
-        if (!(common.isArray(pathId))) {
-            common.log(`error`, `CommonElement._deepMutation - Input pathId is invalid.`);
-        } else {
-            let result;
-            if (common.isEmpty(pathId)) {
-                if (common.isObject(source) && common.isObject(mutator)) {
-                    result = Object.assign({}, source);
-                    const sourceKeys = Object.keys(source);
-                    const mutatorKeys = Object.keys(mutator);
-                    if (sourceKeys.length >= mutatorKeys.length && mutatorKeys.every((key) => sourceKeys.includes(key))) {
-                        mutatorKeys.forEach((key) => {
-                            const sourceItem = source[key];
-                            const mutatorItem = mutator[key];
+        if (common.DEVELOPMENT) {
+            if (!(common.isArray(pathId))) {
+                common.log(`error`, `CommonElement._deepMutation - Input pathId is invalid.`);
+            }
+        }
 
-                            if ((common.isObject(sourceItem) && !common.isObject(mutatorItem) || common.isArray(sourceItem) && !common.isArray(mutatorItem)) ||
-                                (!common.isObject(sourceItem) && common.isObject(mutatorItem) || !common.isArray(sourceItem) && common.isArray(mutatorItem))) {
-                                common.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
-                                common.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
-                                common.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
+        let result;
+        if (common.isEmpty(pathId)) {
+            if (common.isObject(source) && common.isObject(mutator)) {
+                result = Object.assign({}, source);
+                const sourceKeys = Object.keys(source);
+                const mutatorKeys = Object.keys(mutator);
+                if (sourceKeys.length >= mutatorKeys.length && mutatorKeys.every((key) => sourceKeys.includes(key))) {
+                    mutatorKeys.forEach((key) => {
+                        const sourceItem = source[key];
+                        const mutatorItem = mutator[key];
+
+                        if ((common.isObject(sourceItem) && !common.isObject(mutatorItem) || common.isArray(sourceItem) && !common.isArray(mutatorItem)) ||
+                            (!common.isObject(sourceItem) && common.isObject(mutatorItem) || !common.isArray(sourceItem) && common.isArray(mutatorItem))) {
+                            common.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
+                            common.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
+                            common.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
+                        } else {
+                            if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
+                                result[key] = common._deepMutation(sourceItem, mutatorItem);
                             } else {
-                                if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
-                                    result[key] = common._deepMutation(sourceItem, mutatorItem);
-                                } else {
-                                    result[key] = mutatorItem;
-                                }
+                                result[key] = mutatorItem;
                             }
-                        });
-                    } else {
-                        common.log(`warn1`, `CommonElement._deepMutation - Input mutator object schema is not a subset of the source schema.`);
-                        common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
-                        common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
-                    }
-                } else if (common.isArray(source) && common.isArray(mutator)) {
-                    result = source.slice(0);
-                    if (source.length === mutator.length) {
-                        source.forEach((sourceItem, key) => {
-                            const mutatorItem = mutator[key];
-                            if ((common.isObject(sourceItem) && !common.isObject(mutatorItem) || common.isArray(sourceItem) && !common.isArray(mutatorItem)) ||
-                                (!common.isObject(sourceItem) && common.isObject(mutatorItem) || !common.isArray(sourceItem) && common.isArray(mutatorItem))) {
-                                common.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
-                                common.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
-                                common.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
-                            } else {
-                                if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
-                                    result[key] = common._deepMutation(sourceItem, mutatorItem);
-                                } else {
-                                    result[key] = mutatorItem;
-                                }
-                            }
-                        });
-                    } else {
-                        common.log(`warn1`, `CommonElement._deepMutation - Input mutator array must be the same size as the source array.`);
-                        common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
-                        common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
-                    }
+                        }
+                    });
                 } else {
-                    common.log(`error`, `CommonElement._deepMutation - Input source or target mutator is invalid.`);
+                    common.log(`warn1`, `CommonElement._deepMutation - Input mutator object schema is not a subset of the source schema.`);
+                    common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                    common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
+                }
+            } else if (common.isArray(source) && common.isArray(mutator)) {
+                result = source.slice(0);
+                if (source.length === mutator.length) {
+                    source.forEach((sourceItem, key) => {
+                        const mutatorItem = mutator[key];
+                        if ((common.isObject(sourceItem) && !common.isObject(mutatorItem) || common.isArray(sourceItem) && !common.isArray(mutatorItem)) ||
+                            (!common.isObject(sourceItem) && common.isObject(mutatorItem) || !common.isArray(sourceItem) && common.isArray(mutatorItem))) {
+                            common.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
+                            common.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
+                            common.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
+                        } else {
+                            if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
+                                result[key] = common._deepMutation(sourceItem, mutatorItem);
+                            } else {
+                                result[key] = mutatorItem;
+                            }
+                        }
+                    });
+                } else {
+                    common.log(`warn1`, `CommonElement._deepMutation - Input mutator array must be the same size as the source array.`);
+                    common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                    common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                 }
             } else {
-                const key = pathId.shift();
-                if (common.isObject(source) && source.hasOwnProperty(key)) {
-                    result = Object.assign({}, source);
-                    if (common.isEmpty(pathId)) {
-                        if (common.isObject(mutator) && mutator.hasOwnProperty(key)) {
-                            result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
-                        } else {
-                            common.log(`warn1`, `CommonElement._deepMutation - Key:${key} of path id:${pathId} is not defined in mutator.`);
-                            common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
-                            common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
-                        }
+                common.log(`error`, `CommonElement._deepMutation - Input source or target mutator is invalid.`);
+            }
+        } else {
+            const key = pathId.shift();
+            if (common.isObject(source) && source.hasOwnProperty(key)) {
+                result = Object.assign({}, source);
+                if (common.isEmpty(pathId)) {
+                    if (common.isObject(mutator) && mutator.hasOwnProperty(key)) {
+                        result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
                     } else {
-                        result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
-                    }
-                } else if (common.isArray(source) && common.isInteger(key) && key < source.length) {
-                    result = source.slice(0);
-                    if (common.isEmpty(pathId)) {
-                        if (common.isArray(mutator) && key < mutator.length) {
-                            result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
-                        } else {
-                            common.log(`warn1`, `CommonElement._deepMutation - Array index:${key} is greater than mutator array size.`);
-                            common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
-                            common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
-                        }
-                    } else {
-                        result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
+                        common.log(`warn1`, `CommonElement._deepMutation - Key:${key} of path id:${pathId} is not defined in mutator.`);
+                        common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                        common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                     }
                 } else {
-                    common.log(`error`, `CommonElement._deepMutation - Path ends at property key:${key}.`);
+                    result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
                 }
+            } else if (common.isArray(source) && common.isInteger(key) && key < source.length) {
+                result = source.slice(0);
+                if (common.isEmpty(pathId)) {
+                    if (common.isArray(mutator) && key < mutator.length) {
+                        result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
+                    } else {
+                        common.log(`warn1`, `CommonElement._deepMutation - Array index:${key} is greater than mutator array size.`);
+                        common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                        common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
+                    }
+                } else {
+                    result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
+                }
+            } else {
+                common.log(`error`, `CommonElement._deepMutation - Path ends at property key:${key}.`);
             }
-            return result;
         }
+        return result;
     },
     /**
      * @description - Helper function to deep merge source with target and return result.
@@ -243,17 +245,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     if (common.isObject(source)) {
                         result = Object.assign({}, source);
                     }
-                    // Object.keys(target).forEach((key) => {
-                    //     if (common.isObject(target[key]) || common.isArray(target[key])) {
-                    //         if (!common.isDefined(source[key])) {
-                    //             result[key] = target[key];
-                    //         } else {
-                    //             result[key] = common._deepMerge(source[key], target[key]);
-                    //         }
-                    //     } else {
-                    //         result[key] = target[key];
-                    //     }
-                    // });
+
                     Object.entries(target).forEach(([ key, targetValue ]) => {
                         if (common.isObject(targetValue) || common.isArray(targetValue)) {
                             if (!common.isDefined(source[key])) {
@@ -369,43 +361,45 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     _deepRetrieval: function _deepRetrieval (target, pathId, asNestedObject) {
         const common = this;
-        if (!(common.isObject(target) || common.isArray(target))) {
-            common.log(`error`, `CommonElement._deepRetrieval - Input target object or array is invalid.`);
-        } else if (!(common.isArray(pathId))) {
-            common.log(`error`, `CommonElement._deepRetrieval - Input pathId is invalid.`);
-        } else {
-            if (!common.isEmpty(pathId)) {
-                const key = pathId.shift();
-                let resultAtPath = common.isObject(target) ? {} : Array(key).fill(null);
-                let propertyAtPath;
-
-                if (common.isObject(target) && target.hasOwnProperty(key)) {
-                    if (!common.isEmpty(pathId)) {
-                        propertyAtPath = common._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
-                        resultAtPath[key] = propertyAtPath;
-                    } else {
-                        propertyAtPath = target[key];
-                        resultAtPath[key] = propertyAtPath;
-                    }
-                } else if (common.isArray(target) && common.isInteger(key) && key < target.length) {
-                    if (!common.isEmpty(pathId)) {
-                        propertyAtPath = common._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
-                        resultAtPath.push(propertyAtPath);
-                    } else {
-                        propertyAtPath = target[key];
-                        resultAtPath.push(propertyAtPath);
-                    }
-                }
-
-                if (!common.isDefined(propertyAtPath) && !common.isEmpty(pathId)) {
-                    common.log(`error`, `CommonElement._deepRetrieval - Path ends at property key:${key}.`);
-                } else {
-                    return asNestedObject ? resultAtPath : propertyAtPath;
-                }
-            } else {
+        if (common.DEVELOPMENT) {
+            if (!(common.isObject(target) || common.isArray(target))) {
+                common.log(`error`, `CommonElement._deepRetrieval - Input target object or array is invalid.`);
+            } else if (!(common.isArray(pathId))) {
+                common.log(`error`, `CommonElement._deepRetrieval - Input pathId is invalid.`);
+            } else if (common.isArray(pathId) && common.isEmpty(pathId)) {
                 common.log(`error`, `CommonElement._deepRetrieval - No property is defined.`);
             }
         }
+
+        const key = pathId.shift();
+        let resultAtPath = common.isObject(target) ? {} : Array(key).fill(null);
+        let propertyAtPath;
+
+        if (common.isObject(target) && target.hasOwnProperty(key)) {
+            if (!common.isEmpty(pathId)) {
+                propertyAtPath = common._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
+                resultAtPath[key] = propertyAtPath;
+            } else {
+                propertyAtPath = target[key];
+                resultAtPath[key] = propertyAtPath;
+            }
+        } else if (common.isArray(target) && common.isInteger(key) && key < target.length) {
+            if (!common.isEmpty(pathId)) {
+                propertyAtPath = common._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
+                resultAtPath.push(propertyAtPath);
+            } else {
+                propertyAtPath = target[key];
+                resultAtPath.push(propertyAtPath);
+            }
+        }
+
+        if (common.DEVELOPMENT) {
+            if (!common.isDefined(propertyAtPath) && !common.isEmpty(pathId)) {
+                common.log(`error`, `CommonElement._deepRetrieval - Path ends at property key:${key}.`);
+            }
+        }
+
+        return asNestedObject ? resultAtPath : propertyAtPath;
     },
     /**
      * @description - Check if value is an integer.
@@ -625,27 +619,29 @@ const CommonElementPrototype = Object.create({}).prototype = {
     compose: function compose (...fns) {
         const common = this;
 
-        if (fns.length < 2) {
-            common.log(`error`, `CommonElement.compose - Input function array must have more than two functions.`);
-        } else if (!fns.every((fn) => common.isFunction(fn))) {
-            common.log(`error`, `CommonElement.compose - Input function is invalid.`);
-        } else {
-            /**
-             * @description - A composed function of two or more functions.
-             *
-             * @method composed
-             * @param {*} value
-             * @returns {function}
-             */
-            return function composed (value) {
-                return fns.reduce((result, fn) => {
-                    if (common.isDefined(result)) {
-                        return fn(result);
-                    }
-                    return fn();
-                }, value);
-            };
+        if (common.DEVELOPMENT) {
+            if (fns.length < 2) {
+                common.log(`error`, `CommonElement.compose - Input function array must have more than two functions.`);
+            } else if (!fns.every((fn) => common.isFunction(fn))) {
+                common.log(`error`, `CommonElement.compose - Input function is invalid.`);
+            }
         }
+
+        /**
+         * @description - A composed function of two or more functions.
+         *
+         * @method composed
+         * @param {*} value
+         * @returns {function}
+         */
+        return function composed (value) {
+            return fns.reduce((result, fn) => {
+                if (common.isDefined(result)) {
+                    return fn(result);
+                }
+                return fn();
+            }, value);
+        };
     },
     /**
      * @description - Collect propteries from an object or array and return those propteries as an array.
@@ -657,30 +653,30 @@ const CommonElementPrototype = Object.create({}).prototype = {
     collect: function collect (...pathIds) {
         const common = this;
 
-        if (!pathIds.every((pathId) => common.isString(pathId) || common.isArray(pathId))) {
-            common.log(`error`, `CommonElement.collect - Input pathId is invalid.`);
-        } else {
-            /**
-             * @description - Collect from a target object.
-             *
-             * @method collect.from
-             * @param {object|array} target
-             * @return {array}
-             */
-            return {
-                from: function from (target) {
+        if (common.DEVELOPMENT) {
+            if (!pathIds.every((pathId) => common.isString(pathId) || common.isArray(pathId))) {
+                common.log(`error`, `CommonElement.collect - Input pathId is invalid.`);
+            }
+        }
+
+        /**
+         * @description - Collect from a target object.
+         *
+         * @method collect.from
+         * @param {object|array} target
+         * @return {array}
+         */
+        return {
+            from: function from (target) {
+                if (common.DEVELOPMENT) {
                     if (!(common.isObject(target) || common.isArray(target))) {
                         common.log(`error`, `CommonElement.collect.from - Input target is invalid.`);
-                    } else if (common.isEmpty(pathIds)) {
-                        return [];
-                    } else {
-                        return pathIds.map((pathId) => {
-                            return common.retrieve(pathId, `.`).from(target);
-                        });
                     }
                 }
-            };
-        }
+
+                return common.isEmpty(pathIds) ? [] : pathIds.map((pathId) => common.retrieve(pathId, `.`).from(target));
+            }
+        };
     },
     /**
      * @description - Clear all object or array.
@@ -713,21 +709,22 @@ const CommonElementPrototype = Object.create({}).prototype = {
     clone: function clone (source) {
         const common = this;
 
-        if (!(common.isObject(source) || common.isArray(source))) {
-            common.log(`error`, `CommonElement.clone - Input is not an object or array type.`);
-        } else {
-            let result;
-            if (common.isObject(source)) {
-                result = Object.assign({}, source);
+        if (common.DEVELOPMENT) {
+            if (!(common.isObject(source) || common.isArray(source))) {
+                common.log(`error`, `CommonElement.clone - Input is not an object or array type.`);
             }
-            if (common.isArray(source)) {
-                result = source.map((value) => {
-                    return common.isObject(value) || common.isArray(value) ? common.clone(value) : value;
-                }).slice(0);
-            }
-            // return Object.isFrozen(source) ? Object.freeze(result) : result;
-            return result;
         }
+        let result;
+        if (common.isObject(source)) {
+            result = Object.assign({}, source);
+        }
+        if (common.isArray(source)) {
+            result = source.map((value) => {
+                return common.isObject(value) || common.isArray(value) ? common.clone(value) : value;
+            }).slice(0);
+        }
+        // return Object.isFrozen(source) ? Object.freeze(result) : result;
+        return result;
     },
     /**
      * @description - Deep free a source object or function.
@@ -756,44 +753,50 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     mutate: function mutate (source) {
         const common = this;
-        if (!common.isObject(source)) {
-            common.log(`error`, `CommonElement.mutate - Input source is invalid.`);
-        } else {
-            return {
-                /**
-                 * @description - Return a new mutating of source at pathId from reference mutate object...
-                 *
-                 * @method mutate.atPathBy
-                 * @param {object} mutator - Target reference mutator object.
-                 * @param {string|array} pathId - Path of the property to retrieve.
-                 * @returns {object}
-                 */
-                atPathBy: function atPathBy (mutator, pathId) {
-                    pathId = common.isString(pathId) ? common.stringToArray(pathId, `.`) : pathId;
+        if (common.DEVELOPMENT) {
+            if (!common.isObject(source)) {
+                common.log(`error`, `CommonElement.mutate - Input source is invalid.`);
+            }
+        }
+
+        return {
+            /**
+             * @description - Return a new mutating of source at pathId from reference mutate object...
+             *
+             * @method mutate.atPathBy
+             * @param {object} mutator - Target reference mutator object.
+             * @param {string|array} pathId - Path of the property to retrieve.
+             * @returns {object}
+             */
+            atPathBy: function atPathBy (mutator, pathId) {
+                pathId = common.isString(pathId) ? common.stringToArray(pathId, `.`) : pathId;
+                if (common.DEVELOPMENT) {
                     if (!common.isObject(mutator)) {
                         common.log(`error`, `CommonElement.mutate.atPathBy - Input mutator is invalid.`);
                     } else if (!(common.isArray(pathId) && !common.isEmpty(pathId))) {
                         common.log(`error`, `CommonElement.mutate.atPathBy - Input pathId is invalid.`);
-                    } else {
-                        return common._deepMutation(source, mutator, pathId.slice(0));
-                    }
-                },
-                /**
-                 * @description - Mutating the source from reference target mutator object...
-                 *
-                 * @method mutate.by
-                 * @param {object} mutator - Target reference mutator object.
-                 * @returns {object}
-                 */
-                by: function by (mutator) {
-                    if (!common.isObject(mutator)) {
-                        common.log(`error`, `CommonElement.mutate.by - Input mutator is invalid.`);
-                    } else {
-                        return common._deepMutation(source, mutator);
                     }
                 }
-            };
-        }
+
+                return common._deepMutation(source, mutator, pathId.slice(0));
+            },
+            /**
+             * @description - Mutating the source from reference target mutator object...
+             *
+             * @method mutate.by
+             * @param {object} mutator - Target reference mutator object.
+             * @returns {object}
+             */
+            by: function by (mutator) {
+                if (common.DEVELOPMENT) {
+                    if (!common.isObject(mutator)) {
+                        common.log(`error`, `CommonElement.mutate.by - Input mutator is invalid.`);
+                    }
+                }
+
+                return common._deepMutation(source, mutator);
+            }
+        };
     },
     /**
      * @description - Deep merging source to target object.
@@ -804,44 +807,50 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     merge: function merge (source) {
         const common = this;
-        if (!common.isObject(source)) {
-            common.log(`error`, `CommonElement.merge - Input source is invalid.`);
-        } else {
-            return {
-                /**
-                 * @description - Merging with the target object at pathId...
-                 *
-                 * @method merge.atPathWith
-                 * @param {object} target - Target object be merged to.
-                 * @param {string|array} pathId - Path of the property to retrieve.
-                 * @returns {object}
-                 */
-                atPathWith: function atPathWith (target, pathId) {
-                    pathId = common.isString(pathId) ? common.stringToArray(pathId, `.`) : pathId;
+        if (common.DEVELOPMENT) {
+            if (!common.isObject(source)) {
+                common.log(`error`, `CommonElement.merge - Input source is invalid.`);
+            }
+        }
+
+        return {
+            /**
+             * @description - Merging with the target object at pathId...
+             *
+             * @method merge.atPathWith
+             * @param {object} target - Target object be merged to.
+             * @param {string|array} pathId - Path of the property to retrieve.
+             * @returns {object}
+             */
+            atPathWith: function atPathWith (target, pathId) {
+                pathId = common.isString(pathId) ? common.stringToArray(pathId, `.`) : pathId;
+                if (common.DEVELOPMENT) {
                     if (!common.isObject(target)) {
                         common.log(`error`, `CommonElement.merge.atPathWith - Input target is invalid.`);
                     } else if (!(common.isArray(pathId) && !common.isEmpty(pathId))) {
                         common.log(`error`, `CommonElement.merge.atPathWith - Input pathId is invalid.`);
-                    } else {
-                        return common._deepMerge(source, target, pathId.slice(0));
-                    }
-                },
-                /**
-                 * @description - Merging with the target object...
-                 *
-                 * @method merge.with
-                 * @param {object} target - Target object be merged to.
-                 * @returns {object}
-                 */
-                with: function _with (target) {
-                    if (!common.isObject(target)) {
-                        common.log(`error`, `CommonElement.merge.with - Input target is invalid.`);
-                    } else {
-                        return common._deepMerge(source, target);
                     }
                 }
-            };
-        }
+
+                return common._deepMerge(source, target, pathId.slice(0));
+            },
+            /**
+             * @description - Merging with the target object...
+             *
+             * @method merge.with
+             * @param {object} target - Target object be merged to.
+             * @returns {object}
+             */
+            with: function _with (target) {
+                if (common.DEVELOPMENT) {
+                    if (!common.isObject(target)) {
+                        common.log(`error`, `CommonElement.merge.with - Input target is invalid.`);
+                    }
+                }
+
+                return common._deepMerge(source, target);
+            }
+        };
     },
     /**
      * @description - Fallback to source if target does not have the same properties.
@@ -856,26 +865,30 @@ const CommonElementPrototype = Object.create({}).prototype = {
      */
     fallback: function fallback (source, notify) {
         const common = this;
-        if (!(common.isObject(source) || common.isArray(source))) {
-            common.log(`error`, `CommonElement.fallback - Input source object is invalid.`);
-        } else {
-            return {
-                /**
-                 * @description - Fallback from the target object/array...
-                 *
-                 * @method fallback.of
-                 * @param {object|array} target - Target object or array.
-                 * @return {object}
-                 */
-                of: function of (target) {
+        if (common.DEVELOPMENT) {
+            if (!(common.isObject(source) || common.isArray(source))) {
+                common.log(`error`, `CommonElement.fallback - Input source object is invalid.`);
+            }
+        }
+
+        return {
+            /**
+             * @description - Fallback from the target object/array...
+             *
+             * @method fallback.of
+             * @param {object|array} target - Target object or array.
+             * @return {object}
+             */
+            of: function of (target) {
+                if (common.DEVELOPMENT) {
                     if ((common.isObject(source) && !common.isObject(target)) || common.isArray(source) && !common.isArray(target)) {
                         common.log(`error`, `CommonElement.fallback.of - Input target object is invalid.`);
-                    } else {
-                        return common._deepCompareAndFallback(source, target, notify);
                     }
                 }
-            };
-        }
+
+                return common._deepCompareAndFallback(source, target, notify);
+            }
+        };
     },
     /**
      * @description - Mixing function that do shallow mixing and binding of source and target object to a mixed object.
@@ -948,218 +961,161 @@ const CommonElementPrototype = Object.create({}).prototype = {
             return included;
         };
 
-        if (!common.isObject(source)) {
-            common.log(`error`, `CommonElement.mix - Input source object is invalid.`);
-        } else {
-            let result = {};
-
-            if (!exclusion.prototypes) {
-                /* copy source object prototypes to new mixed result object */
-                // result = Object.keys(Object.getPrototypeOf(source)).filter((fnName) => {
-                //     const fn = source[fnName];
-                //
-                //     return common.isFunction(fn) && isIncluded(fnName);
-                // }).reduce((_result, fnName) => {
-                //     /* bind the prototype to source object */
-                //     const fn = source[fnName];
-                //
-                //     _result[fnName] = fn.bind(source);
-                //     return _result;
-                // }, result);
-                result = Object.entries(Object.getPrototypeOf(source)).filter(([ fnName, fn ]) => {
-                    return common.isFunction(fn) && isIncluded(fnName);
-                }).reduce((_result, [ fnName, fn ]) => {
-                    /* bind the prototype to source object */
-                    _result[fnName] = fn.bind(source);
-                    return _result;
-                }, result);
-
-                /* copy source object functions to new mixed result object */
-                // result = Object.keys(source).filter((fnName) => {
-                //     const fn = source[fnName];
-                //
-                //     return common.isFunction(fn) && isIncluded(fnName);
-                // }).reduce((_result, fnName) => {
-                //     /* bind the prototype to source object */
-                //     const fn = source[fnName];
-                //
-                //     _result[fnName] = fn;
-                //     return _result;
-                // }, result);
-                result = Object.entries(source).filter(([ fnName, fn ]) => {
-                    return common.isFunction(fn) && isIncluded(fnName);
-                }).reduce((_result, [ fnName, fn ]) => {
-                    /* bind the prototype to source object */
-                    _result[fnName] = fn;
-                    return _result;
-                }, result);
+        if (common.DEVELOPMENT) {
+            if (!common.isObject(source)) {
+                common.log(`error`, `CommonElement.mix - Input source object is invalid.`);
             }
+        }
 
-            if (!exclusion.properties) {
-                result = Object.keys(Object.getPrototypeOf(source)).concat(
-                    exclusion.enumerablePropertiesOnly ? Object.keys(source) : Object.getOwnPropertyNames(source)
-                ).filter((key) => {
-                    return !common.isFunction(source[key]) && isIncluded(key);
-                }).reduce((_result, key) => {
-                    const sourceObjDesc = Object.getOwnPropertyDescriptor(source, key);
+        let result = {};
 
-                    if (common.isObject(sourceObjDesc)) {
-                        Object.defineProperty(_result, key, {
-                            get: function get () {
-                                return source[key];
-                            },
-                            set: function set (value) {
-                                source[key] = value;
-                            },
-                            configurable: sourceObjDesc.configurable,
-                            enumerable: sourceObjDesc.enumerable
-                        });
-                    } else {
-                        Object.defineProperty(_result, key, {
-                            get: function get () {
-                                return source[key];
-                            },
-                            set: function set (value) {
-                                source[key] = value;
-                            },
-                            configurable: false,
-                            enumerable: true
-                        });
-                    }
+        if (!exclusion.prototypes) {
+            /* copy source object prototypes to new mixed result object */
+            result = Object.entries(Object.getPrototypeOf(source)).filter(([ fnName, fn ]) => {
+                return common.isFunction(fn) && isIncluded(fnName);
+            }).reduce((_result, [ fnName, fn ]) => {
+                /* bind the prototype to source object */
+                _result[fnName] = fn.bind(source);
+                return _result;
+            }, result);
 
-                    return _result;
-                }, result);
-            }
+            /* copy source object functions to new mixed result object */
+            result = Object.entries(source).filter(([ fnName, fn ]) => {
+                return common.isFunction(fn) && isIncluded(fnName);
+            }).reduce((_result, [ fnName, fn ]) => {
+                /* bind the prototype to source object */
+                _result[fnName] = fn;
+                return _result;
+            }, result);
+        }
 
-            return {
-                /**
-                 * @description - Mixing with the target object...
-                 *
-                 * @method mix.with
-                 * @param {object} target - Target object that is being extended to.
-                 * @return {object}
-                 */
-                with: function _with (target) {
+        if (!exclusion.properties) {
+            result = Object.keys(Object.getPrototypeOf(source)).concat(
+                exclusion.enumerablePropertiesOnly ? Object.keys(source) : Object.getOwnPropertyNames(source)
+            ).filter((key) => {
+                return !common.isFunction(source[key]) && isIncluded(key);
+            }).reduce((_result, key) => {
+                const sourceObjDesc = Object.getOwnPropertyDescriptor(source, key);
+
+                if (common.isObject(sourceObjDesc)) {
+                    Object.defineProperty(_result, key, {
+                        get: function get () {
+                            return source[key];
+                        },
+                        set: function set (value) {
+                            source[key] = value;
+                        },
+                        configurable: sourceObjDesc.configurable,
+                        enumerable: sourceObjDesc.enumerable
+                    });
+                } else {
+                    Object.defineProperty(_result, key, {
+                        get: function get () {
+                            return source[key];
+                        },
+                        set: function set (value) {
+                            source[key] = value;
+                        },
+                        configurable: false,
+                        enumerable: true
+                    });
+                }
+
+                return _result;
+            }, result);
+        }
+
+        return {
+            /**
+             * @description - Mixing with the target object...
+             *
+             * @method mix.with
+             * @param {object} target - Target object that is being extended to.
+             * @return {object}
+             */
+            with: function _with (target) {
+                if (common.DEVELOPMENT) {
                     if (!common.isObject(target)) {
                         common.log(`error`, `CommonElement.mix.with - Input target object is invalid.`);
-                    } else {
-                        if (!exclusion.prototypes) {
-                            /* copy target object prototypes to new mixed result object */
-                            // result = Object.keys(Object.getPrototypeOf(target)).filter((fnName) => {
-                            //     const fn = target[fnName];
-                            //
-                            //     if (common.isFunction(fn) && isIncluded(fnName)) {
-                            //         if (!fnOverrided) {
-                            //             if (!result.hasOwnProperty(fnName)) {
-                            //                 return true;
-                            //             }
-                            //             return false;
-                            //         }
-                            //         return true;
-                            //     }
-                            //     return false;
-                            // }).reduce((_result, fnName) => {
-                            //     /* bind the prototype to target object */
-                            //     const fn = target[fnName];
-                            //
-                            //     _result[fnName] = fn.bind(target);
-                            //     return _result;
-                            // }, result);
-                            result = Object.entries(Object.getPrototypeOf(target)).filter(([ fnName, fn ]) => {
-                                if (common.isFunction(fn) && isIncluded(fnName)) {
-                                    if (!fnOverrided) {
-                                        if (!result.hasOwnProperty(fnName)) {
-                                            return true;
-                                        }
-                                        return false;
-                                    }
-                                    return true;
-                                }
-                                return false;
-                            }).reduce((_result, [ fnName, fn ]) => {
-                                /* bind the prototype to target object */
-                                _result[fnName] = fn.bind(target);
-                                return _result;
-                            }, result);
-
-                            /* copy target object functions to new mixed result object */
-                            // result = Object.keys(target).filter((fnName) => {
-                            //     const fn = target[fnName];
-                            //
-                            //     if (common.isFunction(fn) && isIncluded(fnName)) {
-                            //         /* mix prototypes only */
-                            //         if (!fnOverrided) {
-                            //             if (!result.hasOwnProperty(fnName)) {
-                            //                 return true;
-                            //             }
-                            //             return false;
-                            //         }
-                            //         return true;
-                            //     }
-                            //     return false;
-                            // }).reduce((_result, fnName) => {
-                            //     const fn = target[fnName];
-                            //     _result[fnName] = fn;
-                            //     return _result;
-                            // }, result);
-                            result = Object.entries(target).filter(([ fnName, fn ]) => {
-                                if (common.isFunction(fn) && isIncluded(fnName)) {
-                                    /* mix prototypes only */
-                                    if (!fnOverrided) {
-                                        if (!result.hasOwnProperty(fnName)) {
-                                            return true;
-                                        }
-                                        return false;
-                                    }
-                                    return true;
-                                }
-                                return false;
-                            }).reduce((_result, [ fnName, fn ]) => {
-                                _result[fnName] = fn;
-                                return _result;
-                            }, result);
-                        }
-
-                        if (!exclusion.properties) {
-                            result = Object.keys(Object.getPrototypeOf(target)).concat(
-                                exclusion.enumerablePropertiesOnly ? Object.keys(target) : Object.getOwnPropertyNames(target)
-                            ).filter((key) => {
-                                return !common.isFunction(target[key]) && target.hasOwnProperty(key) && !result.hasOwnProperty(key) && isIncluded(key);
-                            }).reduce((_result, key) => {
-                                const targetObjDesc = Object.getOwnPropertyDescriptor(target, key);
-
-                                if (common.isObject(targetObjDesc)) {
-                                    Object.defineProperty(_result, key, {
-                                        get: function get () {
-                                            return target[key];
-                                        },
-                                        set: function set (value) {
-                                            target[key] = value;
-                                        },
-                                        configurable: targetObjDesc.configurable,
-                                        enumerable: targetObjDesc.enumerable
-                                    });
-                                } else {
-                                    Object.defineProperty(_result, key, {
-                                        get: function get () {
-                                            return target[key];
-                                        },
-                                        set: function set (value) {
-                                            target[key] = value;
-                                        },
-                                        configurable: false,
-                                        enumerable: true
-                                    });
-                                }
-
-                                return _result;
-                            }, result);
-                        }
-                        return result;
                     }
                 }
-            };
-        }
+
+                if (!exclusion.prototypes) {
+                    /* copy target object prototypes to new mixed result object */
+                    result = Object.entries(Object.getPrototypeOf(target)).filter(([ fnName, fn ]) => {
+                        if (common.isFunction(fn) && isIncluded(fnName)) {
+                            if (!fnOverrided) {
+                                if (!result.hasOwnProperty(fnName)) {
+                                    return true;
+                                }
+                                return false;
+                            }
+                            return true;
+                        }
+                        return false;
+                    }).reduce((_result, [ fnName, fn ]) => {
+                        /* bind the prototype to target object */
+                        _result[fnName] = fn.bind(target);
+                        return _result;
+                    }, result);
+
+                    /* copy target object functions to new mixed result object */
+                    result = Object.entries(target).filter(([ fnName, fn ]) => {
+                        if (common.isFunction(fn) && isIncluded(fnName)) {
+                            /* mix prototypes only */
+                            if (!fnOverrided) {
+                                if (!result.hasOwnProperty(fnName)) {
+                                    return true;
+                                }
+                                return false;
+                            }
+                            return true;
+                        }
+                        return false;
+                    }).reduce((_result, [ fnName, fn ]) => {
+                        _result[fnName] = fn;
+                        return _result;
+                    }, result);
+                }
+
+                if (!exclusion.properties) {
+                    result = Object.keys(Object.getPrototypeOf(target)).concat(
+                        exclusion.enumerablePropertiesOnly ? Object.keys(target) : Object.getOwnPropertyNames(target)
+                    ).filter((key) => {
+                        return !common.isFunction(target[key]) && target.hasOwnProperty(key) && !result.hasOwnProperty(key) && isIncluded(key);
+                    }).reduce((_result, key) => {
+                        const targetObjDesc = Object.getOwnPropertyDescriptor(target, key);
+
+                        if (common.isObject(targetObjDesc)) {
+                            Object.defineProperty(_result, key, {
+                                get: function get () {
+                                    return target[key];
+                                },
+                                set: function set (value) {
+                                    target[key] = value;
+                                },
+                                configurable: targetObjDesc.configurable,
+                                enumerable: targetObjDesc.enumerable
+                            });
+                        } else {
+                            Object.defineProperty(_result, key, {
+                                get: function get () {
+                                    return target[key];
+                                },
+                                set: function set (value) {
+                                    target[key] = value;
+                                },
+                                configurable: false,
+                                enumerable: true
+                            });
+                        }
+
+                        return _result;
+                    }, result);
+                }
+                return result;
+            }
+        };
     },
     /**
      * @description - Reveal the closure as a public object.
@@ -1174,19 +1130,21 @@ const CommonElementPrototype = Object.create({}).prototype = {
 
         option = common.isObject(option) ? option : {};
 
-        if (!(common.isObject(closure) || common.isFunction(closure))) {
-            common.log(`error`, `CommonElement.reveal - Input closure is invalid.`);
-        } else {
-            if (common.isObject(closure)) {
-                return common.mix(closure, option).with({});
+        if (common.DEVELOPMENT) {
+            if (!(common.isObject(closure) || common.isFunction(closure))) {
+                common.log(`error`, `CommonElement.reveal - Input closure is invalid.`);
             }
+        }
 
-            if (common.isFunction(closure)) {
-                let enclosedObj = {};
+        if (common.isObject(closure)) {
+            return common.mix(closure, option).with({});
+        }
 
-                closure.call(enclosedObj);
-                return common.mix(enclosedObj, option).with({});
-            }
+        if (common.isFunction(closure)) {
+            let enclosedObj = {};
+
+            closure.call(enclosedObj);
+            return common.mix(enclosedObj, option).with({});
         }
     },
     /**
@@ -1205,29 +1163,33 @@ const CommonElementPrototype = Object.create({}).prototype = {
 
         asNestedObject = common.isBoolean(asNestedObject) ? asNestedObject : false;
 
-        if (!(common.isString(pathId) || common.isArray(pathId))) {
-            common.log(`error`, `CommonElement.retrieve - Input pathId is invalid.`);
-        } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
-            common.log(`error`, `CommonElement.retrieve - Input delimiter is invalid.`);
-        } else {
-            pathId = common.isString(pathId) ? common.stringToArray(pathId, delimiter) : pathId;
-            return {
-                /**
-                 * @description - Target object to retrive property from...
-                 *
-                 * @method retrieve.from
-                 * @param {object|array} target
-                 * @returns {*}
-                 */
-                from: function from (target) {
+        if (common.DEVELOPMENT) {
+            if (!(common.isString(pathId) || common.isArray(pathId))) {
+                common.log(`error`, `CommonElement.retrieve - Input pathId is invalid.`);
+            } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
+                common.log(`error`, `CommonElement.retrieve - Input delimiter is invalid.`);
+            }
+        }
+
+        pathId = common.isString(pathId) ? common.stringToArray(pathId, delimiter) : pathId;
+        return {
+            /**
+             * @description - Target object to retrive property from...
+             *
+             * @method retrieve.from
+             * @param {object|array} target
+             * @returns {*}
+             */
+            from: function from (target) {
+                if (common.DEVELOPMENT) {
                     if (!common.isObject(target)) {
                         common.log(`error`, `CommonElement.retrieve.from - Input target object is invalid.`);
-                    } else {
-                        return common._deepRetrieval(target, pathId.slice(0), asNestedObject);
                     }
                 }
-            };
-        }
+
+                return common._deepRetrieval(target, pathId.slice(0), asNestedObject);
+            }
+        };
     },
     /**
      * @description - Loop through an object or array.
@@ -1238,32 +1200,28 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} context - Object to become context (`this`) for the iterator function.
      * @returns void
      */
-    // TODO: remove if not being used.
     forEach: function forEach (value, iterator, context) {
         const common = this;
 
-        if (!(common.isObject(value) || common.isArray(value))) {
-            common.log(`error`, `CommonElement.forEach - Input value is invalid.`);
-        } else if (!common.isFunction(iterator)) {
-            common.log(`error`, `CommonElement.forEach - Input iterator callback is invalid.`);
-        } else {
-            if (common.isObject(value)) {
-                const obj = value;
-
-                // Object.keys(obj).forEach((key) => {
-                //     iterator.call(context, obj[key], key);
-                // });
-                Object.entries(obj).forEach(([ key, _value ]) => {
-                    iterator.call(context, _value, key);
-                });
+        if (common.DEVELOPMENT) {
+            if (!(common.isObject(value) || common.isArray(value))) {
+                common.log(`error`, `CommonElement.forEach - Input value is invalid.`);
+            } else if (!common.isFunction(iterator)) {
+                common.log(`error`, `CommonElement.forEach - Input iterator callback is invalid.`);
             }
-            if (common.isArray(value)) {
-                const array = value;
+        }
+        if (common.isObject(value)) {
+            const obj = value;
 
-                array.forEach((item, key) => {
-                    iterator.call(context, item, key);
-                });
-            }
+            Object.entries(obj).forEach(([ key, _value ]) => {
+                iterator.call(context, _value, key);
+            });
+        } else if (common.isArray(value)) {
+            const array = value;
+
+            array.forEach((item, key) => {
+                iterator.call(context, item, key);
+            });
         }
     },
     /**
@@ -1277,13 +1235,15 @@ const CommonElementPrototype = Object.create({}).prototype = {
     arrayToString: function arrayToString (array, delimiter) {
         const common = this;
 
-        if (!common.isArray(array)) {
-            common.log(`error`, `CommonElement.arrayToString - Input array is invalid.`);
-        } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
-            common.log(`error`, `CommonElement.arrayToString - Input delimiter is invalid.`);
-        } else {
-            return array.join(delimiter);
+        if (common.DEVELOPMENT) {
+            if (!common.isArray(array)) {
+                common.log(`error`, `CommonElement.arrayToString - Input array is invalid.`);
+            } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
+                common.log(`error`, `CommonElement.arrayToString - Input delimiter is invalid.`);
+            }
         }
+
+        return array.join(delimiter);
     },
     /**
      * @description - Split string to array at delimiter.
@@ -1296,22 +1256,22 @@ const CommonElementPrototype = Object.create({}).prototype = {
     stringToArray: function stringToArray (str, delimiter) {
         const common = this;
 
-        if (!common.isString(str)) {
-            common.log(`error`, `CommonElement.stringToArray - Input string is invalid.`);
-        } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
-            common.log(`error`, `CommonElement.stringToArray - Input delimiter is invalid.`);
-        } else {
-            if (str.includes(delimiter) && str.length > 1) {
-                /* split string into array */
-                return str.split(delimiter).map((value) => {
-                    return common.isInteger(value) ? parseInt(value, 10) : value;
-                });
-                // return str.split(delimiter).map((value) => {
-                //     return common.isInteger(value) ? parseInt(value, 10) : value;
-                // }).filter(Boolean);
+        if (common.DEVELOPMENT) {
+            if (!common.isString(str)) {
+                common.log(`error`, `CommonElement.stringToArray - Input string is invalid.`);
+            } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
+                common.log(`error`, `CommonElement.stringToArray - Input delimiter is invalid.`);
             }
-            return [ str ];
         }
+
+        if (str.includes(delimiter) && str.length > 1) {
+            /* split string into array */
+            return str.split(delimiter).map((value) => common.isInteger(value) ? parseInt(value, 10) : value);
+            // return str.split(delimiter).map((value) => {
+            //     return common.isInteger(value) ? parseInt(value, 10) : value;
+            // }).filter(Boolean);
+        }
+        return [ str ];
     },
     /**
      * @description - Helper function to convert camel case str name to underscore.
@@ -1323,13 +1283,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
     camelcaseToUnderscore: function camelcaseToUnderscore (str) {
         const common = this;
 
-        if (!common.isString(str)) {
-            common.log(`error`, `CommonElement.camelcaseToUnderscore - Input string is invalid.`);
-        } else {
-            return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => {
-                return `_${word.toLowerCase()}`;
-            }).replace(/^_/, ``);
+        if (common.DEVELOPMENT) {
+            if (!common.isString(str)) {
+                common.log(`error`, `CommonElement.camelcaseToUnderscore - Input string is invalid.`);
+            }
         }
+
+        return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => `_${word.toLowerCase()}`).replace(/^_/, ``);
     },
     /**
      * @description - Helper function to convert unserScore str name to camelcase.
@@ -1341,13 +1301,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
     underscoreToCamelcase: function underscoreToCamelcase (str) {
         const common = this;
 
-        if (!common.isString(str)) {
-            common.log(`error`, `CommonElement.underscoreToCamelcase - Input string is invalid.`);
-        } else {
-            return str.replace(/_([a-z])/g, (match, word) => {
-                return word.toUpperCase();
-            });
+        if (common.DEVELOPMENT) {
+            if (!common.isString(str)) {
+                common.log(`error`, `CommonElement.underscoreToCamelcase - Input string is invalid.`);
+            }
         }
+
+        return str.replace(/_([a-z])/g, (match, word) => word.toUpperCase());
     },
     /**
      * @description - Helper function to convert camel case str name to dash.
@@ -1359,13 +1319,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
     camelcaseToDash: function camelcaseToDash (str) {
         const common = this;
 
-        if (!common.isString(str)) {
-            common.log(`error`, `CommonElement.camelcaseToDash - Input string is invalid.`);
-        } else {
-            return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => {
-                return `-${word.toLowerCase()}`;
-            }).replace(/^-/, ``);
+        if (common.DEVELOPMENT) {
+            if (!common.isString(str)) {
+                common.log(`error`, `CommonElement.camelcaseToDash - Input string is invalid.`);
+            }
         }
+
+        return str.replace(/(?:^|\.?)([A-Z])/g, (match, word) => `-${word.toLowerCase()}`).replace(/^-/, ``);
     },
     /**
      * @description - Helper function to convert dash str name to camelcase.
@@ -1377,13 +1337,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
     dashToCamelcase: function dashToCamelcase (str) {
         const common = this;
 
-        if (!common.isString(str)) {
-            common.log(`error`, `CommonElement.dashToCamelcase - Input string is invalid.`);
-        } else {
-            return str.replace(/-([a-z])/g, (match, word) => {
-                return word.toUpperCase();
-            });
+        if (common.DEVELOPMENT) {
+            if (!common.isString(str)) {
+                common.log(`error`, `CommonElement.dashToCamelcase - Input string is invalid.`);
+            }
         }
+
+        return str.replace(/-([a-z])/g, (match, word) => word.toUpperCase());
     },
     /**
      * @description - A simple console log wrapper. Only active in debug/development mode.
@@ -1425,12 +1385,21 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         });
                     }
                 },
-                info () {
-                    if (common._consoleLog.enableInfoLog) {
-                        console.info(`INFO: ${stringifiedMessage}`);
+                info0 () {
+                    if (common._consoleLog.enableInfo0Log) {
+                        console.info(`INFO-0: ${stringifiedMessage}`);
                         common._consoleLog.history.infoLogs.push({
                             timestamp: new Date(),
-                            message: `INFO: ${stringifiedMessage}`
+                            message: `INFO-0: ${stringifiedMessage}`
+                        });
+                    }
+                },
+                info1 () {
+                    if (common._consoleLog.enableInfo1Log) {
+                        console.info(`INFO-1: ${stringifiedMessage}`);
+                        common._consoleLog.history.infoLogs.push({
+                            timestamp: new Date(),
+                            message: `INFO-1: ${stringifiedMessage}`
                         });
                     }
                 },
@@ -1447,8 +1416,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
             case `debug`:
                 logger.debug();
                 break;
-            case `info`:
-                logger.info();
+            case `info0`:
+                logger.info0();
+                break;
+            case `info1`:
+                logger.info1();
                 break;
             case `warn0`:
                 logger.warn0();
@@ -1478,8 +1450,10 @@ const CommonElementPrototype = Object.create({}).prototype = {
             switch (type) { // eslint-disable-line
             case `debug`:
                 return common._consoleLog.history.debugLogs;
-            case `info`:
-                return common._consoleLog.history.infoLogs;
+            case `info0`:
+                return common._consoleLog.history.info0Logs;
+            case `info1`:
+                return common._consoleLog.history.info1Logs;
             case `warn0`:
                 return common._consoleLog.history.warn0Logs;
             case `warn1`:
@@ -1500,12 +1474,14 @@ const CommonElementPrototype = Object.create({}).prototype = {
  */
 export default function CommonElement ({
     enableProductionMode = false,
-    enableInfoLog = true,
+    enableInfo0Log = false,
+    enableInfo1Log = true,
     enableWarn0Log = false,
     enableWarn1Log = true
 } = {}) {
     enableProductionMode = CommonElementPrototype.isBoolean(enableProductionMode) ? enableProductionMode : false;
-    enableInfoLog = CommonElementPrototype.isBoolean(enableInfoLog) ? enableInfoLog : true;
+    enableInfo0Log = CommonElementPrototype.isBoolean(enableInfo0Log) ? enableInfo0Log : true;
+    enableInfo1Log = CommonElementPrototype.isBoolean(enableInfo1Log) ? enableInfo1Log : true;
     enableWarn0Log = CommonElementPrototype.isBoolean(enableWarn0Log) ? enableWarn0Log : true;
     enableWarn1Log = CommonElementPrototype.isBoolean(enableWarn1Log) ? enableWarn1Log : true;
 
@@ -1520,7 +1496,8 @@ export default function CommonElement ({
         _consoleLog: {
             value: {
                 /* this flag enables console log of debug messages when calling method Hf.log(`info`, `a debug message.`) */
-                enableInfoLog,
+                enableInfo0Log,
+                enableInfo1Log,
                 enableWarn0Log,
                 enableWarn1Log,
                 history: {

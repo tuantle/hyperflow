@@ -45,11 +45,13 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
         const node = this;
         const tree = node._tree;
 
-        if (node.isRoot()) {
-            Hf.log(`error`, `TreeNodeElement._getHead - Cannot get the head node of a root node.`);
-        } else {
-            return tree._getNode(node._hPathId);
+        if (Hf.DEVELOPMENT) {
+            if (node.isRoot()) {
+                Hf.log(`error`, `TreeNodeElement._getHead - Cannot get the head node of a root node.`);
+            }
         }
+
+        return tree._getNode(node._hPathId);
     },
     /**
      * @description - Helper function to get the tail nodes at this node
@@ -62,11 +64,13 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
         const node = this;
         const tree = node._tree;
 
-        if (node.isLeaf()) {
-            Hf.log(`error`, `TreeNodeElement._getTails - Cannot get tail nodes of a leaf node.`);
-        } else {
-            return node._tPathIds.map((tPathId) => tree._getNode(tPathId));
+        if (Hf.DEVELOPMENT) {
+            if (node.isLeaf()) {
+                Hf.log(`error`, `TreeNodeElement._getTails - Cannot get tail nodes of a leaf node.`);
+            }
         }
+
+        return node._tPathIds.map((tPathId) => tree._getNode(tPathId));
     },
     /**
      * @description - Helper function to get all ancestors at this node
@@ -157,17 +161,11 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      */
     isTailOf: function isTailOf (pathId) {
         const node = this;
-        let verified = false;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
 
-        if (Hf.isString(pathId)) {
-            if (!node.isRoot()) {
-                verified = node._hPathId === pathId;
-            }
-        }
-        return verified;
+        return !node.isRoot() && node._hPathId === pathId;
     },
     /**
      * @description - Check if this node is head of node at pathId.
@@ -178,15 +176,11 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      */
     isHeadOf: function isHeadOf (pathId) {
         const node = this;
-        let verified = false;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
 
-        if (Hf.isString(pathId)) {
-            return node._tPathIds.every((tPathId) => tPathId === pathId);
-        }
-        return verified;
+        return node._tPathIds.every((tPathId) => tPathId === pathId);
     },
     /**
      * @description - Check if this node is a common with node at pathId.
@@ -197,19 +191,17 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      */
     isCommonWith: function isCommonWith (pathId) {
         const node = this;
-        let verified = false;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
 
-        if (Hf.isString(pathId)) {
-            if (!node.isRoot()) {
-                let hNode = node._getHead();
+        if (!node.isRoot()) {
+            let hNode = node._getHead();
 
-                return hNode._tPathIds.every((tPathId) => tPathId === pathId);
-            }
+            return hNode._tPathIds.every((tPathId) => tPathId === pathId);
+        } else { // eslint-disable-line
+            return false;
         }
-        return verified;
     },
     /**
      * @description - Check if this node is an ancestor of node with pathId.
@@ -220,17 +212,11 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      */
     isAncestorOf: function isAncestorOf (pathId) {
         const node = this;
-        let verified = false;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
 
-        if (Hf.isString(pathId)) {
-            if (!node.isRoot()) {
-                return node._getDescendants().every((dNode) => dNode._pathId === pathId);
-            }
-        }
-        return verified;
+        return !node.isRoot() && node._getDescendants().every((dNode) => dNode._pathId === pathId);
     },
     /**
      * @description - Check if this node is an descendant of node with pathId.
@@ -241,17 +227,11 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      */
     isDescendantOf: function isDescendantOf (pathId) {
         const node = this;
-        let verified = false;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
 
-        if (Hf.isString(pathId)) {
-            if (!node.isLeaf()) {
-                return node._getAncestors().every((aNode) => aNode._pathId === pathId);
-            }
-        }
-        return verified;
+        return !node.isLeaf() && node._getAncestors().every((aNode) => aNode._pathId === pathId);
     },
     /**
      * @description - Check if this node is in the same hierarchy with node with pathId.
@@ -262,15 +242,11 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      */
     isInHierarchyOf: function isInHierarchyOf (pathId) {
         const node = this;
-        let verified = false;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
 
-        if (Hf.isString(pathId)) {
-            verified = node.isAncestorOf(pathId) || node.isDescendantOf(pathId);
-        }
-        return verified;
+        return node.isAncestorOf(pathId) || node.isDescendantOf(pathId);
     },
     /**
      * @description - Get node key.
@@ -326,39 +302,42 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     setContent: function setContent (content) {
         const node = this;
 
-        if (Hf.isObject(content) || Hf.isArray(content)) {
-            node._contentProxy = content;
-            if (!node.isSingular() && !node.isRoot()) {
-                const hNode = node._getHead();
-
-                if (!hNode._contentProxy) {
-                    hNode._contentProxy = Hf.isString(node._key) ? {} : [];
-                }
-                if (!hNode._contentProxy.hasOwnProperty(node._key)) {
-                    Object.defineProperty(hNode._contentProxy, node._key, {
-                        get: function get () {
-                            return node._contentProxy;
-                        },
-                        configurable: false,
-                        enumerable: true
-                    });
-                }
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(content) || Hf.isArray(content))) {
+                Hf.log(`error`, `TreeNodeElement.setContent - Input content must be an object or array.`);
             }
-            if (!node.isLeaf()) {
-                const tNodes = node._getTails();
+        }
 
-                tNodes.forEach((tNode) => {
-                    Object.defineProperty(node._contentProxy, tNode._key, {
-                        get: function get () {
-                            return tNode._contentProxy;
-                        },
-                        configurable: false,
-                        enumerable: true
-                    });
+        node._contentProxy = content;
+
+        if (!node.isSingular() && !node.isRoot()) {
+            const hNode = node._getHead();
+
+            if (!hNode._contentProxy) {
+                hNode._contentProxy = Hf.isString(node._key) ? {} : [];
+            }
+            if (!hNode._contentProxy.hasOwnProperty(node._key)) {
+                Object.defineProperty(hNode._contentProxy, node._key, {
+                    get: function get () {
+                        return node._contentProxy;
+                    },
+                    configurable: false,
+                    enumerable: true
                 });
             }
-        } else {
-            Hf.log(`error`, `TreeNodeElement.setContent - Input content must be an object or array.`);
+        }
+        if (!node.isLeaf()) {
+            const tNodes = node._getTails();
+
+            tNodes.forEach((tNode) => {
+                Object.defineProperty(node._contentProxy, tNode._key, {
+                    get: function get () {
+                        return tNode._contentProxy;
+                    },
+                    configurable: false,
+                    enumerable: true
+                });
+            });
         }
     },
     /**
@@ -391,16 +370,18 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     branch: function branch (key, content) {
-        if (!(Hf.isString(key) || Hf.isInteger(key))) {
-            Hf.log(`error`, `TreeNodeElement.branch - Input node key is invalid.`);
-        } else {
-            const node = this;
-            const tree = node._tree;
-            const pathId = `${node._pathId}.${key}`;
-
-            node.sprout(key, content);
-            return tree.select(pathId);
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isString(key) || Hf.isInteger(key))) {
+                Hf.log(`error`, `TreeNodeElement.branch - Input node key is invalid.`);
+            }
         }
+
+        const node = this;
+        const tree = node._tree;
+        const pathId = `${node._pathId}.${key}`;
+
+        node.sprout(key, content);
+        return tree.select(pathId);
     },
     /**
      * @description - Sprout out a new tail node to hierarchy and return this node.
@@ -411,21 +392,23 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     sprout: function sprout (key, content) {
-        if (!(Hf.isString(key) || Hf.isInteger(key))) {
-            Hf.log(`error`, `TreeNodeElement.sprout - Input node key is invalid.`);
-        } else {
-            const node = this;
-            const tree = node._tree;
-            const pathId = `${node._pathId}.${key}`;
-            const tNode = tree._createNode(pathId);
-
-            tNode._hPathId = node._pathId;
-            node._tPathIds.push(tNode._pathId);
-            if (Hf.isObject(content) || Hf.isArray(content)) {
-                tNode.setContent(content);
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isString(key) || Hf.isInteger(key))) {
+                Hf.log(`error`, `TreeNodeElement.sprout - Input node key is invalid.`);
             }
-            return tree.select(node._pathId);
         }
+
+        const node = this;
+        const tree = node._tree;
+        const pathId = `${node._pathId}.${key}`;
+        const tNode = tree._createNode(pathId);
+
+        tNode._hPathId = node._pathId;
+        node._tPathIds.push(tNode._pathId);
+        if (Hf.isObject(content) || Hf.isArray(content)) {
+            tNode.setContent(content);
+        }
+        return tree.select(node._pathId);
     },
     /**
      * @description - Graft a tail node and insert it to a branch of a new root hierarchy.
@@ -435,39 +418,45 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     graft: function graft (key) {
-        if (Hf.isString(key) || Hf.isInteger(key)) {
-            const node = this;
-            const tree = node._tree;
-            const pathId = `${node._pathId}.${key}`;
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isString(key) || Hf.isInteger(key))) {
+                Hf.log(`error`, `TreeNodeElement.graft - Input node key is invalid.`);
+            }
+        }
+        const node = this;
+        const tree = node._tree;
+        const pathId = `${node._pathId}.${key}`;
 
+        if (Hf.DEVELOPMENT) {
             if (!node.isHeadOf(pathId)) {
                 Hf.log(`error`, `TreeNodeElement.graft - Node does not have a tail node key:${key} at pathId:${pathId}.`);
-            } else {
-                const tNode = tree._getNode(pathId);
-                const index = node._tPathIds.indexOf(pathId);
-                return {
-                    /**
-                     * New node branch to graft onto.
-                     *
-                     * @method on
-                     * @param {string|array} newPathId - Node pathId.
-                     * @return {object}
-                     */
-                    onto: function onto (newPathId) {
-                        if (!tree.hasNode(newPathId)) {
-                            Hf.log(`error`, `TreeNodeElement.graft.onto - Input node pathId is invalid.`);
-                        } else {
-                            node._tPathIds.splice(index, 1);
-                            tNode._hPathId = newPathId;
-                            tNode.rekey(key);
-                            return tree.select(tNode._pathId);
-                        }
-                    }
-                };
             }
-        } else {
-            Hf.log(`error`, `TreeNodeElement.graft - Input node key is invalid.`);
         }
+
+        const tNode = tree._getNode(pathId);
+        const index = node._tPathIds.indexOf(pathId);
+        return {
+            /**
+             * New node branch to graft onto.
+             *
+             * @method on
+             * @param {string|array} newPathId - Node pathId.
+             * @return {object}
+             */
+            onto: function onto (newPathId) {
+                if (Hf.DEVELOPMENT) {
+                    if (!tree.hasNode(newPathId)) {
+                        Hf.log(`error`, `TreeNodeElement.graft.onto - Input node pathId is invalid.`);
+                    }
+                }
+
+                node._tPathIds.splice(index, 1);
+                tNode._hPathId = newPathId;
+                tNode.rekey(key);
+
+                return tree.select(tNode._pathId);
+            }
+        };
     },
     /**
      * @description - Cut a tail node and its descendants from hierarchy.
@@ -478,27 +467,31 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     rootify: function rootify (key) {
-        if (Hf.isString(key) || Hf.isInteger(key)) {
-            const node = this;
-            const tree = node._tree;
-            const pathId = `${node._pathId}.${key}`;
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isString(key) || Hf.isInteger(key))) {
+                Hf.log(`error`, `TreeNodeElement.rootify - Input node key is invalid.`);
+            }
+        }
 
+        const node = this;
+        const tree = node._tree;
+        const pathId = `${node._pathId}.${key}`;
+
+        if (Hf.DEVELOPMENT) {
             if (node.isRoot()) {
                 Hf.log(`error`, `TreeNodeElement.rootify - Cannot rootify a root node key:${node._key}.`);
             } else if (!node.isHeadOf(pathId)) {
                 Hf.log(`error`, `TreeNodeElement.rootify - Node does not have a tail node key:${key} at pathId:${pathId}.`);
-            } else {
-                const tNode = tree._getNode(pathId);
-                const index = node._tPathIds.indexOf(pathId);
-
-                node._tPathIds.splice(index, 1);
-                tNode._hPathId = ``;
-                tNode.rekey(key);
-                return tree.select(tNode._pathId);
             }
-        } else {
-            Hf.log(`error`, `TreeNodeElement.rootify - Input node key is invalid.`);
         }
+
+        const tNode = tree._getNode(pathId);
+        const index = node._tPathIds.indexOf(pathId);
+
+        node._tPathIds.splice(index, 1);
+        tNode._hPathId = ``;
+        tNode.rekey(key);
+        return tree.select(tNode._pathId);
     },
     /**
      * @description - Content referencing the topology differences of one node descendants to the other.
@@ -525,49 +518,51 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
 
         const depth = pathId.length - pathId.replace(/\./g, ``).length;
 
-        if (tree.hasNode(pathId)) {
-            const rNode = tree._getNode(pathId);
-
-            if (!rNode.isSingular() && !rNode.isLeaf()) {
-                let rtdNodes = [];
-                let rtsNodes = [];
-
-                if (!node.isLeaf()) {
-                    const tNodes = node._getTails();
-                    const rtNodes = rNode._getTails();
-                    const tNodeKeys = tNodes.map((tNode) => tNode._key);
-
-                    rtdNodes = rtNodes.filter((rtNode) => !tNodeKeys.includes(rtNode._key));
-                    rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.includes(rtNode._key));
-
-                    rtsNodes.filter((rtsNode) => !excludedPathIds.includes(rtsNode._pathId)).forEach((rtsNode) => {
-                        const [ tsNode ] = tNodes.filter((tNode) => tNode._key === rtsNode._key);
-
-                        if ((maxReferDepth === -1 || depth <= maxReferDepth)) {
-                            tsNode.refer(rtsNode._pathId, option);
-                        }
-                    });
-                } else {
-                    rtdNodes = rNode._getTails();
-                }
-                rtdNodes.filter((rtdNode) => !excludedPathIds.includes(rtdNode._pathId)).forEach((rtdNode) => {
-                    // let ts = new Date().getTime();
-
-                    // TODO: needs optimization. Performance issue with deep object & array, especially for large array of objects.
-                    if ((maxReferDepth === -1 || depth <= maxReferDepth)) {
-                        node.branch(rtdNode._key, rtdNode._contentProxy).refer(rtdNode._pathId, option);
-                    } else {
-                        node.branch(rtdNode._key, rtdNode._contentProxy);
-                    }
-                    // let te = new Date().getTime();
-                    // console.log(`TEST execution time: ${te - ts} ms.`);
-                    // if (te - ts > 20) {
-                    //     console.log(`TEST1 pathId: ${rtdNode._pathId}.`);
-                    // }
-                });
+        if (Hf.DEVELOPMENT) {
+            if (!tree.hasNode(pathId)) {
+                Hf.log(`error`, `TreeNodeElement.refer - Input node pathId is invalid.`);
             }
-        } else {
-            Hf.log(`error`, `TreeNodeElement.refer - Input node pathId is invalid.`);
+        }
+
+        const rNode = tree._getNode(pathId);
+
+        if (!rNode.isSingular() && !rNode.isLeaf()) {
+            let rtdNodes = [];
+            let rtsNodes = [];
+
+            if (!node.isLeaf()) {
+                const tNodes = node._getTails();
+                const rtNodes = rNode._getTails();
+                const tNodeKeys = tNodes.map((tNode) => tNode._key);
+
+                rtdNodes = rtNodes.filter((rtNode) => !tNodeKeys.includes(rtNode._key));
+                rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.includes(rtNode._key));
+
+                rtsNodes.filter((rtsNode) => !excludedPathIds.includes(rtsNode._pathId)).forEach((rtsNode) => {
+                    const [ tsNode ] = tNodes.filter((tNode) => tNode._key === rtsNode._key);
+
+                    if ((maxReferDepth === -1 || depth <= maxReferDepth)) {
+                        tsNode.refer(rtsNode._pathId, option);
+                    }
+                });
+            } else {
+                rtdNodes = rNode._getTails();
+            }
+            rtdNodes.filter((rtdNode) => !excludedPathIds.includes(rtdNode._pathId)).forEach((rtdNode) => {
+                // let ts = new Date().getTime();
+
+                // TODO: needs optimization. Performance issue with deep object & array, especially for large array of objects.
+                if ((maxReferDepth === -1 || depth <= maxReferDepth)) {
+                    node.branch(rtdNode._key, rtdNode._contentProxy).refer(rtdNode._pathId, option);
+                } else {
+                    node.branch(rtdNode._key, rtdNode._contentProxy);
+                }
+                // let te = new Date().getTime();
+                // console.log(`TEST execution time: ${te - ts} ms.`);
+                // if (te - ts > 20) {
+                //     console.log(`TEST1 pathId: ${rtdNode._pathId}.`);
+                // }
+            });
         }
     },
     /**
@@ -578,38 +573,40 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     rekey: function rekey (newKey) {
-        if (!(Hf.isString(newKey) || Hf.isInteger(newKey))) {
-            Hf.log(`error`, `TreeNodeElement.rekey - Input node key is invalid.`);
-        } else {
-            const node = this;
-            const tree = node._tree;
-            const oldPathId = node._pathId;
-            let newPathId = ``;
-
-            if (node.isRoot()) {
-                newPathId = newKey;
-            } else {
-                const hNode = node._getHead();
-
-                newPathId = `${hNode._pathId}.${newKey}`;
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isString(newKey) || Hf.isInteger(newKey))) {
+                Hf.log(`error`, `TreeNodeElement.rekey - Input node key is invalid.`);
             }
-            if (oldPathId !== newPathId) {
-                tree._changeNodePathId(oldPathId, newPathId);
-            }
-            node._key = newKey;
-            node._pathId = newPathId;
-            if (!node.isLeaf()) {
-                const tNodes = node._getTails();
-
-                Hf.clear(node._tPathIds);
-                tNodes.forEach((tNode) => {
-                    tNode._hPathId = node._pathId;
-                    tNode.rekey(tNode._key);
-                    node._tPathIds.push(tNode._pathId);
-                });
-            }
-            return tree.select(node._pathId);
         }
+
+        const node = this;
+        const tree = node._tree;
+        const oldPathId = node._pathId;
+        let newPathId = ``;
+
+        if (node.isRoot()) {
+            newPathId = newKey;
+        } else {
+            const hNode = node._getHead();
+
+            newPathId = `${hNode._pathId}.${newKey}`;
+        }
+        if (oldPathId !== newPathId) {
+            tree._changeNodePathId(oldPathId, newPathId);
+        }
+        node._key = newKey;
+        node._pathId = newPathId;
+        if (!node.isLeaf()) {
+            const tNodes = node._getTails();
+
+            Hf.clear(node._tPathIds);
+            tNodes.forEach((tNode) => {
+                tNode._hPathId = node._pathId;
+                tNode.rekey(tNode._key);
+                node._tPathIds.push(tNode._pathId);
+            });
+        }
+        return tree.select(node._pathId);
     },
     /**
      * @description - Loop through the hierarchy and apply the callback iterator.
@@ -621,37 +618,42 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     forEach: function forEach (flag, iterator, context) {
-        if (!Hf.isString(flag)) {
-            Hf.log(`error`, `TreeNodeElement.forEach - Input flag is invalid.`);
-        } else if (!Hf.isFunction(iterator)) {
-            Hf.log(`error`, `TreeNodeElement.forEach - Input iterator callback is invalid.`);
-        } else {
-            const node = this;
-
-            if (node.isSingular()) {
-                Hf.log(`error`, `TreeNodeElement.forEach - Node pathId:${node._pathId} is singular.`);
-            } else {
-                let nodes = [];
-                const fromTails = !node.isLeaf() ? flag === `tails` : false;
-                const fromCommons = !node.isRoot() ? flag === `commons` : false;
-                const fromAncestors = !node.isRoot() ? flag === `ancestors` : false;
-                const fromDescendants = !node.isLeaf() ? flag === `descendants` : false;
-
-                if (fromTails) {
-                    nodes = node._getTails();
-                } else if (fromCommons) {
-                    nodes = node._getHead()._getTails();
-                } else if (fromAncestors) {
-                    nodes = node._getAncestors();
-                } else if (fromDescendants) {
-                    nodes = node._getDescendants();
-                } else {
-                    Hf.log(`error`, `TreeNodeElement.forEach - Input flag is invalid.`);
-                }
-                const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
-                Hf.forEach(nodes.map((_node) => revealFrozen(_node)), iterator, context);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(flag)) {
+                Hf.log(`error`, `TreeNodeElement.forEach - Input flag is invalid.`);
+            } else if (!Hf.isFunction(iterator)) {
+                Hf.log(`error`, `TreeNodeElement.forEach - Input iterator callback is invalid.`);
             }
         }
+
+        const node = this;
+
+        if (Hf.DEVELOPMENT) {
+            if (node.isSingular()) {
+                Hf.log(`error`, `TreeNodeElement.forEach - Node pathId:${node._pathId} is singular.`);
+            }
+        }
+
+        let nodes = [];
+        const fromTails = !node.isLeaf() ? flag === `tails` : false;
+        const fromCommons = !node.isRoot() ? flag === `commons` : false;
+        const fromAncestors = !node.isRoot() ? flag === `ancestors` : false;
+        const fromDescendants = !node.isLeaf() ? flag === `descendants` : false;
+
+        if (fromTails) {
+            nodes = node._getTails();
+        } else if (fromCommons) {
+            nodes = node._getHead()._getTails();
+        } else if (fromAncestors) {
+            nodes = node._getAncestors();
+        } else if (fromDescendants) {
+            nodes = node._getDescendants();
+        } else {
+            Hf.log(`error`, `TreeNodeElement.forEach - Input flag is invalid.`);
+        }
+
+        const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+        Hf.forEach(nodes.map((_node) => revealFrozen(_node)), iterator, context);
     }
     /**
      * @description - Return node`s as a string for debuging.
@@ -663,7 +665,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     //     const node = this;
     //
     //     if (node.isRoot()) {
-    //         Hf.log(`info`, JSON.stringify({
+    //         Hf.log(`debug`, JSON.stringify({
     //             type: `--Root--`,
     //             pathId: node._pathId,
     //             key: node._key,
@@ -671,7 +673,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     //             content: node._contentProxy
     //         }, null, `\t`));
     //     } else if (node.isLeaf()) {
-    //         Hf.log(`info`, JSON.stringify({
+    //         Hf.log(`debug`, JSON.stringify({
     //             type: `--Leaf--`,
     //             pathId: node._pathId,
     //             key: node._key,
@@ -679,7 +681,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     //             content: node._contentProxy
     //         }, null, `\t`));
     //     } else {
-    //         Hf.log(`info`, JSON.stringify({
+    //         Hf.log(`debug`, JSON.stringify({
     //             type: `--Branch--`,
     //             pathId: node._pathId,
     //             key: node._key,
@@ -700,68 +702,72 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function TreeNodeElement (tree, pathId) {
-    if (!Hf.isObject(tree)) {
-        Hf.log(`error`, `TreeNodeElement - Input undirected tree element instance is invalid.`);
-    } else {
-        if (Hf.isString(pathId) || Hf.isArray(pathId)) {
-            let key = ``;
-
-            /* get the key from pathId */
-            if (Hf.isString(pathId)) {
-                [ key ] = Hf.stringToArray(pathId, `.`).reverse();
-            }
-            if (Hf.isArray(pathId)) {
-                [ key ] = pathId.slice(0).reverse();
-                pathId = Hf.arrayToString(pathId, `.`);
-            }
-
-            const element = Object.create(TreeNodeElementPrototype, {
-                _pathId: {
-                    value: pathId,
-                    writable: true,
-                    configurable: false,
-                    enumerable: false
-                },
-                _hPathId: {
-                    value: ``,
-                    writable: true,
-                    configurable: false,
-                    enumerable: false
-                },
-                _tPathIds: {
-                    value: [],
-                    writable: false,
-                    configurable: true,
-                    enumerable: false
-                },
-                _key: {
-                    value: key,
-                    writable: true,
-                    configurable: false,
-                    enumerable: false
-                },
-                // TODO: Used es6 Proxy.
-                _contentProxy: {
-                    value: undefined,
-                    writable: true,
-                    configurable: false,
-                    enumerable: false
-                },
-                _tree: {
-                    value: tree,
-                    writable: false,
-                    configurable: false,
-                    enumerable: false
-                }
-            });
-
-            if (!Hf.isObject(element)) {
-                Hf.log(`error`, `TreeNodeElement - Unable to create a tree node element instance.`);
-            } else {
-                return element;
-            }
-        } else {
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(tree)) {
+            Hf.log(`error`, `TreeNodeElement - Input undirected tree element instance is invalid.`);
+        }
+        if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
             Hf.log(`error`, `TreeNodeElement - Input tree node pathId is invalid.`);
         }
     }
+
+    let key = ``;
+
+    /* get the key from pathId */
+    if (Hf.isString(pathId)) {
+        [ key ] = Hf.stringToArray(pathId, `.`).reverse();
+    }
+
+    if (Hf.isArray(pathId)) {
+        [ key ] = pathId.slice(0).reverse();
+        pathId = Hf.arrayToString(pathId, `.`);
+    }
+
+    const element = Object.create(TreeNodeElementPrototype, {
+        _pathId: {
+            value: pathId,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        _hPathId: {
+            value: ``,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        _tPathIds: {
+            value: [],
+            writable: false,
+            configurable: true,
+            enumerable: false
+        },
+        _key: {
+            value: key,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        // TODO: Used es6 Proxy.
+        _contentProxy: {
+            value: undefined,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        _tree: {
+            value: tree,
+            writable: false,
+            configurable: false,
+            enumerable: false
+        }
+    });
+
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(element)) {
+            Hf.log(`error`, `TreeNodeElement - Unable to create a tree node element instance.`);
+        }
+    }
+
+    return element;
 }

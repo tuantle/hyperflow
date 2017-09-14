@@ -114,10 +114,10 @@ export default Hf.Composite({
                             /* setup event stream observation duplex between service and test fixture */
                             _service.observe(fixture);
                             fixture.observe(_service).delay(DELAY_SERVICE_IN_MS);
-                            Hf.log(`info`, `Test fixture:${fixture.name} registered service:${service.name}.`);
+                            Hf.log(`info1`, `Test fixture:${fixture.name} registered service:${service.name}.`);
 
                             _service = service;
-                            Hf.log(`info`, `Test fixture:${fixture.name} registered service:${service.name}.`);
+                            Hf.log(`info1`, `Test fixture:${fixture.name} registered service:${service.name}.`);
                         }
                     }
                 }
@@ -148,7 +148,7 @@ export default Hf.Composite({
                                 _service.activateIncomingStream();
                                 _service.setup(() => {
                                     _service.activateOutgoingStream();
-                                    Hf.log(`info`, `Test fixture:${fixture.name} activated service:${_service.name}.`);
+                                    Hf.log(`info1`, `Test fixture:${fixture.name} activated service:${_service.name}.`);
                                 });
                             }
                             fixture.activateOutgoingStream();
@@ -181,7 +181,7 @@ export default Hf.Composite({
                                 _service.teardown(() => {
                                     _service.deactivateIncomingStream();
                                     _service.deactivateOutgoingStream();
-                                    Hf.log(`info`, `Test fixture:${fixture.name} deactivated service:${_service.name}.`);
+                                    Hf.log(`info1`, `Test fixture:${fixture.name} deactivated service:${_service.name}.`);
                                 });
                             }
                             fixture.deactivateIncomingStream();

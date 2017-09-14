@@ -84,11 +84,13 @@ export default Composer({
          * @return void
          */
         this.setup = function setup (done) { // eslint-disable-line
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `FixtureFactory.setup - Input done function is invalid.`);
-            } else {
-                done();
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `FixtureFactory.setup - Input done function is invalid.`);
+                }
             }
+
+            done();
         };
         /**
          * @description - Teardown fixture event stream.
@@ -98,11 +100,13 @@ export default Composer({
          * @return void
          */
         this.teardown = function teardown (done) { // eslint-disable-line
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `FixtureFactory.teardown - Input done function is invalid.`);
-            } else {
-                done();
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `FixtureFactory.teardown - Input done function is invalid.`);
+                }
             }
+
+            done();
         };
         /**
          * @description - Check if domain has started.
@@ -132,13 +136,16 @@ export default Composer({
          * @return void
          */
         this.start = function start (option = {}, done) { // eslint-disable-line
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `FixtureFactory.start - Input done function is invalid.`);
-            } else {
-                // TODO: Implement use case for fixture start option.
-                option = Hf.isObject(option) ? option : {};
-                done();
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `FixtureFactory.start - Input done function is invalid.`);
+                }
             }
+
+
+            // TODO: Implement use case for fixture start option.
+            option = Hf.isObject(option) ? option : {};
+            done();
         };
         /**
          * @description - Stop the test fixture.
@@ -148,11 +155,13 @@ export default Composer({
          * @return void
          */
         this.stop = function stop (done) {
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `FixtureFactory.start - Input done function is invalid.`);
-            } else {
-                done();
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `FixtureFactory.start - Input done function is invalid.`);
+                }
             }
+
+            done();
         };
         /**
          * @description - Restart test fixture.
@@ -168,13 +177,15 @@ export default Composer({
             // TODO: Implement use case for fixture start option.
             option = Hf.isObject(option) ? option : {};
 
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `FixtureFactory.restart - Input done function is invalid.`);
-            } else {
-                fixture.stop(() => {
-                    fixture.start(option, done);
-                });
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `FixtureFactory.restart - Input done function is invalid.`);
+                }
             }
+
+            fixture.stop(() => {
+                fixture.start(option, done);
+            });
         };
         /**
          * @description - Perform unit testing...

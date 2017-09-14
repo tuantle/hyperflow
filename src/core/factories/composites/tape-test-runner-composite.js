@@ -69,11 +69,13 @@ export default Hf.Composite({
         test: function test (tester, description = ``) {
             description = Hf.isString(description) ? description : ``;
 
-            if (!Hf.isFunction(tester)) {
-                Hf.log(`error`, `TapeTestRunnerComposite.test - Input test function is invalid.`);
-            } else {
-                tape(description, tester);
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(tester)) {
+                    Hf.log(`error`, `TapeTestRunnerComposite.test - Input test function is invalid.`);
+                }
             }
+
+            tape(description, tester);
         }
     }
 });

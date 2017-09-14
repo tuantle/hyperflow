@@ -44,73 +44,76 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     assign: function assign (descPreset) {
-        if (!Hf.isSchema({
-            key: `string|number`,
-            contexts: `array`,
-            compute: `function`
-        }).of(descPreset)) {
-            Hf.log(`error`, `ComputableDescriptor.assign - Input descriptor preset object is invalid.`);
-        } else {
-            const computable = this;
-            const {
-                key: fnName,
-                contexts: contextPathIds,
-                compute
-            } = descPreset;
+        const computable = this;
 
-            if (computable._description.assigned) {
-                computable.unassign();
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isSchema({
+                key: `string|number`,
+                contexts: `array`,
+                compute: `function`
+            }).of(descPreset)) {
+                Hf.log(`error`, `ComputableDescriptor.assign - Input descriptor preset object is invalid.`);
             }
-            computable._description.compute = compute;
-            return {
-                /**
-                 * @description - The target object to get this computable property.
-                 *
-                 * @method assign.to
-                 * @param {object|array} target - Target object.
-                 * @return void
-                 */
-                to: function to (target) {
-                    if (Hf.isObject(target) || Hf.isArray(target)) {
-                        if (target.hasOwnProperty(fnName) && target[fnName] !== null) {
-                            Hf.log(`error`, `ComputableDescriptor.assign.to - Target already has a defined property key:${fnName}`);
-                        } else {
-                            computable._description.assigned = true;
-                            computable._description.fnName = fnName;
-                            computable._description.proxy = target;
-
-                            /* create context of the computable */
-                            computable._description.context = contextPathIds.reduce((_context, contextPathId) => {
-                                contextPathId = Hf.isString(contextPathId) ? Hf.stringToArray(contextPathId, `.`) : contextPathId;
-                                const key = contextPathId.pop();
-                                Object.defineProperty(_context, key, {
-                                    get: function get () {
-                                        if (Hf.isEmpty(contextPathId)) {
-                                            return computable._description.proxy[key];
-                                        }
-                                        return Hf.retrieve(contextPathId, `.`).from(computable._description.proxy)[key];
-                                    },
-                                    configurable: false,
-                                    enumerable: true
-                                });
-                                return _context;
-                            }, {});
-
-                            /* create the computable property for the assigned object */
-                            Object.defineProperty(computable._description.proxy, fnName, {
-                                get: function get () {
-                                    return computable._description.compute.call(computable._description.context);
-                                },
-                                configurable: false,
-                                enumerable: true
-                            });
-                        }
-                    } else {
-                        Hf.log(`error`, `ComputableDescriptor.assign.to - Input target is invalid.`);
-                    }
-                }
-            };
         }
+
+        const {
+            key: fnName,
+            contexts: contextPathIds,
+            compute
+        } = descPreset;
+
+        if (computable._description.assigned) {
+            computable.unassign();
+        }
+
+        computable._description.compute = compute;
+
+        return {
+            /**
+             * @description - The target object to get this computable property.
+             *
+             * @method assign.to
+             * @param {object|array} target - Target object.
+             * @return void
+             */
+            to: function to (target) {
+                if (!(Hf.isObject(target) || Hf.isArray(target))) {
+                    Hf.log(`error`, `ComputableDescriptor.assign.to - Input target is invalid.`);
+                } else if (target.hasOwnProperty(fnName) && target[fnName] !== null) {
+                    Hf.log(`error`, `ComputableDescriptor.assign.to - Target already has a defined property key:${fnName}`);
+                }
+
+                computable._description.assigned = true;
+                computable._description.fnName = fnName;
+                computable._description.proxy = target;
+
+                /* create context of the computable */
+                computable._description.context = contextPathIds.reduce((_context, contextPathId) => {
+                    contextPathId = Hf.isString(contextPathId) ? Hf.stringToArray(contextPathId, `.`) : contextPathId;
+                    const key = contextPathId.pop();
+                    Object.defineProperty(_context, key, {
+                        get: function get () {
+                            if (Hf.isEmpty(contextPathId)) {
+                                return computable._description.proxy[key];
+                            }
+                            return Hf.retrieve(contextPathId, `.`).from(computable._description.proxy)[key];
+                        },
+                        configurable: false,
+                        enumerable: true
+                    });
+                    return _context;
+                }, {});
+
+                /* create the computable property for the assigned object */
+                Object.defineProperty(computable._description.proxy, fnName, {
+                    get: function get () {
+                        return computable._description.compute.call(computable._description.context);
+                    },
+                    configurable: false,
+                    enumerable: true
+                });
+            }
+        };
     },
     /**
      * @description - Unassign a computable description.
@@ -144,37 +147,41 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function ComputableDescriptor (id) {
-    if (!Hf.isString(id)) {
-        Hf.log(`error`, `ComputableDescriptor - Input descriptor Id is invalid.`);
-    } else {
-        const descriptor = Object.create(ComputableDescriptorPrototype, {
-            _id: {
-                value: id,
-                writable: false,
-                configurable: false,
-                enumerable: false
-            },
-            _description: {
-                value: {
-                    assigned: false,
-                    fnName: undefined,
-                    context: undefined,
-                    compute: undefined,
-                    // TODO: Used es6 Proxy.
-                    proxy: undefined
-                },
-                writable: true,
-                configurable: true,
-                enumerable: false
-            }
-        });
-
-        if (!Hf.isObject(descriptor)) {
-            Hf.log(`error`, `ComputableDescriptor - Unable to create a computable descriptor instance.`);
-        } else {
-            const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
-            /* reveal only the public properties and functions */
-            return revealFrozen(descriptor);
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isString(id)) {
+            Hf.log(`error`, `ComputableDescriptor - Input descriptor Id is invalid.`);
         }
     }
+
+    const descriptor = Object.create(ComputableDescriptorPrototype, {
+        _id: {
+            value: id,
+            writable: false,
+            configurable: false,
+            enumerable: false
+        },
+        _description: {
+            value: {
+                assigned: false,
+                fnName: undefined,
+                context: undefined,
+                compute: undefined,
+                // TODO: Used es6 Proxy.
+                proxy: undefined
+            },
+            writable: true,
+            configurable: true,
+            enumerable: false
+        }
+    });
+
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(descriptor)) {
+            Hf.log(`error`, `ComputableDescriptor - Unable to create a computable descriptor instance.`);
+        }
+    }
+
+    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+    /* reveal only the public properties and functions */
+    return revealFrozen(descriptor);
 }

@@ -62,30 +62,42 @@ export default Hf.Composite({
         renderToTarget: function renderToTarget () {
             const app = this;
             const AppComponent = app.getTopComponent();
-            if (!(Hf.isObject(AppComponent) || Hf.isFunction(AppComponent))) {
-                Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
-            } else {
-                const ReactDOMRenderer = app.getRenderer();
+
+            if (Hf.DEVELOPMENT) {
+                if (!(Hf.isObject(AppComponent) || Hf.isFunction(AppComponent))) {
+                    Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
+                }
+            }
+
+            const ReactDOMRenderer = app.getRenderer();
+
+            if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
                     renderToString: `function`
                 }).of(ReactDOMRenderer)) {
                     Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React renderer is invalid.`);
-                } else {
-                    const domain = app.getTopDomain();
-                    if (!Hf.isSchema({
-                        outgoing: `function`
-                    }).of(domain)) {
-                        Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - App:${app.name} domain is invalid.`);
-                    } else {
-                        const renderedMarkup = ReactDOMRenderer.renderToString(AppComponent);
-                        if (Hf.isNonEmptyString(renderedMarkup)) {
-                            domain.outgoing(`on-render-markup-to-string`).emit(() => renderedMarkup);
-                        } else {
-                            Hf.log(`warn1`, `ReactAppRendererComposite.renderToTarget - React rendered markup is invalid.`);
-                        }
-                    }
                 }
             }
+
+            const domain = app.getTopDomain();
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    outgoing: `function`
+                }).of(domain)) {
+                    Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - App:${app.name} domain is invalid.`);
+                }
+            }
+
+            const renderedMarkup = ReactDOMRenderer.renderToString(AppComponent);
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isNonEmptyString(renderedMarkup)) {
+                    Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React rendered markup is invalid.`);
+                }
+            }
+
+            domain.outgoing(`on-render-markup-to-string`).emit(() => renderedMarkup);
         }
     }
 });

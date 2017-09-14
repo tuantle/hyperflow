@@ -56,8 +56,16 @@ export default Hf.Composite({
          * @method $initAsyncStorageComposite
          * @return void
          */
-        // $initAsyncStorageComposite: function $initAsyncStorageComposite () {
-        // };
+        $initAsyncStorageComposite: function $initAsyncStorageComposite () {
+            const service = this;
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    getProvider: `function`
+                }).of(service)) {
+                    Hf.log(`error`, `AsyncStorageComposite.$init - Service is invalid. Cannot apply composite.`);
+                }
+            }
+        },
         /**
          * @description - Do fetch from async storage.
          *
@@ -67,156 +75,165 @@ export default Hf.Composite({
          */
         fetch: function fetch (...pathIds) {
             const service = this;
-            if (Hf.isEmpty(pathIds) || !pathIds.every((pathId) => Hf.isString(pathId) || Hf.isArray(pathId))) {
-                Hf.log(`error`, `AsyncStorageComposite.fetch - Input pathIds are invalid.`);
-            } else {
-                const {
-                    storage
-                } = service.getProvider();
+
+            if (Hf.DEVELOPMENT) {
+                if (Hf.isEmpty(pathIds) || !pathIds.every((pathId) => Hf.isString(pathId) || Hf.isArray(pathId))) {
+                    Hf.log(`error`, `AsyncStorageComposite.fetch - Input pathIds are invalid.`);
+                }
+            }
+
+            const {
+                storage
+            } = service.getProvider();
+
+            if (Hf.DEVELOPMENT) {
                 if (!Hf.isDefined(storage)) {
                     Hf.log(`error`, `AsyncStorageComposite.fetch - Async storage provider is not unsupported.`);
-                } else {
-                    pathIds = pathIds.map((pathId) => Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId);
-                    return {
-                        /**
-                         * @description - Do a read operation from async storage.
-                         *
-                         * @method fetch.read
-                         * @return {object}
-                         */
-                        read: function read () {
-                            const promises = pathIds.filter((pathId) => {
-                                if (Hf.isEmpty(pathId)) {
-                                    Hf.log(`warn1`, `AsyncStorageComposite.fetch.read - Input pathId is invalid.`);
-                                    return false;
-                                }
-                                return true;
-                            }).map((pathId) => {
-                                const rootKey = pathId.shift();
-                                return new Promise((resolve, reject) => {
-                                    storage.getAllKeys().then((rootKeys) => {
-                                        if (rootKeys.includes(rootKey)) {
-                                            storage.getItem(rootKey).then((rootItem) => {
-                                                if (!Hf.isEmpty(pathId)) {
-                                                    resolve(Hf.retrieve(pathId, `.`).from(JSON.parse(rootItem)));
-                                                } else {
-                                                    resolve(JSON.parse(rootItem));
-                                                }
-                                            }).catch((error) => {
-                                                reject(new Error(`ERROR: Unable to read from storage. ${error.message}`));
-                                            });
+                }
+            }
+
+            pathIds = pathIds.map((pathId) => Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId);
+
+            return {
+                /**
+                 * @description - Do a read operation from async storage.
+                 *
+                 * @method fetch.read
+                 * @return {object}
+                 */
+                read: function read () {
+                    if (Hf.DEVELOPMENT) {
+                        if (pathIds.some((pathId) => Hf.isEmpty(pathId))) {
+                            Hf.log(`warn1`, `AsyncStorageComposite.fetch.read - Input pathId is invalid.`);
+                        }
+                    }
+                    const promises = pathIds.map((pathId) => {
+                        const rootKey = pathId.shift();
+                        return new Promise((resolve, reject) => {
+                            storage.getAllKeys().then((rootKeys) => {
+                                if (rootKeys.includes(rootKey)) {
+                                    storage.getItem(rootKey).then((rootItem) => {
+                                        if (!Hf.isEmpty(pathId)) {
+                                            resolve(Hf.retrieve(pathId, `.`).from(JSON.parse(rootItem)));
                                         } else {
-                                            reject(new Error(`ERROR: Unable to read from storage. Root item key:${rootKey} is invalid.`));
+                                            resolve(JSON.parse(rootItem));
                                         }
                                     }).catch((error) => {
                                         reject(new Error(`ERROR: Unable to read from storage. ${error.message}`));
                                     });
-                                });
+                                } else {
+                                    reject(new Error(`ERROR: Unable to read from storage. Root item key:${rootKey} is invalid.`));
+                                }
+                            }).catch((error) => {
+                                reject(new Error(`ERROR: Unable to read from storage. ${error.message}`));
                             });
-                            return Promise.all(promises).then((rootItems) => {
-                                return rootItems;
-                            });
-                        },
-                        /**
-                         * @description - Do a write operation to async storage.
-                         *
-                         * @method fetch.write
-                         * @param {object} cmd - command statement.
-                         * @return {object}
-                         */
-                        write: function write (cmd = {}) {
-                            if (!Hf.isSchema({
-                                bundle: `object`
-                            }).of(cmd)) {
-                                Hf.log(`error`, `AsyncStorageComposite.fetch.write - Input fetch command statement bundle is invalid.`);
-                            } else {
-                                const {
-                                    bundle,
-                                    touchRoot
-                                } = Hf.fallback({
-                                    touchRoot: false
-                                }).of(cmd);
-                                const promises = pathIds.filter((pathId) => {
-                                    if (Hf.isEmpty(pathId)) {
-                                        Hf.log(`warn1`, `AsyncStorageComposite.fetch.write - Input pathId is invalid.`);
-                                        return false;
-                                    }
-                                    return true;
-                                }).map((pathId) => {
-                                    const rootKey = pathId.shift();
-                                    return new Promise((resolve, reject) => {
-                                        storage.getAllKeys().then((rootKeys) => {
-                                            if (touchRoot && rootKeys.includes(rootKey)) {
+                        });
+                    });
+                    return Promise.all(promises).then((rootItems) => {
+                        return rootItems;
+                    });
+                },
+                /**
+                 * @description - Do a write operation to async storage.
+                 *
+                 * @method fetch.write
+                 * @param {object} cmd - command statement.
+                 * @return {object}
+                 */
+                write: function write (cmd = {}) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!Hf.isSchema({
+                            bundle: `object`
+                        }).of(cmd)) {
+                            Hf.log(`error`, `AsyncStorageComposite.fetch.write - Input fetch command statement bundle is invalid.`);
+                        }
+                    }
+
+                    const {
+                        bundle,
+                        touchRoot
+                    } = Hf.fallback({
+                        touchRoot: false
+                    }).of(cmd);
+
+                    if (Hf.DEVELOPMENT) {
+                        if (pathIds.some((pathId) => Hf.isEmpty(pathId))) {
+                            Hf.log(`warn1`, `AsyncStorageComposite.fetch.write - Input pathId is invalid.`);
+                        }
+                    }
+
+                    const promises = pathIds.map((pathId) => {
+                        const rootKey = pathId.shift();
+                        return new Promise((resolve, reject) => {
+                            storage.getAllKeys().then((rootKeys) => {
+                                if (touchRoot && rootKeys.includes(rootKey)) {
+                                    resolve(bundle);
+                                } else {
+                                    if (!Hf.isEmpty(pathId)) {
+                                        storage.getItem(rootKey).then((rootItem) => {
+                                            const mutator = bundle;
+                                            storage.setItem(
+                                                rootKey,
+                                                JSON.stringify(Hf.mutate(JSON.parse(rootItem)).atPathBy(mutator, pathId))
+                                            ).then(() => {
                                                 resolve(bundle);
+                                            }).catch((_error) => {
+                                                reject(new Error(`ERROR: Unable to write to storage. ${_error.message}`));
+                                            });
+                                        }).catch((error) => { // eslint-disable-line
+                                            reject(new Error(`ERROR: Unable to write to storage. Path Id:${pathId} is invalid.`));
+                                        });
+                                    } else {
+                                        storage.getItem(rootKey).then((rootItem) => {
+                                            if (!bundle.hasOwnProperty(rootKey)) {
+                                                reject(new Error(`ERROR: Unable to write to storage. Bundle root item key:${rootKey} is undefined.`));
                                             } else {
-                                                if (!Hf.isEmpty(pathId)) {
-                                                    storage.getItem(rootKey).then((rootItem) => {
-                                                        const mutator = bundle;
-                                                        storage.setItem(
-                                                            rootKey,
-                                                            JSON.stringify(Hf.mutate(JSON.parse(rootItem)).atPathBy(mutator, pathId))
-                                                        ).then(() => {
-                                                            resolve(bundle);
-                                                        }).catch((_error) => {
-                                                            reject(new Error(`ERROR: Unable to write to storage. ${_error.message}`));
-                                                        });
-                                                    }).catch((error) => { // eslint-disable-line
-                                                        reject(new Error(`ERROR: Unable to write to storage. Path Id:${pathId} is invalid.`));
+                                                const mutator = bundle[rootKey];
+                                                if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
+                                                    storage.setItem(
+                                                        rootKey,
+                                                        JSON.stringify(Hf.mutate(JSON.parse(rootItem)).by(mutator))
+                                                    ).then(() => {
+                                                        resolve(bundle);
+                                                    }).catch((error) => {
+                                                        reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
                                                     });
                                                 } else {
-                                                    storage.getItem(rootKey).then((rootItem) => {
-                                                        if (!bundle.hasOwnProperty(rootKey)) {
-                                                            reject(new Error(`ERROR: Unable to write to storage. Bundle root item key:${rootKey} is undefined.`));
-                                                        } else {
-                                                            const mutator = bundle[rootKey];
-                                                            if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
-                                                                storage.setItem(
-                                                                    rootKey,
-                                                                    JSON.stringify(Hf.mutate(JSON.parse(rootItem)).by(mutator))
-                                                                ).then(() => {
-                                                                    resolve(bundle);
-                                                                }).catch((error) => {
-                                                                    reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
-                                                                });
-                                                            } else {
-                                                                storage.setItem(
-                                                                    rootKey,
-                                                                    JSON.stringify(mutator)
-                                                                ).then(() => {
-                                                                    resolve(bundle);
-                                                                }).catch((error) => {
-                                                                    reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
-                                                                });
-                                                            }
-                                                        }
-                                                    }).catch((error) => { // eslint-disable-line
-                                                        if (!bundle.hasOwnProperty(rootKey)) {
-                                                            reject(new Error(`ERROR: Unable to write to storage. Bundle root item key:${rootKey} is undefined.`));
-                                                        } else {
-                                                            const mutator = bundle[rootKey];
-                                                            storage.setItem(
-                                                                rootKey,
-                                                                JSON.stringify(mutator)
-                                                            ).then(() => {
-                                                                resolve(bundle);
-                                                            }).catch((_error) => {
-                                                                reject(new Error(`ERROR: Unable to write to storage. ${_error.message}`));
-                                                            });
-                                                        }
+                                                    storage.setItem(
+                                                        rootKey,
+                                                        JSON.stringify(mutator)
+                                                    ).then(() => {
+                                                        resolve(bundle);
+                                                    }).catch((error) => {
+                                                        reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
                                                     });
                                                 }
                                             }
-                                        }).catch((error) => {
-                                            reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
+                                        }).catch((error) => { // eslint-disable-line
+                                            if (!bundle.hasOwnProperty(rootKey)) {
+                                                reject(new Error(`ERROR: Unable to write to storage. Bundle root item key:${rootKey} is undefined.`));
+                                            } else {
+                                                const mutator = bundle[rootKey];
+                                                storage.setItem(
+                                                    rootKey,
+                                                    JSON.stringify(mutator)
+                                                ).then(() => {
+                                                    resolve(bundle);
+                                                }).catch((_error) => {
+                                                    reject(new Error(`ERROR: Unable to write to storage. ${_error.message}`));
+                                                });
+                                            }
                                         });
-                                    });
-                                });
-                                return Promise.all(promises);
-                            }
-                        }
-                    };
+                                    }
+                                }
+                            }).catch((error) => {
+                                reject(new Error(`ERROR: Unable to write to storage. ${error.message}`));
+                            });
+                        });
+                    });
+                    return Promise.all(promises);
                 }
-            }
+            };
         }
     }
 });

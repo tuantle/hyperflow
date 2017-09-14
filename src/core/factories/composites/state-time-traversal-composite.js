@@ -95,43 +95,49 @@ export default Hf.Composite({
         timeTraverse: function timeTraverse (key, timeIndexOffset) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
-            if (!stateCursor.hasItem(key)) {
-                Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Data item key:${key} is not defined.`);
-            } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
-                Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Input time index offset must be non-zero and negative.`);
-            } else {
-                const {
-                    timestamp,
-                    content
-                } = stateCursor.recallContentItem(key, timeIndexOffset);
-                if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
-                    let reconfiguration = {};
 
-                    if (Hf.isObject(content) || Hf.isArray(content)) {
-                        reconfiguration = content;
-                    } else {
-                        reconfiguration[key] = content;
-                    }
-
-                    factory.reconfigState(reconfiguration);
-
-                    const recalledState = Hf.mix(factory.getStateAsObject(), {
-                        exclusion: {
-                            keys: [
-                                `name`,
-                                `fId`
-                            ]
-                        }
-                    }).with({});
-
-                    /* emitting a mutation event to interface */
-                    factory.outgoing(`as-state-mutated`).emit(() => recalledState);
-                    factory.outgoing(`do-sync-reflected-state`).emit(() => recalledState);
-                    Hf.log(`info`, `Time traversing to previous state at timestamp:${timestamp} of key:${key}.`);
-                } else {
-                    Hf.log(`warn1`, `StateTimeTraversalComposite.timeTraverse - Unable to time traverse to undefined state of key:${key} at time index.`);
+            if (Hf.DEVELOPMENT) {
+                if (!stateCursor.hasItem(key)) {
+                    Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Data item key:${key} is not defined.`);
+                } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
+                    Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Input time index offset must be non-zero and negative.`);
                 }
             }
+
+            const {
+                timestamp,
+                content
+            } = stateCursor.recallContentItem(key, timeIndexOffset);
+
+            if (Hf.DEVELOPMENT) {
+                if (!(Hf.isDefined(content) || Hf.isNumeric(timestamp))) {
+                    Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Unable to time traverse to undefined state of key:${key} at time index.`);
+                }
+            }
+
+            let reconfiguration = {};
+
+            if (Hf.isObject(content) || Hf.isArray(content)) {
+                reconfiguration = content;
+            } else {
+                reconfiguration[key] = content;
+            }
+
+            factory.reconfigState(reconfiguration);
+
+            const recalledState = Hf.mix(factory.getStateAsObject(), {
+                exclusion: {
+                    keys: [
+                        `name`,
+                        `fId`
+                    ]
+                }
+            }).with({});
+
+            /* emitting a mutation event to interface */
+            factory.outgoing(`as-state-mutated`).emit(() => recalledState);
+            factory.outgoing(`do-sync-reflected-state`).emit(() => recalledState);
+            Hf.log(`info0`, `Time traversing to previous state at timestamp:${timestamp} of key:${key}.`);
         },
         /**
          * @description - Traverse and recall the previous state mutation from time history.
@@ -145,22 +151,28 @@ export default Hf.Composite({
         recall: function recall (key, timeIndexOffset) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
-            if (!stateCursor.hasItem(key)) {
-                Hf.log(`error`, `StateTimeTraversalComposite.recall - Data item key:${key} is not defined.`);
-            } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
-                Hf.log(`error`, `StateTimeTraversalComposite.recall - Input time index offset must be non-zero and negative.`);
-            } else {
-                const {
-                    timestamp,
-                    content
-                } = stateCursor.recallContentItem(key, timeIndexOffset);
-                if (Hf.isDefined(content) && Hf.isNumeric(timestamp)) {
-                    Hf.log(`info`, `Recalling previous state at timestamp:${timestamp} of key:${key}.`);
-                    return content;
-                } else { // eslint-disable-line
-                    Hf.log(`warn1`, `StateTimeTraversalComposite.recall - Unable to recall an undefined state of key:${key} at time index.`);
+
+            if (Hf.DEVELOPMENT) {
+                if (!stateCursor.hasItem(key)) {
+                    Hf.log(`error`, `StateTimeTraversalComposite.recall - Data item key:${key} is not defined.`);
+                } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
+                    Hf.log(`error`, `StateTimeTraversalComposite.recall - Input time index offset must be non-zero and negative.`);
                 }
             }
+
+            const {
+                timestamp,
+                content
+            } = stateCursor.recallContentItem(key, timeIndexOffset);
+
+            if (Hf.DEVELOPMENT) {
+                if (!(Hf.isDefined(content) || Hf.isNumeric(timestamp))) {
+                    Hf.log(`error`, `StateTimeTraversalComposite.recall - Unable to recall an undefined state of key:${key} at time index.`);
+                }
+            }
+
+            Hf.log(`info0`, `Recalling previous state at timestamp:${timestamp} of key:${key}.`);
+            return content;
         },
         /**
          * @description - Traverse and recall all the previous state mutation from time history.
@@ -173,17 +185,23 @@ export default Hf.Composite({
         recallAll: function recallAll (key) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
-            if (!stateCursor.hasItem(key)) {
-                Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Data item key:${key} is not defined.`);
-            } else {
-                const contentHistoryItems = stateCursor.recallAllContentItems(key);
-                if (Hf.isArray(contentHistoryItems)) {
-                    Hf.log(`info`, `Recalling all previous states of key:${key}.`);
-                    return contentHistoryItems;
-                } else { // eslint-disable-line
-                    Hf.log(`warn1`, `StateTimeTraversalComposite.recallAll - Unable to recall all previous states of key:${key}.`);
+
+            if (Hf.DEVELOPMENT) {
+                if (!stateCursor.hasItem(key)) {
+                    Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Data item key:${key} is not defined.`);
                 }
             }
+
+            const contentHistoryItems = stateCursor.recallAllContentItems(key);
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isArray(contentHistoryItems)) {
+                    Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Unable to recall all previous states of key:${key}.`);
+                }
+            }
+
+            Hf.log(`info0`, `Recalling all previous states of key:${key}.`);
+            return contentHistoryItems;
         }
     }
 });

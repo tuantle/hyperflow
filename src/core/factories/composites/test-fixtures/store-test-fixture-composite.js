@@ -123,7 +123,7 @@ export default Hf.Composite({
                             /* setup event stream observation duplex between store and test fixture */
                             _store.observe(fixture);
                             fixture.observe(_store).delay(DELAY_STORE_IN_MS);
-                            Hf.log(`info`, `Test fixture:${fixture.name} registered store:${store.name}.`);
+                            Hf.log(`info1`, `Test fixture:${fixture.name} registered store:${store.name}.`);
                         }
                     }
                 }
@@ -154,7 +154,7 @@ export default Hf.Composite({
                                 _store.activateIncomingStream();
                                 _store.setup(() => {
                                     _store.activateOutgoingStream();
-                                    Hf.log(`info`, `Test fixture:${fixture.name} activated store:${_store.name}.`);
+                                    Hf.log(`info1`, `Test fixture:${fixture.name} activated store:${_store.name}.`);
                                 });
                             }
                             fixture.activateOutgoingStream();
@@ -187,7 +187,7 @@ export default Hf.Composite({
                                 _store.teardown(() => {
                                     _store.deactivateIncomingStream();
                                     _store.deactivateOutgoingStream();
-                                    Hf.log(`info`, `Test fixture:${fixture.name} deactivated store:${_store.name}.`);
+                                    Hf.log(`info1`, `Test fixture:${fixture.name} deactivated store:${_store.name}.`);
                                 });
                             }
                             fixture.deactivateIncomingStream();

@@ -57,19 +57,18 @@ const CompositeElementPrototype = Object.create({}).prototype = {
 
         if (Hf.isEmpty(fnNames)) {
             Hf.log(`warn0`, `CompositeElement.getEnclosure - Input enclosure function name array is empty.`);
-        } else {
-            return fnNames.filter((fnName) => {
-                if (!Hf.isString(fnName)) {
+            return clonedEnclosure;
+        } else { // eslint-disable-line
+            if (Hf.DEVELOPMENT) {
+                if (fnNames.some((fnName) => !Hf.isString(fnName))) {
                     Hf.log(`error`, `CompositeElement.getEnclosure - Input enclosure function name is invalid.`);
-                    return false;
                 }
-                return composite._enclosure.hasOwnProperty(fnName);
-            }).reduce((enclosure, fnName) => {
+            }
+            return fnNames.filter((fnName) => composite._enclosure.hasOwnProperty(fnName)).reduce((enclosure, fnName) => {
                 enclosure[fnName] = clonedEnclosure[fnName];
                 return enclosure;
             }, {});
         }
-        return clonedEnclosure;
     },
     /**
      * @description - Get a cloned set of composite template.
@@ -84,19 +83,18 @@ const CompositeElementPrototype = Object.create({}).prototype = {
 
         if (Hf.isEmpty(keys)) {
             Hf.log(`warn0`, `CompositeElement.getTemplate - Input template key array is empty.`);
-        } else {
-            return keys.filter((key) => {
-                if (!Hf.isString(key)) {
+            return clonedTemplate;
+        } else { // eslint-disable-line
+            if (Hf.DEVELOPMENT) {
+                if (keys.some((key) => !Hf.isString(key))) {
                     Hf.log(`error`, `CompositeElement.getTemplate - Input template key is invalid.`);
-                    return false;
                 }
-                return composite._template.hasOwnProperty(key);
-            }).reduce((template, key) => {
+            }
+            return keys.filter((key) => composite._template.hasOwnProperty(key)).reduce((template, key) => {
                 template[key] = clonedTemplate[key];
                 return template;
             }, {});
         }
-        return clonedTemplate;
     },
     /**
      * @description - Get a cloned of composite exclusion option.
@@ -118,42 +116,43 @@ const CompositeElementPrototype = Object.create({}).prototype = {
     mixin: function mixin (...sources) {
         const composite = this;
 
-        if (!Hf.isEmpty(sources)) {
-            const mixedTemplate = sources.filter((source) => {
-                if (!(Hf.isObject(source) || Hf.isFunction(source))) {
-                    Hf.log(`warn0`, `CompositeElement.mixin - Input source is invalid.`);
-                    return false;
-                }
-                return true;
-            }).reduce((_mixedTemplate, source) => {
-                let sourceObj = {};
+        if (Hf.DEVELOPMENT) {
+            if (Hf.isEmpty(sources)) {
+                Hf.log(`warn0`, `CompositeElement.mixin - Input source array is empty.`);
+            } else if (sources.filter((source) => !(Hf.isObject(source) || Hf.isFunction(source)))) {
+                Hf.log(`warn0`, `CompositeElement.mixin - Input source is invalid.`);
+            }
+        }
 
-                if (Hf.isObject(source)) {
-                    /* object literal mixins */
-                    sourceObj = source;
-                }
-                if (Hf.isFunction(source)) {
-                    /* functional mixins */
-                    source.call(sourceObj);
-                }
-                _mixedTemplate = Hf.mix(sourceObj).with(_mixedTemplate);
+        const mixedTemplate = sources.reduce((_mixedTemplate, source) => {
+            let sourceObj = {};
 
-                return _mixedTemplate;
-            }, composite.getTemplate());
+            if (Hf.isObject(source)) {
+                /* object literal mixins */
+                sourceObj = source;
+            }
+            if (Hf.isFunction(source)) {
+                /* functional mixins */
+                source.call(sourceObj);
+            }
+            _mixedTemplate = Hf.mix(sourceObj).with(_mixedTemplate);
 
+            return _mixedTemplate;
+        }, composite.getTemplate());
+
+        if (Hf.DEVELOPMENT) {
             if (!Hf.isObject(mixedTemplate)) {
                 Hf.log(`error`, `CompositeElement.mixin - Unable to mixin methods of source object.`);
-            } else {
-                const definition = {
-                    exclusion: composite.getExclusion(),
-                    enclosure: composite.getEnclosure(),
-                    template: mixedTemplate
-                };
-                return CompositeElement(definition); // eslint-disable-line
             }
-        } else {
-            Hf.log(`warn0`, `CompositeElement.mixin - Input source array is empty.`);
         }
+
+        const definition = {
+            exclusion: composite.getExclusion(),
+            enclosure: composite.getEnclosure(),
+            template: mixedTemplate
+        };
+
+        return CompositeElement(definition); // eslint-disable-line
     },
     /**
      * @description - Compose self with a set of composites into a new composite.
@@ -165,54 +164,49 @@ const CompositeElementPrototype = Object.create({}).prototype = {
     compose: function compose (...composites) {
         const composite = this;
 
-        if (!Hf.isEmpty(composites)) {
-            composites = composites.filter((_composite) => {
-                if (!Hf.isSchema({
-                    // NOTE: for composite with internal private state, use enclosure.
-                    getEnclosure: `function`,
-                    // NOTE: for composite with no internal private state, use template.
-                    getTemplate: `function`,
-                    getExclusion: `function`
-                }).of(_composite)) {
-                    Hf.log(`warn0`, `CompositeElement.compose - Input composite object is invalid.`);
-                    return false;
-                }
-                return true;
-            });
-
-            if (!Hf.isEmpty(composites)) {
-                const composedExclusion = composites.reduce((_composedExclusion, _composite) => {
-                    const mergeExclusion = Hf.compose(_composite.getExclusion, Hf.merge);
-                    _composedExclusion = mergeExclusion().with(_composedExclusion);
-                    return _composedExclusion;
-                }, composite.getExclusion());
-                const composedEnclosure = composites.reduce((_composedEnclosure, _composite) => {
-                    const mixEnclosure = Hf.compose(_composite.getEnclosure, Hf.mix);
-                    _composedEnclosure = mixEnclosure().with(_composedEnclosure);
-                    return _composedEnclosure;
-                }, composite.getEnclosure());
-                const composedTemplate = composites.reduce((_composedTemplate, _composite) => {
-                    const mixTemplate = Hf.compose(_composite.getTemplate, Hf.mix);
-                    _composedTemplate = mixTemplate().with(_composedTemplate);
-                    return _composedTemplate;
-                }, composite.getTemplate());
-
-                if (!(Hf.isObject(composedEnclosure) && Hf.isObject(composedTemplate))) {
-                    Hf.log(`error`, `CompositeElement.compose - Unable to compose composites set.`);
-                } else {
-                    const definition = {
-                        exclusion: composedExclusion,
-                        enclosure: composedEnclosure,
-                        template: composedTemplate
-                    };
-                    return CompositeElement(definition); // eslint-disable-line
-                }
-            } else {
-                Hf.log(`error`, `CompositeElement.compose - Input composites set is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (Hf.isEmpty(composites)) {
+                Hf.log(`warn0`, `CompositeElement.compose - Input composites set is empty.`);
+            } else if (!composites.every((_composite) => Hf.isSchema({
+                // NOTE: for composite with internal private state, use enclosure.
+                getEnclosure: `function`,
+                // NOTE: for composite with no internal private state, use template.
+                getTemplate: `function`,
+                getExclusion: `function`
+            }).of(_composite))) {
+                Hf.log(`error`, `CompositeElement.compose - Input composite object is invalid.`);
             }
-        } else {
-            Hf.log(`warn0`, `CompositeElement.compose - Input composites set is empty.`);
         }
+
+        const composedExclusion = composites.reduce((_composedExclusion, _composite) => {
+            const mergeExclusion = Hf.compose(_composite.getExclusion, Hf.merge);
+            _composedExclusion = mergeExclusion().with(_composedExclusion);
+            return _composedExclusion;
+        }, composite.getExclusion());
+        const composedEnclosure = composites.reduce((_composedEnclosure, _composite) => {
+            const mixEnclosure = Hf.compose(_composite.getEnclosure, Hf.mix);
+            _composedEnclosure = mixEnclosure().with(_composedEnclosure);
+            return _composedEnclosure;
+        }, composite.getEnclosure());
+        const composedTemplate = composites.reduce((_composedTemplate, _composite) => {
+            const mixTemplate = Hf.compose(_composite.getTemplate, Hf.mix);
+            _composedTemplate = mixTemplate().with(_composedTemplate);
+            return _composedTemplate;
+        }, composite.getTemplate());
+
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(composedEnclosure) && Hf.isObject(composedTemplate))) {
+                Hf.log(`error`, `CompositeElement.compose - Unable to compose composites set.`);
+            }
+        }
+
+        const definition = {
+            exclusion: composedExclusion,
+            enclosure: composedEnclosure,
+            template: composedTemplate
+        };
+
+        return CompositeElement(definition); // eslint-disable-line
     },
     /**
      * @description - Resolve a composite with required initial state values and returns a factory.
@@ -461,17 +455,21 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      */
                     reduceState: function reduceState (reducer) {
                         let mutated = false;
-                        if (Hf.isObject(reducer)) {
-                            deepStateReduction(currentStateAccessor, reducer);
-                            nextStateAccessor = stateCursor.getAccessor();
-                            mutated = currentStateAccessor !== nextStateAccessor;
-                            if (mutated) {
-                                /* do update state accessor if mutation did occur */
-                                currentStateAccessor = nextStateAccessor;
+
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isObject(reducer)) {
+                                Hf.log(`error`, `Factory.reduceState - Input reducer is invalid.`);
                             }
-                        } else {
-                            Hf.log(`error`, `Factory.reduceState - Input reducer is invalid.`);
                         }
+
+                        deepStateReduction(currentStateAccessor, reducer);
+                        nextStateAccessor = stateCursor.getAccessor();
+                        mutated = currentStateAccessor !== nextStateAccessor;
+                        if (mutated) {
+                            /* do update state accessor if mutation did occur */
+                            currentStateAccessor = nextStateAccessor;
+                        }
+
                         return mutated;
                     },
                     /**
@@ -484,42 +482,46 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @return void
                      */
                     reconfigState: function reconfigState (reconfiguration) {
-                        if (Hf.isObject(reconfiguration)) {
-                            const reconfigurationKeys = Object.keys(reconfiguration);
-                            const originalStateKeys = Object.keys(originalStateAccessor);
-
-                            if (originalStateKeys.length >= reconfigurationKeys.length && reconfigurationKeys.every((key) => originalStateKeys.includes(key))) {
-                                let reconfigurationPathIds = [];
-
-                                reconfigurationKeys.forEach((key) => {
-                                    let stateAccessorAtPath;
-                                    const pathId = `state.${key}`;
-
-                                    if (originalStateAccessor[key] !== null && (Hf.isNonEmptyObject(originalStateAccessor[key]) || Hf.isNonEmptyArray(originalStateAccessor[key]))) {
-                                        if (!originalStateAccessorCache.hasOwnProperty(pathId)) {
-                                            stateAccessorAtPath = data.select(pathId).getAccessor();
-                                            originalStateAccessorCache[pathId] = stateAccessorAtPath;
-                                        } else {
-                                            stateAccessorAtPath = originalStateAccessorCache[pathId];
-                                        }
-                                        reconfigurationPathIds = deepStateReconfiguration(stateAccessorAtPath, reconfiguration[key], originalStateAccessor, key);
-                                    } else {
-                                        reconfigurationPathIds = deepStateReconfiguration(originalStateAccessor, reconfiguration, null, ``);
-                                    }
-                                });
-
-                                nextStateAccessor = stateCursor.getAccessor({
-                                    excludedNonmutatioReferalPathIds: reconfigurationPathIds.map((pathId) => `state.${pathId}`)
-                                });
-
-                                /* do update current state accessor after reconfiged state */
-                                currentStateAccessor = nextStateAccessor;
-                            } else {
+                        if (Hf.DEVELOPMENT) {
+                            if (!Hf.isObject(reconfiguration)) {
                                 Hf.log(`error`, `Factory.reconfigState - Input reconfiguration is invalid.`);
                             }
-                        } else {
-                            Hf.log(`error`, `Factory.reconfigState - Input reconfiguration is invalid.`);
                         }
+
+                        const reconfigurationKeys = Object.keys(reconfiguration);
+                        const originalStateKeys = Object.keys(originalStateAccessor);
+
+                        if (Hf.DEVELOPMENT) {
+                            if (originalStateKeys.length < reconfigurationKeys.length || !reconfigurationKeys.every((key) => originalStateKeys.includes(key))) {
+                                Hf.log(`error`, `Factory.reconfigState - Input reconfiguration is invalid.`);
+                            }
+                        }
+
+                        let reconfigurationPathIds = [];
+
+                        reconfigurationKeys.forEach((key) => {
+                            let stateAccessorAtPath;
+                            const pathId = `state.${key}`;
+
+                            if (originalStateAccessor[key] !== null && (Hf.isNonEmptyObject(originalStateAccessor[key]) || Hf.isNonEmptyArray(originalStateAccessor[key]))) {
+                                if (!originalStateAccessorCache.hasOwnProperty(pathId)) {
+                                    stateAccessorAtPath = data.select(pathId).getAccessor();
+                                    originalStateAccessorCache[pathId] = stateAccessorAtPath;
+                                } else {
+                                    stateAccessorAtPath = originalStateAccessorCache[pathId];
+                                }
+                                reconfigurationPathIds = deepStateReconfiguration(stateAccessorAtPath, reconfiguration[key], originalStateAccessor, key);
+                            } else {
+                                reconfigurationPathIds = deepStateReconfiguration(originalStateAccessor, reconfiguration, null, ``);
+                            }
+                        });
+
+                        nextStateAccessor = stateCursor.getAccessor({
+                            excludedNonmutatioReferalPathIds: reconfigurationPathIds.map((pathId) => `state.${pathId}`)
+                        });
+
+                        /* do update current state accessor after reconfiged state */
+                        currentStateAccessor = nextStateAccessor;
                     }
                 }).getTemplate();
 
@@ -551,16 +553,6 @@ const CompositeElementPrototype = Object.create({}).prototype = {
             }
 
             if (!Hf.isEmpty(initialStatic)) {
-                // product = Object.keys(initialStatic).reduce((productStatic, key) => {
-                //     Object.defineProperty(productStatic, key, {
-                //         get: function get () {
-                //             return Hf.freeze(initialStatic[key]);
-                //         },
-                //         configurable: false,
-                //         enumerable: true
-                //     });
-                //     return productStatic;
-                // }, product);
                 product = Object.entries(initialStatic).reduce((productStatic, [ key, value ]) => {
                     Object.defineProperty(productStatic, key, {
                         get: function get () {
@@ -578,21 +570,6 @@ const CompositeElementPrototype = Object.create({}).prototype = {
             });
 
             /* if a function with initialization prefix is defined, call it once at init */
-            // Object.keys(product).filter((key) => {
-            //     return Hf.isFunction(product[key]) && key.charAt(0) === INITIALIZATION_PREFIX;
-            // }).sort((fnNameA, fnNameB) => {
-            //     if (fnNameA < fnNameB) {
-            //         return -1;
-            //     }
-            //     if (fnNameA > fnNameB) {
-            //         return 1;
-            //     }
-            //     return 0;
-            // }).map((fnName) => {
-            //     return product[fnName];
-            // }).forEach((fn) => {
-            //     fn.call(revealedProduct);
-            // });
             Object.entries(product).filter(([ fnName, fn ]) => {
                 return Hf.isFunction(fn) && fnName.charAt(0) === INITIALIZATION_PREFIX;
             }).sort(([ fnNameA, fnA ], [ fnNameB, fnB ]) => { // eslint-disable-line
@@ -621,64 +598,69 @@ const CompositeElementPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function CompositeElement (definition) {
-    if (!Hf.isObject(definition)) {
-        Hf.log(`error`, `CompositeElement - Input composite definition object is invalid.`);
-    } else {
-        const {
-            enclosure,
-            template,
-            exclusion
-        } = Hf.fallback({
-            enclosure: {},
-            template: {},
-            exclusion: {
-                /* set default exclusion */
-                prefixes: DEFAULT_EXCLUSION_PREFIXES,
-                properties: false
-            }
-        }).of(definition);
-
-        exclusion.prefixes = exclusion.prefixes.concat(DEFAULT_EXCLUSION_PREFIXES.filter((prefix) => {
-            return !exclusion.prefixes.includes(prefix);
-        }));
-
-        // if (!Object.keys(enclosure).every((fnName) => Hf.isFunction(enclosure[fnName]))) {
-        if (!Object.values(enclosure).every((fn) => Hf.isFunction(fn))) {
-            Hf.log(`error`, `CompositeElement - Input composite definition for enclosure object is invalid.`);
-        } else {
-            const element = Object.create(CompositeElementPrototype, {
-                // TODO: Implement $init sequence for composer method. This will allow the $init method call order to be deterministic.
-                // _initSequences: [],
-                /* internal composite enclose functions */
-                _enclosure: {
-                    value: enclosure,
-                    writable: true,
-                    configurable: false,
-                    enumerable: false
-                },
-                /* internal composite method template */
-                _template: {
-                    value: template,
-                    writable: true,
-                    configurable: false,
-                    enumerable: false
-                },
-                /* esolve exclusion option */
-                _exclusion: {
-                    value: exclusion,
-                    writable: true,
-                    configurable: false,
-                    enumerable: false
-                }
-            });
-
-            if (!Hf.isObject(element)) {
-                Hf.log(`error`, `CompositeElement - Unable to create a composite element instance.`);
-            } else {
-                const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
-                /* reveal only the public properties and functions */
-                return revealFrozen(element);
-            }
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(definition)) {
+            Hf.log(`error`, `CompositeElement - Input composite definition object is invalid.`);
         }
     }
+
+    const {
+        enclosure,
+        template,
+        exclusion
+    } = Hf.fallback({
+        enclosure: {},
+        template: {},
+        exclusion: {
+            /* set default exclusion */
+            prefixes: DEFAULT_EXCLUSION_PREFIXES,
+            properties: false
+        }
+    }).of(definition);
+
+    exclusion.prefixes = exclusion.prefixes.concat(DEFAULT_EXCLUSION_PREFIXES.filter((prefix) => {
+        return !exclusion.prefixes.includes(prefix);
+    }));
+
+    if (Hf.DEVELOPMENT) {
+        if (!Object.values(enclosure).every((fn) => Hf.isFunction(fn))) {
+            Hf.log(`error`, `CompositeElement - Input composite definition for enclosure object is invalid.`);
+        }
+    }
+
+    const element = Object.create(CompositeElementPrototype, {
+        // TODO: Implement $init sequence for composer method. This will allow the $init method call order to be deterministic.
+        // _initSequences: [],
+        /* internal composite enclose functions */
+        _enclosure: {
+            value: enclosure,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        /* internal composite method template */
+        _template: {
+            value: template,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        /* esolve exclusion option */
+        _exclusion: {
+            value: exclusion,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        }
+    });
+
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(element)) {
+            Hf.log(`error`, `CompositeElement - Unable to create a composite element instance.`);
+        }
+    }
+
+    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+    /* reveal only the public properties and functions */
+    return revealFrozen(element);
 }

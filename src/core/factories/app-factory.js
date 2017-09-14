@@ -81,11 +81,14 @@ export default Composer({
          */
         this.hasStarted = function hasStarted () {
             const app = this;
-            if (!Hf.isObject(_domain)) {
-                Hf.log(`error`, `AppFactory.hasStarted - App:${app.name} is not registered with a domain.`);
-            } else {
-                return _domain.hasStarted();
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_domain)) {
+                    Hf.log(`error`, `AppFactory.hasStarted - App:${app.name} is not registered with a domain.`);
+                }
             }
+
+            return _domain.hasStarted();
         };
         /**
          * @description - Render app top level component to the target env.
@@ -104,11 +107,14 @@ export default Composer({
          */
         this.getRenderer = function getRenderer () {
             const app = this;
-            if (!Hf.isObject(_renderer)) {
-                Hf.log(`error`, `AppFactory.getRenderer - App:${app.name} is not registered with a component renderer.`);
-            } else {
-                return _renderer;
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_renderer)) {
+                    Hf.log(`error`, `AppFactory.getRenderer - App:${app.name} is not registered with a component renderer.`);
+                }
             }
+
+            return _renderer;
         };
         /**
          * @description - Get the composed app top interface component from top level domain.
@@ -128,11 +134,14 @@ export default Composer({
          */
         this.getTopDomain = function getTopDomain () {
             const app = this;
-            if (!Hf.isObject(_domain)) {
-                Hf.log(`error`, `AppFactory.getTopDomain - App:${app.name} is not registered with a domain.`);
-            } else {
-                return _domain;
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_domain)) {
+                    Hf.log(`error`, `AppFactory.getTopDomain - App:${app.name} is not registered with a domain.`);
+                }
             }
+
+            return _domain;
         };
         /**
          * @description - Register app domain, renderer, and app environment target.
@@ -144,19 +153,25 @@ export default Composer({
         this.register = function register (definition) {
             const app = this;
             // TODO: Throw error if called outside of $init.
-            if (!Hf.isSchema({
-                domain: `object`,
-                component: {
-                    library: `object`,
-                    renderer: `object`
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    domain: `object`,
+                    component: {
+                        library: `object`,
+                        renderer: `object`
+                    }
+                }).of(definition)) {
+                    Hf.log(`error`, `AppFactory.register - Input definition is invalid.`);
                 }
-            }).of(definition)) {
-                Hf.log(`error`, `AppFactory.register - Input definition is invalid.`);
-            } else {
-                const {
-                    domain,
-                    component
-                } = definition;
+            }
+
+            const {
+                domain,
+                component
+            } = definition;
+
+            if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
                     fId: `string`,
                     name: `string`,
@@ -168,22 +183,25 @@ export default Composer({
                     Hf.log(`error`, `AppFactory.register - Input domain is invalid.`);
                 } else if (Hf.isObject(_domain)) {
                     Hf.log(`warn1`, `AppFactory.register - App:${app.name} already registered domain:${_domain.name}.`);
-                } else {
-                    _domain = domain;
-                    _renderer = component.renderer;
-
-                    const intf = domain.getInterface();
-                    if (!Hf.isSchema({
-                        registerComponentLib: `function`
-                    }).of(intf)) {
-                        Hf.log(`error`, `AppFactory.register - App top domain:${domain.name} interface is invalid.`);
-                    } else {
-                        intf.registerComponentLib(component.library);
-                    }
-
-                    Hf.log(`info`, `App:${app.name} registered domain:${domain.name}.`);
                 }
             }
+
+            _domain = domain;
+            _renderer = component.renderer;
+
+            const intf = domain.getInterface();
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    registerComponentLib: `function`
+                }).of(intf)) {
+                    Hf.log(`error`, `AppFactory.register - App top domain:${domain.name} interface is invalid.`);
+                }
+            }
+
+            intf.registerComponentLib(component.library);
+
+            Hf.log(`info1`, `App:${app.name} registered domain:${domain.name}.`);
         };
         /**
          * @description - Start app.
@@ -200,26 +218,28 @@ export default Composer({
                 doRenderToTarget: true
             }).of(option);
 
-            if (!Hf.isObject(_domain)) {
-                Hf.log(`error`, `AppFactory.start - App:${app.name} is not registered with a domain.`);
-            } else {
-                if (_domain.hasStarted()) {
-                    Hf.log(`warn1`, `AppFactory.start - App:${app.name} is already running. Restarting...`);
-                    _domain.restart(() => {
-                        if (doRenderToTarget) {
-                            app.renderToTarget();
-                        }
-                        Hf.log(`info`, `App:${app.name} has started.`);
-                    }, option);
-                } else {
-                    Hf.log(`info`, `Starting app:${app.name}...`);
-                    _domain.start(() => {
-                        if (doRenderToTarget) {
-                            app.renderToTarget();
-                        }
-                        Hf.log(`info`, `App:${app.name} has started.`);
-                    }, option);
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_domain)) {
+                    Hf.log(`error`, `AppFactory.start - App:${app.name} is not registered with a domain.`);
                 }
+            }
+
+            if (_domain.hasStarted()) {
+                Hf.log(`warn1`, `AppFactory.start - App:${app.name} is already running. Restarting...`);
+                _domain.restart(() => {
+                    if (doRenderToTarget) {
+                        app.renderToTarget();
+                    }
+                    Hf.log(`info1`, `App:${app.name} has started.`);
+                }, option);
+            } else {
+                Hf.log(`info1`, `Starting app:${app.name}...`);
+                _domain.start(() => {
+                    if (doRenderToTarget) {
+                        app.renderToTarget();
+                    }
+                    Hf.log(`info1`, `App:${app.name} has started.`);
+                }, option);
             }
         };
         /**
@@ -232,15 +252,17 @@ export default Composer({
         this.stop = function stop (option = {}) {
             const app = this;
 
-            if (!Hf.isObject(_domain)) {
-                Hf.log(`error`, `AppFactory.stop - App:${app.name} is not registered with a domain.`);
-            } else {
-                if (_domain.hasStarted()) {
-                    Hf.log(`info`, `Stopping app:${app.name}...`);
-                    _domain.stop(() => {
-                        Hf.log(`info`, `App:${app.name} has stopped.`);
-                    }, option);
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_domain)) {
+                    Hf.log(`error`, `AppFactory.stop - App:${app.name} is not registered with a domain.`);
                 }
+            }
+
+            if (_domain.hasStarted()) {
+                Hf.log(`info1`, `Stopping app:${app.name}...`);
+                _domain.stop(() => {
+                    Hf.log(`info1`, `App:${app.name} has stopped.`);
+                }, option);
             }
         };
         /**
@@ -258,20 +280,22 @@ export default Composer({
                 doRenderToTarget: true
             }).of(option);
 
-            if (!Hf.isObject(_domain)) {
-                Hf.log(`error`, `AppFactory.restart - App:${app.name} is not registered with a domain.`);
-            } else {
-                if (_domain.hasStarted()) {
-                    Hf.log(`info`, `Restarting app:${app.name}...`);
-                    _domain.restart(() => {
-                        if (doRenderToTarget) {
-                            app.renderToTarget();
-                        }
-                        Hf.log(`info`, `App:${app.name} has restarted.`);
-                    }, option);
-                } else {
-                    app.start(option);
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_domain)) {
+                    Hf.log(`error`, `AppFactory.restart - App:${app.name} is not registered with a domain.`);
                 }
+            }
+
+            if (_domain.hasStarted()) {
+                Hf.log(`info1`, `Restarting app:${app.name}...`);
+                _domain.restart(() => {
+                    if (doRenderToTarget) {
+                        app.renderToTarget();
+                    }
+                    Hf.log(`info1`, `App:${app.name} has restarted.`);
+                }, option);
+            } else {
+                app.start(option);
             }
         };
     }

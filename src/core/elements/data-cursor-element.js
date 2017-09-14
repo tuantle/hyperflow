@@ -51,49 +51,31 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      */
     _createSchema: function _createSchema (source) {
         const cursor = this;
-        if (!(Hf.isObject(source) || Hf.isArray(source))) {
-            Hf.log(`error`, `DataCursorElement._createSchema - Input source object is invalid.`);
-        } else {
-            // return Object.keys(source).reduce((schema, key) => {
-            //     const value = source[key];
-            //     if (Hf.isObject(value)) {
-            //         schema[key] = cursor._createSchema(value);
-            //     } else if (Hf.isArray(value)) {
-            //         schema[key] = value.map((arrayItem) => {
-            //             if (Hf.isObject(arrayItem)) {
-            //                 return cursor._createSchema(arrayItem);
-            //             }
-            //             return Hf.typeOf(arrayItem);
-            //         });
-            //     } else if (cursor.isItemComputable(key)) {
-            //         schema[key] = `computable`;
-            //     } else if (cursor.isItemObservable(key)) {
-            //         schema[key] = `observable`;
-            //     } else {
-            //         schema[key] = Hf.typeOf(value);
-            //     }
-            //     return schema;
-            // }, {});
-            return Object.entries(source).reduce((schema, [ key, value ]) => {
-                if (Hf.isObject(value)) {
-                    schema[key] = cursor._createSchema(value);
-                } else if (Hf.isArray(value)) {
-                    schema[key] = value.map((arrayItem) => {
-                        if (Hf.isObject(arrayItem)) {
-                            return cursor._createSchema(arrayItem);
-                        }
-                        return Hf.typeOf(arrayItem);
-                    });
-                } else if (cursor.isItemComputable(key)) {
-                    schema[key] = `computable`;
-                } else if (cursor.isItemObservable(key)) {
-                    schema[key] = `observable`;
-                } else {
-                    schema[key] = Hf.typeOf(value);
-                }
-                return schema;
-            }, {});
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(source) || Hf.isArray(source))) {
+                Hf.log(`error`, `DataCursorElement._createSchema - Input source object is invalid.`);
+            }
         }
+
+        return Object.entries(source).reduce((schema, [ key, value ]) => {
+            if (Hf.isObject(value)) {
+                schema[key] = cursor._createSchema(value);
+            } else if (Hf.isArray(value)) {
+                schema[key] = value.map((arrayItem) => {
+                    if (Hf.isObject(arrayItem)) {
+                        return cursor._createSchema(arrayItem);
+                    }
+                    return Hf.typeOf(arrayItem);
+                });
+            } else if (cursor.isItemComputable(key)) {
+                schema[key] = `computable`;
+            } else if (cursor.isItemObservable(key)) {
+                schema[key] = `observable`;
+            } else {
+                schema[key] = Hf.typeOf(value);
+            }
+            return schema;
+        }, {});
     },
     /**
      * @description - At cursor, check if there is a data item in content at key.
@@ -310,15 +292,15 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
-        if (!cursor.hasItem(key)) {
-            Hf.log(`error`, `DataCursorElement.getContentItem - Data item key:${key} at pathId:${pathId} is not defined.`);
-        } else {
-            const contentItem = cursor._content[key];
-            if (Hf.isObject(contentItem) || Hf.isArray(contentItem)) {
-                return Hf.clone(contentItem);
+        if (Hf.DEVELOPMENT) {
+            if (!cursor.hasItem(key)) {
+                Hf.log(`error`, `DataCursorElement.getContentItem - Data item key:${key} at pathId:${pathId} is not defined.`);
             }
-            return contentItem;
         }
+
+        const contentItem = cursor._content[key];
+
+        return Hf.isObject(contentItem) || Hf.isArray(contentItem) ? Hf.clone(contentItem) : contentItem;
     },
     /**
      * @description - At cursor, set value to a data item.
@@ -333,132 +315,120 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const data = cursor._data;
         const pathId = `${cursor._pathId}.${key}`;
 
-        if (Hf.isDefined(item)) {
-            if (cursor.hasItem(key)) {
-                /* check that data item is not computable */
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isDefined(item)) {
+                Hf.log(`error`, `DataCursorElement.setContentItem - Input data item with key:${key} at pathId:${pathId} is invalid.`);
+            }
+        }
+
+        if (cursor.hasItem(key)) {
+            /* check that data item is not computable */
+            if (Hf.DEVELOPMENT) {
                 if (cursor.isItemComputable(key)) {
                     Hf.log(`error`, `DataCursorElement.setContentItem - Data item key:${key} at pathId:${pathId} is already described as a computable.`);
-                } else {
-                    if (item === null && cursor._content[key] !== null) {
-                        cursor._content[key] = null;
-                        /* unassign descriptors if data item is strongly typed and/or is required */
-                        if (cursor.isItemStronglyTyped(key) || cursor.isItemRequired(key)) {
-                            cursor.unDescribeItem(key).asConstrainable();
-                        }
-                        /* save change to mutation record at cursor if immutable */
-                        if (cursor.isImmutable()) {
-                            data._recordMutation(pathId);
-                        }
-                    } else if (Hf.isObject(item) || Hf.isArray(item)) {
-                        if (Hf.isObject(item)) {
-                            cursor._content[key] = {};
+                }
+            }
+            if (item === null && cursor._content[key] !== null) {
+                cursor._content[key] = null;
+                /* unassign descriptors if data item is strongly typed and/or is required */
+                if (cursor.isItemStronglyTyped(key) || cursor.isItemRequired(key)) {
+                    cursor.unDescribeItem(key).asConstrainable();
+                }
+                /* save change to mutation record at cursor if immutable */
+                if (cursor.isImmutable()) {
+                    data._recordMutation(pathId);
+                }
+            } else if (Hf.isObject(item) || Hf.isArray(item)) {
+                if (Hf.isObject(item)) {
+                    cursor._content[key] = {};
 
-                            if (!Hf.isEmpty(item)) {
-                                const innerCursor = data.select(pathId);
-                                // Object.keys(item).forEach((innerKey) => {
-                                //     innerCursor.setContentItem(item[innerKey], innerKey);
-                                // });
-                                Object.entries(item).forEach(([ innerKey, innerItem ]) => {
-                                    innerCursor.setContentItem(innerItem, innerKey);
-                                });
-                            }
-                            /* if data item is strongly typed and/or is required
-                               reassign strongly typed and/or required descriptor for item and it`s nested items */
-                            if (cursor.isItemStronglyTyped(key)) {
-                                cursor.describeItem(key).asStronglyTyped();
-                            }
-                            if (cursor.isItemRequired(key)) {
-                                cursor.describeItem(key).asRequired();
-                            }
-                        } else if (Hf.isArray(item)) {
-                            cursor._content[key] = [];
+                    if (!Hf.isEmpty(item)) {
+                        const innerCursor = data.select(pathId);
 
-                            if (!Hf.isEmpty(item)) {
-                                const innerCursor = data.select(pathId);
-                                item.forEach((innerItem, innerKey) => {
-                                    innerCursor.setContentItem(innerItem, innerKey);
-                                });
-                            }
-                            /* if data item is strongly typed and/or is required
-                               reassign strongly typed and/or required descriptor for item and it`s nested items */
-                            if (cursor.isItemStronglyTyped(key)) {
-                                cursor.describeItem(key).asStronglyTyped();
-                            }
-                            if (cursor.isItemRequired(key)) {
-                                cursor.describeItem(key).asRequired();
-                            }
-                        }
-                        /* save change to mutation record at cursor if immutable */
-                        if (cursor.isImmutable()) {
-                            data._recordMutation(pathId);
-                        }
-                    } else {
-                        if (cursor._content[key] !== item) {
-                            cursor._content[key] = item;
-                            /* save change to mutation record at cursor if immutable */
-                            if (cursor.isImmutable()) {
-                                data._recordMutation(pathId);
-                            }
-                        }
+                        Object.entries(item).forEach(([ innerKey, innerItem ]) => {
+                            innerCursor.setContentItem(innerItem, innerKey);
+                        });
+                    }
+                    /* if data item is strongly typed and/or is required
+                       reassign strongly typed and/or required descriptor for item and it`s nested items */
+                    if (cursor.isItemStronglyTyped(key)) {
+                        cursor.describeItem(key).asStronglyTyped();
+                    }
+                    if (cursor.isItemRequired(key)) {
+                        cursor.describeItem(key).asRequired();
+                    }
+                } else if (Hf.isArray(item)) {
+                    cursor._content[key] = [];
+
+                    if (!Hf.isEmpty(item)) {
+                        const innerCursor = data.select(pathId);
+                        item.forEach((innerItem, innerKey) => {
+                            innerCursor.setContentItem(innerItem, innerKey);
+                        });
+                    }
+                    /* if data item is strongly typed and/or is required
+                       reassign strongly typed and/or required descriptor for item and it`s nested items */
+                    if (cursor.isItemStronglyTyped(key)) {
+                        cursor.describeItem(key).asStronglyTyped();
+                    }
+                    if (cursor.isItemRequired(key)) {
+                        cursor.describeItem(key).asRequired();
                     }
                 }
+                /* save change to mutation record at cursor if immutable */
+                if (cursor.isImmutable()) {
+                    data._recordMutation(pathId);
+                }
             } else {
-                if (item === null) {
-                    cursor._content[key] = null;
+                if (cursor._content[key] !== item) {
+                    cursor._content[key] = item;
                     /* save change to mutation record at cursor if immutable */
                     if (cursor.isImmutable()) {
                         data._recordMutation(pathId);
                     }
-                } else {
-                    if (Hf.isObject(item) || Hf.isArray(item)) {
-                        if (Hf.isObject(item)) {
-                            cursor._content[key] = {};
+                }
+            }
+        } else {
+            if (item === null) {
+                cursor._content[key] = null;
+                /* save change to mutation record at cursor if immutable */
+                if (cursor.isImmutable()) {
+                    data._recordMutation(pathId);
+                }
+            } else {
+                if (Hf.isObject(item) || Hf.isArray(item)) {
+                    if (Hf.isObject(item)) {
+                        cursor._content[key] = {};
 
-                            if (!Hf.isEmpty(item)) {
-                                const innerCursor = data.select(pathId);
-                                // Object.keys(item).forEach((innerKey) => {
-                                //     innerCursor.setContentItem(item[innerKey], innerKey);
-                                // });
-                                Object.entries(item).forEach(([ innerKey, innerItem ]) => {
-                                    innerCursor.setContentItem(innerItem, innerKey);
-                                });
+                        if (!Hf.isEmpty(item)) {
+                            const innerCursor = data.select(pathId);
+
+                            Object.entries(item).forEach(([ innerKey, innerItem ]) => {
+                                innerCursor.setContentItem(innerItem, innerKey);
+                            });
+                        }
+
+                        /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
+                        if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
+                            const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
+
+                            if (description.hasConstraint(`stronglyTyped`)) {
+                                cursor.describeItem(key).asStronglyTyped();
                             }
-
-                            /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
-                            if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
-                                const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
-
-                                if (description.hasConstraint(`stronglyTyped`)) {
-                                    cursor.describeItem(key).asStronglyTyped();
-                                }
-                                if (description.hasConstraint(`required`)) {
-                                    cursor.describeItem(key).asRequired();
-                                }
-                            }
-                        } else {
-                            cursor._content[key] = [];
-
-                            if (!Hf.isEmpty(item)) {
-                                const innerCursor = data.select(pathId);
-                                item.forEach((innerItem, innerKey) => {
-                                    innerCursor.setContentItem(innerItem, innerKey);
-                                });
-                            }
-
-                            /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
-                            if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
-                                const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
-
-                                if (description.hasConstraint(`stronglyTyped`)) {
-                                    cursor.describeItem(key).asStronglyTyped();
-                                }
-                                if (description.hasConstraint(`required`)) {
-                                    cursor.describeItem(key).asRequired();
-                                }
+                            if (description.hasConstraint(`required`)) {
+                                cursor.describeItem(key).asRequired();
                             }
                         }
                     } else {
-                        cursor._content[key] = item;
+                        cursor._content[key] = [];
+
+                        if (!Hf.isEmpty(item)) {
+                            const innerCursor = data.select(pathId);
+                            item.forEach((innerItem, innerKey) => {
+                                innerCursor.setContentItem(innerItem, innerKey);
+                            });
+                        }
+
                         /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
                         if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
                             const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
@@ -471,14 +441,25 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                             }
                         }
                     }
-                    /* save change to mutation record at cursor if immutable */
-                    if (cursor.isImmutable()) {
-                        data._recordMutation(pathId);
+                } else {
+                    cursor._content[key] = item;
+                    /* set the nested item as strongly typed and/or required if top item is a strongly typed and/or required */
+                    if (cursor._descriptor.select(`constrainable`).hasDescription(cursor._pathId)) {
+                        const description = cursor._descriptor.select(`constrainable`).getDescription(cursor._pathId);
+
+                        if (description.hasConstraint(`stronglyTyped`)) {
+                            cursor.describeItem(key).asStronglyTyped();
+                        }
+                        if (description.hasConstraint(`required`)) {
+                            cursor.describeItem(key).asRequired();
+                        }
                     }
                 }
+                /* save change to mutation record at cursor if immutable */
+                if (cursor.isImmutable()) {
+                    data._recordMutation(pathId);
+                }
             }
-        } else {
-            Hf.log(`error`, `DataCursorElement.setContentItem - Input data item with key:${key} at pathId:${pathId} is invalid.`);
         }
     },
     /**
@@ -493,46 +474,48 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
-        if (!cursor.hasItem(key)) {
-            Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is not defined.`);
-        } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
-            Hf.log(`error`, `DataCursorElement.recallContentItem - Input time index offset must be non-zero and negative.`);
-        } else {
-            if (!cursor.isImmutable()) {
+        if (Hf.DEVELOPMENT) {
+            if (!cursor.hasItem(key)) {
+                Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is not defined.`);
+            } else if (!Hf.isInteger(timeIndexOffset) || timeIndexOffset >= 0) {
+                Hf.log(`error`, `DataCursorElement.recallContentItem - Input time index offset must be non-zero and negative.`);
+            } else if (!cursor.isImmutable()) {
                 Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is mutable and has no mutation history.`);
-            } else {
-                const data = cursor._data;
-                const mMap = data._mutation.mMap;
-                const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
-                const recallTimeIndex = currentTimeIndex + timeIndexOffset;
-                const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
-                const leafType = cursor.getContentType(key) !== `object` || cursor.getContentType(key) !== `array`;
-                let pathIdAtTimeIndex = Hf.stringToArray(pathId, `.`);
+            }
+        }
 
-                if (cursorTimestamps.length > recallTimeIndex) {
-                    if (leafType) {
-                        pathIdAtTimeIndex.pop();
-                    }
-                    pathIdAtTimeIndex.shift();
-                    pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
-                    pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
+        const data = cursor._data;
+        const mMap = data._mutation.mMap;
+        const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
+        const recallTimeIndex = currentTimeIndex + timeIndexOffset;
+        const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
+        const leafType = cursor.getContentType(key) !== `object` || cursor.getContentType(key) !== `array`;
+        let pathIdAtTimeIndex = Hf.stringToArray(pathId, `.`);
 
-                    if (mMap.hasNode(pathIdAtTimeIndex)) {
-                        return {
-                            timestamp: cursorTimestamps[recallTimeIndex],
-                            key,
-                            content: leafType ? mMap.select(pathIdAtTimeIndex).getContent()[key] : mMap.select(pathIdAtTimeIndex).getContent()
-                        };
-                    } else { // eslint-disable-line
-                        Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
-                    }
-                } else {
-                    return {
-                        timestamp: null,
-                        content: null
-                    };
+        if (cursorTimestamps.length > recallTimeIndex) {
+            if (leafType) {
+                pathIdAtTimeIndex.pop();
+            }
+            pathIdAtTimeIndex.shift();
+            pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
+            pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
+
+            if (Hf.DEVELOPMENT) {
+                if (!mMap.hasNode(pathIdAtTimeIndex)) {
+                    Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
                 }
             }
+
+            return {
+                timestamp: cursorTimestamps[recallTimeIndex],
+                key,
+                content: leafType ? mMap.select(pathIdAtTimeIndex).getContent()[key] : mMap.select(pathIdAtTimeIndex).getContent()
+            };
+        } else { // eslint-disable-line
+            return {
+                timestamp: null,
+                content: null
+            };
         }
     },
     /**
@@ -546,45 +529,45 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
-        if (!cursor.hasItem(key)) {
-            Hf.log(`error`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is not defined.`);
-        } else {
-            if (!cursor.isImmutable()) {
+        if (Hf.DEVELOPMENT) {
+            if (!cursor.hasItem(key)) {
+                Hf.log(`error`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is not defined.`);
+            } else if (!cursor.isImmutable()) {
                 Hf.log(`error`, `DataCursorElement.recallAllContentItems - Data item key:${key} at pathId:${pathId} is mutable and has no mutation history.`);
-            } else {
-                const data = cursor._data;
-                const mMap = data._mutation.mMap;
-                const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
-                const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
-                const leafType = cursor.getContentType(key) !== `object` || cursor.getContentType(key) !== `array`;
-                let timeIndexOffset = -1;
-
-                return cursorTimestamps.slice(1).map((cursorTimestamp) => {
-                    const recallTimeIndex = currentTimeIndex + timeIndexOffset;
-                    let pathIdAtTimeIndex = Hf.stringToArray(pathId, `.`);
-
-                    timeIndexOffset--;
-
-                    if (leafType) {
-                        pathIdAtTimeIndex.pop();
-                    }
-
-                    pathIdAtTimeIndex.shift();
-                    pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
-                    pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
-                    return {
-                        timestamp: cursorTimestamp,
-                        pathIdAtTimeIndex
-                    };
-                }).filter((timeCursor) => mMap.hasNode(timeCursor.pathIdAtTimeIndex)).map((timeCursor) => {
-                    return {
-                        timestamp: timeCursor.timestamp,
-                        key,
-                        content: leafType ? mMap.select(timeCursor.pathIdAtTimeIndex).getContent()[key] : mMap.select(timeCursor.pathIdAtTimeIndex).getContent()
-                    };
-                });
             }
         }
+
+        const data = cursor._data;
+        const mMap = data._mutation.mMap;
+        const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
+        const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
+        const leafType = cursor.getContentType(key) !== `object` || cursor.getContentType(key) !== `array`;
+        let timeIndexOffset = -1;
+
+        return cursorTimestamps.slice(1).map((cursorTimestamp) => {
+            const recallTimeIndex = currentTimeIndex + timeIndexOffset;
+            let pathIdAtTimeIndex = Hf.stringToArray(pathId, `.`);
+
+            timeIndexOffset--;
+
+            if (leafType) {
+                pathIdAtTimeIndex.pop();
+            }
+
+            pathIdAtTimeIndex.shift();
+            pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
+            pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
+            return {
+                timestamp: cursorTimestamp,
+                pathIdAtTimeIndex
+            };
+        }).filter((timeCursor) => mMap.hasNode(timeCursor.pathIdAtTimeIndex)).map((timeCursor) => {
+            return {
+                timestamp: timeCursor.timestamp,
+                key,
+                content: leafType ? mMap.select(timeCursor.pathIdAtTimeIndex).getContent()[key] : mMap.select(timeCursor.pathIdAtTimeIndex).getContent()
+            };
+        });
     },
     /**
      * @description - At cursor, get the description of an item.
@@ -597,51 +580,59 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
-        if (!cursor.hasItem(key)) {
-            Hf.log(`error`, `DataCursorElement.getItemDescription - Data item key:${key} at pathId:${pathId} is not defined.`);
-        } else {
-            return {
-                /**
-                 * @description - Get item constrainable description.
-                 *
-                 * @method getItemDescription.ofConstrainable
-                 * @return {object}
-                 */
-                ofConstrainable: function ofConstrainable () {
+        if (Hf.DEVELOPMENT) {
+            if (!cursor.hasItem(key)) {
+                Hf.log(`error`, `DataCursorElement.getItemDescription - Data item key:${key} at pathId:${pathId} is not defined.`);
+            }
+        }
+
+        return {
+            /**
+             * @description - Get item constrainable description.
+             *
+             * @method getItemDescription.ofConstrainable
+             * @return {object}
+             */
+            ofConstrainable: function ofConstrainable () {
+                if (Hf.DEVELOPMENT) {
                     if (!cursor.isItemConstrainable(key)) {
                         Hf.log(`error`, `DataCursorElement.getItemDescription.ofConstrainable - Data item key:${key} at pathId:${pathId} does not have a constrainable description.`);
-                    } else {
-                        return cursor._descriptor.select(`constrainable`).getDescription(pathId);
-                    }
-                },
-                /**
-                 * @description - Get item computable description.
-                 *
-                 * @method getItemDescription.ofComputable
-                 * @return {object}
-                 */
-                ofComputable: function ofComputable () {
-                    if (!cursor.isItemComputable(key)) {
-                        Hf.log(`error`, `DataCursorElement.getItemDescription.ofComputable - Data item key:${key} at pathId:${pathId} does not have a computable description.`);
-                    } else {
-                        return cursor._descriptor.select(`computable`).getDescription(pathId);
-                    }
-                },
-                /**
-                 * @description - Get item observable description.
-                 *
-                 * @method getItemDescription.ofObservable
-                 * @return {object}
-                 */
-                ofObservable: function ofObservable () {
-                    if (!cursor.isItemObservable(key)) {
-                        Hf.log(`error`, `DataCursorElement.getItemDescription.ofObservable - Data item key:${key} at pathId:${pathId} does not have an observable description.`);
-                    } else {
-                        return cursor._descriptor.select(`observable`).getDescription(pathId);
                     }
                 }
-            };
-        }
+
+                return cursor._descriptor.select(`constrainable`).getDescription(pathId);
+            },
+            /**
+             * @description - Get item computable description.
+             *
+             * @method getItemDescription.ofComputable
+             * @return {object}
+             */
+            ofComputable: function ofComputable () {
+                if (Hf.DEVELOPMENT) {
+                    if (!cursor.isItemComputable(key)) {
+                        Hf.log(`error`, `DataCursorElement.getItemDescription.ofComputable - Data item key:${key} at pathId:${pathId} does not have a computable description.`);
+                    }
+                }
+
+                return cursor._descriptor.select(`computable`).getDescription(pathId);
+            },
+            /**
+             * @description - Get item observable description.
+             *
+             * @method getItemDescription.ofObservable
+             * @return {object}
+             */
+            ofObservable: function ofObservable () {
+                if (Hf.DEVELOPMENT) {
+                    if (!cursor.isItemObservable(key)) {
+                        Hf.log(`error`, `DataCursorElement.getItemDescription.ofObservable - Data item key:${key} at pathId:${pathId} does not have an observable description.`);
+                    }
+                }
+
+                return cursor._descriptor.select(`observable`).getDescription(pathId);
+            }
+        };
     },
     /**
      * @description - At cursor, give descriptions to an item.
@@ -654,309 +645,320 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
-        if (!cursor.hasItem(key)) {
-            Hf.log(`error`, `DataCursorElement.describeItem - Data item key:${key} at pathId:${pathId} is not defined.`);
-        } else {
-            const constrainableItem = cursor.isItemConstrainable(key);
-            const computableItem = cursor.isItemComputable(key);
-            const observableItem = cursor.isItemObservable(key);
+        if (Hf.DEVELOPMENT) {
+            if (!cursor.hasItem(key)) {
+                Hf.log(`error`, `DataCursorElement.describeItem - Data item key:${key} at pathId:${pathId} is not defined.`);
+            }
+        }
 
-            return {
-                /**
-                 * @description - Describe item with a one of values constraint.
-                 *
-                 * @method describeItem.asOneOfValues
-                 * @param {array} values
-                 * @return {object}
-                 */
-                asOneOfValues: function asOneOfValues (values) {
+        const constrainableItem = cursor.isItemConstrainable(key);
+        const computableItem = cursor.isItemComputable(key);
+        const observableItem = cursor.isItemObservable(key);
+
+        return {
+            /**
+             * @description - Describe item with a one of values constraint.
+             *
+             * @method describeItem.asOneOfValues
+             * @param {array} values
+             * @return {object}
+             */
+            asOneOfValues: function asOneOfValues (values) {
+                if (Hf.DEVELOPMENT) {
                     if (!Hf.isArray(values) || Hf.isEmpty(values)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Input values are invalid.`);
                     } else if (!values.every((value) => Hf.isString(value) || Hf.isNumeric(value))) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Value must be either numeric or string.`);
-                    } else {
-                        if (computableItem) {
-                            Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
-                        } else {
-                            const descriptor = cursor._descriptor.select(`constrainable`);
-                            const constraint = oneOfValuesPreset(values);
-                            if (!descriptor.hasDescription(pathId)) {
-                                const descPreset = {
-                                    key,
-                                    constraint
-                                };
-                                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
-                            } else {
-                                descriptor.getDescription(pathId).addConstraint(
-                                    constraint.oneOf.constrainer,
-                                    constraint.oneOf.condition,
-                                    `oneOf`
-                                );
-                            }
-                        }
+                    } else if (computableItem) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                     }
-                    return this;
-                },
-                /**
-                 * @description - Describe item with a one of types constraint.
-                 *
-                 * @method describeItem.asOneOfTypes
-                 * @param {array} types
-                 * @return {object}
-                 */
-                asOneOfTypes: function asOneOfTypes (types) {
+                }
+
+                const descriptor = cursor._descriptor.select(`constrainable`);
+                const constraint = oneOfValuesPreset(values);
+
+                if (!descriptor.hasDescription(pathId)) {
+                    const descPreset = {
+                        key,
+                        constraint
+                    };
+                    descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
+                } else {
+                    descriptor.getDescription(pathId).addConstraint(
+                        constraint.oneOf.constrainer,
+                        constraint.oneOf.condition,
+                        `oneOf`
+                    );
+                }
+
+                return this;
+            },
+            /**
+             * @description - Describe item with a one of types constraint.
+             *
+             * @method describeItem.asOneOfTypes
+             * @param {array} types
+             * @return {object}
+             */
+            asOneOfTypes: function asOneOfTypes (types) {
+                if (Hf.DEVELOPMENT) {
                     if (!Hf.isArray(types) || Hf.isEmpty(types)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Input types are invalid.`);
                     } else if (!types.every((type) => Hf.isString(type))) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Type value must be string.`);
+                    } else if (computableItem) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                    }
+                }
+
+                const descriptor = cursor._descriptor.select(`constrainable`);
+                const constraint = oneOfTypesPreset(types);
+                if (!descriptor.hasDescription(pathId)) {
+                    const descPreset = {
+                        key,
+                        constraint
+                    };
+                    descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
+                } else {
+                    descriptor.getDescription(pathId).addConstraint(
+                        constraint.oneTypeOf.constrainer,
+                        constraint.oneTypeOf.condition,
+                        `oneTypeOf`
+                    );
+                }
+
+                return this;
+            },
+            /**
+             * @description - Describe item with a required constraint.
+             *
+             * @method describeItem.asRequired
+             * @return {object}
+             */
+            asRequired: function asRequired () {
+                function deepAssignDescription (_pathId, _content, _key) {
+                    const descriptor = cursor._descriptor.select(`constrainable`);
+                    const constraint = requiredPreset();
+                    if (!descriptor.hasDescription(_pathId)) {
+                        const descPreset = {
+                            key: _key,
+                            constraint
+                        };
+                        descriptor.addDescription(_pathId).assign(descPreset).to(_content);
                     } else {
-                        if (computableItem) {
-                            Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
-                        } else {
-                            const descriptor = cursor._descriptor.select(`constrainable`);
-                            const constraint = oneOfTypesPreset(types);
-                            if (!descriptor.hasDescription(pathId)) {
-                                const descPreset = {
-                                    key,
-                                    constraint
-                                };
-                                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
-                            } else {
-                                descriptor.getDescription(pathId).addConstraint(
-                                    constraint.oneTypeOf.constrainer,
-                                    constraint.oneTypeOf.condition,
-                                    `oneTypeOf`
-                                );
-                            }
-                        }
-                    }
-                    return this;
-                },
-                /**
-                 * @description - Describe item with a required constraint.
-                 *
-                 * @method describeItem.asRequired
-                 * @return {object}
-                 */
-                asRequired: function asRequired () {
-                    function deepAssignDescription (_pathId, _content, _key) {
-                        const descriptor = cursor._descriptor.select(`constrainable`);
-                        const constraint = requiredPreset();
-                        if (!descriptor.hasDescription(_pathId)) {
-                            const descPreset = {
-                                key: _key,
-                                constraint
-                            };
-                            descriptor.addDescription(_pathId).assign(descPreset).to(_content);
-                        } else {
-                            descriptor.getDescription(_pathId).addConstraint(
-                                constraint.required.constrainer,
-                                null,
-                                `required`
-                            );
-                        }
-
-                        /* recursively set requirable description to nested objects */
-                        if (Hf.isNonEmptyObject(_content[_key])) {
-                            Object.keys(_content[_key]).forEach((innerKey) => {
-                                deepAssignDescription(`${_pathId}.${innerKey}`, _content[_key], innerKey);
-                            });
-                        }
+                        descriptor.getDescription(_pathId).addConstraint(
+                            constraint.required.constrainer,
+                            null,
+                            `required`
+                        );
                     }
 
+                    /* recursively set requirable description to nested objects */
+                    if (Hf.isNonEmptyObject(_content[_key])) {
+                        Object.keys(_content[_key]).forEach((innerKey) => {
+                            deepAssignDescription(`${_pathId}.${innerKey}`, _content[_key], innerKey);
+                        });
+                    }
+                }
+
+                if (Hf.DEVELOPMENT) {
                     if (computableItem) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asRequired - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
+                    }
+                }
+
+                deepAssignDescription(pathId, cursor._content, key);
+
+                return this;
+            },
+            /**
+             * @description - Describe item with a strongly typed constraint.
+             *
+             * @method describeItem.asStronglyTyped
+             * @return void
+             */
+            asStronglyTyped: function asStronglyTyped () {
+                function deepAssignDescription (_pathId, _content, _key) {
+                    const descriptor = cursor._descriptor.select(`constrainable`);
+                    const constraint = stronglyTypedPreset();
+                    if (!descriptor.hasDescription(_pathId)) {
+                        const descPreset = {
+                            key: _key,
+                            constraint
+                        };
+                        descriptor.addDescription(_pathId).assign(descPreset).to(_content);
                     } else {
-                        deepAssignDescription(pathId, cursor._content, key);
-                    }
-                    return this;
-                },
-                /**
-                 * @description - Describe item with a strongly typed constraint.
-                 *
-                 * @method describeItem.asStronglyTyped
-                 * @return void
-                 */
-                asStronglyTyped: function asStronglyTyped () {
-                    function deepAssignDescription (_pathId, _content, _key) {
-                        const descriptor = cursor._descriptor.select(`constrainable`);
-                        const constraint = stronglyTypedPreset();
-                        if (!descriptor.hasDescription(_pathId)) {
-                            const descPreset = {
-                                key: _key,
-                                constraint
-                            };
-                            descriptor.addDescription(_pathId).assign(descPreset).to(_content);
-                        } else {
-                            descriptor.getDescription(_pathId).addConstraint(
-                                constraint.stronglyTyped.constrainer,
-                                null,
-                                `stronglyTyped`);
-                        }
-
-                        /* recursively set strongly typed description to nested objects */
-                        if (Hf.isNonEmptyObject(_content[_key])) {
-                            Object.keys(_content[_key]).forEach((innerKey) => {
-                                deepAssignDescription(`${_pathId}.${innerKey}`, _content[_key], innerKey);
-                            });
-                        }
+                        descriptor.getDescription(_pathId).addConstraint(
+                            constraint.stronglyTyped.constrainer,
+                            null,
+                            `stronglyTyped`);
                     }
 
+                    /* recursively set strongly typed description to nested objects */
+                    if (Hf.isNonEmptyObject(_content[_key])) {
+                        Object.keys(_content[_key]).forEach((innerKey) => {
+                            deepAssignDescription(`${_pathId}.${innerKey}`, _content[_key], innerKey);
+                        });
+                    }
+                }
+
+                if (Hf.DEVELOPMENT) {
                     if (computableItem) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asStronglyTyped - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
-                    } else {
-                        deepAssignDescription(pathId, cursor._content, key);
                     }
-                    return this;
-                },
-                /**
-                 * @description - Describe item with a bounding constraint.
-                 *
-                 * @method describeItem.asBounded
-                 * @param {object} lowerBound
-                 * @param {object} upperBound
-                 * @return {object}
-                 */
-                asBounded: function asBounded (lowerBound, upperBound) {
+                }
+
+                deepAssignDescription(pathId, cursor._content, key);
+
+                return this;
+            },
+            /**
+             * @description - Describe item with a bounding constraint.
+             *
+             * @method describeItem.asBounded
+             * @param {object} lowerBound
+             * @param {object} upperBound
+             * @return {object}
+             */
+            asBounded: function asBounded (lowerBound, upperBound) {
+                if (Hf.DEVELOPMENT) {
                     if (!Hf.isNumeric(lowerBound) && !Hf.isNumeric(upperBound)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asBounded - Input bouding range values are must be numeric.`);
-                    } else {
-                        if (computableItem) {
-                            Hf.log(`error`, `DataCursorElement.describeItem.asBounded - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
-                        } else {
-                            const descriptor = cursor._descriptor.select(`constrainable`);
-                            const constraint = boundedPreset(lowerBound, upperBound);
-                            if (!descriptor.hasDescription(pathId)) {
-                                const descPreset = {
-                                    key,
-                                    constraint
-                                };
-                                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
-                            } else {
-                                descriptor.getDescription(pathId).addConstraint(
-                                    constraint.bounded.constrainer,
-                                    constraint.bounded.condition,
-                                    `bounded`);
-                            }
-                        }
+                    } else if (computableItem) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asBounded - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                     }
-                    return this;
-                },
-                /**
-                 * @description - Describe item as a constrainable.
-                 *
-                 * @method describeItem.asConstrainable
-                 * @param {object} constraint
-                 * @return void
-                 */
-                asConstrainable: function asConstrainable (constraint) {
+                }
+
+                const descriptor = cursor._descriptor.select(`constrainable`);
+                const constraint = boundedPreset(lowerBound, upperBound);
+                if (!descriptor.hasDescription(pathId)) {
+                    const descPreset = {
+                        key,
+                        constraint
+                    };
+                    descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
+                } else {
+                    descriptor.getDescription(pathId).addConstraint(
+                        constraint.bounded.constrainer,
+                        constraint.bounded.condition,
+                        `bounded`);
+                }
+
+                return this;
+            },
+            /**
+             * @description - Describe item as a constrainable.
+             *
+             * @method describeItem.asConstrainable
+             * @param {object} constraint
+             * @return void
+             */
+            asConstrainable: function asConstrainable (constraint) {
+                if (Hf.DEVELOPMENT) {
                     if (!Hf.isObject(constraint) && Object.key(constraint).forEach((constraintKey) => {
                         return Hf.isSchema({
                             constrainer: `function`
                         }).of(constraint[constraintKey]);
                     })) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asConstrainable - Input constraint is invalid.`);
-                    } else {
-                        if (computableItem) {
-                            Hf.log(`error`, `DataCursorElement.describeItem.asConstrainable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
-                        } else {
-                            const descriptor = cursor._descriptor.select(`constrainable`);
-
-                            if (!descriptor.hasDescription(pathId)) {
-                                const descPreset = {
-                                    key,
-                                    constraint
-                                };
-                                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
-                            } else {
-                                // Object.keys(constraint).forEach((constraintKey) => {
-                                //     descriptor.getDescription(pathId).addConstraint(
-                                //         constraint[constraintKey].contrainer,
-                                //         constraint[constraintKey].condition,
-                                //         constraintKey
-                                //     );
-                                // });
-                                Object.entries(constraint).forEach(([ constraintKey, constraintValue ]) => {
-                                    descriptor.getDescription(pathId).addConstraint(
-                                        constraintValue.contrainer,
-                                        constraintValue.condition,
-                                        constraintKey
-                                    );
-                                });
-                            }
-                        }
+                    } else if (computableItem) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asConstrainable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
                     }
-                    return this;
-                },
-                /**
-                 * @description - Describe item as an observable.
-                 *
-                 * @method describeItem.asObservable
-                 * @param {object} condition
-                 * @param {object} subscriber
-                 * @return void
-                 */
-                asObservable: function asObservable (condition, subscriber) {
+                }
+
+                const descriptor = cursor._descriptor.select(`constrainable`);
+
+                if (!descriptor.hasDescription(pathId)) {
+                    const descPreset = {
+                        key,
+                        constraint
+                    };
+                    descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
+                } else {
+
+                    Object.entries(constraint).forEach(([ constraintKey, constraintValue ]) => {
+                        descriptor.getDescription(pathId).addConstraint(
+                            constraintValue.contrainer,
+                            constraintValue.condition,
+                            constraintKey
+                        );
+                    });
+                }
+
+                return this;
+            },
+            /**
+             * @description - Describe item as an observable.
+             *
+             * @method describeItem.asObservable
+             * @param {object} condition
+             * @param {object} subscriber
+             * @return void
+             */
+            asObservable: function asObservable (condition, subscriber) {
+                if (Hf.DEVELOPMENT) {
                     if (computableItem) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asObservable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
-                    } else {
-                        condition = Hf.isObject(condition) ? condition : {};
-                        subscriber = Hf.isObject(subscriber) ? subscriber : {};
-
-                        const descriptor = cursor._descriptor.select(`observable`);
-                        const descPreset = {
-                            key,
-                            condition,
-                            subscriber
-                        };
-
-                        if (!descriptor.hasDescription(pathId)) {
-                            descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
-                        } else {
-                            Hf.forEach(condition, (trigger, conditionKey) => {
-                                descriptor.getDescription(pathId).addCondition(trigger, conditionKey);
-                            });
-                            Hf.forEach(subscriber, (handler, handlerKey) => {
-                                descriptor.getDescription(pathId).addSubscriber(handler, handlerKey);
-                            });
-                        }
                     }
-                    return this;
-                },
-                /**
-                 * @description - Describe item as a computable.
-                 *
-                 * @method describeItem.asComputable
-                 * @param {array} contexts
-                 * @param {function} compute
-                 * @return void
-                 */
-                asComputable: function asComputable (contexts, compute) {
+                }
+
+                condition = Hf.isObject(condition) ? condition : {};
+                subscriber = Hf.isObject(subscriber) ? subscriber : {};
+
+                const descriptor = cursor._descriptor.select(`observable`);
+                const descPreset = {
+                    key,
+                    condition,
+                    subscriber
+                };
+
+                if (!descriptor.hasDescription(pathId)) {
+                    descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
+                } else {
+                    Hf.forEach(condition, (trigger, conditionKey) => {
+                        descriptor.getDescription(pathId).addCondition(trigger, conditionKey);
+                    });
+                    Hf.forEach(subscriber, (handler, handlerKey) => {
+                        descriptor.getDescription(pathId).addSubscriber(handler, handlerKey);
+                    });
+                }
+
+                return this;
+            },
+            /**
+             * @description - Describe item as a computable.
+             *
+             * @method describeItem.asComputable
+             * @param {array} contexts
+             * @param {function} compute
+             * @return void
+             */
+            asComputable: function asComputable (contexts, compute) {
+                if (Hf.DEVELOPMENT) {
                     if (!Hf.isArray(contexts)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asComputable - Input computable contexts are invalid.`);
                     } else if (!Hf.isFunction(compute)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asComputable - Input compute function is invalid.`);
-                    } else {
-                        if (constrainableItem || observableItem) {
-                            Hf.log(`error`, `DataCursorElement.describeItem.asComputable - Cannot redescribe computable to data item key:${key} at pathId:${pathId}.`);
-                        } else {
-                            const descriptor = cursor._descriptor.select(`computable`);
-                            const descPreset = {
-                                key,
-                                contexts,
-                                compute
-                            };
-
-                            if (descriptor.hasDescription(pathId)) {
-                                descriptor.removeDescription(pathId);
-                            }
-                            descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
-                        }
+                    } else if (constrainableItem || observableItem) {
+                        Hf.log(`error`, `DataCursorElement.describeItem.asComputable - Cannot redescribe computable to data item key:${key} at pathId:${pathId}.`);
                     }
-                    return this;
                 }
-            };
-        }
+
+                const descriptor = cursor._descriptor.select(`computable`);
+                const descPreset = {
+                    key,
+                    contexts,
+                    compute
+                };
+
+                if (descriptor.hasDescription(pathId)) {
+                    descriptor.removeDescription(pathId);
+                }
+                descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
+
+                return this;
+            }
+        };
     },
     /**
      * @description - At cursor, remove descriptions from an item.
@@ -969,52 +971,54 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
-        if (!cursor.hasItem(key)) {
-            Hf.log(`error`, `DataCursorElement.unDescribeItem - Data item key:${key} at pathId:${pathId} is not defined.`);
-        } else {
-            const constrainableItem = cursor.isItemComputable(key);
-            const computableItem = cursor.isItemComputable(key);
-            const observableItem = cursor.isItemObservable(key);
-
-            return {
-                /**
-                 * @description - Undescribe item as a constrainable.
-                 *
-                 * @method unDescribeItem.asConstrainable
-                 * @return void
-                 */
-                asConstrainable: function asConstrainable () {
-                    if (constrainableItem) {
-                        cursor._descriptor.select(`constrainable`).removeDescription(pathId);
-                    }
-                    return this;
-                },
-                /**
-                 * @description - Undescribe item as an observable.
-                 *
-                 * @method unDescribeItem.asObservable
-                 * @return void
-                 */
-                asObservable: function asObservable () {
-                    if (observableItem) {
-                        cursor._descriptor.select(`observable`).removeDescription(pathId);
-                    }
-                    return this;
-                },
-                /**
-                 * @description - Undescribe item as a computable.
-                 *
-                 * @method unDescribeItem.asComputable
-                 * @return void
-                 */
-                asComputable: function asComputable () {
-                    if (computableItem) {
-                        cursor._descriptor.select(`computable`).removeDescription(pathId);
-                    }
-                    return this;
-                }
-            };
+        if (Hf.DEVELOPMENT) {
+            if (!cursor.hasItem(key)) {
+                Hf.log(`error`, `DataCursorElement.unDescribeItem - Data item key:${key} at pathId:${pathId} is not defined.`);
+            }
         }
+
+        const constrainableItem = cursor.isItemComputable(key);
+        const computableItem = cursor.isItemComputable(key);
+        const observableItem = cursor.isItemObservable(key);
+
+        return {
+            /**
+             * @description - Undescribe item as a constrainable.
+             *
+             * @method unDescribeItem.asConstrainable
+             * @return void
+             */
+            asConstrainable: function asConstrainable () {
+                if (constrainableItem) {
+                    cursor._descriptor.select(`constrainable`).removeDescription(pathId);
+                }
+                return this;
+            },
+            /**
+             * @description - Undescribe item as an observable.
+             *
+             * @method unDescribeItem.asObservable
+             * @return void
+             */
+            asObservable: function asObservable () {
+                if (observableItem) {
+                    cursor._descriptor.select(`observable`).removeDescription(pathId);
+                }
+                return this;
+            },
+            /**
+             * @description - Undescribe item as a computable.
+             *
+             * @method unDescribeItem.asComputable
+             * @return void
+             */
+            asComputable: function asComputable () {
+                if (computableItem) {
+                    cursor._descriptor.select(`computable`).removeDescription(pathId);
+                }
+                return this;
+            }
+        };
     },
     /**
      * @description - At cursor, loop through all data values.
@@ -1025,15 +1029,17 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     forEach: function forEach (iterator, context) {
-        if (Hf.isFunction(iterator)) {
-            const cursor = this;
-
-            Hf.forEach(cursor._content, (item, key) => {
-                iterator.call(context, item, key);
-            });
-        } else {
-            Hf.log(`error`, `DataCursorElement.forEach - Input iterator callback is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isFunction(iterator)) {
+                Hf.log(`error`, `DataCursorElement.forEach - Input iterator callback is invalid.`);
+            }
         }
+
+        const cursor = this;
+
+        Hf.forEach(cursor._content, (item, key) => {
+            iterator.call(context, item, key);
+        });
     },
     /**
      * @description - At cursor, get data item as schema object.
@@ -1067,10 +1073,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
 
         beautified = Hf.isBoolean(beautified) ? beautified : true;
 
-        if (beautified) {
-            return JSON.stringify(cursor.toObject(), null, `\t`);
-        }
-        return JSON.stringify(cursor.toObject());
+        return beautified ? JSON.stringify(cursor.toObject(), null, `\t`) : JSON.stringify(cursor.toObject());
     }
 };
 
@@ -1082,84 +1085,88 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function DataCursorElement (data, pathId) {
-    if (!Hf.isObject(data)) {
-        Hf.log(`error`, `DataCursorElement - Input data element instance is invalid.`);
-    } else {
-        if (Hf.isString(pathId) || Hf.isArray(pathId)) {
-            let rootKey = ``;
-            let key = ``;
-            /* parsing pathId and retrive content */
-            const content = Hf.retrieve(pathId, `.`).from(data._rootContent);
-
-            /* get the keys from pathId */
-            if (Hf.isString(pathId)) {
-                [ key ] = Hf.stringToArray(pathId, `.`).reverse();
-                [ rootKey ] = Hf.stringToArray(pathId, `.`);
-            }
-            if (Hf.isArray(pathId)) {
-                [ rootKey ] = pathId;
-                [ key ] = pathId.slice(0).reverse();
-                pathId = Hf.arrayToString(pathId, `.`);
-            }
-
-            /* check that content must be an object or array */
-            if (!(Hf.isObject(content) || Hf.isArray(content))) {
-                Hf.log(`error`, `DataCursorElement - Invalid pathId. Last content in pathId must be an object or array.`);
-            } else {
-                const element = Object.create(DataCursorElementPrototype, {
-                    _pathId: {
-                        value: pathId,
-                        writable: true,
-                        configurable: false,
-                        enumerable: false
-                    },
-                    _immutable: {
-                        get: function get () {
-                            return data._mutation.immutableRootKeys.includes(rootKey);
-                        },
-                        configurable: false,
-                        enumerable: false
-                    },
-                    _rootKey: {
-                        value: rootKey,
-                        writable: true,
-                        configurable: false,
-                        enumerable: false
-                    },
-                    _key: {
-                        value: key,
-                        writable: true,
-                        configurable: false,
-                        enumerable: false
-                    },
-                    _content: {
-                        value: content,
-                        writable: true,
-                        configurable: false,
-                        enumerable: false
-                    },
-                    _descriptor: {
-                        value: data._descriptor,
-                        writable: false,
-                        configurable: false,
-                        enumerable: false
-                    },
-                    _data: {
-                        value: data,
-                        writable: false,
-                        configurable: false,
-                        enumerable: false
-                    }
-                });
-
-                if (!Hf.isObject(element)) {
-                    Hf.log(`error`, `DataCursorElement - Unable to create a data cursor element instance.`);
-                } else {
-                    return element;
-                }
-            }
-        } else {
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(data)) {
+            Hf.log(`error`, `DataCursorElement - Input data element instance is invalid.`);
+        } else if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
             Hf.log(`error`, `DataCursorElement - Input pathId is invalid.`);
         }
     }
+
+    let rootKey = ``;
+    let key = ``;
+    /* parsing pathId and retrive content */
+    const content = Hf.retrieve(pathId, `.`).from(data._rootContent);
+
+    /* get the keys from pathId */
+    if (Hf.isString(pathId)) {
+        [ key ] = Hf.stringToArray(pathId, `.`).reverse();
+        [ rootKey ] = Hf.stringToArray(pathId, `.`);
+    }
+    if (Hf.isArray(pathId)) {
+        [ rootKey ] = pathId;
+        [ key ] = pathId.slice(0).reverse();
+        pathId = Hf.arrayToString(pathId, `.`);
+    }
+
+    /* check that content must be an object or array */
+    if (Hf.DEVELOPMENT) {
+        if (!(Hf.isObject(content) || Hf.isArray(content))) {
+            Hf.log(`error`, `DataCursorElement - Invalid pathId. Last content in pathId must be an object or array.`);
+        }
+    }
+
+    const element = Object.create(DataCursorElementPrototype, {
+        _pathId: {
+            value: pathId,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        _immutable: {
+            get: function get () {
+                return data._mutation.immutableRootKeys.includes(rootKey);
+            },
+            configurable: false,
+            enumerable: false
+        },
+        _rootKey: {
+            value: rootKey,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        _key: {
+            value: key,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        _content: {
+            value: content,
+            writable: true,
+            configurable: false,
+            enumerable: false
+        },
+        _descriptor: {
+            value: data._descriptor,
+            writable: false,
+            configurable: false,
+            enumerable: false
+        },
+        _data: {
+            value: data,
+            writable: false,
+            configurable: false,
+            enumerable: false
+        }
+    });
+
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(element)) {
+            Hf.log(`error`, `DataCursorElement - Unable to create a data cursor element instance.`);
+        }
+    }
+
+    return element;
 }

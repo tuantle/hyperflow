@@ -35,35 +35,37 @@ import { Hf } from '../../../../hyperflow';
  * @return {object}
  */
 const oneOfTypesPreset = function oneOfTypesPreset (_types) {
-    if (!Hf.isArray(_types) || Hf.isEmpty(_types)) {
-        Hf.log(`error`, `oneTypeOf - Input types are invalid.`);
-    } else if (!_types.every((type) => Hf.isString(type))) {
-        Hf.log(`error`, `oneTypeOf - Type value must be string.`);
-    } else {
-        return {
-            oneTypeOf: {
-                condition: _types,
-                /**
-                 * @description - Ensures value is one of types.
-                 *
-                 * @method oneTypeOf
-                 * @return {object}
-                 */
-                constrainer: function oneTypeOf (types) {
-                    const context = this;
-                    const oldValueType = Hf.typeOf(context.oldValue);
-                    const newValueType = Hf.typeOf(context.newValue);
-                    const result = {
-                        verified: true,
-                        reject: function reject () {
-                            Hf.log(`warn1`, `oneTypeOf - Property key:${context.key} value is not one type of ${types}`);
-                        }
-                    };
-                    result.verified = types.includes(oldValueType) && types.includes(newValueType);
-                    return result;
-                }
-            }
-        };
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isArray(_types) || Hf.isEmpty(_types)) {
+            Hf.log(`error`, `oneTypeOf - Input types are invalid.`);
+        } else if (!_types.every((type) => Hf.isString(type))) {
+            Hf.log(`error`, `oneTypeOf - Type value must be string.`);
+        }
     }
+
+    return {
+        oneTypeOf: {
+            condition: _types,
+            /**
+             * @description - Ensures value is one of types.
+             *
+             * @method oneTypeOf
+             * @return {object}
+             */
+            constrainer: function oneTypeOf (types) {
+                const context = this;
+                const oldValueType = Hf.typeOf(context.oldValue);
+                const newValueType = Hf.typeOf(context.newValue);
+                const result = {
+                    verified: true,
+                    reject: function reject () {
+                        Hf.log(`warn1`, `oneTypeOf - Property key:${context.key} value is not one type of ${types}`);
+                    }
+                };
+                result.verified = types.includes(oldValueType) && types.includes(newValueType);
+                return result;
+            }
+        }
+    };
 };
 export default oneOfTypesPreset;

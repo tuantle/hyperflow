@@ -110,11 +110,12 @@ export default Composer({
          * @return void
          */
         this.setup = function setup (done) { // eslint-disable-line
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `DomainFactory.setup - Input done function is invalid.`);
-            } else {
-                done();
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `DomainFactory.setup - Input done function is invalid.`);
+                }
             }
+            done();
         };
         /**
          * @description - Teardown domain event stream.
@@ -124,11 +125,13 @@ export default Composer({
          * @return void
          */
         this.teardown = function teardown (done) { // eslint-disable-line
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `DomainFactory.teardown - Input done function is invalid.`);
-            } else {
-                done();
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `DomainFactory.teardown - Input done function is invalid.`);
+                }
             }
+
+            done();
         };
         /**
          * @description - Check if domain has started.
@@ -147,11 +150,12 @@ export default Composer({
          */
         this.getInterface = function getInterface () {
             const domain = this;
-            if (!Hf.isObject(_intf)) {
-                Hf.log(`warn0`, `DomainFactory.getInterface - Domain:${domain.name} is not registered with an interface.`);
-            } else {
-                return _intf;
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_intf)) {
+                    Hf.log(`warn0`, `DomainFactory.getInterface - Domain:${domain.name} is not registered with an interface.`);
+                }
             }
+            return _intf;
         };
         /**
          * @description - Get domain store.
@@ -161,11 +165,12 @@ export default Composer({
          */
         this.getStore = function getStore () {
             const domain = this;
-            if (!Hf.isObject(_store)) {
-                Hf.log(`warn0`, `DomainFactory.getStore - Domain:${domain.name} is not registered with a store.`);
-            } else {
-                return _store;
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_store)) {
+                    Hf.log(`warn0`, `DomainFactory.getStore - Domain:${domain.name} is not registered with a store.`);
+                }
             }
+            return _store;
         };
         /**
          * @description - Get domain services.
@@ -178,13 +183,15 @@ export default Composer({
             let services = [];
             if (!Hf.isEmpty(_services)) {
                 if (!Hf.isEmpty(serviceNames)) {
-                    if (!serviceNames.every((name) => Hf.isString(name))) {
-                        Hf.log(`error`, `DomainFactory.getServices - Input service name is invalid.`);
-                    } else if (!serviceNames.every((name) => _services.hasOwnProperty(name))) {
-                        Hf.log(`error`, `DomainFactory.getServices - Service is not found.`);
-                    } else {
-                        services = services.concat(Hf.collect(...serviceNames).from(_services));
+                    if (Hf.DEVELOPMENT) {
+                        if (!serviceNames.every((name) => Hf.isString(name))) {
+                            Hf.log(`error`, `DomainFactory.getServices - Input service name is invalid.`);
+                        } else if (!serviceNames.every((name) => _services.hasOwnProperty(name))) {
+                            Hf.log(`error`, `DomainFactory.getServices - Service is not found.`);
+                        }
                     }
+
+                    services = services.concat(Hf.collect(...serviceNames).from(_services));
                 } else {
                     services = _services;
                 }
@@ -201,23 +208,28 @@ export default Composer({
         this.register = function register (definition) {
             const domain = this;
             // TODO: Throw error if called outside of $init.
-            if (!Hf.isSchema({
-                intf: `object|undefined`,
-                store: `object|undefined`,
-                services: `array|undefined`,
-                peerDomains: `array|undefined`,
-                childDomains: `array|undefined`
-            }).of(definition)) {
-                Hf.log(`error`, `DomainFactory.register - Input definition is invalid.`);
-            } else {
-                const {
-                    intf,
-                    store,
-                    services,
-                    peerDomains,
-                    childDomains
-                } = definition;
-                if (Hf.isObject(intf)) {
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    intf: `object|undefined`,
+                    store: `object|undefined`,
+                    services: `array|undefined`,
+                    peerDomains: `array|undefined`,
+                    childDomains: `array|undefined`
+                }).of(definition)) {
+                    Hf.log(`error`, `DomainFactory.register - Input definition is invalid.`);
+                }
+            }
+
+            const {
+                intf,
+                store,
+                services,
+                peerDomains,
+                childDomains
+            } = definition;
+
+            if (Hf.isObject(intf)) {
+                if (Hf.DEVELOPMENT) {
                     if (!Hf.isSchema({
                         fId: `string`,
                         name: `string`,
@@ -235,40 +247,42 @@ export default Composer({
                         Hf.log(`error`, `DomainFactory.register - Input interface is invalid.`);
                     } else if (Hf.isObject(_intf)) {
                         Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered interface:${_intf.name}.`);
-                    } else {
-                        _intf = intf;
-                        Hf.log(`info`, `Domain:${domain.name} registered interface:${_intf.name}.`);
                     }
                 }
-                if (Hf.isObject(store)) {
-                    if (!Hf.isObject(_intf)) {
-                        Hf.log(`warn0`, `DomainFactory.register - Cannot register store:${store.name} without first register an interface.`);
-                    } else {
-                        if (!Hf.isSchema({
-                            fId: `string`,
-                            name: `string`,
-                            setup: `function`,
-                            teardown: `function`,
-                            observe: `function`,
-                            activateIncomingStream: `function`,
-                            activateOutgoingStream: `function`,
-                            deactivateIncomingStream: `function`,
-                            deactivateOutgoingStream: `function`
-                        }).of(store) || store.fId.substr(0, STORE_FACTORY_CODE.length) !== STORE_FACTORY_CODE) {
-                            Hf.log(`error`, `DomainFactory.register - Input store is invalid.`);
-                        } else if (Hf.isObject(_store)) {
-                            Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered store:${_store.name}.`);
-                        } else {
-                            _store = store;
-                            Hf.log(`info`, `Domain:${domain.name} registered store:${_store.name}.`);
-                        }
+
+                _intf = intf;
+                Hf.log(`info1`, `Domain:${domain.name} registered interface:${_intf.name}.`);
+            }
+            if (Hf.isObject(store)) {
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isSchema({
+                        fId: `string`,
+                        name: `string`,
+                        setup: `function`,
+                        teardown: `function`,
+                        observe: `function`,
+                        activateIncomingStream: `function`,
+                        activateOutgoingStream: `function`,
+                        deactivateIncomingStream: `function`,
+                        deactivateOutgoingStream: `function`
+                    }).of(store) || store.fId.substr(0, STORE_FACTORY_CODE.length) !== STORE_FACTORY_CODE) {
+                        Hf.log(`error`, `DomainFactory.register - Input store is invalid.`);
+                    } else if (!Hf.isObject(_intf)) {
+                        Hf.log(`error`, `DomainFactory.register - Cannot register store:${store.name} without first register an interface.`);
+                    } else if (Hf.isObject(_store)) {
+                        Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered store:${_store.name}.`);
                     }
                 }
-                if (Hf.isObject(_store) && Hf.isObject(_intf)) {
-                    /* interface is now stateful and reflecting its state with a store */
-                    _intf.reflectStateOf(_store);
-                }
-                if (Hf.isArray(services)) {
+
+                _store = store;
+                Hf.log(`info1`, `Domain:${domain.name} registered store:${_store.name}.`);
+            }
+            if (Hf.isObject(_store) && Hf.isObject(_intf)) {
+                /* interface is now stateful and reflecting its state with a store */
+                _intf.reflectStateOf(_store);
+            }
+            if (Hf.isArray(services)) {
+                if (Hf.DEVELOPMENT) {
                     if (!services.every((service) => {
                         return Hf.isSchema({
                             fId: `string`,
@@ -283,18 +297,20 @@ export default Composer({
                         }).of(service) && service.fId.substr(0, SERVICE_FACTORY_CODE.length) === SERVICE_FACTORY_CODE;
                     })) {
                         Hf.log(`error`, `DomainFactory.register - Input services are invalid.`);
-                    } else {
-                        _services = _services.concat(services.filter((service) => {
-                            if (_services.includes(service.name)) {
-                                Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered service:${service.name}.`);
-                                return false;
-                            }
-                            Hf.log(`info`, `Domain:${domain.name} registered service:${service.name}.`);
-                            return true;
-                        }));
                     }
                 }
-                if (Hf.isArray(childDomains)) {
+
+                _services = _services.concat(services.filter((service) => {
+                    if (_services.includes(service.name)) {
+                        Hf.log(`warn1`, `DomainFactory.register - Domain:${domain.name} already registered service:${service.name}.`);
+                        return false;
+                    }
+                    Hf.log(`info1`, `Domain:${domain.name} registered service:${service.name}.`);
+                    return true;
+                }));
+            }
+            if (Hf.isArray(childDomains)) {
+                if (Hf.DEVELOPMENT) {
                     if (!childDomains.every((childDomain) => {
                         return Hf.isSchema({
                             fId: `string`,
@@ -306,26 +322,28 @@ export default Composer({
                         }).of(childDomain) && childDomain.fId.substr(0, DOMAIN_FACTORY_CODE.length) === DOMAIN_FACTORY_CODE;
                     })) {
                         Hf.log(`error`, `DomainFactory.register - Input children domains are invalid.`);
-                    } else {
-                        _childDomains = _childDomains.concat(childDomains.filter((childDomain) => {
-                            if (domain.name === childDomain.name) {
-                                Hf.log(`warn1`, `DomainFactory.register - Cannot register domain:${childDomain.name} as a child of itself.`);
-                                return false;
-                            } else if (_peerDomains.includes(childDomain.name)) {
-                                Hf.log(`warn1`, `DomainFactory.register - Child domain:${childDomain.name} is already registered as a peer.`);
-                                return false;
-                            }
-                            Hf.log(`info`, `Domain:${domain.name} registered child domain:${childDomain.name}.`);
-                            return true;
-                        }));
-                        if (Hf.isObject(_intf)) {
-                            _intf.composedOf(
-                                ..._childDomains.map((childDomain) => childDomain.getInterface()).filter((compositeIntf) => Hf.isObject(compositeIntf))
-                            );
-                        }
                     }
                 }
-                if (Hf.isArray(peerDomains)) {
+
+                _childDomains = _childDomains.concat(childDomains.filter((childDomain) => {
+                    if (domain.name === childDomain.name) {
+                        Hf.log(`warn1`, `DomainFactory.register - Cannot register domain:${childDomain.name} as a child of itself.`);
+                        return false;
+                    } else if (_peerDomains.includes(childDomain.name)) {
+                        Hf.log(`warn1`, `DomainFactory.register - Child domain:${childDomain.name} is already registered as a peer.`);
+                        return false;
+                    }
+                    Hf.log(`info1`, `Domain:${domain.name} registered child domain:${childDomain.name}.`);
+                    return true;
+                }));
+                if (Hf.isObject(_intf)) {
+                    _intf.composedOf(
+                        ..._childDomains.map((childDomain) => childDomain.getInterface()).filter((compositeIntf) => Hf.isObject(compositeIntf))
+                    );
+                }
+            }
+            if (Hf.isArray(peerDomains)) {
+                if (Hf.DEVELOPMENT) {
                     if (!peerDomains.every((peerDomain) => {
                         return Hf.isSchema({
                             fId: `string`,
@@ -337,20 +355,20 @@ export default Composer({
                         }).of(peerDomain) && peerDomain.fId.substr(0, DOMAIN_FACTORY_CODE.length) === DOMAIN_FACTORY_CODE;
                     })) {
                         Hf.log(`error`, `DomainFactory.register - Input peer domains are invalid.`);
-                    } else {
-                        _peerDomains = _peerDomains.concat(peerDomains.filter((peerDomain) => {
-                            if (domain.name === peerDomain.name) {
-                                Hf.log(`warn1`, `DomainFactory.register - Cannot register domain:${peerDomain.name} as a peer of itself.`);
-                                return false;
-                            } else if (_childDomains.includes(peerDomain.name)) {
-                                Hf.log(`warn1`, `DomainFactory.register - Peer domain:${peerDomain.name} is already registered as a child.`);
-                                return false;
-                            }
-                            Hf.log(`info`, `Domain:${domain.name} registered peer domain:${peerDomain.name}.`);
-                            return true;
-                        }));
                     }
                 }
+
+                _peerDomains = _peerDomains.concat(peerDomains.filter((peerDomain) => {
+                    if (domain.name === peerDomain.name) {
+                        Hf.log(`warn1`, `DomainFactory.register - Cannot register domain:${peerDomain.name} as a peer of itself.`);
+                        return false;
+                    } else if (_childDomains.includes(peerDomain.name)) {
+                        Hf.log(`warn1`, `DomainFactory.register - Peer domain:${peerDomain.name} is already registered as a child.`);
+                        return false;
+                    }
+                    Hf.log(`info1`, `Domain:${domain.name} registered peer domain:${peerDomain.name}.`);
+                    return true;
+                }));
             }
         };
         /**
@@ -365,180 +383,200 @@ export default Composer({
             const domain = this;
             const {
                 enableSlowRunMode,
-                waitTime
+                waitTime,
+                timeout
             } = Hf.fallback({
                 enableSlowRunMode: false,
                 waitTime: DEFAULT_SETUP_WAIT_TIME_IN_MS
             }).of(option);
 
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `DomainFactory.start - Input done function is invalid.`);
-            } else {
-                if (!_started) {
-                    const domainSetupTimeout = setTimeout(() => {
-                        Hf.log(`warn1`, `DomainFactory.start - Domain:${domain.name} is taking longer than ${waitTime}ms to setup.`);
-                    }, waitTime);
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `DomainFactory.start - Input done function is invalid.`);
+                }
+            }
 
-                    Hf.log(`info`, `Starting domain:${domain.name}...`);
+            if (!_started) {
+                const domainTimeoutId = setTimeout(() => {
+                    Hf.log(`warn1`, `DomainFactory.start - Domain:${domain.name} is taking longer than ${waitTime}ms to setup.`);
+                    if (Hf.isFunction(timeout)) {
+                        timeout(domain.name);
+                    }
+                }, waitTime);
 
-                    /* setup event stream with domain observing interface */
+                Hf.log(`info1`, `Starting domain:${domain.name}...`);
+
+                /* setup event stream with domain observing interface */
+                if (Hf.isObject(_intf)) {
+                    domain.observe(_intf);
+                }
+                /* setup event stream observation duplex between domain and store */
+                if (Hf.isObject(_store)) {
+                    domain.observe(_store);
+                    _store.observe(domain);
+
+                    /* setup event stream with interface observing store */
                     if (Hf.isObject(_intf)) {
-                        domain.observe(_intf);
+                        _intf.observe(_store);
                     }
-                    /* setup event stream observation duplex between domain and store */
-                    if (Hf.isObject(_store)) {
-                        domain.observe(_store);
-                        _store.observe(domain);
+                }
+                /* setup event stream observation duplex between domain and servies */
+                if (!Hf.isEmpty(_services)) {
+                    domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
+                    _services.forEach((service) => service.observe(domain));
+                }
+                /* setup event stream observation duplex between domain and children */
+                if (!Hf.isEmpty(_childDomains)) {
+                    domain.observe(..._childDomains);
+                    _childDomains.forEach((childDomain) => childDomain.observe(domain));
+                }
+                /* setup event stream observation duplex between domain and peers */
+                if (!Hf.isEmpty(_peerDomains)) {
+                    let index = 0;
+                    while (index < _peerDomains.length - 1) {
+                        _peerDomains[index].observe(..._peerDomains.slice(index + 1));
+                        _peerDomains.slice(index + 1).forEach((peerDomain) => peerDomain.observe(_peerDomains[index])); // eslint-disable-line
+                        index++;
+                    }
+                    domain.observe(..._peerDomains);
+                    _peerDomains.forEach((peerDomain) => peerDomain.observe(domain));
+                }
 
-                        /* setup event stream with interface observing store */
-                        if (Hf.isObject(_intf)) {
-                            _intf.observe(_store);
-                        }
-                    }
-                    /* setup event stream observation duplex between domain and servies */
-                    if (!Hf.isEmpty(_services)) {
-                        domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
-                        _services.forEach((service) => service.observe(domain));
-                    }
-                    /* setup event stream observation duplex between domain and children */
+                domain.setup(() => {
+                    /* first activate parent domain incoming stream */
+                    domain.activateIncomingStream({
+                        forceBufferingOnAllIncomingStreams: enableSlowRunMode,
+                        bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                        bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                    });
+
+                    /*  then startup child domains... */
                     if (!Hf.isEmpty(_childDomains)) {
-                        domain.observe(..._childDomains);
-                        _childDomains.forEach((childDomain) => childDomain.observe(domain));
-                    }
-                    /* setup event stream observation duplex between domain and peers */
-                    if (!Hf.isEmpty(_peerDomains)) {
-                        let index = 0;
-                        while (index < _peerDomains.length - 1) {
-                            _peerDomains[index].observe(..._peerDomains.slice(index + 1));
-                            _peerDomains.slice(index + 1).forEach((peerDomain) => peerDomain.observe(_peerDomains[index])); // eslint-disable-line
-                            index++;
-                        }
-                        domain.observe(..._peerDomains);
-                        _peerDomains.forEach((peerDomain) => peerDomain.observe(domain));
-                    }
-
-                    domain.setup(() => {
-                        /* first activate parent domain incoming stream */
-                        domain.activateIncomingStream({
-                            forceBufferingOnAllIncomingStreams: enableSlowRunMode,
-                            bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
-                            bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
-                        });
-
-                        /*  then startup child domains... */
-                        if (!Hf.isEmpty(_childDomains)) {
-                            _childDomains.forEach((childDomain) => {
-                                const childDomainStartingTimeout = setTimeout(() => {
-                                    Hf.log(`warn1`, `DomainFactory.start - Child domain:${childDomain.name} is taking longer than ${waitTime}ms to start.`);
-                                }, waitTime);
-                                childDomain.start(() => clearTimeout(childDomainStartingTimeout), option);
-                            });
-                        }
-
-                        /* then startup peer domains... */
-                        if (!Hf.isEmpty(_peerDomains)) {
-                            _peerDomains.forEach((peerDomain) => {
-                                const peerDomainStartingTimeout = setTimeout(() => {
-                                    Hf.log(`warn1`, `DomainFactory.start -  Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to start.`);
-                                }, waitTime);
-                                peerDomain.start(() => clearTimeout(peerDomainStartingTimeout), option);
-                            });
-                        }
-
-                        /* then activate parent to child interfaces... */
-                        if (Hf.isObject(_intf)) {
-                            /* helper function to activate all child interfaces event stream */
-                            const deepInterfaceActivateStream = function deepInterfaceActivateStream (intf) {
-                                if (Hf.isObject(intf)) {
-                                    const intfSetupTimeout = setTimeout(() => {
-                                        Hf.log(`warn1`, `DomainFactory.start - Interface:${intf.name} is taking longer than ${waitTime}ms to setup.`);
-                                    }, waitTime);
-                                    intf.setup(() => {
-                                        intf.activateIncomingStream({
-                                            forceBufferingOnAllIncomingStreams: enableSlowRunMode,
-                                            bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
-                                            bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
-                                        });
-                                        intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceActivateStream(compositeIntf));
-                                        intf.activateOutgoingStream({
-                                            forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
-                                            bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
-                                            bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
-                                        });
-                                        Hf.log(`info`, `Activated interface:${intf.name}.`);
-                                        clearTimeout(intfSetupTimeout);
-                                    });
-                                } else {
-                                    Hf.log(`warn0`, `DomainFactory.start - DomainFactory.start.deepInterfaceActivateStream - Input interface is invalid.`);
+                        _childDomains.forEach((childDomain) => {
+                            const childDomainTimeoutId = setTimeout(() => {
+                                Hf.log(`warn1`, `DomainFactory.start - Child domain:${childDomain.name} is taking longer than ${waitTime}ms to start.`);
+                                if (Hf.isFunction(timeout)) {
+                                    timeout(childDomain.name);
                                 }
-                            };
-                            deepInterfaceActivateStream(_intf);
-                        } else {
-                            Hf.log(`warn0`, `DomainFactory.start - Domain:${domain.name} is not registered with an interface.`);
-                        }
-
-                        /* then activate store... */
-                        if (Hf.isObject(_store)) {
-                            const storeSetupTimeout = setTimeout(() => {
-                                Hf.log(`warn1`, `DomainFactory.start - Store:${_store.name} is taking longer than ${waitTime}ms to setup.`);
                             }, waitTime);
+                            childDomain.start(() => clearTimeout(childDomainTimeoutId), option);
+                        });
+                    }
 
-                            _store.setup(() => {
-                                _store.activateIncomingStream({
-                                    forceBufferingOnAllIncomingStreams: enableSlowRunMode,
-                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
-                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
-                                });
-                                _store.activateOutgoingStream({
-                                    forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
-                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
-                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
-                                });
-                                Hf.log(`info`, `Activated store:${_store.name}.`);
-                                clearTimeout(storeSetupTimeout);
-                            });
-                        }
+                    /* then startup peer domains... */
+                    if (!Hf.isEmpty(_peerDomains)) {
+                        _peerDomains.forEach((peerDomain) => {
+                            const peerDomainTimeoutId = setTimeout(() => {
+                                Hf.log(`warn1`, `DomainFactory.start -  Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to start.`);
+                                if (Hf.isFunction(timeout)) {
+                                    timeout(peerDomain.name);
+                                }
+                            }, waitTime);
+                            peerDomain.start(() => clearTimeout(peerDomainTimeoutId), option);
+                        });
+                    }
 
-                        /* then activate services... */
-                        if (!Hf.isEmpty(_services)) {
-                            _services.forEach((service) => {
-                                const serviceSetupTimeout = setTimeout(() => {
-                                    Hf.log(`warn1`, `DomainFactory.start - Service:${service.name} is taking longer than ${waitTime}ms to setup.`);
+                    /* then activate parent to child interfaces... */
+                    if (Hf.isObject(_intf)) {
+                        /* helper function to activate all child interfaces event stream */
+                        const deepInterfaceActivateStream = function deepInterfaceActivateStream (intf) {
+                            if (Hf.isObject(intf)) {
+                                const intfTimeoutId = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.start - Interface:${intf.name} is taking longer than ${waitTime}ms to setup.`);
+                                    if (Hf.isFunction(timeout)) {
+                                        timeout(intf.name);
+                                    }
                                 }, waitTime);
-                                service.setup(() => {
-                                    service.activateIncomingStream({
+                                intf.setup(() => {
+                                    intf.activateIncomingStream({
                                         forceBufferingOnAllIncomingStreams: enableSlowRunMode,
                                         bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
                                         bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                     });
-                                    service.activateOutgoingStream({
+                                    intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceActivateStream(compositeIntf));
+                                    intf.activateOutgoingStream({
                                         forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
                                         bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
                                         bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                                     });
-                                    Hf.log(`info`, `Activated service:${service.name}.`);
-                                    clearTimeout(serviceSetupTimeout);
+                                    Hf.log(`info1`, `Activated interface:${intf.name}.`);
+                                    clearTimeout(intfTimeoutId);
                                 });
+                            } else {
+                                Hf.log(`warn0`, `DomainFactory.start - DomainFactory.start.deepInterfaceActivateStream - Input interface is invalid.`);
+                            }
+                        };
+                        deepInterfaceActivateStream(_intf);
+                    } else {
+                        Hf.log(`warn0`, `DomainFactory.start - Domain:${domain.name} is not registered with an interface.`);
+                    }
+
+                    /* then activate store... */
+                    if (Hf.isObject(_store)) {
+                        const storeTimeoutId = setTimeout(() => {
+                            Hf.log(`warn1`, `DomainFactory.start - Store:${_store.name} is taking longer than ${waitTime}ms to setup.`);
+                            if (Hf.isFunction(timeout)) {
+                                timeout(_store.name);
+                            }
+                        }, waitTime);
+
+                        _store.setup(() => {
+                            _store.activateIncomingStream({
+                                forceBufferingOnAllIncomingStreams: enableSlowRunMode,
+                                bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                             });
-                        }
-
-                        /* then finally activate domain... */
-                        domain.activateOutgoingStream({
-                            forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
-                            bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
-                            bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                            _store.activateOutgoingStream({
+                                forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                            });
+                            Hf.log(`info1`, `Activated store:${_store.name}.`);
+                            clearTimeout(storeTimeoutId);
                         });
+                    }
 
-                        _started = true;
+                    /* then activate services... */
+                    if (!Hf.isEmpty(_services)) {
+                        _services.forEach((service) => {
+                            const serviceTimeoutId = setTimeout(() => {
+                                Hf.log(`warn1`, `DomainFactory.start - Service:${service.name} is taking longer than ${waitTime}ms to setup.`);
+                                if (Hf.isFunction(timeout)) {
+                                    timeout(service.name);
+                                }
+                            }, waitTime);
+                            service.setup(() => {
+                                service.activateIncomingStream({
+                                    forceBufferingOnAllIncomingStreams: enableSlowRunMode,
+                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                                });
+                                service.activateOutgoingStream({
+                                    forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                    bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                    bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                                });
+                                Hf.log(`info1`, `Activated service:${service.name}.`);
+                                clearTimeout(serviceTimeoutId);
+                            });
+                        });
+                    }
 
-                        Hf.log(`info`, `Domain:${domain.name} has started.`);
-                        clearTimeout(domainSetupTimeout);
-                        done();
+                    /* then finally activate domain... */
+                    domain.activateOutgoingStream({
+                        forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                        bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                        bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
                     });
-                } else { // eslint-disable-line
-                    Hf.log(`warn1`, `DomainFactory.start - Domain:${domain.name} is already started. Restarting...`);
-                    domain.restart(done, option);
-                }
+
+                    _started = true;
+
+                    Hf.log(`info1`, `Domain:${domain.name} has started.`);
+                    clearTimeout(domainTimeoutId);
+                    done();
+                });
+            } else { // eslint-disable-line
+                domain.restart(done, option);
             }
         };
         /**
@@ -551,9 +589,10 @@ export default Composer({
          */
         this.stop = function stop (done, option = {}) {
             const {
-                waitTime,
                 resetStoreState,
-                resetAllServiceStates
+                resetAllServiceStates,
+                waitTime,
+                timeout
             } = Hf.fallback({
                 resetStoreState: true,
                 resetAllServiceStates: true,
@@ -561,110 +600,129 @@ export default Composer({
             }).of(option);
 
             const domain = this;
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `DomainFactory.stop - DomainFactory.stop - Input done function is invalid.`);
-            } else {
-                if (!_started) {
-                    Hf.log(`warn1`, `DomainFactory.stop - DomainFactory.stop - Domain:${domain.name} is already stopped.`);
-                } else {
-                    const domainTeardownTimeout = setTimeout(() => {
-                        Hf.log(`warn1`, `DomainFactory.stop - Domain:${domain.name} is taking longer than ${waitTime}ms to teardown.`);
-                    }, waitTime);
 
-                    Hf.log(`info`, `Stopping domain:${domain.name}...`);
-                    domain.teardown(() => {
-                        /* first stop child domains... */
-                        if (!Hf.isEmpty(_childDomains)) {
-                            _childDomains.forEach((childDomain) => {
-                                const childDomainStoppingTimeout = setTimeout(() => {
-                                    Hf.log(`warn1`, `Child domain:${childDomain.name} is taking longer than ${waitTime}ms to stop.`);
-                                }, waitTime);
-                                childDomain.stop(() => clearTimeout(childDomainStoppingTimeout), option);
-                            });
-                        }
-
-                        /* then peer domains... */
-                        if (!Hf.isEmpty(_peerDomains)) {
-                            _peerDomains.forEach((peerDomain) => {
-                                const peerDomainStoppingTimeout = setTimeout(() => {
-                                    Hf.log(`warn1`, `Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to stop.`);
-                                }, waitTime);
-                                peerDomain.stop(() => clearTimeout(peerDomainStoppingTimeout), option);
-                            });
-                        }
-
-                        /* then stop child to parent interfaces... */
-                        if (Hf.isObject(_intf)) {
-                            /* helper function to deactivate all child interfaces event stream */
-                            const deepInterfaceDeactivateStream = function deepInterfaceDeactivateStream (intf) {
-                                if (Hf.isObject(intf)) {
-                                    const intfTeardownTimeout = setTimeout(() => {
-                                        Hf.log(`warn1`, `DomainFactory.stop - Interface:${intf.name} is taking longer than ${waitTime}ms to teardown.`);
-                                    }, waitTime);
-
-                                    intf.teardown(() => {
-                                        intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceDeactivateStream(compositeIntf));
-                                        // TODO: compositeIntf does not or should not have incoming event stream activated.
-                                        intf.deactivateIncomingStream();
-                                        intf.deactivateOutgoingStream();
-                                        // TODO: Un-reflect state from store?
-                                        Hf.log(`info`, `Deactivated interface:${intf.name}.`);
-                                        clearTimeout(intfTeardownTimeout);
-                                    });
-                                } else {
-                                    Hf.log(`warn0`, `DomainFactory.stop - DomainFactory.stop.deepInterfaceDeactivateStream - Input interface is invalid.`);
-                                }
-                            };
-                            deepInterfaceDeactivateStream(_intf);
-                        }
-
-                        /* then store... */
-                        if (Hf.isObject(_store)) {
-                            const storeTeardownTimeout = setTimeout(() => {
-                                Hf.log(`warn1`, `DomainFactory.stop - Store:${_store.name} is taking longer than ${waitTime}ms to teardown.`);
-                            }, waitTime);
-                            _store.teardown(() => {
-                                _store.deactivateIncomingStream();
-                                _store.deactivateOutgoingStream();
-                                if (resetStoreState && Hf.isFunction(_store.reset)) {
-                                    /* reset store state */
-                                    _store.reset();
-                                }
-                                Hf.log(`info`, `Deactivated store:${_store.name}.`);
-                                clearTimeout(storeTeardownTimeout);
-                            });
-                        }
-
-                        /* then services... */
-                        if (!Hf.isEmpty(_services)) {
-                            _services.forEach((service) => {
-                                const serviceTeardownTimeout = setTimeout(() => {
-                                    Hf.log(`warn1`, `DomainFactory.stop - Service:${service.name} is taking longer than ${waitTime}ms to teardown.`);
-                                }, waitTime);
-                                service.teardown(() => {
-                                    service.deactivateIncomingStream();
-                                    service.deactivateOutgoingStream();
-                                    if (resetAllServiceStates && Hf.isFunction(service.reset)) {
-                                        /* reset service state */
-                                        service.reset();
-                                    }
-                                    Hf.log(`info`, `Deactivated service:${service.name}.`);
-                                    clearTimeout(serviceTeardownTimeout);
-                                });
-                            });
-                        }
-
-                        /* then finally parent domain. */
-                        domain.deactivateIncomingStream();
-                        domain.deactivateOutgoingStream();
-
-                        _started = false;
-
-                        Hf.log(`info`, `Domain:${domain.name} has stopped.`);
-                        clearTimeout(domainTeardownTimeout);
-                        done();
-                    });
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `DomainFactory.stop - DomainFactory.stop - Input done function is invalid.`);
                 }
+            }
+
+            if (_started) {
+                const domainTimeoutId = setTimeout(() => {
+                    Hf.log(`warn1`, `DomainFactory.stop - Domain:${domain.name} is taking longer than ${waitTime}ms to teardown.`);
+                    if (Hf.isFunction(timeout)) {
+                        timeout(domain.name);
+                    }
+                }, waitTime);
+
+                Hf.log(`info1`, `Stopping domain:${domain.name}...`);
+                domain.teardown(() => {
+                    /* first stop child domains... */
+                    if (!Hf.isEmpty(_childDomains)) {
+                        _childDomains.forEach((childDomain) => {
+                            const childDomainTimeoutId = setTimeout(() => {
+                                Hf.log(`warn1`, `Child domain:${childDomain.name} is taking longer than ${waitTime}ms to stop.`);
+                                if (Hf.isFunction(timeout)) {
+                                    timeout(childDomain.name);
+                                }
+                            }, waitTime);
+                            childDomain.stop(() => clearTimeout(childDomainTimeoutId), option);
+                        });
+                    }
+
+                    /* then peer domains... */
+                    if (!Hf.isEmpty(_peerDomains)) {
+                        _peerDomains.forEach((peerDomain) => {
+                            const peerDomainTimeoutId = setTimeout(() => {
+                                Hf.log(`warn1`, `Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to stop.`);
+                                if (Hf.isFunction(timeout)) {
+                                    timeout(peerDomain.name);
+                                }
+                            }, waitTime);
+                            peerDomain.stop(() => clearTimeout(peerDomainTimeoutId), option);
+                        });
+                    }
+
+                    /* then stop child to parent interfaces... */
+                    if (Hf.isObject(_intf)) {
+                        /* helper function to deactivate all child interfaces event stream */
+                        const deepInterfaceDeactivateStream = function deepInterfaceDeactivateStream (intf) {
+                            if (Hf.isObject(intf)) {
+                                const intfTimeoutId = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.stop - Interface:${intf.name} is taking longer than ${waitTime}ms to teardown.`);
+                                    if (Hf.isFunction(timeout)) {
+                                        timeout(intf.name);
+                                    }
+                                }, waitTime);
+
+                                intf.teardown(() => {
+                                    intf.getInterfaceComposites().forEach((compositeIntf) => deepInterfaceDeactivateStream(compositeIntf));
+                                    // TODO: compositeIntf does not or should not have incoming event stream activated.
+                                    intf.deactivateIncomingStream();
+                                    intf.deactivateOutgoingStream();
+                                    // TODO: Un-reflect state from store?
+                                    Hf.log(`info1`, `Deactivated interface:${intf.name}.`);
+                                    clearTimeout(intfTimeoutId);
+                                });
+                            } else {
+                                Hf.log(`warn0`, `DomainFactory.stop - DomainFactory.stop.deepInterfaceDeactivateStream - Input interface is invalid.`);
+                            }
+                        };
+                        deepInterfaceDeactivateStream(_intf);
+                    }
+
+                    /* then store... */
+                    if (Hf.isObject(_store)) {
+                        const storeTimeoutId = setTimeout(() => {
+                            Hf.log(`warn1`, `DomainFactory.stop - Store:${_store.name} is taking longer than ${waitTime}ms to teardown.`);
+                            if (Hf.isFunction(timeout)) {
+                                timeout(_store.name);
+                            }
+                        }, waitTime);
+                        _store.teardown(() => {
+                            _store.deactivateIncomingStream();
+                            _store.deactivateOutgoingStream();
+                            if (resetStoreState && Hf.isFunction(_store.reset)) {
+                                /* reset store state */
+                                _store.reset();
+                            }
+                            Hf.log(`info1`, `Deactivated store:${_store.name}.`);
+                            clearTimeout(storeTimeoutId);
+                        });
+                    }
+
+                    /* then services... */
+                    if (!Hf.isEmpty(_services)) {
+                        _services.forEach((service) => {
+                            const serviceTimeoutId = setTimeout(() => {
+                                Hf.log(`warn1`, `DomainFactory.stop - Service:${service.name} is taking longer than ${waitTime}ms to teardown.`);
+                                if (Hf.isFunction(timeout)) {
+                                    timeout(service.name);
+                                }
+                            }, waitTime);
+                            service.teardown(() => {
+                                service.deactivateIncomingStream();
+                                service.deactivateOutgoingStream();
+                                if (resetAllServiceStates && Hf.isFunction(service.reset)) {
+                                    /* reset service state */
+                                    service.reset();
+                                }
+                                Hf.log(`info1`, `Deactivated service:${service.name}.`);
+                                clearTimeout(serviceTimeoutId);
+                            });
+                        });
+                    }
+
+                    /* then finally parent domain. */
+                    domain.deactivateIncomingStream();
+                    domain.deactivateOutgoingStream();
+
+                    _started = false;
+
+                    Hf.log(`info1`, `Domain:${domain.name} has stopped.`);
+                    clearTimeout(domainTimeoutId);
+                    done();
+                });
             }
         };
         /**
@@ -678,23 +736,29 @@ export default Composer({
         this.restart = function restart (done, option = {}) {
             const domain = this;
             const {
-                waitTime
+                waitTime,
+                timeout
             } = Hf.fallback({
                 waitTime: DEFAULT_SETUP_WAIT_TIME_IN_MS
             }).of(option);
 
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `DomainFactory.restart - Input done function is invalid.`);
-            } else {
-                const domainStoppingTimeout = setTimeout(() => {
-                    Hf.log(`warn1`, `DomainFactory.restart - Domain:${domain.name} is taking longer than ${waitTime} seconds to stop and restart.`);
-                }, waitTime);
-
-                domain.stop(() => {
-                    clearTimeout(domainStoppingTimeout);
-                    domain.start(done, option);
-                }, option);
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `DomainFactory.restart - Input done function is invalid.`);
+                }
             }
+
+            const domainTimeoutId = setTimeout(() => {
+                Hf.log(`warn1`, `DomainFactory.restart - Domain:${domain.name} is taking longer than ${waitTime} seconds to stop and restart.`);
+                if (Hf.isFunction(timeout)) {
+                    timeout(domain.name);
+                }
+            }, waitTime);
+
+            domain.stop(() => {
+                clearTimeout(domainTimeoutId);
+                domain.start(done, option);
+            }, option);
         };
     }
 });

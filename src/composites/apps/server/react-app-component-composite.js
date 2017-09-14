@@ -65,39 +65,51 @@ export default Hf.Composite({
             option = Hf.isObject(option) ? option : {};
 
             const domain = app.getTopDomain();
-            if (!Hf.isSchema({
-                name: `string`,
-                getInterface: `function`
-            }).of(domain)) {
-                Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} domain is invalid.`);
-            } else {
-                const intf = domain.getInterface();
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    name: `string`,
+                    getInterface: `function`
+                }).of(domain)) {
+                    Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} domain is invalid.`);
+                }
+            }
+
+            const intf = domain.getInterface();
+
+            if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
                     toComponent: `function`,
                     getComponentLib: `function`
                 }).of(intf)) {
                     Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - App:${app.name} top domain:${domain.name} interface is invalid.`);
-                } else {
-                    const {
-                        React
-                    } = intf.getComponentLib();
-                    if (!Hf.isSchema({
-                        createElement: `function`
-                    }).of(React)) {
-                        Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
-                    } else {
-                        const TopComponent = intf.toComponent(null, {
-                            ...option,
-                            alwaysUpdateAsParent: true
-                        });
-                        if (!Hf.isFunction(TopComponent)) {
-                            Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
-                        } else {
-                            return React.createElement(TopComponent);
-                        }
-                    }
                 }
             }
+
+            const {
+                React
+            } = intf.getComponentLib();
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    createElement: `function`
+                }).of(React)) {
+                    Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - React is invalid.`);
+                }
+            }
+
+            const TopComponent = intf.toComponent(null, {
+                ...option,
+                alwaysUpdateAsParent: true
+            });
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(TopComponent)) {
+                    Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
+                }
+            }
+
+            return React.createElement(TopComponent);
         }
     }
 });

@@ -63,7 +63,8 @@ export default Hf.Composite({
                     dbServer: {
                         name: `string`
                     },
-                    dbServerUrl: `string`
+                    dbServerUrl: `string`,
+                    getProvider: `function`
                 }).of(service)) {
                     Hf.log(`error`, `PGComposite.$init - Service is invalid. Cannot apply composite.`);
                 }
@@ -78,223 +79,244 @@ export default Hf.Composite({
          */
         query: function query (tableName) {
             const service = this;
-            if (!Hf.isString(tableName)) {
-                Hf.log(`error`, `PGComposite.query - Input table name is invalid.`);
-            } else {
-                const {
-                    dbServer,
-                    dbServerUrl,
-                    getProvider
-                } = service;
-                const dbName = dbServer.name;
-                const {
-                    pg,
-                    sql
-                } = getProvider();
-                if (!Hf.isObject(pg) || !Hf.isObject(sql)) {
-                    Hf.log(`error`, `PGComposite.query - Postgres driver or squel builder provider is not unsupported.`);
-                } else {
-                    const sqlPostgres = sql.useFlavour(`postgres`);
-                    return {
-                        /**
-                         * @description - Do select query on data base.
-                         *
-                         * @param {function} sqlCreate
-                         * @method query.select
-                         */
-                        select: function select (sqlCreate) {
-                            if (!Hf.isFunction(sqlCreate)) {
-                                Hf.log(`error`, `PGComposite.query.select - Input squel function is invalid.`);
-                            } else {
-                                return new Promise((resolve, reject) => {
-                                    pg.connect(dbServerUrl, (error, client, done) => {
-                                        if (error) {
-                                            reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
-                                        } else {
-                                            const results = [];
-                                            /* do sql query select */
-                                            const statementSQL = sqlCreate(sqlPostgres.select({
-                                                separator: `\n`,
-                                                autoQuoteFieldNames: true,
-                                                nameQuoteCharacter: `"`,
-                                                tableAliasQuoteCharacter: `|`,
-                                                fieldAliasQuoteCharacter: `~`
-                                            }).from(tableName));
-                                            if (!Hf.isObject(statementSQL)) {
-                                                reject(new Error(`ERROR: SQL statement object is invalid.`));
-                                            } else {
-                                                const selectQuery = client.query(statementSQL.toParam());
-                                                Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
-                                                /* stream results back one row at a time */
-                                                selectQuery.on(`row`, (row) => results.push(row));
 
-                                                /* after all data is returned, close connection and resolve results */
-                                                selectQuery.on(`end`, () => {
-                                                    // client.end();
-                                                    resolve(results);
-                                                    /* call `done()` to release the client back to the pool */
-                                                    done();
-                                                });
-
-                                                selectQuery.on(`error`, (_error) => {
-                                                    reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
-                                                });
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                        },
-                        /**
-                         * @description - Do insert query on data base.
-                         *
-                         * @param {function} sqlCreate
-                         * @method query.update
-                         */
-                        update: function update (sqlCreate) {
-                            if (!Hf.isFunction(sqlCreate)) {
-                                Hf.log(`error`, `PGComposite.query.update - Input squel function is invalid.`);
-                            } else {
-                                return new Promise((resolve, reject) => {
-                                    pg.connect(dbServerUrl, (error, client, done) => {
-                                        if (error) {
-                                            reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
-                                        } else {
-                                            const results = [];
-                                            /* do sql query update */
-                                            const statementSQL = sqlCreate(sqlPostgres.update({
-                                                separator: `\n`,
-                                                autoQuoteFieldNames: true,
-                                                nameQuoteCharacter: `"`,
-                                                tableAliasQuoteCharacter: `|`,
-                                                fieldAliasQuoteCharacter: `~`
-                                            }).table(tableName));
-                                            if (!Hf.isObject(statementSQL)) {
-                                                reject(new Error(`ERROR: SQL statement object is invalid.`));
-                                            } else {
-                                                const updateQuery = client.query(statementSQL.returning(`*`).toParam());
-                                                Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
-
-                                                updateQuery.on(`row`, (row) => results.push(row));
-
-                                                /* after data is updated, close connection and resolve the Id */
-                                                updateQuery.on(`end`, () => {
-                                                    // client.end();
-                                                    resolve(results);
-                                                    /* call `done()` to release the client back to the pool */
-                                                    done();
-                                                });
-
-                                                updateQuery.on(`error`, (_error) => {
-                                                    reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
-                                                });
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                        },
-                        /**
-                         * @description - Do insert query on data base.
-                         *
-                         * @param {function} sqlCreate
-                         * @method query.insert
-                         */
-                        insert: function insert (sqlCreate) {
-                            if (!Hf.isFunction(sqlCreate)) {
-                                Hf.log(`error`, `PGComposite.query.insert - Input squel function is invalid.`);
-                            } else {
-                                return new Promise((resolve, reject) => {
-                                    pg.connect(dbServerUrl, (error, client, done) => {
-                                        if (error) {
-                                            reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
-                                        } else {
-                                            const results = [];
-                                            /* do sql query insert */
-                                            const statementSQL = sqlCreate(sqlPostgres.insert({
-                                                separator: `\n`,
-                                                autoQuoteFieldNames: true,
-                                                nameQuoteCharacter: `"`,
-                                                tableAliasQuoteCharacter: `|`,
-                                                fieldAliasQuoteCharacter: `~`
-                                            }).into(tableName));
-                                            if (!Hf.isObject(statementSQL)) {
-                                                reject(new Error(`ERROR: SQL statement object is invalid.`));
-                                            } else {
-                                                const insertQuery = client.query(statementSQL.returning(`*`).toParam());
-                                                Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
-
-                                                insertQuery.on(`row`, (row) => results.push(row));
-
-                                                /* after data is inserted, close connection and resolve the Id */
-                                                insertQuery.on(`end`, () => {
-                                                    // client.end();
-                                                    resolve(results);
-                                                    /* call done to release the client back to the pool */
-                                                    done();
-                                                });
-
-                                                insertQuery.on(`error`, (_error) => {
-                                                    reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
-                                                });
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                        },
-                        /**
-                         * @description - Do delete query on data base.
-                         *
-                         * @param {function} sqlCreate
-                         * @method query.delete
-                         */
-                        delete: function _delete (sqlCreate) {
-                            if (!Hf.isFunction(sqlCreate)) {
-                                Hf.log(`error`, `PGComposite.query.delete - Input squel function is invalid.`);
-                            } else {
-                                return new Promise((resolve, reject) => {
-                                    pg.connect(dbServerUrl, (error, client, done) => {
-                                        if (error) {
-                                            reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
-                                        } else {
-                                            const results = [];
-                                            /* do sql query delete */
-                                            const statementSQL = sqlCreate(sqlPostgres.delete({
-                                                separator: `\n`,
-                                                autoQuoteFieldNames: true,
-                                                nameQuoteCharacter: `"`,
-                                                tableAliasQuoteCharacter: `|`,
-                                                fieldAliasQuoteCharacter: `~`
-                                            }).from(tableName));
-                                            if (!Hf.isObject(statementSQL)) {
-                                                reject(new Error(`ERROR: SQL statement object is invalid.`));
-                                            } else {
-                                                const deleteQuery = client.query(statementSQL.returning(`*`).toParam());
-                                                Hf.log(`info`, `Submitted query statement:${statementSQL.toString()}.`);
-
-                                                deleteQuery.on(`row`, (row) => results.push(row));
-
-                                                /* after data is deleted, close connection and resolve the Id */
-                                                deleteQuery.on(`end`, () => {
-                                                    // client.end();
-                                                    resolve(results);
-                                                    /* call done to release the client back to the pool */
-                                                    done();
-                                                });
-
-                                                deleteQuery.on(`error`, (_error) => {
-                                                    reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
-                                                });
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                        }
-                    };
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isString(tableName)) {
+                    Hf.log(`error`, `PGComposite.query - Input table name is invalid.`);
                 }
             }
+
+            const {
+                dbServer,
+                dbServerUrl,
+                getProvider
+            } = service;
+            const dbName = dbServer.name;
+            const {
+                pg,
+                sql
+            } = getProvider();
+
+
+            if (Hf.DEVELOPMENT) {
+                if (!(Hf.isObject(pg) || Hf.isObject(sql))) {
+                    Hf.log(`error`, `PGComposite.query - Postgres driver or squel builder provider is not unsupported.`);
+                }
+            }
+
+            const sqlPostgres = sql.useFlavour(`postgres`);
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isDefined(sqlPostgres)) {
+                    Hf.log(`error`, `PGComposite.query - Postgres driver or squel builder provider is invalid.`);
+                }
+            }
+
+            return {
+                /**
+                 * @description - Do select query on data base.
+                 *
+                 * @param {function} sqlCreate
+                 * @method query.select
+                 */
+                select: function select (sqlCreate) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!Hf.isFunction(sqlCreate)) {
+                            Hf.log(`error`, `PGComposite.query.select - Input squel function is invalid.`);
+                        }
+                    }
+                    return new Promise((resolve, reject) => {
+                        pg.connect(dbServerUrl, (error, client, done) => {
+                            if (error) {
+                                reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
+                            } else {
+                                const results = [];
+                                /* do sql query select */
+                                const statementSQL = sqlCreate(sqlPostgres.select({
+                                    separator: `\n`,
+                                    autoQuoteFieldNames: true,
+                                    nameQuoteCharacter: `"`,
+                                    tableAliasQuoteCharacter: `|`,
+                                    fieldAliasQuoteCharacter: `~`
+                                }).from(tableName));
+                                if (!Hf.isObject(statementSQL)) {
+                                    reject(new Error(`ERROR: SQL statement object is invalid.`));
+                                } else {
+                                    const selectQuery = client.query(statementSQL.toParam());
+                                    Hf.log(`info0`, `Submitted query statement:${statementSQL.toString()}.`);
+                                    /* stream results back one row at a time */
+                                    selectQuery.on(`row`, (row) => results.push(row));
+
+                                    /* after all data is returned, close connection and resolve results */
+                                    selectQuery.on(`end`, () => {
+                                        // client.end();
+                                        resolve(results);
+                                        /* call `done()` to release the client back to the pool */
+                                        done();
+                                    });
+
+                                    selectQuery.on(`error`, (_error) => {
+                                        reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
+                                    });
+                                }
+                            }
+                        });
+                    });
+                },
+                /**
+                 * @description - Do insert query on data base.
+                 *
+                 * @param {function} sqlCreate
+                 * @method query.update
+                 */
+                update: function update (sqlCreate) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!Hf.isFunction(sqlCreate)) {
+                            Hf.log(`error`, `PGComposite.query.update - Input squel function is invalid.`);
+                        }
+                    }
+
+                    return new Promise((resolve, reject) => {
+                        pg.connect(dbServerUrl, (error, client, done) => {
+                            if (error) {
+                                reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
+                            } else {
+                                const results = [];
+                                /* do sql query update */
+                                const statementSQL = sqlCreate(sqlPostgres.update({
+                                    separator: `\n`,
+                                    autoQuoteFieldNames: true,
+                                    nameQuoteCharacter: `"`,
+                                    tableAliasQuoteCharacter: `|`,
+                                    fieldAliasQuoteCharacter: `~`
+                                }).table(tableName));
+                                if (!Hf.isObject(statementSQL)) {
+                                    reject(new Error(`ERROR: SQL statement object is invalid.`));
+                                } else {
+                                    const updateQuery = client.query(statementSQL.returning(`*`).toParam());
+                                    Hf.log(`info0`, `Submitted query statement:${statementSQL.toString()}.`);
+
+                                    updateQuery.on(`row`, (row) => results.push(row));
+
+                                    /* after data is updated, close connection and resolve the Id */
+                                    updateQuery.on(`end`, () => {
+                                        // client.end();
+                                        resolve(results);
+                                        /* call `done()` to release the client back to the pool */
+                                        done();
+                                    });
+
+                                    updateQuery.on(`error`, (_error) => {
+                                        reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
+                                    });
+                                }
+                            }
+                        });
+                    });
+                },
+                /**
+                 * @description - Do insert query on data base.
+                 *
+                 * @param {function} sqlCreate
+                 * @method query.insert
+                 */
+                insert: function insert (sqlCreate) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!Hf.isFunction(sqlCreate)) {
+                            Hf.log(`error`, `PGComposite.query.insert - Input squel function is invalid.`);
+                        }
+                    }
+
+                    return new Promise((resolve, reject) => {
+                        pg.connect(dbServerUrl, (error, client, done) => {
+                            if (error) {
+                                reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
+                            } else {
+                                const results = [];
+                                /* do sql query insert */
+                                const statementSQL = sqlCreate(sqlPostgres.insert({
+                                    separator: `\n`,
+                                    autoQuoteFieldNames: true,
+                                    nameQuoteCharacter: `"`,
+                                    tableAliasQuoteCharacter: `|`,
+                                    fieldAliasQuoteCharacter: `~`
+                                }).into(tableName));
+                                if (!Hf.isObject(statementSQL)) {
+                                    reject(new Error(`ERROR: SQL statement object is invalid.`));
+                                } else {
+                                    const insertQuery = client.query(statementSQL.returning(`*`).toParam());
+                                    Hf.log(`info0`, `Submitted query statement:${statementSQL.toString()}.`);
+
+                                    insertQuery.on(`row`, (row) => results.push(row));
+
+                                    /* after data is inserted, close connection and resolve the Id */
+                                    insertQuery.on(`end`, () => {
+                                        // client.end();
+                                        resolve(results);
+                                        /* call done to release the client back to the pool */
+                                        done();
+                                    });
+
+                                    insertQuery.on(`error`, (_error) => {
+                                        reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
+                                    });
+                                }
+                            }
+                        });
+                    });
+                },
+                /**
+                 * @description - Do delete query on data base.
+                 *
+                 * @param {function} sqlCreate
+                 * @method query.delete
+                 */
+                delete: function _delete (sqlCreate) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!Hf.isFunction(sqlCreate)) {
+                            Hf.log(`error`, `PGComposite.query.delete - Input squel function is invalid.`);
+                        }
+                    }
+
+                    return new Promise((resolve, reject) => {
+                        pg.connect(dbServerUrl, (error, client, done) => {
+                            if (error) {
+                                reject(new Error(`ERROR: Unable to connect to database:${dbName}, ${error.message}`));
+                            } else {
+                                const results = [];
+                                /* do sql query delete */
+                                const statementSQL = sqlCreate(sqlPostgres.delete({
+                                    separator: `\n`,
+                                    autoQuoteFieldNames: true,
+                                    nameQuoteCharacter: `"`,
+                                    tableAliasQuoteCharacter: `|`,
+                                    fieldAliasQuoteCharacter: `~`
+                                }).from(tableName));
+                                if (!Hf.isObject(statementSQL)) {
+                                    reject(new Error(`ERROR: SQL statement object is invalid.`));
+                                } else {
+                                    const deleteQuery = client.query(statementSQL.returning(`*`).toParam());
+                                    Hf.log(`info0`, `Submitted query statement:${statementSQL.toString()}.`);
+
+                                    deleteQuery.on(`row`, (row) => results.push(row));
+
+                                    /* after data is deleted, close connection and resolve the Id */
+                                    deleteQuery.on(`end`, () => {
+                                        // client.end();
+                                        resolve(results);
+                                        /* call done to release the client back to the pool */
+                                        done();
+                                    });
+
+                                    deleteQuery.on(`error`, (_error) => {
+                                        reject(new Error(`ERROR: Unable to query table:${dbName}.${tableName}, ${_error.message}`));
+                                    });
+                                }
+                            }
+                        });
+                    });
+                }
+            };
         }
     }
 });

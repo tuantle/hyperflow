@@ -137,18 +137,20 @@ export default Hf.Composite({
          */
         preMountStage: function preMountStage (handler) {
             const intf = this;
-            if (!Hf.isFunction(handler)) {
-                Hf.log(`error`, `ReactComponentComposite.preMountStage - Input handler function is invalid.`);
-            } else {
-                // intf.incoming(`on-component-will-mount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
-                //     handler(component);
-                // });
-                intf.incoming(`on-component-will-mount`).handle((component) => {
-                    if (component.props.fId === intf.fId) {
-                        handler(component);
-                    }
-                });
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(handler)) {
+                    Hf.log(`error`, `ReactComponentComposite.preMountStage - Input handler function is invalid.`);
+                }
             }
+
+            // intf.incoming(`on-component-will-mount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+            //     handler(component);
+            // });
+            intf.incoming(`on-component-will-mount`).handle((component) => {
+                if (component.props.fId === intf.fId) {
+                    handler(component);
+                }
+            });
         },
         /**
          * @description - Handle logic at component postmounting stage.
@@ -159,18 +161,19 @@ export default Hf.Composite({
          */
         postMountStage: function postMountStage (handler) {
             const intf = this;
-            if (!Hf.isFunction(handler)) {
-                Hf.log(`error`, `ReactComponentComposite.postMountStage - Input handler function is invalid.`);
-            } else {
-                // intf.incoming(`on-component-did-mount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
-                //     handler(component);
-                // });
-                intf.incoming(`on-component-did-mount`).handle((component) => {
-                    if (component.props.fId === intf.fId) {
-                        handler(component);
-                    }
-                });
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(handler)) {
+                    Hf.log(`error`, `ReactComponentComposite.postMountStage - Input handler function is invalid.`);
+                }
             }
+            // intf.incoming(`on-component-did-mount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+            //     handler(component);
+            // });
+            intf.incoming(`on-component-did-mount`).handle((component) => {
+                if (component.props.fId === intf.fId) {
+                    handler(component);
+                }
+            });
         },
         /**
          * @description - Handle logic at component predismounting stage.
@@ -181,18 +184,19 @@ export default Hf.Composite({
          */
         preDismountStage: function preDismountStage (handler) {
             const intf = this;
-            if (!Hf.isFunction(handler)) {
-                Hf.log(`error`, `ReactComponentComposite.preDismountStage - Input handler function is invalid.`);
-            } else {
-                // intf.incoming(`on-component-will-unmount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
-                //     handler(component);
-                // });
-                intf.incoming(`on-component-will-unmount`).handle((component) => {
-                    if (component.props.fId === intf.fId) {
-                        handler(component);
-                    }
-                });
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(handler)) {
+                    Hf.log(`error`, `ReactComponentComposite.preDismountStage - Input handler function is invalid.`);
+                }
             }
+            // intf.incoming(`on-component-will-unmount`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+            //     handler(component);
+            // });
+            intf.incoming(`on-component-will-unmount`).handle((component) => {
+                if (component.props.fId === intf.fId) {
+                    handler(component);
+                }
+            });
         },
         /**
          * @description - Handle logic at component prepare to update stage.
@@ -203,18 +207,19 @@ export default Hf.Composite({
          */
         preUpdateStage: function preUpdateStage (handler) {
             const intf = this;
-            if (!Hf.isFunction(handler)) {
-                Hf.log(`error`, `ReactComponentComposite.preUpdateStage - Input handler function is invalid.`);
-            } else {
-                // intf.incoming(`on-component-will-update`).filter((component) => component.props.fId === intf.fId).handle((component) => {
-                //     handler(component);
-                // });
-                intf.incoming(`on-component-will-update`).handle((component) => {
-                    if (component.props.fId === intf.fId) {
-                        handler(component);
-                    }
-                });
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(handler)) {
+                    Hf.log(`error`, `ReactComponentComposite.preUpdateStage - Input handler function is invalid.`);
+                }
             }
+            // intf.incoming(`on-component-will-update`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+            //     handler(component);
+            // });
+            intf.incoming(`on-component-will-update`).handle((component) => {
+                if (component.props.fId === intf.fId) {
+                    handler(component);
+                }
+            });
         },
         /**
          * @description - Handle logic at component after updating stage.
@@ -225,18 +230,19 @@ export default Hf.Composite({
          */
         postUpdateStage: function postUpdateStage (handler) {
             const intf = this;
-            if (!Hf.isFunction(handler)) {
-                Hf.log(`error`, `ReactComponentComposite.postUpdateStage - Input handler function is invalid.`);
-            } else {
-                // intf.incoming(`on-component-did-update`).filter((component) => component.props.fId === intf.fId).handle((component) => {
-                //     handler(component);
-                // });
-                intf.incoming(`on-component-did-update`).handle((component) => {
-                    if (component.props.fId === intf.fId) {
-                        handler(component);
-                    }
-                });
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(handler)) {
+                    Hf.log(`error`, `ReactComponentComposite.postUpdateStage - Input handler function is invalid.`);
+                }
             }
+            // intf.incoming(`on-component-did-update`).filter((component) => component.props.fId === intf.fId).handle((component) => {
+            //     handler(component);
+            // });
+            intf.incoming(`on-component-did-update`).handle((component) => {
+                if (component.props.fId === intf.fId) {
+                    handler(component);
+                }
+            });
         }
     },
     enclosure: {
@@ -255,12 +261,18 @@ export default Hf.Composite({
                 const intf = this;
                 const stateless = intf.isStateless();
                 const stateCursor = intf.getStateCursor();
-                if (!stateless) {
-                    Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React component.`);
-                } else {
-                    const {
-                        PropTypes
-                    } = intf.getComponentLib();
+
+                if (Hf.DEVELOPMENT) {
+                    if (!stateless) {
+                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} is stateful. Cannot create pure React component.`);
+                    }
+                }
+
+                const {
+                    PropTypes
+                } = intf.getComponentLib();
+
+                if (Hf.DEVELOPMENT) {
                     if (!Hf.isSchema({
                         bool: `function`,
                         array: `function`,
@@ -272,87 +284,90 @@ export default Hf.Composite({
                         oneOfType: `function`
                     }).of(PropTypes)) {
                         Hf.log(`error`, `ReactComponentComposite.toPureComponent - React prop-types library is invalid.`);
-                    } else {
-                        const defaultProperty = intf.getStateAsObject();
-                        const defaultPropertyKeys = Object.keys(defaultProperty);
-                        const reactPropTypeAlias = {
-                            boolean: PropTypes.bool,
-                            array: PropTypes.array,
-                            object: PropTypes.object,
-                            function: PropTypes.func,
-                            string: PropTypes.string,
-                            number: PropTypes.number
-                        };
-                        const intfPureComponentDefinition = (Hf.Composite({
-                            exclusion: {
-                                keys: [ `*` ],
-                                exception: {
-                                    prefixes: DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS,
-                                    keys: DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS
-                                }
-                            },
-                            enclosure: {
-                                IntfPureComponentDefinition: function IntfPureComponentDefinition () {
-                                    /* set react property type checking */
-                                    this.propTypes = (() => {
-                                        let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
-                                            if (stateCursor.isItemStronglyTyped(key)) {
-                                                const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
-                                                if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
-                                                    if (stateCursor.isItemRequired(key)) {
-                                                        propType[key] = reactPropTypeAlias[propertyTypeAliasKey].isRequired;
-                                                    } else {
-                                                        propType[key] = reactPropTypeAlias[propertyTypeAliasKey];
-                                                    }
-                                                }
-                                            }
-                                            return propType;
-                                        }, {});
-
-                                        return defaultPropertyKeys.reduce((propType, key) => {
-                                            if (stateCursor.isItemOneOfValues(key)) {
-                                                const {
-                                                    condition: types
-                                                } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
-                                                propType[key] = PropTypes.oneOf(types);
-                                            }
-                                            if (stateCursor.isItemOneOfTypes(key)) {
-                                                const {
-                                                    condition: types
-                                                } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
-                                                propType[key] = PropTypes.oneOfType(types.map((typeAliasKey) => {
-                                                    return reactPropTypeAlias[typeAliasKey];
-                                                }));
-                                            }
-                                            return propType;
-                                        }, _propTypes);
-                                    })();
-                                    /* set react default property */
-                                    this.defaultProps = defaultProperty;
-                                }
-                            }
-                        }).mixin(intf).resolve())();
-                        if (!Hf.isSchema({
-                            pureRender: `function`
-                        }).of(intfPureComponentDefinition)) {
-                            Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} pure component definition is invalid.`);
-                        } else {
-                            let {
-                                pureRender: PureComponent
-                            } = intfPureComponentDefinition;
-
-                            PureComponent = PureComponent.bind(intfPureComponentDefinition);
-
-                            /* allow React pure component function access to React propTypes */
-                            PureComponent.propTypes = intfPureComponentDefinition.propTypes;
-
-                            /* allow React pure component function access to default property */
-                            PureComponent.defaultProps = intfPureComponentDefinition.defaultProps;
-
-                            return PureComponent;
-                        }
                     }
                 }
+
+                const defaultProperty = intf.getStateAsObject();
+                const defaultPropertyKeys = Object.keys(defaultProperty);
+                const reactPropTypeAlias = {
+                    boolean: PropTypes.bool,
+                    array: PropTypes.array,
+                    object: PropTypes.object,
+                    function: PropTypes.func,
+                    string: PropTypes.string,
+                    number: PropTypes.number
+                };
+                const intfPureComponentDefinition = (Hf.Composite({
+                    exclusion: {
+                        keys: [ `*` ],
+                        exception: {
+                            prefixes: DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS,
+                            keys: DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS
+                        }
+                    },
+                    enclosure: {
+                        IntfPureComponentDefinition: function IntfPureComponentDefinition () {
+                            /* set react property type checking */
+                            this.propTypes = (() => {
+                                let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
+                                    if (stateCursor.isItemStronglyTyped(key)) {
+                                        const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
+                                        if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
+                                            if (stateCursor.isItemRequired(key)) {
+                                                propType[key] = reactPropTypeAlias[propertyTypeAliasKey].isRequired;
+                                            } else {
+                                                propType[key] = reactPropTypeAlias[propertyTypeAliasKey];
+                                            }
+                                        }
+                                    }
+                                    return propType;
+                                }, {});
+
+                                return defaultPropertyKeys.reduce((propType, key) => {
+                                    if (stateCursor.isItemOneOfValues(key)) {
+                                        const {
+                                            condition: types
+                                        } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
+                                        propType[key] = PropTypes.oneOf(types);
+                                    }
+                                    if (stateCursor.isItemOneOfTypes(key)) {
+                                        const {
+                                            condition: types
+                                        } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
+                                        propType[key] = PropTypes.oneOfType(types.map((typeAliasKey) => {
+                                            return reactPropTypeAlias[typeAliasKey];
+                                        }));
+                                    }
+                                    return propType;
+                                }, _propTypes);
+                            })();
+                            /* set react default property */
+                            this.defaultProps = defaultProperty;
+                        }
+                    }
+                }).mixin(intf).resolve())();
+
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isSchema({
+                        pureRender: `function`
+                    }).of(intfPureComponentDefinition)) {
+                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} pure component definition is invalid.`);
+                    }
+                }
+
+                let {
+                    pureRender: PureComponent
+                } = intfPureComponentDefinition;
+
+                PureComponent = PureComponent.bind(intfPureComponentDefinition);
+
+                /* allow React pure component function access to React propTypes */
+                PureComponent.propTypes = intfPureComponentDefinition.propTypes;
+
+                /* allow React pure component function access to default property */
+                PureComponent.defaultProps = intfPureComponentDefinition.defaultProps;
+
+                return PureComponent;
             };
             /**
              * @description - Convert composite to a renderable component.
@@ -362,7 +377,7 @@ export default Hf.Composite({
              * @param {object} option
              * @returns {object}
              */
-            this.toComponent = function toComponent (applet, option = {}) {
+            this.toComponent = function toComponent (applet = null, option = {}) {
                 const intf = this;
                 const stateCursor = intf.getStateCursor();
                 const {
@@ -374,321 +389,325 @@ export default Hf.Composite({
                     componentMethodPrefixInclusions,
                     componentMethodAndPropertyInclusions
                 } = Hf.fallback({
-                    alwaysUpdateAsParent: false,
+                    alwaysUpdateAsParent: true,
                     componentMethodPrefixInclusions: [],
                     componentMethodAndPropertyInclusions: []
                 }).of(option);
 
-                if (!Hf.isFunction(CreateReactClass)) {
-                    Hf.log(`error`, `ReactComponentComposite.toComponent - React create class library is invalid.`);
-                } else if (!Hf.isSchema({
-                    bool: `function`,
-                    array: `function`,
-                    object: `function`,
-                    func: `function`,
-                    string: `function`,
-                    number: `function`,
-                    oneOf: `function`,
-                    oneOfType: `function`
-                }).of(PropTypes)) {
-                    Hf.log(`error`, `ReactComponentComposite.toComponent - React prop-types library is invalid.`);
-                } else if (Hf.isObject(applet) && (!Hf.isSchema({
-                    fId: `string`,
-                    name: `string`,
-                    hasStarted: `function`,
-                    start: `function`,
-                    stop: `function`
-                }).of(applet) || applet.fId.substr(0, APP_FACTORY_CODE.length) !== APP_FACTORY_CODE)) {
-                    Hf.log(`error`, `ReactComponentComposite.toComponent - Applet is invalid.`);
-                } else {
-                    const stateless = intf.isStateless();
-                    const defaultProperty = intf.getStateAsObject();
-                    const defaultPropertyKeys = Object.keys(defaultProperty);
-                    const reactPropTypeAlias = {
-                        boolean: PropTypes.bool,
-                        array: PropTypes.array,
-                        object: PropTypes.object,
-                        function: PropTypes.func,
-                        string: PropTypes.string,
-                        number: PropTypes.number
-                    };
-                    const intfComponentDefinition = (Hf.Composite({
-                        exclusion: {
-                            keys: [ `*` ],
-                            exception: {
-                                prefixes: DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS.concat(componentMethodPrefixInclusions),
-                                keys: DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS.concat(componentMethodAndPropertyInclusions)
-                            }
-                        },
-                        enclosure: {
-                            ReactDefinition: function ReactDefinition () {
-                                /* set react property type checking */
-                                this.propTypes = (() => {
-                                    let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
-                                        if (stateCursor.isItemStronglyTyped(key)) {
-                                            const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
-                                            if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
-                                                if (stateCursor.isItemRequired(key)) {
-                                                    propType[key] = reactPropTypeAlias[propertyTypeAliasKey].isRequired;
-                                                } else {
-                                                    propType[key] = reactPropTypeAlias[propertyTypeAliasKey];
-                                                }
-                                            }
-                                        }
-                                        return propType;
-                                    }, {});
-
-                                    return defaultPropertyKeys.reduce((propType, key) => {
-                                        if (stateCursor.isItemOneOfValues(key)) {
-                                            const {
-                                                condition: types
-                                            } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
-                                            propType[key] = PropTypes.oneOf(types);
-                                        }
-                                        if (stateCursor.isItemOneOfTypes(key)) {
-                                            const {
-                                                condition: types
-                                            } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
-                                            propType[key] = PropTypes.oneOfType(types.map((typeAliasKey) => {
-                                                return reactPropTypeAlias[typeAliasKey];
-                                            }));
-                                        }
-                                        return propType;
-                                    }, _propTypes);
-                                })();
-                                /* ----- Public Functions -------------- */
-                                /**
-                                 * @description - Get this component's interface.
-                                 *
-                                 * @method getInterface
-                                 * @return {object}
-                                 */
-                                this.getInterface = function getInterface () {
-                                    return intf;
-                                };
-                                /**
-                                 * @description - React method for getting the default prop values.
-                                 *
-                                 * @method getDefaultProps
-                                 * @returns {object}
-                                 */
-                                this.getDefaultProps = function getDefaultProps () {
-                                    return defaultProperty;
-                                };
-                                /**
-                                 * @description - React method for getting the initial state values.
-                                 *
-                                 * @method getInitialState
-                                 * @returns {object}
-                                 */
-                                this.getInitialState = function getInitialState () {
-                                    if (stateless) {
-                                        _mutationOccurred = false;
-                                        return {};
-                                    } else { // eslint-disable-line
-                                        _mutationOccurred = true;
-                                        return intf.getInitialReflectedState();
-                                    }
-                                };
-                                /**
-                                 * @description - React method for setting up component before mounting.
-                                 *
-                                 * @method componentWillMount
-                                 * @returns void
-                                 */
-                                this.componentWillMount = function componentWillMount () {
-                                    const component = this;
-
-                                    _mountStage = WILL_MOUNT_STAGE;
-
-                                    if (Hf.isObject(applet)) {
-                                        if (applet.hasStarted()) {
-                                            Hf.log(`warn1`, `ReactComponentComposite.toComponent - Applet:${applet.name} of interface:${intf.name} has already started.`);
-                                            applet.restart(option);
-                                        } else {
-                                            applet.start(option);
-                                        }
-                                    }
-
-                                    if (!stateless) {
-                                        /* this event is call ONLY when the state did mutate in store */
-                                        intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
-                                                component.setState(() => reflectedState);
-                                                _mutationOccurred = true;
-                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                            }
-                                        });
-                                        /* this event is call ONLY when the state did mutate in store and FORCE component to update */
-                                        intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
-                                            if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
-                                                component.setState(() => reflectedState);
-                                                component.forceUpdate();
-                                                _mutationOccurred = true;
-                                                Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                                Hf.log(`info`, `Forced update for component:${component.props.name}.`);
-                                            }
-                                        });
-                                    }
-
-                                    // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
-                                    if (alwaysUpdateAsParent) {
-                                        _mutationOccurred = true;
-                                    }
-
-                                    /* needs to sync up interface state and component props before mounting.
-                                       This is needed because componentWillReceiveProps is not called right after mounting. */
-                                    if (intf.reduceState(Hf.fallback(defaultProperty).of(Hf.mix(component.props, {
-                                        exclusion: {
-                                            enumerablePropertiesOnly: true,
-                                            keys: [ `*` ],
-                                            exception: {
-                                                keys: defaultPropertyKeys.filter((key) => key !== `name` && key !== `fId`)
-                                            }
-                                        }
-                                    }).with({})))) {
-                                        _mutationOccurred = true;
-                                        Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
-                                    }
-                                    intf.outgoing(`on-component-will-mount`).emit(() => component);
-                                };
-                                /**
-                                 * @description - React method for when component will get props.
-                                 *
-                                 * @method componentWillReceiveProps
-                                 * @param {object} nextProperty
-                                 * @returns void
-                                 */
-                                this.componentWillReceiveProps = function componentWillReceiveProps (nextProperty) {
-                                    const component = this;
-                                    /* interface tracks new props mutation when component receive new props.
-                                       This will do necessary mutation on interface state. */
-                                    const currentProperty = intf.getStateAsObject();
-
-                                    // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
-                                    if (alwaysUpdateAsParent) {
-                                        _mutationOccurred = true;
-                                    }
-
-                                    if (intf.reduceState(Hf.fallback(currentProperty).of(Hf.mix(nextProperty, {
-                                        exclusion: {
-                                            enumerablePropertiesOnly: true,
-                                            keys: [ `*` ],
-                                            exception: {
-                                                keys: defaultPropertyKeys.filter((key) => key !== `name` && key !== `fId`)
-                                            }
-                                        }
-                                    }).with({})))) {
-                                        /* The interface will detect mutation when component gets new props and update accordingly */
-                                        _mutationOccurred = true;
-                                        Hf.log(`info`, `Property mutated for component:${component.props.name}.`);
-                                    }
-                                };
-                                /**
-                                 * @description - React method for setting up component after mounting.
-                                 *
-                                 * @method componentDidMount
-                                 * @returns void
-                                 */
-                                this.componentDidMount = function componentDidMount () {
-                                    const component = this;
-
-                                    _mountStage = DID_MOUNT_STAGE;
-
-                                    // NOTE: using component.setState here will cause ui flickering. Use component.setState in componentWillMount instead.
-                                    // if (!stateless) {
-                                    //     /* this event is call ONLY when the state did mutate in store */
-                                    //     intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                    //         if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                    //             component.setState(() => reflectedState);
-                                    //             _mutationOccurred = true;
-                                    //             Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                    //         }
-                                    //     });
-                                    //     /* this event is call ONLY when the state did mutate in store and FORCE component to update */
-                                    //     intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
-                                    //         if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
-                                    //             component.setState(() => reflectedState);
-                                    //             component.forceUpdate();
-                                    //             _mutationOccurred = true;
-                                    //             Hf.log(`info`, `State mutated for component:${component.props.name}.`);
-                                    //             Hf.log(`info`, `Forced update for component:${component.props.name}.`);
-                                    //         }
-                                    //     });
-                                    // }
-
-                                    intf.outgoing(`on-component-did-mount`).emit(() => component);
-                                };
-                                /**
-                                 * @description - React method for tearing down component before unmounting.
-                                 *
-                                 * @method componentWillMount
-                                 * @returns void
-                                 */
-                                this.componentWillUnmount = function componentWillUnmount () {
-                                    const component = this;
-
-                                    _mountStage = WILL_UNMOUNT_STAGE;
-
-                                    intf.outgoing(`on-component-will-unmount`).emit(() => component);
-
-                                    if (Hf.isObject(applet)) {
-                                        if (applet.hasStarted()) {
-                                            applet.stop(option);
-                                        } else {
-                                            Hf.log(`warn1`, `ReactComponentComposite.toComponent - Applet:${applet.name} of interface:${intf.name} never started.`);
-                                        }
-                                    }
-                                };
-                                /**
-                                 * @description - React method for preparing component before updating.
-                                 *
-                                 * @method componentWillUpdate
-                                 * @returns void
-                                 */
-                                this.componentWillUpdate = function componentWillUpdate () {
-                                    const component = this;
-                                    intf.outgoing(`on-component-will-update`).emit(() => component);
-                                };
-                                /**
-                                 * @description - React method for preparing component after updating.
-                                 *
-                                 * @method componentDidUpdate
-                                 * @returns void
-                                 */
-                                this.componentDidUpdate = function componentDidUpdate () {
-                                    const component = this;
-                                    intf.outgoing(`on-component-did-update`).emit(() => component);
-                                };
-                                /**
-                                 * @description - React method for checking if component should update.
-                                 *
-                                 * @method shouldComponentUpdate
-                                 * @returns {boolean}
-                                 */
-                                this.shouldComponentUpdate = function shouldComponentUpdate () {
-                                    const component = this;
-
-                                    if (_mutationOccurred) {
-                                        _mutationOccurred = false;
-                                        Hf.log(`info`, `Rendering component:${component.props.name}.`);
-                                        return true;
-                                    } else { // eslint-disable-line
-                                        Hf.log(`info`, `Skipped rendering for component:${component.props.name}.`);
-                                        return false;
-                                    }
-                                };
-                            }
-                        }
-                    }).mixin(intf).resolve())();
-                    let Component = CreateReactClass(intfComponentDefinition);
-
-                    if (!Hf.isFunction(Component)) {
-                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} React component is invalid.`);
-                    } else {
-                        return Component;
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isFunction(CreateReactClass)) {
+                        Hf.log(`error`, `ReactComponentComposite.toComponent - React create class library is invalid.`);
+                    } else if (!Hf.isSchema({
+                        bool: `function`,
+                        array: `function`,
+                        object: `function`,
+                        func: `function`,
+                        string: `function`,
+                        number: `function`,
+                        oneOf: `function`,
+                        oneOfType: `function`
+                    }).of(PropTypes)) {
+                        Hf.log(`error`, `ReactComponentComposite.toComponent - React prop-types library is invalid.`);
+                    } else if (Hf.isObject(applet) && (!Hf.isSchema({
+                        fId: `string`,
+                        name: `string`,
+                        hasStarted: `function`,
+                        start: `function`,
+                        stop: `function`
+                    }).of(applet) || applet.fId.substr(0, APP_FACTORY_CODE.length) !== APP_FACTORY_CODE)) {
+                        Hf.log(`error`, `ReactComponentComposite.toComponent - Applet is invalid.`);
                     }
                 }
+
+                const stateless = intf.isStateless();
+                const defaultProperty = intf.getStateAsObject();
+                const defaultPropertyKeys = Object.keys(defaultProperty);
+                const reactPropTypeAlias = {
+                    boolean: PropTypes.bool,
+                    array: PropTypes.array,
+                    object: PropTypes.object,
+                    function: PropTypes.func,
+                    string: PropTypes.string,
+                    number: PropTypes.number
+                };
+                const intfComponentDefinition = (Hf.Composite({
+                    exclusion: {
+                        keys: [ `*` ],
+                        exception: {
+                            prefixes: DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS.concat(componentMethodPrefixInclusions),
+                            keys: DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS.concat(componentMethodAndPropertyInclusions)
+                        }
+                    },
+                    enclosure: {
+                        ReactDefinition: function ReactDefinition () {
+                            /* set react property type checking */
+                            this.propTypes = (() => {
+                                let _propTypes = defaultPropertyKeys.reduce((propType, key) => {
+                                    if (stateCursor.isItemStronglyTyped(key)) {
+                                        const propertyTypeAliasKey = Hf.typeOf(defaultProperty[key]);
+                                        if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
+                                            if (stateCursor.isItemRequired(key)) {
+                                                propType[key] = reactPropTypeAlias[propertyTypeAliasKey].isRequired;
+                                            } else {
+                                                propType[key] = reactPropTypeAlias[propertyTypeAliasKey];
+                                            }
+                                        }
+                                    }
+                                    return propType;
+                                }, {});
+
+                                return defaultPropertyKeys.reduce((propType, key) => {
+                                    if (stateCursor.isItemOneOfValues(key)) {
+                                        const {
+                                            condition: types
+                                        } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
+                                        propType[key] = PropTypes.oneOf(types);
+                                    }
+                                    if (stateCursor.isItemOneOfTypes(key)) {
+                                        const {
+                                            condition: types
+                                        } = stateCursor.getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
+                                        propType[key] = PropTypes.oneOfType(types.map((typeAliasKey) => {
+                                            return reactPropTypeAlias[typeAliasKey];
+                                        }));
+                                    }
+                                    return propType;
+                                }, _propTypes);
+                            })();
+                            /* ----- Public Functions -------------- */
+                            /**
+                             * @description - Get this component's interface.
+                             *
+                             * @method getInterface
+                             * @return {object}
+                             */
+                            this.getInterface = function getInterface () {
+                                return intf;
+                            };
+                            /**
+                             * @description - React method for getting the default prop values.
+                             *
+                             * @method getDefaultProps
+                             * @returns {object}
+                             */
+                            this.getDefaultProps = function getDefaultProps () {
+                                return defaultProperty;
+                            };
+                            /**
+                             * @description - React method for getting the initial state values.
+                             *
+                             * @method getInitialState
+                             * @returns {object}
+                             */
+                            this.getInitialState = function getInitialState () {
+                                if (stateless) {
+                                    _mutationOccurred = false;
+                                    return {};
+                                } else { // eslint-disable-line
+                                    _mutationOccurred = true;
+                                    return intf.getInitialReflectedState();
+                                }
+                            };
+                            /**
+                             * @description - React method for setting up component before mounting.
+                             *
+                             * @method componentWillMount
+                             * @returns void
+                             */
+                            this.componentWillMount = function componentWillMount () {
+                                const component = this;
+
+                                _mountStage = WILL_MOUNT_STAGE;
+
+                                if (Hf.isObject(applet)) {
+                                    if (applet.hasStarted()) {
+                                        Hf.log(`warn1`, `ReactComponentComposite.toComponent - Applet:${applet.name} of interface:${intf.name} has already started.`);
+                                        applet.restart(option);
+                                    } else {
+                                        applet.start(option);
+                                    }
+                                }
+
+                                if (!stateless) {
+                                    /* this event is call ONLY when the state did mutate in store */
+                                    intf.incoming(`as-state-mutated`).handle((reflectedState) => {
+                                        if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
+                                            component.setState(() => reflectedState);
+                                            _mutationOccurred = true;
+                                            Hf.log(`info0`, `State mutated for component:${component.props.name}.`);
+                                        }
+                                    });
+                                    /* this event is call ONLY when the state did mutate in store and FORCE component to update */
+                                    intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
+                                        if (Hf.isObject(reflectedState) && (_mountStage === WILL_MOUNT_STAGE || _mountStage === DID_MOUNT_STAGE)) {
+                                            component.setState(() => reflectedState);
+                                            component.forceUpdate();
+                                            _mutationOccurred = true;
+                                            Hf.log(`info0`, `State mutated for component:${component.props.name}.`);
+                                            Hf.log(`info0`, `Forced update for component:${component.props.name}.`);
+                                        }
+                                    });
+                                }
+
+                                // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
+                                if (alwaysUpdateAsParent) {
+                                    _mutationOccurred = true;
+                                }
+
+                                /* needs to sync up interface state and component props before mounting.
+                                   This is needed because componentWillReceiveProps is not called right after mounting. */
+                                if (intf.reduceState(Hf.fallback(defaultProperty).of(Hf.mix(component.props, {
+                                    exclusion: {
+                                        enumerablePropertiesOnly: true,
+                                        keys: [ `*` ],
+                                        exception: {
+                                            keys: defaultPropertyKeys.filter((key) => key !== `name` && key !== `fId`)
+                                        }
+                                    }
+                                }).with({})))) {
+                                    _mutationOccurred = true;
+                                    Hf.log(`info0`, `Property mutated for component:${component.props.name}.`);
+                                }
+                                intf.outgoing(`on-component-will-mount`).emit(() => component);
+                            };
+                            /**
+                             * @description - React method for when component will get props.
+                             *
+                             * @method componentWillReceiveProps
+                             * @param {object} nextProperty
+                             * @returns void
+                             */
+                            this.componentWillReceiveProps = function componentWillReceiveProps (nextProperty) {
+                                const component = this;
+                                /* interface tracks new props mutation when component receive new props.
+                                   This will do necessary mutation on interface state. */
+                                const currentProperty = intf.getStateAsObject();
+
+                                // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
+                                if (alwaysUpdateAsParent) {
+                                    _mutationOccurred = true;
+                                }
+
+                                if (intf.reduceState(Hf.fallback(currentProperty).of(Hf.mix(nextProperty, {
+                                    exclusion: {
+                                        enumerablePropertiesOnly: true,
+                                        keys: [ `*` ],
+                                        exception: {
+                                            keys: defaultPropertyKeys.filter((key) => key !== `name` && key !== `fId`)
+                                        }
+                                    }
+                                }).with({})))) {
+                                    /* The interface will detect mutation when component gets new props and update accordingly */
+                                    _mutationOccurred = true;
+                                    Hf.log(`info0`, `Property mutated for component:${component.props.name}.`);
+                                }
+                            };
+                            /**
+                             * @description - React method for setting up component after mounting.
+                             *
+                             * @method componentDidMount
+                             * @returns void
+                             */
+                            this.componentDidMount = function componentDidMount () {
+                                const component = this;
+
+                                _mountStage = DID_MOUNT_STAGE;
+
+                                // NOTE: using component.setState here will cause ui flickering. Use component.setState in componentWillMount instead.
+                                // if (!stateless) {
+                                //     /* this event is call ONLY when the state did mutate in store */
+                                //     intf.incoming(`as-state-mutated`).handle((reflectedState) => {
+                                //         if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
+                                //             component.setState(() => reflectedState);
+                                //             _mutationOccurred = true;
+                                //             Hf.log(`info0`, `State mutated for component:${component.props.name}.`);
+                                //         }
+                                //     });
+                                //     /* this event is call ONLY when the state did mutate in store and FORCE component to update */
+                                //     intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
+                                //         if (Hf.isObject(reflectedState) && _mountStage === DID_MOUNT_STAGE) {
+                                //             component.setState(() => reflectedState);
+                                //             component.forceUpdate();
+                                //             _mutationOccurred = true;
+                                //             Hf.log(`info0`, `State mutated for component:${component.props.name}.`);
+                                //             Hf.log(`info0`, `Forced update for component:${component.props.name}.`);
+                                //         }
+                                //     });
+                                // }
+
+                                intf.outgoing(`on-component-did-mount`).emit(() => component);
+                            };
+                            /**
+                             * @description - React method for tearing down component before unmounting.
+                             *
+                             * @method componentWillMount
+                             * @returns void
+                             */
+                            this.componentWillUnmount = function componentWillUnmount () {
+                                const component = this;
+
+                                _mountStage = WILL_UNMOUNT_STAGE;
+
+                                intf.outgoing(`on-component-will-unmount`).emit(() => component);
+
+                                if (Hf.isObject(applet)) {
+                                    if (applet.hasStarted()) {
+                                        applet.stop(option);
+                                    } else {
+                                        Hf.log(`warn1`, `ReactComponentComposite.toComponent - Applet:${applet.name} of interface:${intf.name} never started.`);
+                                    }
+                                }
+                            };
+                            /**
+                             * @description - React method for preparing component before updating.
+                             *
+                             * @method componentWillUpdate
+                             * @returns void
+                             */
+                            this.componentWillUpdate = function componentWillUpdate () {
+                                const component = this;
+                                intf.outgoing(`on-component-will-update`).emit(() => component);
+                            };
+                            /**
+                             * @description - React method for preparing component after updating.
+                             *
+                             * @method componentDidUpdate
+                             * @returns void
+                             */
+                            this.componentDidUpdate = function componentDidUpdate () {
+                                const component = this;
+                                intf.outgoing(`on-component-did-update`).emit(() => component);
+                            };
+                            /**
+                             * @description - React method for checking if component should update.
+                             *
+                             * @method shouldComponentUpdate
+                             * @returns {boolean}
+                             */
+                            this.shouldComponentUpdate = function shouldComponentUpdate () {
+                                const component = this;
+
+                                if (_mutationOccurred) {
+                                    _mutationOccurred = false;
+                                    Hf.log(`info1`, `Rendering component:${component.props.name}.`);
+                                    return true;
+                                } else { // eslint-disable-line
+                                    Hf.log(`info1`, `Skipped rendering for component:${component.props.name}.`);
+                                    return false;
+                                }
+                            };
+                        }
+                    }
+                }).mixin(intf).resolve())();
+                let Component = CreateReactClass(intfComponentDefinition);
+
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isFunction(Component)) {
+                        Hf.log(`error`, `ReactComponentComposite.toPureComponent - Interface:${intf.name} React component is invalid.`);
+                    }
+                }
+
+                return Component;
             };
         }
     }

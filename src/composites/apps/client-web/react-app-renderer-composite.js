@@ -62,19 +62,25 @@ export default Hf.Composite({
         renderToTarget: function renderToTarget () {
             const app = this;
             const AppComponent = app.getTopComponent();
-            if (!(Hf.isObject(AppComponent) || Hf.isFunction(AppComponent))) {
-                Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
-            } else {
-                const elId = app.name;
-                const ReactDOMRenderer = app.getRenderer();
+
+            if (Hf.DEVELOPMENT) {
+                if (!(Hf.isObject(AppComponent) || Hf.isFunction(AppComponent))) {
+                    Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
+                }
+            }
+
+            const elId = app.name;
+            const ReactDOMRenderer = app.getRenderer();
+
+            if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
                     render: `function`
                 }).of(ReactDOMRenderer)) {
                     Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React renderer is invalid.`);
-                } else {
-                    ReactDOMRenderer.render(AppComponent, document.getElementById(elId));
                 }
             }
+
+            ReactDOMRenderer.render(AppComponent, document.getElementById(elId));
         }
     }
 });

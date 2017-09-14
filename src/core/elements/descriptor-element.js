@@ -54,22 +54,29 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
         let registry;
         let Descriptor;
 
-        if (Hf.isString(type)) {
-            if (type === `constrainable`) {
-                registry = desc._constrainableRegistry;
-                Descriptor = ConstrainableDescriptor;
-            } else if (type === `computable`) {
-                registry = desc._computableRegistry;
-                Descriptor = ComputableDescriptor;
-            } else if (type === `observable`) {
-                registry = desc._observableRegistry;
-                Descriptor = ObservableDescriptor;
-            } else {
-                Hf.log(`error`, `DescriptorElement.select - Unknow descriptor type:${type}.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(type)) {
+                Hf.log(`error`, `DescriptorElement.select - Input descriptor type is invalid.`);
             }
-        } else {
-            Hf.log(`error`, `DescriptorElement.select - Input descriptor type is invalid.`);
         }
+
+        switch (type) {
+        case `constrainable`:
+            registry = desc._constrainableRegistry;
+            Descriptor = ConstrainableDescriptor;
+            break;
+        case `computable`:
+            registry = desc._computableRegistry;
+            Descriptor = ComputableDescriptor;
+            break;
+        case `observable`:
+            registry = desc._observableRegistry;
+            Descriptor = ObservableDescriptor;
+            break;
+        default:
+            Hf.log(`error`, `DescriptorElement.select - Unknow descriptor type:${type}.`);
+        }
+
         return {
             /**
              * @description - Check that descriptor has a description at Id.
@@ -88,15 +95,15 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
              * @returns {object}
              */
             getDescription: function getDescription (id) {
-                if (!Hf.isString(id)) {
-                    Hf.log(`error`, `DescriptorElement.select.getDescription - Input description Id is invalid.`);
-                } else {
-                    if (!this.hasDescription(id)) {
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isString(id)) {
+                        Hf.log(`error`, `DescriptorElement.select.getDescription - Input description Id is invalid.`);
+                    } else if (!this.hasDescription(id)) {
                         Hf.log(`error`, `DescriptorElement.select.getDescription - Description Id:${id} is not defined.`);
-                    } else {
-                        return registry[id];
                     }
                 }
+
+                return registry[id];
             },
             /**
              * @description - Add a description.
@@ -106,16 +113,16 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
              * @return {object}
              */
             addDescription: function addDescription (id) {
-                if (!Hf.isString(id)) {
-                    Hf.log(`error`, `DescriptorElement.select.addDescription - Input description Id is invalid.`);
-                } else {
-                    if (this.hasDescription(id)) {
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isString(id)) {
+                        Hf.log(`error`, `DescriptorElement.select.addDescription - Input description Id is invalid.`);
+                    } else if (this.hasDescription(id)) {
                         Hf.log(`error`, `DescriptorElement.select.addDescription - Description Id:${id} is already added.`);
-                    } else {
-                        registry[id] = Descriptor(id);
-                        return registry[id];
                     }
                 }
+
+                registry[id] = Descriptor(id);
+                return registry[id];
             },
             /**
              * @description - Remove a description.
@@ -125,17 +132,17 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
              * @return void
              */
             removeDescription: function removeDescription (id) {
-                if (!Hf.isString(id)) {
-                    Hf.log(`error`, `DescriptorElement.select.removeDescription - Input descriptor Id is invalid.`);
-                } else {
-                    if (!this.hasDescription(id)) {
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isString(id)) {
+                        Hf.log(`error`, `DescriptorElement.select.removeDescription - Input descriptor Id is invalid.`);
+                    } else if (!this.hasDescription(id)) {
                         Hf.log(`error`, `DescriptorElement.select.removeDescription - Descriptor Id:${id} is not defined.`);
-                    } else {
-                        registry[id].unassign();
-                        registry[id] = undefined;
-                        delete registry[id];
                     }
                 }
+
+                registry[id].unassign();
+                registry[id] = undefined;
+                delete registry[id];
             }
         };
     }
@@ -169,11 +176,13 @@ export default function DescriptorElement () {
         }
     });
 
-    if (!Hf.isObject(element)) {
-        Hf.log(`error`, `DescriptorElement - Unable to create a descriptor element instance.`);
-    } else {
-        const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
-        /* reveal only the public properties and functions */
-        return revealFrozen(element);
+    if (Hf.DEVELOPMENT) {
+        if (!Hf.isObject(element)) {
+            Hf.log(`error`, `DescriptorElement - Unable to create a descriptor element instance.`);
+        }
     }
+
+    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+    /* reveal only the public properties and functions */
+    return revealFrozen(element);
 }

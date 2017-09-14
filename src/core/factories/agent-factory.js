@@ -111,7 +111,7 @@ export default Composer({
                         if (_fixtures.some((_fixture) => _fixture.name === fixture.name)) {
                             Hf.log(`warn1`, `AgentFactory.register - Test fixture:${fixture.name} is already registered.`);
                         }
-                        Hf.log(`info`, `Test agent:${agent.name} registered fixture:${fixture.name}.`);
+                        Hf.log(`info1`, `Test agent:${agent.name} registered fixture:${fixture.name}.`);
                         return true;
                     }));
                 }
@@ -133,11 +133,11 @@ export default Composer({
                 _fixtures.forEach((fixture) => {
                     if (!fixture.hasStarted()) {
                         fixture.start(() => {
-                            Hf.log(`info`, `Running test fixture:${fixture.name}...`);
+                            Hf.log(`info1`, `Running test fixture:${fixture.name}...`);
                         }, option);
                     } else {
                         fixture.restart(() => {
-                            Hf.log(`info`, `Rerunning test fixture:${fixture.name}...`);
+                            Hf.log(`info1`, `Rerunning test fixture:${fixture.name}...`);
                         }, option);
                         Hf.log(`warn1`, `AgentFactory.run - Test fixture:${fixture.name} is already running. Restarting...`);
                     }

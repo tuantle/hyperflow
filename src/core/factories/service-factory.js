@@ -84,11 +84,13 @@ export default Composer({
          * @return void
          */
         this.setup = function setup (done) { // eslint-disable-line
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `ServiceFactory.setup - Input done function is invalid.`);
-            } else {
-                done();
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `ServiceFactory.setup - Input done function is invalid.`);
+                }
             }
+
+            done();
         };
         /**
          * @description - Teardown service event stream.
@@ -98,11 +100,13 @@ export default Composer({
          * @return void
          */
         this.teardown = function teardown (done) { // eslint-disable-line
-            if (!Hf.isFunction(done)) {
-                Hf.log(`error`, `ServiceFactory.teardown - Input done function is invalid.`);
-            } else {
-                done();
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(done)) {
+                    Hf.log(`error`, `ServiceFactory.teardown - Input done function is invalid.`);
+                }
             }
+
+            done();
         };
     }
 });

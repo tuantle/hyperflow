@@ -43,12 +43,15 @@ export default Hf.Composite({
          */
         $initReactAppRendererComposite: function $initReactAppRendererComposite () {
             const app = this;
-            if (!Hf.isSchema({
-                name: `string`,
-                getRenderer: `function`,
-                getTopComponent: `function`
-            }).of(app)) {
-                Hf.log(`error`, `ReactAppRendererComposite.$init - App is invalid. Cannot apply composite.`);
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    name: `string`,
+                    getRenderer: `function`,
+                    getTopComponent: `function`
+                }).of(app)) {
+                    Hf.log(`error`, `ReactAppRendererComposite.$init - App is invalid. Cannot apply composite.`);
+                }
             }
         },
         /**
@@ -60,20 +63,26 @@ export default Hf.Composite({
         renderToTarget: function renderToTarget () {
             const app = this;
             const AppComponent = app.getTopComponent();
-            if (!(Hf.isObject(AppComponent) || Hf.isFunction(AppComponent))) {
-                Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
-            } else {
-                const ReactNativeRenderer = app.getRenderer();
+
+            if (Hf.DEVELOPMENT) {
+                if (!(Hf.isObject(AppComponent) || Hf.isFunction(AppComponent))) {
+                    Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React component is invalid.`);
+                }
+            }
+
+            const ReactNativeRenderer = app.getRenderer();
+
+            if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
                     AppRegistry: {
                         registerComponent: `function`
                     }
                 }).of(ReactNativeRenderer)) {
                     Hf.log(`error`, `ReactAppRendererComposite.renderToTarget - React renderer is invalid.`);
-                } else {
-                    ReactNativeRenderer.AppRegistry.registerComponent(app.name, () => AppComponent);
                 }
             }
+
+            ReactNativeRenderer.AppRegistry.registerComponent(app.name, () => AppComponent);
         }
     }
 });

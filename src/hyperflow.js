@@ -40,21 +40,23 @@ let Hf = null;
 const init = function init ({
     target = `client-web`,
     enableProductionMode = false,
-    enableInfoLog = true,
+    enableInfo0Log = false,
+    enableInfo1Log = true,
     enableWarn0Log = false,
     enableWarn1Log = true
 } = {}) {
     if (Hf === null) {
         Hf = CommonElement({
             enableProductionMode,
-            enableInfoLog,
+            enableInfo0Log,
+            enableInfo1Log,
             enableWarn0Log,
             enableWarn1Log
         });
 
         /* Hyperflow core element libraries */
         const HfCoreProperty = {
-            VERSION: `0.1.2`,
+            VERSION: `0.1.3`,
             TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
             /* load Composer & set composer factory namespace */

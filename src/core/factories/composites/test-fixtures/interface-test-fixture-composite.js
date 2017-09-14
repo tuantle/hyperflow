@@ -171,7 +171,7 @@ export default Hf.Composite({
                             /* setup event stream observation duplex between interface and test fixture */
                             _intf.observe(fixture);
                             fixture.observe(_intf).delay(DELAY_INTERFACE_IN_MS);
-                            Hf.log(`info`, `Test fixture:${fixture.name} registered interface:${intf.name}.`);
+                            Hf.log(`info1`, `Test fixture:${fixture.name} registered interface:${intf.name}.`);
                         }
                     }
                 }
@@ -216,7 +216,7 @@ export default Hf.Composite({
                                 _intf.teardown(() => {
                                     _intf.deactivateIncomingStream();
                                     _intf.deactivateOutgoingStream();
-                                    Hf.log(`info`, `Test fixture:${fixture.name} deactivated intf:${_intf.name}.`);
+                                    Hf.log(`info1`, `Test fixture:${fixture.name} deactivated intf:${_intf.name}.`);
                                 });
                             }
                             fixture.deactivateIncomingStream();

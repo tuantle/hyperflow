@@ -121,7 +121,7 @@ export default Hf.Composite({
                             /* setup event stream observation duplex between domain and test fixture */
                             _domain.observe(fixture);
                             fixture.observe(_domain).delay(DELAY_DOMAIN_IN_MS);
-                            Hf.log(`info`, `Test fixture:${fixture.name} registered domain:${domain.name}.`);
+                            Hf.log(`info1`, `Test fixture:${fixture.name} registered domain:${domain.name}.`);
                         }
                     }
                 }
@@ -150,7 +150,7 @@ export default Hf.Composite({
                                 Hf.log(`error`, `DomainTestFixtureComposite.start - Test fixture:${fixture.name} is not registered with a domain.`);
                             } else {
                                 _domain.start(() => {
-                                    Hf.log(`info`, `Domain:${_domain.name} has started.`);
+                                    Hf.log(`info1`, `Domain:${_domain.name} has started.`);
                                 });
                             }
                             fixture.activateOutgoingStream();
@@ -181,7 +181,7 @@ export default Hf.Composite({
                         fixture.teardown(() => {
                             if (Hf.isObject(_domain)) {
                                 _domain.stop(() => {
-                                    Hf.log(`info`, `Domain:${_domain.name} has stopped.`);
+                                    Hf.log(`info1`, `Domain:${_domain.name} has stopped.`);
                                 });
                             }
                             fixture.deactivateIncomingStream();
