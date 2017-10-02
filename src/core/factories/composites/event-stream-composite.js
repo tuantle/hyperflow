@@ -1263,7 +1263,8 @@ export default Hf.Composite({
                                     const awaitedBundleEventIds = Object.keys(awaitedPayloadBundle).filter((eventId) => !awaitedPayloadBundle[eventId].cancelled);
                                     const cancelledBundleEventIds = Object.keys(awaitedPayloadBundle).filter((eventId) => awaitedPayloadBundle[eventId].cancelled);
 
-                                    if (awaitedBundleEventIds.toString() === eventIds.toString()) {
+                                    if (awaitedBundleEventIds.length === eventIds.length &&
+                                        awaitedBundleEventIds.every((eventId) => eventIds.includes(eventId))) {
                                         if (Hf.isNumeric(timeoutId)) {
                                             clearTimeout(timeoutId);
                                         }
