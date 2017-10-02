@@ -160,7 +160,8 @@ export default Hf.Composite({
                         } = Hf.fallback({
                             completed: false,
                             waitTime: 0
-                        }).of((_arbiter[eventId]));
+                        }).of(_arbiter[eventId]);
+
                         if (eventDirectionalState !== REPEATED_EVENT) {
                             if (eventDirectionalState === REPEATING_EVENT) {
                                 _arbiter[eventId].eventDirectionalState = REPEATED_EVENT;
@@ -176,8 +177,8 @@ export default Hf.Composite({
                                         relayer(handledValue, cancelled);
                                     }
                                     if (completed) {
-                                        _arbiter[eventId] = undefined;
                                         delete _arbiter[eventId];
+                                        // _arbiter[eventId] = undefined;
                                     }
                                 }, waitTime);
                             } else {
@@ -190,8 +191,8 @@ export default Hf.Composite({
                                     relayer(handledValue, cancelled);
                                 }
                                 if (completed) {
-                                    _arbiter[eventId] = undefined;
                                     delete _arbiter[eventId];
+                                    // _arbiter[eventId] = undefined;
                                 }
                             }
                         } else {
@@ -289,16 +290,16 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.debounce(ms).share();
+                            _incomingStream = _incomingStream.debounceTime(ms).share();
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.debounce(ms).share();
+                            _outgoingStream = _outgoingStream.debounceTIme(ms).share();
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.debounce(ms).share();
+                            _divertedIncomingStream = _divertedIncomingStream.debounceTime(ms).share();
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.debounce(ms).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.debounceTime(ms).share();
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.debounce - Invalid direction:${direction}.`);
@@ -672,16 +673,16 @@ export default Hf.Composite({
                     monitor: function monitor (logger) {
                         if (Hf.DEVELOPMENT) {
                             if (!Hf.isSchema({
-                                logOnNext: `function`
+                                logNext: `function`
                             }).of(logger)) {
                                 Hf.log(`error`, `EventStreamComposite.monitor - Input logger object is invalid.`);
                             }
                         }
 
                         const {
-                            logOnNext,
-                            logOnError,
-                            logOnCompleted
+                            logNext,
+                            logError,
+                            logCompleted
                         } = Hf.fallback({
                             /**
                              * @description - On subscription to error...
@@ -690,8 +691,8 @@ export default Hf.Composite({
                              * @param {string} error
                              * @return void
                              */
-                            logOnError: function logOnError (error) {
-                                Hf.log(`error`, `EventStreamComposite.monitor.logOnError - ${error.message}`);
+                            logError: function logError (error) {
+                                Hf.log(`error`, `EventStreamComposite.monitor.logError - ${error.message}`);
                             },
                             /**
                              * @description - On subscription to completion...
@@ -699,15 +700,15 @@ export default Hf.Composite({
                              * @method logOnCompleted
                              * @return void
                              */
-                            logOnCompleted: function logOnCompleted () {
+                            logCompleted: function logCompleted () {
                                 Hf.log(`info0`, `Complete side subscription.`);
                             }
                         }).of(logger);
                         /* using a side observer for monitoring */
                         const sideObserver = Rx.Subscriber.create(
-                            logOnNext,
-                            logOnError,
-                            logOnCompleted
+                            logNext,
+                            logError,
+                            logCompleted
                         );
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
@@ -767,10 +768,11 @@ export default Hf.Composite({
                                 payloads.push(payload);
                                 return payloads;
                             }, []).flatMap((payload) => payload);
-                            // FIXME: needs to filler out diverted events from main incoming stream.
-                            // _incomingStream = _incomingStream.filter((payload) => {
-                            //     return eventIds.every((eventId) => eventId !== payload.eventId);
-                            // }).share();
+                            /* filler out diverted events from main incoming stream */
+                            _incomingStream = _incomingStream.filter((payload) => {
+                                return eventIds.every((eventId) => eventId !== payload.eventId);
+                            }).share();
+
                             return _createStreamOperatorFor.call(factory, DIVERTED_INCOMING_DIRECTION);
                         case OUTGOING_DIRECTION:
                             _divertedOutgoingStream = _outgoingStream.filter((payload) => {
@@ -779,10 +781,11 @@ export default Hf.Composite({
                                 payloads.push(payload);
                                 return payloads;
                             }, []).flatMap((payload) => payload);
-                            // FIXME: needs to filler out diverted events from main outgoing stream.
-                            // _outgoingStream = _outgoingStream.filter((payload) => {
-                            //     return eventIds.every((eventId) => eventId !== payload.eventId);
-                            // }).share();
+                            /* filler out diverted events from main outgoing stream */
+                            _outgoingStream = _outgoingStream.filter((payload) => {
+                                return eventIds.every((eventId) => eventId !== payload.eventId);
+                            }).share();
+
                             return _createStreamOperatorFor.call(factory, DIVERTED_OUTGOING_DIRECTION);
                         case `diversion`:
                             Hf.log(`error`, `EventStreamComposite.divert - Cannot divert a diverted stream.`);
@@ -925,28 +928,24 @@ export default Hf.Composite({
                      *
                      * @method outgoing.interval
                      * @param {number} ms - Period in millisecond
-                     * @param {number} lifeSpan - Life time counter of the interval, -1 = indefinite
                      * @param {function} stopper - Interval stopper
                      * @return {object}
                      */
-                    interval: function interval (ms, lifeSpan = -1, stopper = () => false) {
+                    interval: function interval (ms, stopper = () => false) {
                         if (Hf.DEVELOPMENT) {
                             if (!Hf.isInteger(ms)) {
-                                Hf.log(`error`, `EventStreamComposite.outgoing.interval - Input period time is invalid.`);
+                                Hf.log(`error`, `EventStreamComposite.outgoing.interval - Input period is invalid.`);
                             }
                         }
 
-                        lifeSpan = Hf.isNumeric(lifeSpan) ? lifeSpan : -1;
-
                         if (ms < 1) {
                             ms = 1;
-                            Hf.log(`warn1`, `EventStreamComposite.outgoing.interval - Input interval period time should be greater than 0. Reset to 1ms.`);
+                            Hf.log(`warn1`, `EventStreamComposite.outgoing.interval - Input interval period should be greater than 0. Reset to 1ms.`);
                         }
 
                         _arbiter = eventIds.reduce((arbiter, eventId) => {
                             if (arbiter.hasOwnProperty(eventId)) {
                                 arbiter[eventId].intervalPeriod = ms;
-                                arbiter[eventId].lifeSpan = lifeSpan;
                                 arbiter[eventId].stopper = stopper;
                                 if (arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
                                     arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
@@ -955,7 +954,6 @@ export default Hf.Composite({
                                 arbiter[eventId] = {
                                     eventDirectionalState: OUTGOING_EVENT,
                                     intervalPeriod: ms,
-                                    lifeSpan,
                                     stopper,
                                     handler: null,
                                     canceller: null,
@@ -988,6 +986,7 @@ export default Hf.Composite({
                             const {
                                 eventId
                             } = payload;
+
                             if (!_outgoingStreamActivated) {
                                 _unemitPayloads.push(payload);
                                 Hf.log(`warn0`, `EventStreamComposite.outgoing.emit - Emitting payload with eventId:${eventId} before observer activation.`);
@@ -996,51 +995,73 @@ export default Hf.Composite({
                                     const {
                                         waitTime,
                                         intervalPeriod,
-                                        lifeSpan,
                                         stopper
                                     } = Hf.fallback({
                                         waitTime: 0,
-                                        intervalPeriod: 0,
-                                        lifeSpan: -1
-                                    }).of((_arbiter[eventId]));
-                                    let lifeSpanCounter = 0;
-                                    let intervalId;
-                                    let intervalStopped = false;
+                                        intervalPeriod: 0
+                                    }).of(_arbiter[eventId]);
+                                    let sideSubscription;
+                                    let sideStream = Rx.Observable;
+                                    const sideObserver = Rx.Subscriber.create(
+                                        /**
+                                         * @description - On subscription to next incoming side value...
+                                         *
+                                         * @method next
+                                         * @param {object} awaitedPayloadBundle
+                                         * @return void
+                                         */
+                                        function next (tick) {
+                                            if (Hf.isFunction(stopper)) {
+                                                let intervalStopped = stopper(tick);
+
+                                                intervalStopped = Hf.isBoolean(intervalStopped) ? intervalStopped : false;
+
+                                                if (intervalStopped) {
+                                                    sideObserver.complete();
+                                                }
+                                            }
+                                            _streamEmitter.next(payload);
+                                        },
+                                        /**
+                                         * @description - On subscription to side error...
+                                         *
+                                         * @method error
+                                         * @param {string} errorMessage
+                                         * @return void
+                                         */
+                                        function error (errorMessage) {
+                                            Hf.log(`error`, `EventStreamComposite.outgoing.emit.error - Side subscription error. ${errorMessage}`);
+                                        },
+                                        /**
+                                         * @description - On subscription to side completion...
+                                         *
+                                         * @method complete
+                                         * @return void
+                                         */
+                                        function complete () {
+                                            sideSubscription.unsubscribe();
+                                            Hf.log(`info0`, `Side subscription completed.`);
+                                        }
+                                    );
 
                                     if (_arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
                                         _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
                                     }
 
-                                    if (waitTime > 0 && intervalPeriod > 0) {
-                                        setTimeout(() => {
-                                            intervalId = setInterval(() => {
-                                                _streamEmitter.next(payload);
-                                                lifeSpanCounter++;
-                                                if (Hf.isFunction(stopper)) {
-                                                    intervalStopped = stopper(lifeSpanCounter);
-                                                    intervalStopped = Hf.isBoolean(intervalStopped) ? intervalStopped : false;
-                                                }
-                                                if (intervalStopped || (lifeSpan !== -1 && lifeSpanCounter === lifeSpan)) {
-                                                    clearInterval(intervalId);
-                                                }
-                                            }, intervalPeriod);
-                                        }, waitTime);
-                                    } else if (waitTime > 0 && intervalPeriod === 0) {
+                                    if (waitTime > 0 && intervalPeriod === 0) {
                                         setTimeout(() => {
                                             _streamEmitter.next(payload);
+                                        }, waitTime);
+                                    } else if (waitTime > 0 && intervalPeriod > 0) {
+                                        setTimeout(() => {
+                                            sideStream = sideStream.interval(intervalPeriod).timeInterval().share();
+                                            _outgoingStream = _outgoingStream.merge(sideStream).share();
+                                            sideSubscription = sideStream.subscribe(sideObserver);
                                         }, waitTime);
                                     } else if (waitTime === 0 && intervalPeriod > 0) {
-                                        intervalId = setInterval(() => {
-                                            _streamEmitter.next(payload);
-                                            lifeSpanCounter++;
-                                            if (Hf.isFunction(stopper)) {
-                                                intervalStopped = stopper(lifeSpanCounter);
-                                                intervalStopped = Hf.isBoolean(intervalStopped) ? intervalStopped : false;
-                                            }
-                                            if (intervalStopped || (lifeSpan !== -1 && lifeSpanCounter === lifeSpan)) {
-                                                clearInterval(intervalId);
-                                            }
-                                        }, intervalPeriod);
+                                        sideStream = sideStream.interval(intervalPeriod).timeInterval().share();
+                                        _outgoingStream = _outgoingStream.merge(sideStream).share();
+                                        sideSubscription = sideStream.subscribe(sideObserver);
                                     } else {
                                         _streamEmitter.next(payload);
                                     }
@@ -1085,24 +1106,21 @@ export default Hf.Composite({
                                     } = Hf.fallback({
                                         waitTime: 0,
                                         intervalPeriod: 0
-                                    }).of((_arbiter[eventId]));
+                                    }).of(_arbiter[eventId]);
+
+                                    if (Hf.DEVELOPMENT) {
+                                        if (intervalPeriod !== 0) {
+                                            Hf.log(`warn1`, `EventStreamComposite.outgoing.cancelLatest - Interval is not used by cancelLatest. Ignoring interval with period:${intervalPeriod}.`);
+                                        }
+                                    }
+
                                     if (_arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
                                         _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
                                     }
-                                    if (waitTime > 0 && intervalPeriod > 0) {
-                                        setTimeout(() => {
-                                            setInterval(() => {
-                                                _streamEmitter.next(payload);
-                                            }, intervalPeriod);
-                                        }, waitTime);
-                                    } else if (waitTime > 0 && intervalPeriod === 0) {
+                                    if (waitTime > 0) {
                                         setTimeout(() => {
                                             _streamEmitter.next(payload);
                                         }, waitTime);
-                                    } else if (waitTime === 0 && intervalPeriod > 0) {
-                                        setInterval(() => {
-                                            _streamEmitter.next(payload);
-                                        }, intervalPeriod);
                                     } else {
                                         _streamEmitter.next(payload);
                                     }
@@ -1250,7 +1268,7 @@ export default Hf.Composite({
                             const awaitedEventId = eventIds.reduce((_awaitedEventId, eventId) => {
                                 return Hf.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId},${eventId}`;
                             }, ``);
-                            const incomingAWaitOperator = factory.incoming(awaitedEventId);
+                            const incomingAwaitOperator = factory.incoming(awaitedEventId);
                             const sideObserver = Rx.Subscriber.create(
                                 /**
                                  * @description - On subscription to next incoming side value...
@@ -1328,8 +1346,8 @@ export default Hf.Composite({
 
                             return {
                                 // asPromised: incoming.asPromised,
-                                handle: incomingAWaitOperator.handle,
-                                forward: incomingAWaitOperator.forward
+                                handle: incomingAwaitOperator.handle,
+                                forward: incomingAwaitOperator.forward
                             };
                         }
                         return {
@@ -1496,7 +1514,11 @@ export default Hf.Composite({
              * @param {object} option
              * @return void
              */
-            this.activateIncomingStream = function activateIncomingStream (option = {}) {
+            this.activateIncomingStream = function activateIncomingStream (option = {
+                forceBufferingOnAllIncomingStreams: false,
+                bufferTimeSpan: 1,
+                bufferTimeShift: 1
+            }) {
                 const factory = this;
                 let {
                     forceBufferingOnAllIncomingStreams,
@@ -1547,7 +1569,11 @@ export default Hf.Composite({
              * @param {object} option
              * @return void
              */
-            this.activateOutgoingStream = function activateOutgoingStream (option = {}) {
+            this.activateOutgoingStream = function activateOutgoingStream (option = {
+                forceBufferingOnAllOutgoingStreams: false,
+                bufferTimeSpan: 1,
+                bufferTimeShift: 1
+            }) {
                 const factory = this;
                 let {
                     forceBufferingOnAllOutgoingStreams,
