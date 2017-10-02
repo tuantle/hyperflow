@@ -66,7 +66,6 @@ export default Composer({
     state: {
         name: {
             value: `unnamed`,
-            stronglyTyped: true,
             required: true
         },
         fId: {
@@ -379,7 +378,10 @@ export default Composer({
          * @param {object} option
          * @return void
          */
-        this.start = function start (done, option = {}) {
+        this.start = function start (done, option = {
+            enableSlowRunMode: false,
+            waitTime: DEFAULT_SETUP_WAIT_TIME_IN_MS
+        }) {
             const domain = this;
             const {
                 enableSlowRunMode,
@@ -587,7 +589,11 @@ export default Composer({
          * @param {object} option
          * @return void
          */
-        this.stop = function stop (done, option = {}) {
+        this.stop = function stop (done, option = {
+            resetStoreState: true,
+            resetAllServiceStates: true,
+            waitTime: DEFAULT_TEARDOWN_WAIT_TIME_IN_MS
+        }) {
             const {
                 resetStoreState,
                 resetAllServiceStates,
@@ -733,7 +739,9 @@ export default Composer({
          * @param {object} option,
          * @return void
          */
-        this.restart = function restart (done, option = {}) {
+        this.restart = function restart (done, option = {
+            waitTime: DEFAULT_SETUP_WAIT_TIME_IN_MS
+        }) {
             const domain = this;
             const {
                 waitTime,

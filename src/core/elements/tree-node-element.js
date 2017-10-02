@@ -27,6 +27,8 @@
 /* load Hyperflow */
 import { Hf } from '../../hyperflow';
 
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+
 /**
  * @description - A tree node prototypes.
  *
@@ -279,7 +281,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     getContentType: function getContentType () {
         const node = this;
 
-        return Hf.typeOf(node._contentProxy);
+        return Hf.typeOf(node._content.accessor);
     },
     /**
      * @description - Get node content.
@@ -290,77 +292,124 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     getContent: function getContent () {
         const node = this;
 
-        return node._contentProxy;
+        return node._content.accessor;
+    },
+    /**
+     * @description - Set node content.
+     *
+     * @method getContentCacheItem
+     * @param {*} cachedItem
+     * @return void
+     */
+    getContentCacheItem: function getContentCacheItem (key) {
+        const node = this;
+
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isString(key) || Hf.isInteger(key))) {
+                Hf.log(`error`, `TreeNodeElement.getContentCacheItem - Input content cache item key is invalid.`);
+            }
+        }
+
+        if (Hf.isObject(node._content.cache)) {
+            return node._content.cache.hasOwnProperty(key) ? node._content.cache[key] : undefined;
+        } else if (Hf.isArray(node._content.cache)) {
+            return node._content.cache.length > key ? node._content.cache[key] : undefined;
+        } else { // eslint-disable-line
+            return undefined;
+        }
     },
     /**
      * @description - Set node content.
      *
      * @method setContent
-     * @param {object|array} content
+     * @param {object} content
      * @return void
      */
     setContent: function setContent (content) {
         const node = this;
 
-        if (Hf.DEVELOPMENT) {
-            if (!(Hf.isObject(content) || Hf.isArray(content))) {
-                Hf.log(`error`, `TreeNodeElement.setContent - Input content must be an object or array.`);
+        if (Hf.isSchema({
+            cache: `object|array`,
+            accessor: `object|array`
+        }).of(content)) {
+            node._content = content;
+
+            if (!node.isSingular() && !node.isRoot()) {
+                const hNode = node._getHead();
+
+                if (!Hf.isDefined(hNode._content.accessor)) {
+                    hNode._content.accessor = Hf.isString(node._key) ? {} : [];
+                }
+                if (!hNode._content.accessor.hasOwnProperty(node._key)) {
+                    Object.defineProperty(hNode._content.accessor, node._key, {
+                        get: function get () {
+                            return node._content.accessor;
+                        },
+                        configurable: false,
+                        enumerable: true
+                    });
+                }
             }
-        }
+            if (!node.isLeaf()) {
+                const tNodes = node._getTails();
 
-        node._contentProxy = content;
-
-        if (!node.isSingular() && !node.isRoot()) {
-            const hNode = node._getHead();
-
-            if (!hNode._contentProxy) {
-                hNode._contentProxy = Hf.isString(node._key) ? {} : [];
-            }
-            if (!hNode._contentProxy.hasOwnProperty(node._key)) {
-                Object.defineProperty(hNode._contentProxy, node._key, {
-                    get: function get () {
-                        return node._contentProxy;
-                    },
-                    configurable: false,
-                    enumerable: true
+                tNodes.forEach((tNode) => {
+                    Object.defineProperty(node._content.accessor, tNode._key, {
+                        get: function get () {
+                            return tNode._content.accessor;
+                        },
+                        configurable: false,
+                        enumerable: true
+                    });
                 });
             }
-        }
-        if (!node.isLeaf()) {
-            const tNodes = node._getTails();
-
-            tNodes.forEach((tNode) => {
-                Object.defineProperty(node._contentProxy, tNode._key, {
-                    get: function get () {
-                        return tNode._contentProxy;
-                    },
-                    configurable: false,
-                    enumerable: true
-                });
-            });
         }
     },
     /**
      * @description - Freeze node content hierarchy and prevent extension.
      *
-     * @method freeze
+     * @method freezeContent
      * @return void
      */
     freezeContent: function freezeContent () {
         const node = this;
 
-        Object.freeze(node._contentProxy);
+        Object.freeze(node._content);
+
         if (!node.isLeaf()) {
             const tNodes = node._getTails();
 
             tNodes.forEach((tNode) => {
-                Object.freeze(tNode._contentProxy);
+                Object.freeze(tNode._content);
                 if (!tNode.isLeaf()) {
                     tNode.freezeContent();
                 }
             });
         }
     },
+    /**
+     * @description - Delete node content and its children's contents.
+     *
+     * @method flushContent
+     * @return void
+     */
+    // flushContent: function flushContent () {
+    //     const node = this;
+    //
+    //     if (!node.isLeaf() && !node.isSingular()) {
+    //         node.forEach(`descendants`, (dNode) => {
+    //             dNode._content = {
+    //                 cache: undefined,
+    //                 accessor: undefined
+    //             }
+    //         });
+    //     }
+    //
+    //     node._content = {
+    //         cache: undefined,
+    //         accessor: undefined
+    //     }
+    // },
     /**
      * @description - Branch out a new tail node to hierarchy and return the new tail node.
      *
@@ -369,18 +418,23 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {*} content - Node content.
      * @return {object}
      */
-    branch: function branch (key, content) {
+    branch: function branch (key, content = {
+        cache: undefined,
+        accessor: undefined
+    }) {
+        const node = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(key) || Hf.isInteger(key))) {
                 Hf.log(`error`, `TreeNodeElement.branch - Input node key is invalid.`);
             }
         }
 
-        const node = this;
         const tree = node._tree;
         const pathId = `${node._pathId}.${key}`;
 
         node.sprout(key, content);
+
         return tree.select(pathId);
     },
     /**
@@ -391,23 +445,27 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {*} content - Node content.
      * @return {object}
      */
-    sprout: function sprout (key, content) {
+    sprout: function sprout (key, content = {
+        cache: undefined,
+        accessor: undefined
+    }) {
+        const node = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(key) || Hf.isInteger(key))) {
                 Hf.log(`error`, `TreeNodeElement.sprout - Input node key is invalid.`);
             }
         }
 
-        const node = this;
         const tree = node._tree;
         const pathId = `${node._pathId}.${key}`;
         const tNode = tree._createNode(pathId);
 
         tNode._hPathId = node._pathId;
         node._tPathIds.push(tNode._pathId);
-        if (Hf.isObject(content) || Hf.isArray(content)) {
-            tNode.setContent(content);
-        }
+
+        tNode.setContent(content);
+
         return tree.select(node._pathId);
     },
     /**
@@ -418,12 +476,14 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     graft: function graft (key) {
+        const node = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(key) || Hf.isInteger(key))) {
                 Hf.log(`error`, `TreeNodeElement.graft - Input node key is invalid.`);
             }
         }
-        const node = this;
+
         const tree = node._tree;
         const pathId = `${node._pathId}.${key}`;
 
@@ -435,6 +495,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
 
         const tNode = tree._getNode(pathId);
         const index = node._tPathIds.indexOf(pathId);
+
         return {
             /**
              * New node branch to graft onto.
@@ -467,13 +528,14 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     rootify: function rootify (key) {
+        const node = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(key) || Hf.isInteger(key))) {
                 Hf.log(`error`, `TreeNodeElement.rootify - Input node key is invalid.`);
             }
         }
 
-        const node = this;
         const tree = node._tree;
         const pathId = `${node._pathId}.${key}`;
 
@@ -491,6 +553,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
         node._tPathIds.splice(index, 1);
         tNode._hPathId = ``;
         tNode.rekey(key);
+
         return tree.select(tNode._pathId);
     },
     /**
@@ -501,7 +564,10 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {object} option - Referal option.
      * @return void
      */
-    refer: function refer (pathId, option = {}) {
+    refer: function refer (pathId, option = {
+        maxReferDepth: -1,
+        excludedPathIds: []
+    }) {
         const node = this;
         const tree = node._tree;
         const {
@@ -535,10 +601,10 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
                 const rtNodes = rNode._getTails();
                 const tNodeKeys = tNodes.map((tNode) => tNode._key);
 
-                rtdNodes = rtNodes.filter((rtNode) => !tNodeKeys.includes(rtNode._key));
-                rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.includes(rtNode._key));
+                rtdNodes = rtNodes.filter((rtNode) => !tNodeKeys.includes(rtNode._key) && !excludedPathIds.includes(rtNode._pathId));
+                rtsNodes = rtNodes.filter((rtNode) => tNodeKeys.includes(rtNode._key) && !excludedPathIds.includes(rtNode._pathId));
 
-                rtsNodes.filter((rtsNode) => !excludedPathIds.includes(rtsNode._pathId)).forEach((rtsNode) => {
+                rtsNodes.forEach((rtsNode) => {
                     const [ tsNode ] = tNodes.filter((tNode) => tNode._key === rtsNode._key);
 
                     if ((maxReferDepth === -1 || depth <= maxReferDepth)) {
@@ -548,14 +614,15 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
             } else {
                 rtdNodes = rNode._getTails();
             }
-            rtdNodes.filter((rtdNode) => !excludedPathIds.includes(rtdNode._pathId)).forEach((rtdNode) => {
+
+            rtdNodes.forEach((rtdNode) => {
                 // let ts = new Date().getTime();
 
                 // TODO: needs optimization. Performance issue with deep object & array, especially for large array of objects.
                 if ((maxReferDepth === -1 || depth <= maxReferDepth)) {
-                    node.branch(rtdNode._key, rtdNode._contentProxy).refer(rtdNode._pathId, option);
+                    node.branch(rtdNode._key, rtdNode._content).refer(rtdNode._pathId, option);
                 } else {
-                    node.branch(rtdNode._key, rtdNode._contentProxy);
+                    node.branch(rtdNode._key, rtdNode._content);
                 }
                 // let te = new Date().getTime();
                 // console.log(`TEST execution time: ${te - ts} ms.`);
@@ -573,13 +640,14 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     rekey: function rekey (newKey) {
+        const node = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(newKey) || Hf.isInteger(newKey))) {
                 Hf.log(`error`, `TreeNodeElement.rekey - Input node key is invalid.`);
             }
         }
 
-        const node = this;
         const tree = node._tree;
         const oldPathId = node._pathId;
         let newPathId = ``;
@@ -618,42 +686,34 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     forEach: function forEach (flag, iterator, context) {
+        const node = this;
+
         if (Hf.DEVELOPMENT) {
             if (!Hf.isString(flag)) {
                 Hf.log(`error`, `TreeNodeElement.forEach - Input flag is invalid.`);
             } else if (!Hf.isFunction(iterator)) {
                 Hf.log(`error`, `TreeNodeElement.forEach - Input iterator callback is invalid.`);
-            }
-        }
-
-        const node = this;
-
-        if (Hf.DEVELOPMENT) {
-            if (node.isSingular()) {
+            } else if (node.isSingular()) {
                 Hf.log(`error`, `TreeNodeElement.forEach - Node pathId:${node._pathId} is singular.`);
             }
         }
 
-        let nodes = [];
         const fromTails = !node.isLeaf() ? flag === `tails` : false;
         const fromCommons = !node.isRoot() ? flag === `commons` : false;
         const fromAncestors = !node.isRoot() ? flag === `ancestors` : false;
         const fromDescendants = !node.isLeaf() ? flag === `descendants` : false;
 
         if (fromTails) {
-            nodes = node._getTails();
+            Hf.forEach(node._getTails().map((_node) => revealFrozen(_node)), iterator, context);
         } else if (fromCommons) {
-            nodes = node._getHead()._getTails();
+            Hf.forEach(node._getHead()._getTails().map((_node) => revealFrozen(_node)), iterator, context);
         } else if (fromAncestors) {
-            nodes = node._getAncestors();
+            Hf.forEach(node._getAncestors().map((_node) => revealFrozen(_node)), iterator, context);
         } else if (fromDescendants) {
-            nodes = node._getDescendants();
+            Hf.forEach(node._getDescendants().map((_node) => revealFrozen(_node)), iterator, context);
         } else {
             Hf.log(`error`, `TreeNodeElement.forEach - Input flag is invalid.`);
         }
-
-        const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
-        Hf.forEach(nodes.map((_node) => revealFrozen(_node)), iterator, context);
     }
     /**
      * @description - Return node`s as a string for debuging.
@@ -670,7 +730,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     //             pathId: node._pathId,
     //             key: node._key,
     //             tails: node._tPathIds,
-    //             content: node._contentProxy
+    //             content: node._content
     //         }, null, `\t`));
     //     } else if (node.isLeaf()) {
     //         Hf.log(`debug`, JSON.stringify({
@@ -678,7 +738,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     //             pathId: node._pathId,
     //             key: node._key,
     //             head: node._hPathId,
-    //             content: node._contentProxy
+    //             content: node._content
     //         }, null, `\t`));
     //     } else {
     //         Hf.log(`debug`, JSON.stringify({
@@ -687,7 +747,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
     //             key: node._key,
     //             head: node._hPathId,
     //             tails: node._tPathIds,
-    //             content: node._contentProxy
+    //             content: node._content
     //         }, null, `\t`));
     //     }
     // }
@@ -748,11 +808,14 @@ export default function TreeNodeElement (tree, pathId) {
             configurable: false,
             enumerable: false
         },
-        // TODO: Used es6 Proxy.
-        _contentProxy: {
-            value: undefined,
+        // TODO: Used es6 proxy.
+        _content: {
+            value: {
+                cache: undefined,
+                accessor: undefined
+            },
             writable: true,
-            configurable: false,
+            configurable: true,
             enumerable: false
         },
         _tree: {

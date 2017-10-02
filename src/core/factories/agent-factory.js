@@ -45,7 +45,6 @@ export default Composer({
     state: {
         name: {
             value: `unnamed`,
-            stronglyTyped: true,
             required: true
         },
         fId: {
@@ -126,6 +125,8 @@ export default Composer({
          */
         this.run = function run (option = {}) {
             const agent = this;
+
+            option = Hf.isObject(option) ? option : {};
 
             if (Hf.isEmpty(_fixtures)) {
                 Hf.log(`error`, `AgentFactory.run - Test agent:${agent.name} is not registered with a test fixture.`);

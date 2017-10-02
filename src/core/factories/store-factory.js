@@ -54,7 +54,6 @@ export default Composer({
     state: {
         name: {
             value: `unnamed`,
-            stronglyTyped: true,
             required: true
         },
         fId: {

@@ -31,6 +31,8 @@ import { Hf } from '../../../hyperflow';
 /* load RxJs dependency */
 import Rx from 'rxjs/Rx';
 
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+
 /**
  * @description - A emitter descriptor prototypes.
  *
@@ -122,8 +124,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
         const eventId = `${observable._id}.${handerKey}`;
 
         if (observable.hasSubscriber(eventId)) {
-            observable._description.subscriber[eventId] = undefined;
             delete observable._description.subscriber[eventId];
+            // observable._description.subscriber[eventId] = undefined;
         }
     },
     /**
@@ -168,8 +170,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
         const eventId = `${observable._id}.${conditionKey}`;
 
         if (observable.hasCondition(eventId)) {
-            observable._description.condition[eventId] = undefined;
             delete observable._description.condition[eventId];
+            // observable._description.condition[eventId] = undefined;
         }
     },
     /**
@@ -196,6 +198,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
         } = Hf.fallback({
             condition: {},
             subscriber: {}
+        }, () => {
+            Hf.log(`warn1`, `ObservableDescriptor.assign - Input descriptor preset is invalid.`);
         }).of(descPreset);
 
         if (observable._description.assigned) {
@@ -356,8 +360,8 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
             observable._subscription.unsubscribe();
 
             /* delete current property */
-            observable._description.proxy[key] = undefined;
             delete observable._description.proxy[key];
+            // observable._description.proxy[key] = undefined;
 
             /* restore original property with it descriptor */
             if (observable._description.orgDesc.hasOwnProperty(`get`) || observable._description.orgDesc.hasOwnProperty(`set`)) {
@@ -445,7 +449,6 @@ export default function ObservableDescriptor (id) {
         }
     }
 
-    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
     /* reveal only the public properties and functions */
     return revealFrozen(descriptor);
 }

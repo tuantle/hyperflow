@@ -135,7 +135,9 @@ export default Hf.Composite({
                  * @param {object} cmd - command statement.
                  * @return {object}
                  */
-                write: function write (cmd = {}) {
+                write: function write (cmd = {
+                    touchRoot: false
+                }) {
                     if (Hf.DEVELOPMENT) {
                         if (!Hf.isSchema({
                             bundle: `object`

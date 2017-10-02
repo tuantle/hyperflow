@@ -59,7 +59,7 @@ const oneOfTypesPreset = function oneOfTypesPreset (_types) {
                 const result = {
                     verified: true,
                     reject: function reject () {
-                        Hf.log(`warn1`, `oneTypeOf - Property key:${context.key} value is not one type of ${types}`);
+                        Hf.log(`warn1`, `oneTypeOf - Property key:${context.key} value:${context.newValue} is not one type of ${types}`);
                     }
                 };
                 result.verified = types.includes(oldValueType) && types.includes(newValueType);

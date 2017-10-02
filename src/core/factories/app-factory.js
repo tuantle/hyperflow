@@ -45,7 +45,6 @@ export default Composer({
     state: {
         name: {
             value: `unnamed`,
-            stronglyTyped: true,
             required: true
         },
         fId: {
@@ -210,7 +209,9 @@ export default Composer({
          * @param {object} option
          * @return void
          */
-        this.start = function start (option = {}) {
+        this.start = function start (option = {
+            doRenderToTarget: true
+        }) {
             const app = this;
             const {
                 doRenderToTarget
@@ -252,6 +253,8 @@ export default Composer({
         this.stop = function stop (option = {}) {
             const app = this;
 
+            option = Hf.isObject(option) ? option : {};
+
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isObject(_domain)) {
                     Hf.log(`error`, `AppFactory.stop - App:${app.name} is not registered with a domain.`);
@@ -272,7 +275,9 @@ export default Composer({
          * @param {object} option,
          * @return void
          */
-        this.restart = function restart (option = {}) {
+        this.restart = function restart (option = {
+            doRenderToTarget: true
+        }) {
             const app = this;
             const {
                 doRenderToTarget

@@ -44,30 +44,31 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _deepCompareSchema: function _deepCompareSchema (schema, target) {
-        const common = this;
+        const Hf = this;
         let verified = true;
-        if (common.isObject(schema) && common.isObject(target)) {
-            common.forEach(schema, (schemaItem, key) => {
+
+        if (Hf.isObject(schema) && Hf.isObject(target)) {
+            Hf.forEach(schema, (schemaItem, key) => {
                 if (verified) {
                     let itemTypes = [];
                     if (target.hasOwnProperty(key) || Object.getPrototypeOf(target).hasOwnProperty(key)) {
                         const targetItem = target[key];
-                        if ((common.isObject(targetItem) && common.isObject(schemaItem)) || (common.isArray(targetItem) && common.isArray(schemaItem))) {
-                            verified = common._deepCompareSchema(schemaItem, targetItem);
-                        } else if (common.isString(schemaItem)) {
-                            itemTypes = common.stringToArray(schemaItem, `|`);
+                        if ((Hf.isObject(targetItem) && Hf.isObject(schemaItem)) || (Hf.isArray(targetItem) && Hf.isArray(schemaItem))) {
+                            verified = Hf._deepCompareSchema(schemaItem, targetItem);
+                        } else if (Hf.isString(schemaItem)) {
+                            itemTypes = Hf.stringToArray(schemaItem, `|`);
                             verified = itemTypes.some((itemType) => {
                                 if (itemType === `defined`) {
-                                    return common.isDefined(targetItem);
+                                    return Hf.isDefined(targetItem);
                                 }
-                                return common.typeOf(targetItem) === itemType;
+                                return Hf.typeOf(targetItem) === itemType;
                             });
                         } else {
                             verified = false;
                         }
                     } else {
-                        if (common.isString(schemaItem)) {
-                            itemTypes = common.stringToArray(schemaItem, `|`);
+                        if (Hf.isString(schemaItem)) {
+                            itemTypes = Hf.stringToArray(schemaItem, `|`);
                             verified = itemTypes.includes(`undefined`);
                         } else {
                             verified = false;
@@ -75,20 +76,20 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     }
                 }
             });
-        } else if (common.isArray(schema) && common.isArray(target)) {
+        } else if (Hf.isArray(schema) && Hf.isArray(target)) {
             if (schema.length === 1) {
                 const [ schemaItem ] = schema;
                 verified = target.reduce((_verified, targetItem) => {
                     let itemTypes = [];
-                    if ((common.isObject(targetItem) && common.isObject(schemaItem)) || (common.isArray(targetItem) && common.isArray(schemaItem))) {
-                        _verified = common._deepCompareSchema(schemaItem, targetItem);
-                    } else if (common.isString(schemaItem)) {
-                        itemTypes = common.stringToArray(schemaItem, `|`);
+                    if ((Hf.isObject(targetItem) && Hf.isObject(schemaItem)) || (Hf.isArray(targetItem) && Hf.isArray(schemaItem))) {
+                        _verified = Hf._deepCompareSchema(schemaItem, targetItem);
+                    } else if (Hf.isString(schemaItem)) {
+                        itemTypes = Hf.stringToArray(schemaItem, `|`);
                         _verified = itemTypes.some((itemType) => {
                             if (itemType === `defined`) {
-                                return common.isDefined(targetItem);
+                                return Hf.isDefined(targetItem);
                             }
-                            return common.typeOf(targetItem) === itemType;
+                            return Hf.typeOf(targetItem) === itemType;
                         });
                     } else {
                         _verified = false;
@@ -96,7 +97,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     return _verified;
                 }, verified);
             } else {
-                common.log(`warn1`, `CommonElement._deepCompareSchema - Predefined schema test array must have a length of 1.`);
+                Hf.log(`warn1`, `CommonElement._deepCompareSchema - Predefined schema test array must have a length of 1.`);
                 verified = false;
             }
         } else {
@@ -115,98 +116,100 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _deepMutation: function _deepMutation (source, mutator, pathId = []) {
-        const common = this;
-        if (common.DEVELOPMENT) {
-            if (!(common.isArray(pathId))) {
-                common.log(`error`, `CommonElement._deepMutation - Input pathId is invalid.`);
+        const Hf = this;
+        let result;
+
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isArray(pathId))) {
+                Hf.log(`error`, `CommonElement._deepMutation - Input pathId is invalid.`);
             }
         }
 
-        let result;
-        if (common.isEmpty(pathId)) {
-            if (common.isObject(source) && common.isObject(mutator)) {
+        if (Hf.isEmpty(pathId)) {
+            if (Hf.isObject(source) && Hf.isObject(mutator)) {
                 result = Object.assign({}, source);
                 const sourceKeys = Object.keys(source);
                 const mutatorKeys = Object.keys(mutator);
+
                 if (sourceKeys.length >= mutatorKeys.length && mutatorKeys.every((key) => sourceKeys.includes(key))) {
                     mutatorKeys.forEach((key) => {
                         const sourceItem = source[key];
                         const mutatorItem = mutator[key];
 
-                        if ((common.isObject(sourceItem) && !common.isObject(mutatorItem) || common.isArray(sourceItem) && !common.isArray(mutatorItem)) ||
-                            (!common.isObject(sourceItem) && common.isObject(mutatorItem) || !common.isArray(sourceItem) && common.isArray(mutatorItem))) {
-                            common.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
-                            common.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
-                            common.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
+                        if ((Hf.isObject(sourceItem) && !Hf.isObject(mutatorItem) || Hf.isArray(sourceItem) && !Hf.isArray(mutatorItem)) ||
+                            (!Hf.isObject(sourceItem) && Hf.isObject(mutatorItem) || !Hf.isArray(sourceItem) && Hf.isArray(mutatorItem))) {
+                            Hf.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
+                            Hf.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
+                            Hf.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
                         } else {
-                            if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
-                                result[key] = common._deepMutation(sourceItem, mutatorItem);
+                            if (Hf.isObject(sourceItem) && Hf.isObject(mutatorItem) || Hf.isArray(sourceItem) && Hf.isArray(mutatorItem)) {
+                                result[key] = Hf._deepMutation(sourceItem, mutatorItem);
                             } else {
                                 result[key] = mutatorItem;
                             }
                         }
                     });
                 } else {
-                    common.log(`warn1`, `CommonElement._deepMutation - Input mutator object schema is not a subset of the source schema.`);
-                    common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
-                    common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
+                    Hf.log(`warn1`, `CommonElement._deepMutation - Input mutator object schema is not a subset of the source schema.`);
+                    Hf.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                    Hf.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                 }
-            } else if (common.isArray(source) && common.isArray(mutator)) {
+            } else if (Hf.isArray(source) && Hf.isArray(mutator)) {
                 result = source.slice(0);
                 if (source.length === mutator.length) {
                     source.forEach((sourceItem, key) => {
                         const mutatorItem = mutator[key];
-                        if ((common.isObject(sourceItem) && !common.isObject(mutatorItem) || common.isArray(sourceItem) && !common.isArray(mutatorItem)) ||
-                            (!common.isObject(sourceItem) && common.isObject(mutatorItem) || !common.isArray(sourceItem) && common.isArray(mutatorItem))) {
-                            common.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
-                            common.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
-                            common.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
+                        if ((Hf.isObject(sourceItem) && !Hf.isObject(mutatorItem) || Hf.isArray(sourceItem) && !Hf.isArray(mutatorItem)) ||
+                            (!Hf.isObject(sourceItem) && Hf.isObject(mutatorItem) || !Hf.isArray(sourceItem) && Hf.isArray(mutatorItem))) {
+                            Hf.log(`warn1`, `CommonElement._deepMutation - Input mutator schema at key:${key} must be a subset of source schema.`);
+                            Hf.log(`debug`, `CommonElement._deepMutation - sourceItem:${JSON.stringify(sourceItem, null, `\t`)}`);
+                            Hf.log(`debug`, `CommonElement._deepMutation - mutatorItem:${JSON.stringify(mutatorItem, null, `\t`)}`);
                         } else {
-                            if (common.isObject(sourceItem) && common.isObject(mutatorItem) || common.isArray(sourceItem) && common.isArray(mutatorItem)) {
-                                result[key] = common._deepMutation(sourceItem, mutatorItem);
+                            if (Hf.isObject(sourceItem) && Hf.isObject(mutatorItem) || Hf.isArray(sourceItem) && Hf.isArray(mutatorItem)) {
+                                result[key] = Hf._deepMutation(sourceItem, mutatorItem);
                             } else {
                                 result[key] = mutatorItem;
                             }
                         }
                     });
                 } else {
-                    common.log(`warn1`, `CommonElement._deepMutation - Input mutator array must be the same size as the source array.`);
-                    common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
-                    common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
+                    Hf.log(`warn1`, `CommonElement._deepMutation - Input mutator array must be the same size as the source array.`);
+                    Hf.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                    Hf.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                 }
             } else {
-                common.log(`error`, `CommonElement._deepMutation - Input source or target mutator is invalid.`);
+                Hf.log(`error`, `CommonElement._deepMutation - Input source or target mutator is invalid.`);
             }
         } else {
             const key = pathId.shift();
-            if (common.isObject(source) && source.hasOwnProperty(key)) {
+            if (Hf.isObject(source) && source.hasOwnProperty(key)) {
                 result = Object.assign({}, source);
-                if (common.isEmpty(pathId)) {
-                    if (common.isObject(mutator) && mutator.hasOwnProperty(key)) {
-                        result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
+                if (Hf.isEmpty(pathId)) {
+                    if (Hf.isObject(mutator) && mutator.hasOwnProperty(key)) {
+                        result[key] = Hf._deepMutation(source[key], mutator[key], pathId.slice(0));
                     } else {
-                        common.log(`warn1`, `CommonElement._deepMutation - Key:${key} of path id:${pathId} is not defined in mutator.`);
-                        common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
-                        common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
+                        Hf.log(`warn1`, `CommonElement._deepMutation - Key:${key} of path Id:${pathId} is not defined in mutator.`);
+                        Hf.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                        Hf.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                     }
                 } else {
-                    result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
+                    result[key] = Hf._deepMutation(source[key], mutator, pathId.slice(0));
                 }
-            } else if (common.isArray(source) && common.isInteger(key) && key < source.length) {
+            } else if (Hf.isArray(source) && Hf.isInteger(key) && key < source.length) {
                 result = source.slice(0);
-                if (common.isEmpty(pathId)) {
-                    if (common.isArray(mutator) && key < mutator.length) {
-                        result[key] = common._deepMutation(source[key], mutator[key], pathId.slice(0));
+                if (Hf.isEmpty(pathId)) {
+                    if (Hf.isArray(mutator) && key < mutator.length) {
+                        result[key] = Hf._deepMutation(source[key], mutator[key], pathId.slice(0));
                     } else {
-                        common.log(`warn1`, `CommonElement._deepMutation - Array index:${key} is greater than mutator array size.`);
-                        common.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
-                        common.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
+                        Hf.log(`warn1`, `CommonElement._deepMutation - Array index:${key} is greater than mutator array size.`);
+                        Hf.log(`debug`, `CommonElement._deepMutation - source:${JSON.stringify(source, null, `\t`)}`);
+                        Hf.log(`debug`, `CommonElement._deepMutation - mutator:${JSON.stringify(mutator, null, `\t`)}`);
                     }
                 } else {
-                    result[key] = common._deepMutation(source[key], mutator, pathId.slice(0));
+                    result[key] = Hf._deepMutation(source[key], mutator, pathId.slice(0));
                 }
             } else {
-                common.log(`error`, `CommonElement._deepMutation - Path ends at property key:${key}.`);
+                Hf.log(`error`, `CommonElement._deepMutation - Path ends at property key:${key}.`);
             }
         }
         return result;
@@ -222,67 +225,71 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _deepMerge: function _deepMerge (source, target, pathId = []) {
-        const common = this;
+        const Hf = this;
         let result;
-        pathId = common.isArray(pathId) ? pathId : [];
-        if (common.isEmpty(pathId)) {
-            if ((common.isObject(source) || common.isArray(source)) &&
-                (common.isObject(target) || common.isArray(target))) {
-                if (common.isArray(source) && common.isArray(target)) {
-                    result = source.slice(0);
-                    target.forEach((item, key) => {
-                        if (!common.isDefined(result[key])) {
-                            result[key] = item;
-                        } else if (common.isObject(item)) {
-                            result[key] = common._deepMerge(source[key], item);
-                        } else {
-                            if (!source.includes(item)) {
-                                result.push(item);
-                            }
-                        }
-                    });
-                } else {
-                    if (common.isObject(source)) {
-                        result = Object.assign({}, source);
-                    }
 
-                    Object.entries(target).forEach(([ key, targetValue ]) => {
-                        if (common.isObject(targetValue) || common.isArray(targetValue)) {
-                            if (!common.isDefined(source[key])) {
-                                result[key] = targetValue;
-                            } else {
-                                result[key] = common._deepMerge(source[key], targetValue);
-                            }
-                        } else {
-                            result[key] = targetValue;
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(source) || Hf.isArray(source)) &&
+                !(Hf.isObject(target) || Hf.isArray(target))) {
+                Hf.log(`error`, `CommonElement._deepMerge - Input source or mutation is invalid.`);
+            }
+        }
+
+        pathId = Hf.isArray(pathId) ? pathId : [];
+
+        if (Hf.isEmpty(pathId)) {
+            if (Hf.isArray(source) && Hf.isArray(target)) {
+                result = source.slice(0);
+                target.forEach((item, key) => {
+                    if (!Hf.isDefined(result[key])) {
+                        result[key] = item;
+                    } else if (Hf.isObject(item)) {
+                        result[key] = Hf._deepMerge(source[key], item);
+                    } else {
+                        if (!source.includes(item)) {
+                            result.push(item);
                         }
-                    });
-                }
+                    }
+                });
             } else {
-                common.log(`error`, `CommonElement._deepMerge - Input source or mutation is invalid.`);
+                if (Hf.isObject(source)) {
+                    result = Object.assign({}, source);
+                }
+
+                Object.entries(target).forEach(([ key, targetValue ]) => {
+                    if (Hf.isObject(targetValue) || Hf.isArray(targetValue)) {
+                        if (!Hf.isDefined(source[key])) {
+                            result[key] = targetValue;
+                        } else {
+                            result[key] = Hf._deepMerge(source[key], targetValue);
+                        }
+                    } else {
+                        result[key] = targetValue;
+                    }
+                });
             }
         } else {
             const key = pathId.shift();
-            if (common.isObject(source) && source.hasOwnProperty(key)) {
+            if (Hf.isObject(source) && source.hasOwnProperty(key)) {
                 result = Object.assign({}, source);
-                if (common.isEmpty(pathId)) {
-                    if (common.isObject(target) && target.hasOwnProperty(key)) {
-                        result[key] = common._deepMerge(source[key], target[key], pathId.slice(0));
+                if (Hf.isEmpty(pathId)) {
+                    if (Hf.isObject(target) && target.hasOwnProperty(key)) {
+                        result[key] = Hf._deepMerge(source[key], target[key], pathId.slice(0));
                     }
                 } else {
-                    result[key] = common._deepMerge(source[key], target, pathId.slice(0));
+                    result[key] = Hf._deepMerge(source[key], target, pathId.slice(0));
                 }
-            } else if (common.isArray(source) && common.isInteger(key) && key < source.length) {
+            } else if (Hf.isArray(source) && Hf.isInteger(key) && key < source.length) {
                 result = source.slice(0);
-                if (common.isEmpty(pathId)) {
-                    if (common.isArray(target) && key < target.length) {
-                        result[key] = common._deepMerge(source[key], target[key], pathId.slice(0));
+                if (Hf.isEmpty(pathId)) {
+                    if (Hf.isArray(target) && key < target.length) {
+                        result[key] = Hf._deepMerge(source[key], target[key], pathId.slice(0));
                     }
                 } else {
-                    result[key] = common._deepMerge(source[key], target, pathId.slice(0));
+                    result[key] = Hf._deepMerge(source[key], target, pathId.slice(0));
                 }
             } else {
-                common.log(`error`, `CommonElement._deepMerge - Path ends at property key:${key}.`);
+                Hf.log(`error`, `CommonElement._deepMerge - Path ends at property key:${key}.`);
             }
         }
         return result;
@@ -298,54 +305,55 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _deepCompareAndFallback: function _deepCompareAndFallback (source, target, notify) {
-        const common = this;
+        const Hf = this;
         let result;
-        if (common.isObject(source) && common.isObject(target)) {
-            result = common.clone(target);
-            common.forEach(source, (sourceItem, key) => {
+
+        if (Hf.isObject(source) && Hf.isObject(target)) {
+            result = Hf.clone(target);
+            Hf.forEach(source, (sourceItem, key) => {
                 if (target.hasOwnProperty(key)) {
                     const targetItem = target[key];
-                    if ((common.isObject(targetItem) && common.isObject(sourceItem)) || (common.isArray(targetItem) && common.isArray(sourceItem))) {
-                        result[key] = common._deepCompareAndFallback(sourceItem, targetItem, notify);
+                    if ((Hf.isObject(targetItem) && Hf.isObject(sourceItem)) || (Hf.isArray(targetItem) && Hf.isArray(sourceItem))) {
+                        result[key] = Hf._deepCompareAndFallback(sourceItem, targetItem, notify);
                     } else {
-                        if (common.typeOf(targetItem) !== common.typeOf(sourceItem)) {
+                        if (Hf.typeOf(targetItem) !== Hf.typeOf(sourceItem)) {
                             result[key] = sourceItem;
-                            if (common.isFunction(notify)) {
+                            if (Hf.isFunction(notify)) {
                                 notify(key);
                             }
                         }
                     }
                 } else {
                     result[key] = sourceItem;
-                    if (common.isFunction(notify)) {
+                    if (Hf.isFunction(notify)) {
                         notify(key);
                     }
                 }
             });
-        } else if (common.isArray(source) && common.isArray(target)) {
-            result = common.clone(target);
-            common.forEach(source, (sourceItem, key) => {
+        } else if (Hf.isArray(source) && Hf.isArray(target)) {
+            result = Hf.clone(target);
+            Hf.forEach(source, (sourceItem, key) => {
                 if (key >= 0 && key < target.length) {
                     const targetItem = target[key];
-                    if ((common.isObject(targetItem) && common.isObject(sourceItem)) || (common.isArray(targetItem) && common.isArray(sourceItem))) {
-                        result[key] = common._deepCompareAndFallback(sourceItem, targetItem, notify);
+                    if ((Hf.isObject(targetItem) && Hf.isObject(sourceItem)) || (Hf.isArray(targetItem) && Hf.isArray(sourceItem))) {
+                        result[key] = Hf._deepCompareAndFallback(sourceItem, targetItem, notify);
                     } else {
-                        if (common.typeOf(targetItem) !== common.typeOf(sourceItem)) {
+                        if (Hf.typeOf(targetItem) !== Hf.typeOf(sourceItem)) {
                             result[key] = sourceItem;
-                            if (common.isFunction(notify)) {
+                            if (Hf.isFunction(notify)) {
                                 notify(key);
                             }
                         }
                     }
                 } else {
                     result.push(sourceItem);
-                    if (common.isFunction(notify)) {
+                    if (Hf.isFunction(notify)) {
                         notify(key);
                     }
                 }
             });
         } else {
-            common.log(`error`, `CommonElement._deepCompareAndFallback - Input source or target object is invalid.`);
+            Hf.log(`error`, `CommonElement._deepCompareAndFallback - Input source or target object is invalid.`);
         }
         return result;
     },
@@ -360,32 +368,32 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _deepRetrieval: function _deepRetrieval (target, pathId, asNestedObject) {
-        const common = this;
-        if (common.DEVELOPMENT) {
-            if (!(common.isObject(target) || common.isArray(target))) {
-                common.log(`error`, `CommonElement._deepRetrieval - Input target object or array is invalid.`);
-            } else if (!(common.isArray(pathId))) {
-                common.log(`error`, `CommonElement._deepRetrieval - Input pathId is invalid.`);
-            } else if (common.isArray(pathId) && common.isEmpty(pathId)) {
-                common.log(`error`, `CommonElement._deepRetrieval - No property is defined.`);
+        const Hf = this;
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(target) || Hf.isArray(target))) {
+                Hf.log(`error`, `CommonElement._deepRetrieval - Input target object or array is invalid.`);
+            } else if (!(Hf.isArray(pathId))) {
+                Hf.log(`error`, `CommonElement._deepRetrieval - Input pathId is invalid.`);
+            } else if (Hf.isArray(pathId) && Hf.isEmpty(pathId)) {
+                Hf.log(`error`, `CommonElement._deepRetrieval - No property is defined.`);
             }
         }
 
         const key = pathId.shift();
-        let resultAtPath = common.isObject(target) ? {} : Array(key).fill(null);
+        let resultAtPath = Hf.isObject(target) ? {} : Array(key).fill(null);
         let propertyAtPath;
 
-        if (common.isObject(target) && target.hasOwnProperty(key)) {
-            if (!common.isEmpty(pathId)) {
-                propertyAtPath = common._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
+        if (Hf.isObject(target) && target.hasOwnProperty(key)) {
+            if (!Hf.isEmpty(pathId)) {
+                propertyAtPath = Hf._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
                 resultAtPath[key] = propertyAtPath;
             } else {
                 propertyAtPath = target[key];
                 resultAtPath[key] = propertyAtPath;
             }
-        } else if (common.isArray(target) && common.isInteger(key) && key < target.length) {
-            if (!common.isEmpty(pathId)) {
-                propertyAtPath = common._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
+        } else if (Hf.isArray(target) && Hf.isInteger(key) && key < target.length) {
+            if (!Hf.isEmpty(pathId)) {
+                propertyAtPath = Hf._deepRetrieval(target[key], pathId.slice(0), asNestedObject);
                 resultAtPath.push(propertyAtPath);
             } else {
                 propertyAtPath = target[key];
@@ -393,9 +401,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
             }
         }
 
-        if (common.DEVELOPMENT) {
-            if (!common.isDefined(propertyAtPath) && !common.isEmpty(pathId)) {
-                common.log(`error`, `CommonElement._deepRetrieval - Path ends at property key:${key}.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isDefined(propertyAtPath) && !Hf.isEmpty(pathId)) {
+                Hf.log(`error`, `CommonElement._deepRetrieval - Path ends at property key:${key}.`);
             }
         }
 
@@ -441,11 +449,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isEmpty: function isEmpty (value) {
-        const common = this;
+        const Hf = this;
 
-        if (common.isObject(value)) {
+        if (Hf.isObject(value)) {
             return Object.getOwnPropertyNames(value).length === 0;
-        } else if (common.isArray(value) || common.isString(value)) {
+        } else if (Hf.isArray(value) || Hf.isString(value)) {
             return value.length === 0;
         }
         return true;
@@ -458,9 +466,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isString: function isString (str) {
-        const common = this;
+        const Hf = this;
 
-        return common.typeOf(str) === `string` || (common.typeOf(str) === `object` && str.constructor === String);
+        return Hf.typeOf(str) === `string` || (Hf.typeOf(str) === `object` && str.constructor === String);
     },
     /**
      * @description - Check for a string type and is not empty.
@@ -470,9 +478,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isNonEmptyString: function isNonEmptyString (str) {
-        const common = this;
+        const Hf = this;
 
-        return common.isString(str) && !common.isEmpty(str);
+        return Hf.isString(str) && !Hf.isEmpty(str);
     },
     /**
      * @description - Check if value is a boolean.
@@ -482,9 +490,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isBoolean: function isBoolean (value) {
-        const common = this;
+        const Hf = this;
 
-        return common.typeOf(value) === `boolean` || (common.isString(value) && (value.toLowerCase() === `true` || value.toLowerCase() === `false`));
+        return Hf.typeOf(value) === `boolean` || (Hf.isString(value) && (value.toLowerCase() === `true` || value.toLowerCase() === `false`));
     },
     /**
      * @description - Check for defined type.
@@ -494,9 +502,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isDefined: function isDefined (value) {
-        const common = this;
+        const Hf = this;
 
-        return common.typeOf(value) !== `undefined`;
+        return Hf.typeOf(value) !== `undefined`;
     },
     /**
      * @description - Check for function type.
@@ -546,9 +554,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isNonEmptyArray: function isNonEmptyArray (array) {
-        const common = this;
+        const Hf = this;
 
-        return common.isArray(array) && !common.isEmpty(array);
+        return Hf.isArray(array) && !Hf.isEmpty(array);
     },
     /**
      * @description - Check for object type.
@@ -558,9 +566,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isObject: function isObject (obj) {
-        const common = this;
+        const Hf = this;
 
-        return common.typeOf(obj) === `object` && obj === Object(obj) && !common.isArray(obj) && obj !== null;
+        return Hf.typeOf(obj) === `object` && obj === Object(obj) && !Hf.isArray(obj) && obj !== null;
     },
     /**
      * @description - Check for an object type and is not empty.
@@ -570,9 +578,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isNonEmptyObject: function isNonEmptyObject (array) {
-        const common = this;
+        const Hf = this;
 
-        return common.isObject(array) && !common.isEmpty(array);
+        return Hf.isObject(array) && !Hf.isEmpty(array);
     },
     /**
      * @description - Check object by comparing it to a predefined schema.
@@ -584,7 +592,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      */
     isSchema: function isSchema (schema) {
-        const common = this;
+        const Hf = this;
         return {
             /**
              * @description - Compare schema of the target object...
@@ -594,7 +602,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @returns {boolean}
              */
             of: function of (target) {
-                return common._deepCompareSchema(schema, target);
+                return Hf._deepCompareSchema(schema, target);
             }
         };
     },
@@ -617,13 +625,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {function}
      */
     compose: function compose (...fns) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
+        if (Hf.DEVELOPMENT) {
             if (fns.length < 2) {
-                common.log(`error`, `CommonElement.compose - Input function array must have more than two functions.`);
-            } else if (!fns.every((fn) => common.isFunction(fn))) {
-                common.log(`error`, `CommonElement.compose - Input function is invalid.`);
+                Hf.log(`error`, `CommonElement.compose - Input function array must have more than two functions.`);
+            } else if (!fns.every((fn) => Hf.isFunction(fn))) {
+                Hf.log(`error`, `CommonElement.compose - Input function is invalid.`);
             }
         }
 
@@ -636,7 +644,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
          */
         return function composed (value) {
             return fns.reduce((result, fn) => {
-                if (common.isDefined(result)) {
+                if (Hf.isDefined(result)) {
                     return fn(result);
                 }
                 return fn();
@@ -651,11 +659,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     collect: function collect (...pathIds) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!pathIds.every((pathId) => common.isString(pathId) || common.isArray(pathId))) {
-                common.log(`error`, `CommonElement.collect - Input pathId is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!pathIds.every((pathId) => Hf.isString(pathId) || Hf.isArray(pathId))) {
+                Hf.log(`error`, `CommonElement.collect - Input pathId is invalid.`);
             }
         }
 
@@ -668,13 +676,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
          */
         return {
             from: function from (target) {
-                if (common.DEVELOPMENT) {
-                    if (!(common.isObject(target) || common.isArray(target))) {
-                        common.log(`error`, `CommonElement.collect.from - Input target is invalid.`);
+                if (Hf.DEVELOPMENT) {
+                    if (!(Hf.isObject(target) || Hf.isArray(target))) {
+                        Hf.log(`error`, `CommonElement.collect.from - Input target is invalid.`);
                     }
                 }
 
-                return common.isEmpty(pathIds) ? [] : pathIds.map((pathId) => common.retrieve(pathId, `.`).from(target));
+                return Hf.isEmpty(pathIds) ? [] : pathIds.map((pathId) => Hf.retrieve(pathId, `.`).from(target));
             }
         };
     },
@@ -686,17 +694,17 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     clear: function clear (value) {
-        const common = this;
+        const Hf = this;
 
-        if (common.isObject(value)) {
+        if (Hf.isObject(value)) {
             Object.getOwnPropertyNames(value).forEach((key) => {
-                value[key] = undefined;
                 delete value[key];
+                // value[key] = undefined;
             });
-        } else if (common.isArray(value)) {
+        } else if (Hf.isArray(value)) {
             value.length = 0;
         } else {
-            common.log(`error`, `CommonElement.clear - Input is not an object or array type.`);
+            Hf.log(`error`, `CommonElement.clear - Input is not an object or array type.`);
         }
     },
     /**
@@ -707,20 +715,20 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      */
     clone: function clone (source) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!(common.isObject(source) || common.isArray(source))) {
-                common.log(`error`, `CommonElement.clone - Input is not an object or array type.`);
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(source) || Hf.isArray(source))) {
+                Hf.log(`error`, `CommonElement.clone - Input is not an object or array type.`);
             }
         }
         let result;
-        if (common.isObject(source)) {
+        if (Hf.isObject(source)) {
             result = Object.assign({}, source);
         }
-        if (common.isArray(source)) {
+        if (Hf.isArray(source)) {
             result = source.map((value) => {
-                return common.isObject(value) || common.isArray(value) ? common.clone(value) : value;
+                return Hf.isObject(value) || Hf.isArray(value) ? Hf.clone(value) : value;
             }).slice(0);
         }
         // return Object.isFrozen(source) ? Object.freeze(result) : result;
@@ -734,11 +742,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     freeze: function freeze (source) {
-        const common = this;
+        const Hf = this;
 
-        if ((common.isObject(source) || common.isFunction(source)) && !Object.isFrozen(source)) {
+        if ((Hf.isObject(source) || Hf.isFunction(source)) && !Object.isFrozen(source)) {
             Object.freeze(source);
-            Object.getOwnPropertyNames(source).forEach((key) => common.freeze(source[key]));
+            Object.getOwnPropertyNames(source).forEach((key) => Hf.freeze(source[key]));
         }
 
         return source;
@@ -752,10 +760,10 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      */
     mutate: function mutate (source) {
-        const common = this;
-        if (common.DEVELOPMENT) {
-            if (!common.isObject(source)) {
-                common.log(`error`, `CommonElement.mutate - Input source is invalid.`);
+        const Hf = this;
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isObject(source)) {
+                Hf.log(`error`, `CommonElement.mutate - Input source is invalid.`);
             }
         }
 
@@ -769,16 +777,16 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @returns {object}
              */
             atPathBy: function atPathBy (mutator, pathId) {
-                pathId = common.isString(pathId) ? common.stringToArray(pathId, `.`) : pathId;
-                if (common.DEVELOPMENT) {
-                    if (!common.isObject(mutator)) {
-                        common.log(`error`, `CommonElement.mutate.atPathBy - Input mutator is invalid.`);
-                    } else if (!(common.isArray(pathId) && !common.isEmpty(pathId))) {
-                        common.log(`error`, `CommonElement.mutate.atPathBy - Input pathId is invalid.`);
+                pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isObject(mutator)) {
+                        Hf.log(`error`, `CommonElement.mutate.atPathBy - Input mutator is invalid.`);
+                    } else if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+                        Hf.log(`error`, `CommonElement.mutate.atPathBy - Input pathId is invalid.`);
                     }
                 }
 
-                return common._deepMutation(source, mutator, pathId.slice(0));
+                return Hf._deepMutation(source, mutator, pathId.slice(0));
             },
             /**
              * @description - Mutating the source from reference target mutator object...
@@ -788,13 +796,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @returns {object}
              */
             by: function by (mutator) {
-                if (common.DEVELOPMENT) {
-                    if (!common.isObject(mutator)) {
-                        common.log(`error`, `CommonElement.mutate.by - Input mutator is invalid.`);
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isObject(mutator)) {
+                        Hf.log(`error`, `CommonElement.mutate.by - Input mutator is invalid.`);
                     }
                 }
 
-                return common._deepMutation(source, mutator);
+                return Hf._deepMutation(source, mutator);
             }
         };
     },
@@ -806,10 +814,10 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      */
     merge: function merge (source) {
-        const common = this;
-        if (common.DEVELOPMENT) {
-            if (!common.isObject(source)) {
-                common.log(`error`, `CommonElement.merge - Input source is invalid.`);
+        const Hf = this;
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isObject(source)) {
+                Hf.log(`error`, `CommonElement.merge - Input source is invalid.`);
             }
         }
 
@@ -823,16 +831,16 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @returns {object}
              */
             atPathWith: function atPathWith (target, pathId) {
-                pathId = common.isString(pathId) ? common.stringToArray(pathId, `.`) : pathId;
-                if (common.DEVELOPMENT) {
-                    if (!common.isObject(target)) {
-                        common.log(`error`, `CommonElement.merge.atPathWith - Input target is invalid.`);
-                    } else if (!(common.isArray(pathId) && !common.isEmpty(pathId))) {
-                        common.log(`error`, `CommonElement.merge.atPathWith - Input pathId is invalid.`);
+                pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isObject(target)) {
+                        Hf.log(`error`, `CommonElement.merge.atPathWith - Input target is invalid.`);
+                    } else if (!(Hf.isArray(pathId) && !Hf.isEmpty(pathId))) {
+                        Hf.log(`error`, `CommonElement.merge.atPathWith - Input pathId is invalid.`);
                     }
                 }
 
-                return common._deepMerge(source, target, pathId.slice(0));
+                return Hf._deepMerge(source, target, pathId.slice(0));
             },
             /**
              * @description - Merging with the target object...
@@ -842,13 +850,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @returns {object}
              */
             with: function _with (target) {
-                if (common.DEVELOPMENT) {
-                    if (!common.isObject(target)) {
-                        common.log(`error`, `CommonElement.merge.with - Input target is invalid.`);
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isObject(target)) {
+                        Hf.log(`error`, `CommonElement.merge.with - Input target is invalid.`);
                     }
                 }
 
-                return common._deepMerge(source, target);
+                return Hf._deepMerge(source, target);
             }
         };
     },
@@ -864,10 +872,10 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     fallback: function fallback (source, notify) {
-        const common = this;
-        if (common.DEVELOPMENT) {
-            if (!(common.isObject(source) || common.isArray(source))) {
-                common.log(`error`, `CommonElement.fallback - Input source object is invalid.`);
+        const Hf = this;
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(source) || Hf.isArray(source))) {
+                Hf.log(`error`, `CommonElement.fallback - Input source object is invalid.`);
             }
         }
 
@@ -880,13 +888,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @return {object}
              */
             of: function of (target) {
-                if (common.DEVELOPMENT) {
-                    if ((common.isObject(source) && !common.isObject(target)) || common.isArray(source) && !common.isArray(target)) {
-                        common.log(`error`, `CommonElement.fallback.of - Input target object is invalid.`);
+                if (Hf.DEVELOPMENT) {
+                    if ((Hf.isObject(source) && !Hf.isObject(target)) || Hf.isArray(source) && !Hf.isArray(target)) {
+                        Hf.log(`error`, `CommonElement.fallback.of - Input target object is invalid.`);
                     }
                 }
 
-                return common._deepCompareAndFallback(source, target, notify);
+                return Hf._deepCompareAndFallback(source, target, notify);
             }
         };
     },
@@ -900,12 +908,27 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} option - Exclusion, a list of functions or properties that should not be mixed.
      * @return {object}
      */
-    mix: function mix (source, option = {}) {
-        const common = this;
+    mix: function mix (source, option = {
+        fnOverrided: true,
+        exclusion: {
+            prototypes: false,
+            properties: false,
+            enumerablePropertiesOnly: false,
+            prefixes: [ PRIVATE_PREFIX ],
+            postfixes: [],
+            keys: [],
+            exception: {
+                prefixes: [],
+                postfixes: [],
+                keys: []
+            }
+        }
+    }) {
+        const Hf = this;
         const {
             fnOverrided,
             exclusion
-        } = common.fallback({
+        } = Hf.fallback({
             fnOverrided: true,
             exclusion: {
                 prototypes: false,
@@ -922,7 +945,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
             }
         }).of(option);
 
-        if (!common.DEVELOPMENT) {
+        if (!Hf.DEVELOPMENT) {
             exclusion.prefixes.push(`DEBUG_`);
         }
 
@@ -930,24 +953,24 @@ const CommonElementPrototype = Object.create({}).prototype = {
         const isIncluded = function isIncluded (key) {
             let included = false;
 
-            if (common.isString(key)) {
-                const prefixExcepted = !common.isEmpty(exclusion.exception.prefixes) ? exclusion.exception.prefixes.some((prefix) => {
+            if (Hf.isString(key)) {
+                const prefixExcepted = !Hf.isEmpty(exclusion.exception.prefixes) ? exclusion.exception.prefixes.some((prefix) => {
                     return key.substr(0, prefix.length) === prefix;
                 }) : false;
-                const postfixExcepted = !common.isEmpty(exclusion.exception.postfixes) ? exclusion.exception.postfixes.some((postfix) => {
+                const postfixExcepted = !Hf.isEmpty(exclusion.exception.postfixes) ? exclusion.exception.postfixes.some((postfix) => {
                     return key.substr(0, postfix.length) === postfix;
                 }) : false;
-                const keyExcepted = !common.isEmpty(exclusion.exception.keys) ? exclusion.exception.keys.includes(key) : false;
+                const keyExcepted = !Hf.isEmpty(exclusion.exception.keys) ? exclusion.exception.keys.includes(key) : false;
 
                 included = true;
 
-                if (included && !common.isEmpty(exclusion.prefixes)) {
+                if (included && !Hf.isEmpty(exclusion.prefixes)) {
                     included = exclusion.prefixes.every((prefix) => key.substr(0, prefix.length) !== prefix);
                 }
-                if (included && !common.isEmpty(exclusion.postfixes)) {
+                if (included && !Hf.isEmpty(exclusion.postfixes)) {
                     included = exclusion.postfixes.every((postfix) => key.substr(0, postfix.length) !== postfix);
                 }
-                if (included && !common.isEmpty(exclusion.keys)) {
+                if (included && !Hf.isEmpty(exclusion.keys)) {
                     if (exclusion.keys.length === 1 && exclusion.keys[0] === `*`) {
                         included = false;
                     } else {
@@ -961,9 +984,9 @@ const CommonElementPrototype = Object.create({}).prototype = {
             return included;
         };
 
-        if (common.DEVELOPMENT) {
-            if (!common.isObject(source)) {
-                common.log(`error`, `CommonElement.mix - Input source object is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isObject(source)) {
+                Hf.log(`error`, `CommonElement.mix - Input source object is invalid.`);
             }
         }
 
@@ -972,7 +995,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
         if (!exclusion.prototypes) {
             /* copy source object prototypes to new mixed result object */
             result = Object.entries(Object.getPrototypeOf(source)).filter(([ fnName, fn ]) => {
-                return common.isFunction(fn) && isIncluded(fnName);
+                return Hf.isFunction(fn) && isIncluded(fnName);
             }).reduce((_result, [ fnName, fn ]) => {
                 /* bind the prototype to source object */
                 _result[fnName] = fn.bind(source);
@@ -981,7 +1004,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
 
             /* copy source object functions to new mixed result object */
             result = Object.entries(source).filter(([ fnName, fn ]) => {
-                return common.isFunction(fn) && isIncluded(fnName);
+                return Hf.isFunction(fn) && isIncluded(fnName);
             }).reduce((_result, [ fnName, fn ]) => {
                 /* bind the prototype to source object */
                 _result[fnName] = fn;
@@ -993,11 +1016,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
             result = Object.keys(Object.getPrototypeOf(source)).concat(
                 exclusion.enumerablePropertiesOnly ? Object.keys(source) : Object.getOwnPropertyNames(source)
             ).filter((key) => {
-                return !common.isFunction(source[key]) && isIncluded(key);
+                return !Hf.isFunction(source[key]) && isIncluded(key);
             }).reduce((_result, key) => {
                 const sourceObjDesc = Object.getOwnPropertyDescriptor(source, key);
 
-                if (common.isObject(sourceObjDesc)) {
+                if (Hf.isObject(sourceObjDesc)) {
                     Object.defineProperty(_result, key, {
                         get: function get () {
                             return source[key];
@@ -1034,16 +1057,16 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @return {object}
              */
             with: function _with (target) {
-                if (common.DEVELOPMENT) {
-                    if (!common.isObject(target)) {
-                        common.log(`error`, `CommonElement.mix.with - Input target object is invalid.`);
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isObject(target)) {
+                        Hf.log(`error`, `CommonElement.mix.with - Input target object is invalid.`);
                     }
                 }
 
                 if (!exclusion.prototypes) {
                     /* copy target object prototypes to new mixed result object */
                     result = Object.entries(Object.getPrototypeOf(target)).filter(([ fnName, fn ]) => {
-                        if (common.isFunction(fn) && isIncluded(fnName)) {
+                        if (Hf.isFunction(fn) && isIncluded(fnName)) {
                             if (!fnOverrided) {
                                 if (!result.hasOwnProperty(fnName)) {
                                     return true;
@@ -1061,7 +1084,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
 
                     /* copy target object functions to new mixed result object */
                     result = Object.entries(target).filter(([ fnName, fn ]) => {
-                        if (common.isFunction(fn) && isIncluded(fnName)) {
+                        if (Hf.isFunction(fn) && isIncluded(fnName)) {
                             /* mix prototypes only */
                             if (!fnOverrided) {
                                 if (!result.hasOwnProperty(fnName)) {
@@ -1082,11 +1105,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     result = Object.keys(Object.getPrototypeOf(target)).concat(
                         exclusion.enumerablePropertiesOnly ? Object.keys(target) : Object.getOwnPropertyNames(target)
                     ).filter((key) => {
-                        return !common.isFunction(target[key]) && target.hasOwnProperty(key) && !result.hasOwnProperty(key) && isIncluded(key);
+                        return !Hf.isFunction(target[key]) && target.hasOwnProperty(key) && !result.hasOwnProperty(key) && isIncluded(key);
                     }).reduce((_result, key) => {
                         const targetObjDesc = Object.getOwnPropertyDescriptor(target, key);
 
-                        if (common.isObject(targetObjDesc)) {
+                        if (Hf.isObject(targetObjDesc)) {
                             Object.defineProperty(_result, key, {
                                 get: function get () {
                                     return target[key];
@@ -1126,25 +1149,25 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     reveal: function reveal (closure, option = {}) {
-        const common = this;
+        const Hf = this;
 
-        option = common.isObject(option) ? option : {};
+        option = Hf.isObject(option) ? option : {};
 
-        if (common.DEVELOPMENT) {
-            if (!(common.isObject(closure) || common.isFunction(closure))) {
-                common.log(`error`, `CommonElement.reveal - Input closure is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(closure) || Hf.isFunction(closure))) {
+                Hf.log(`error`, `CommonElement.reveal - Input closure is invalid.`);
             }
         }
 
-        if (common.isObject(closure)) {
-            return common.mix(closure, option).with({});
+        if (Hf.isObject(closure)) {
+            return Hf.mix(closure, option).with({});
         }
 
-        if (common.isFunction(closure)) {
+        if (Hf.isFunction(closure)) {
             let enclosedObj = {};
 
             closure.call(enclosedObj);
-            return common.mix(enclosedObj, option).with({});
+            return Hf.mix(enclosedObj, option).with({});
         }
     },
     /**
@@ -1159,19 +1182,19 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     retrieve: function retrieve (pathId, delimiter, asNestedObject = false) {
-        const common = this;
+        const Hf = this;
 
-        asNestedObject = common.isBoolean(asNestedObject) ? asNestedObject : false;
+        asNestedObject = Hf.isBoolean(asNestedObject) ? asNestedObject : false;
 
-        if (common.DEVELOPMENT) {
-            if (!(common.isString(pathId) || common.isArray(pathId))) {
-                common.log(`error`, `CommonElement.retrieve - Input pathId is invalid.`);
-            } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
-                common.log(`error`, `CommonElement.retrieve - Input delimiter is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
+                Hf.log(`error`, `CommonElement.retrieve - Input pathId is invalid.`);
+            } else if (!(Hf.isString(delimiter) && delimiter.length === 1)) {
+                Hf.log(`error`, `CommonElement.retrieve - Input delimiter is invalid.`);
             }
         }
 
-        pathId = common.isString(pathId) ? common.stringToArray(pathId, delimiter) : pathId;
+        pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, delimiter) : pathId;
         return {
             /**
              * @description - Target object to retrive property from...
@@ -1181,13 +1204,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @returns {*}
              */
             from: function from (target) {
-                if (common.DEVELOPMENT) {
-                    if (!common.isObject(target)) {
-                        common.log(`error`, `CommonElement.retrieve.from - Input target object is invalid.`);
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isObject(target)) {
+                        Hf.log(`error`, `CommonElement.retrieve.from - Input target object is invalid.`);
                     }
                 }
 
-                return common._deepRetrieval(target, pathId.slice(0), asNestedObject);
+                return Hf._deepRetrieval(target, pathId.slice(0), asNestedObject);
             }
         };
     },
@@ -1201,22 +1224,22 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns void
      */
     forEach: function forEach (value, iterator, context) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!(common.isObject(value) || common.isArray(value))) {
-                common.log(`error`, `CommonElement.forEach - Input value is invalid.`);
-            } else if (!common.isFunction(iterator)) {
-                common.log(`error`, `CommonElement.forEach - Input iterator callback is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(value) || Hf.isArray(value))) {
+                Hf.log(`error`, `CommonElement.forEach - Input value is invalid.`);
+            } else if (!Hf.isFunction(iterator)) {
+                Hf.log(`error`, `CommonElement.forEach - Input iterator callback is invalid.`);
             }
         }
-        if (common.isObject(value)) {
+        if (Hf.isObject(value)) {
             const obj = value;
 
             Object.entries(obj).forEach(([ key, _value ]) => {
                 iterator.call(context, _value, key);
             });
-        } else if (common.isArray(value)) {
+        } else if (Hf.isArray(value)) {
             const array = value;
 
             array.forEach((item, key) => {
@@ -1233,13 +1256,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {string}
      */
     arrayToString: function arrayToString (array, delimiter) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!common.isArray(array)) {
-                common.log(`error`, `CommonElement.arrayToString - Input array is invalid.`);
-            } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
-                common.log(`error`, `CommonElement.arrayToString - Input delimiter is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isArray(array)) {
+                Hf.log(`error`, `CommonElement.arrayToString - Input array is invalid.`);
+            } else if (!(Hf.isString(delimiter) && delimiter.length === 1)) {
+                Hf.log(`error`, `CommonElement.arrayToString - Input delimiter is invalid.`);
             }
         }
 
@@ -1254,21 +1277,21 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {array}
      */
     stringToArray: function stringToArray (str, delimiter) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!common.isString(str)) {
-                common.log(`error`, `CommonElement.stringToArray - Input string is invalid.`);
-            } else if (!(common.isString(delimiter) && delimiter.length === 1)) {
-                common.log(`error`, `CommonElement.stringToArray - Input delimiter is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(str)) {
+                Hf.log(`error`, `CommonElement.stringToArray - Input string is invalid.`);
+            } else if (!(Hf.isString(delimiter) && delimiter.length === 1)) {
+                Hf.log(`error`, `CommonElement.stringToArray - Input delimiter is invalid.`);
             }
         }
 
         if (str.includes(delimiter) && str.length > 1) {
             /* split string into array */
-            return str.split(delimiter).map((value) => common.isInteger(value) ? parseInt(value, 10) : value);
+            return str.split(delimiter).map((value) => Hf.isInteger(value) ? parseInt(value, 10) : value);
             // return str.split(delimiter).map((value) => {
-            //     return common.isInteger(value) ? parseInt(value, 10) : value;
+            //     return Hf.isInteger(value) ? parseInt(value, 10) : value;
             // }).filter(Boolean);
         }
         return [ str ];
@@ -1281,11 +1304,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {string}
      */
     camelcaseToUnderscore: function camelcaseToUnderscore (str) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!common.isString(str)) {
-                common.log(`error`, `CommonElement.camelcaseToUnderscore - Input string is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(str)) {
+                Hf.log(`error`, `CommonElement.camelcaseToUnderscore - Input string is invalid.`);
             }
         }
 
@@ -1299,11 +1322,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {string}
      */
     underscoreToCamelcase: function underscoreToCamelcase (str) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!common.isString(str)) {
-                common.log(`error`, `CommonElement.underscoreToCamelcase - Input string is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(str)) {
+                Hf.log(`error`, `CommonElement.underscoreToCamelcase - Input string is invalid.`);
             }
         }
 
@@ -1317,11 +1340,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {string}
      */
     camelcaseToDash: function camelcaseToDash (str) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!common.isString(str)) {
-                common.log(`error`, `CommonElement.camelcaseToDash - Input string is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(str)) {
+                Hf.log(`error`, `CommonElement.camelcaseToDash - Input string is invalid.`);
             }
         }
 
@@ -1335,11 +1358,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @return {string}
      */
     dashToCamelcase: function dashToCamelcase (str) {
-        const common = this;
+        const Hf = this;
 
-        if (common.DEVELOPMENT) {
-            if (!common.isString(str)) {
-                common.log(`error`, `CommonElement.dashToCamelcase - Input string is invalid.`);
+        if (Hf.DEVELOPMENT) {
+            if (!Hf.isString(str)) {
+                Hf.log(`error`, `CommonElement.dashToCamelcase - Input string is invalid.`);
             }
         }
 
@@ -1354,11 +1377,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns void
      */
     log: function log (type, message) {
-        const common = this;
-        if (common.DEVELOPMENT) {
+        const Hf = this;
+        if (Hf.DEVELOPMENT) {
             let stringifiedMessage = ``;
 
-            if (common.isObject(message) || common.isArray(message)) {
+            if (Hf.isObject(message) || Hf.isArray(message)) {
                 stringifiedMessage = JSON.stringify(message, null, `\t`);
             } else {
                 stringifiedMessage = message;
@@ -1368,36 +1391,36 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     throw new Error(`ERROR: ${message}`);
                 },
                 warn0 () {
-                    if (common._consoleLog.enableWarn0Log) {
+                    if (Hf._consoleLog.enableWarn0Log) {
                         console.warn(`WARNING-0: ${stringifiedMessage}`);
-                        common._consoleLog.history.warn0Logs.push({
+                        Hf._consoleLog.history.warn0Logs.push({
                             timestamp: new Date(),
                             message: `WARNING-0: ${stringifiedMessage}`
                         });
                     }
                 },
                 warn1 () {
-                    if (common._consoleLog.enableWarn1Log) {
+                    if (Hf._consoleLog.enableWarn1Log) {
                         console.warn(`WARNING-1: ${stringifiedMessage}`);
-                        common._consoleLog.history.warn1Logs.push({
+                        Hf._consoleLog.history.warn1Logs.push({
                             timestamp: new Date(),
                             message: `WARNING-1: ${stringifiedMessage}`
                         });
                     }
                 },
                 info0 () {
-                    if (common._consoleLog.enableInfo0Log) {
+                    if (Hf._consoleLog.enableInfo0Log) {
                         console.info(`INFO-0: ${stringifiedMessage}`);
-                        common._consoleLog.history.infoLogs.push({
+                        Hf._consoleLog.history.infoLogs.push({
                             timestamp: new Date(),
                             message: `INFO-0: ${stringifiedMessage}`
                         });
                     }
                 },
                 info1 () {
-                    if (common._consoleLog.enableInfo1Log) {
+                    if (Hf._consoleLog.enableInfo1Log) {
                         console.info(`INFO-1: ${stringifiedMessage}`);
-                        common._consoleLog.history.infoLogs.push({
+                        Hf._consoleLog.history.infoLogs.push({
                             timestamp: new Date(),
                             message: `INFO-1: ${stringifiedMessage}`
                         });
@@ -1406,7 +1429,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
                 debug () {
                     /* debug log is always enabled */
                     console.log(`DEBUG: ${stringifiedMessage}`);
-                    common._consoleLog.history.debugLogs.push({
+                    Hf._consoleLog.history.debugLogs.push({
                         timestamp: new Date(),
                         message: `DEBUG: ${stringifiedMessage}`
                     });
@@ -1445,21 +1468,21 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {array}
      */
     getLogHistory: function getLogHistory (type) {
-        const common = this;
-        if (common.DEVELOPMENT) {
+        const Hf = this;
+        if (Hf.DEVELOPMENT) {
             switch (type) { // eslint-disable-line
             case `debug`:
-                return common._consoleLog.history.debugLogs;
+                return Hf._consoleLog.history.debugLogs;
             case `info0`:
-                return common._consoleLog.history.info0Logs;
+                return Hf._consoleLog.history.info0Logs;
             case `info1`:
-                return common._consoleLog.history.info1Logs;
+                return Hf._consoleLog.history.info1Logs;
             case `warn0`:
-                return common._consoleLog.history.warn0Logs;
+                return Hf._consoleLog.history.warn0Logs;
             case `warn1`:
-                return common._consoleLog.history.warn1Logs;
+                return Hf._consoleLog.history.warn1Logs;
             default:
-                common.log(`warn1`, `CommonElement.getLogHistory - Invalid log type:${type}.`);
+                Hf.log(`warn1`, `CommonElement.getLogHistory - Invalid log type:${type}.`);
                 return;
             }
         }
@@ -1472,13 +1495,21 @@ const CommonElementPrototype = Object.create({}).prototype = {
  * @module CommonElement
  * @return {object}
  */
-export default function CommonElement ({
-    enableProductionMode = false,
-    enableInfo0Log = false,
-    enableInfo1Log = true,
-    enableWarn0Log = false,
-    enableWarn1Log = true
-} = {}) {
+export default function CommonElement (option = {
+    enableProductionMode: false,
+    enableInfo0Log: false,
+    enableInfo1Log: true,
+    enableWarn0Log: false,
+    enableWarn1Log: true
+}) {
+    let {
+        enableProductionMode,
+        enableInfo0Log,
+        enableInfo1Log,
+        enableWarn0Log,
+        enableWarn1Log
+    } = option;
+
     enableProductionMode = CommonElementPrototype.isBoolean(enableProductionMode) ? enableProductionMode : false;
     enableInfo0Log = CommonElementPrototype.isBoolean(enableInfo0Log) ? enableInfo0Log : true;
     enableInfo1Log = CommonElementPrototype.isBoolean(enableInfo1Log) ? enableInfo1Log : true;

@@ -30,6 +30,8 @@ import { Hf } from '../../hyperflow';
 /* load undirected node */
 import TreeNodeElement from './tree-node-element';
 
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+
 /**
  * @description - An undirected tree element prototypes.
  *
@@ -46,13 +48,13 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _getNode: function _getNode (pathId) {
+        const tree = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
                 Hf.log(`error`, `TreeElement._getNode - Input node pathId is invalid.`);
             }
         }
-
-        const tree = this;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
@@ -74,13 +76,13 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _createNode: function _createNode (pathId) {
+        const tree = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
                 Hf.log(`error`, `TreeElement._createNode - Input node pathId is invalid.`);
             }
         }
-
-        const tree = this;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
@@ -104,6 +106,48 @@ const TreeElementPrototype = Object.create({}).prototype = {
         return node;
     },
     /**
+     * @description - From pathId, delete node at pathId.
+     *
+     * @method _destroyNode
+     * @param {string|array} pathId - Node pathId.
+     * @return void
+     * @private
+     */
+    _destroyNode: function _destroyNode (pathId) {
+        const tree = this;
+
+        if (Hf.DEVELOPMENT) {
+            if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
+                Hf.log(`error`, `TreeElement._destroyNode - Input node pathId is invalid.`);
+            }
+        }
+
+        /* convert pathId from array format to string format */
+        pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
+
+        if (Hf.DEVELOPMENT) {
+            if (!tree.hasNode(pathId)) {
+                Hf.log(`error`, `TreeElement._destroyNode - Node with pathId:${pathId} is undefined.`);
+            }
+        }
+
+        const node = tree._node[pathId];
+
+        if (!node.isSingular()) {
+            let pathIds = [];
+            node.forEach(`descendants`, (dNode) => {
+                pathIds.push(dNode.getPathId());
+            });
+            pathIds.forEach((_pathId) => {
+                delete tree._node[_pathId];
+                // tree._node[_pathId] = undefined;
+            });
+        }
+
+        delete tree._node[pathId];
+        // tree._node[pathId] = undefined;
+    },
+    /**
      * @description - Change Node pathId
      *
      * @method _changeNodePathId
@@ -113,14 +157,14 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _changeNodePathId: function _changeNodePathId (oldPathId, newPathId) {
+        const tree = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(oldPathId) || Hf.isArray(oldPathId)) &&
                (!(Hf.isString(newPathId) || Hf.isArray(newPathId)))) {
                 Hf.log(`error`, `TreeElement._changeNodePathId - Input node pathIds are invalid.`);
             }
         }
-
-        const tree = this;
 
         /* convert pathId from array format to string format */
         oldPathId = Hf.isArray(oldPathId) ? Hf.arrayToString(oldPathId, `.`) : oldPathId;
@@ -129,8 +173,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
         if (Hf.DEVELOPMENT) {
             if (tree.hasNode(newPathId)) {
                 Hf.log(`error`, `TreeElement._changeNodePathId - Node with pathId:${oldPathId} is already defined.`);
-            }
-            if (!tree.hasNode(oldPathId)) {
+            } else if (!tree.hasNode(oldPathId)) {
                 Hf.log(`error`, `TreeElement._changeNodePathId - Node with pathId:${oldPathId} is undefined.`);
             }
         }
@@ -138,8 +181,8 @@ const TreeElementPrototype = Object.create({}).prototype = {
         const node = tree._node[oldPathId];
 
         tree._node[newPathId] = node;
-        tree._node[oldPathId] = undefined;
         delete tree._node[oldPathId];
+        // tree._node[oldPathId] = undefined;
     },
     /**
      * @description - From pathId, check if there is a node at pathId.
@@ -149,10 +192,11 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @return {boolean}
      */
     hasNode: function hasNode (pathId) {
+        const tree = this;
+
         if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
             return false;
         }
-        const tree = this;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
@@ -179,41 +223,25 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     cutRoot: function cutRoot (rootKey) {
+        const tree = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(rootKey) || Hf.isInteger(rootKey))) {
                 Hf.log(`error`, `TreeElement.cutRoot - Input root node key is invalid.`);
             }
         }
 
-        const tree = this;
         const pathId = rootKey;
 
         if (Hf.DEVELOPMENT) {
             if (!tree.hasNode(pathId)) {
                 Hf.log(`error`, `TreeElement.cutRoot - Root node rootKey:${rootKey} is undefined.`);
-            }
-        }
-
-        const rootNode = tree._getNode(pathId);
-
-        if (Hf.DEVELOPMENT) {
-            if (!Hf.isObject(rootNode)) {
+            } else if (!Hf.isObject(tree._getNode(pathId))) {
                 Hf.log(`error`, `TreeElement.cutRoot - Unable to cut root node at pathId:${pathId}`);
             }
         }
 
-        if (!rootNode.isSingular()) {
-            let pathIds = [];
-            rootNode.forEach(`descendants`, (tNode) => {
-                pathIds.push(tNode.getPathId());
-            });
-            pathIds.forEach((_pathId) => {
-                tree._node[_pathId] = undefined;
-                delete tree._node[_pathId];
-            });
-        }
-        tree._node[pathId] = undefined;
-        delete tree._node[pathId];
+        tree._destroyNode(pathId);
     },
     /**
      * @description - Sprout out a new root node.
@@ -223,14 +251,18 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @param {*} rootContent - Root node content.
      * @return {object}
      */
-    sproutRoot: function sproutRoot (rootKey, rootContent) {
+    sproutRoot: function sproutRoot (rootKey, rootContent = {
+        cache: undefined,
+        accessor: undefined
+    }) {
+        const tree = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isString(rootKey) || Hf.isInteger(rootKey))) {
                 Hf.log(`error`, `TreeElement.sproutRoot - Input root node key is invalid.`);
             }
         }
 
-        const tree = this;
         const pathId = rootKey;
         const rootNode = tree._createNode(pathId);
 
@@ -240,9 +272,8 @@ const TreeElementPrototype = Object.create({}).prototype = {
             }
         }
 
-        if (Hf.isObject(rootContent) || Hf.isArray(rootContent)) {
-            rootNode.setContent(rootContent);
-        }
+        rootNode.setContent(rootContent);
+
         return tree.select(pathId);
     },
     /**
@@ -253,29 +284,20 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     select: function select (pathId) {
-        if (Hf.DEVELOPMENT) {
-            if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
-                Hf.log(`error`, `TreeElement.select - Input node pathId is invalid.`);
-            }
-        }
-
         const tree = this;
 
         if (Hf.DEVELOPMENT) {
-            if (!tree.hasNode(pathId)) {
+            if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
+                Hf.log(`error`, `TreeElement.select - Input node pathId is invalid.`);
+            } else if (!tree.hasNode(pathId)) {
                 Hf.log(`error`, `TreeElement.select - Node with pathId:${pathId} is undefined.`);
+            } else if (!Hf.isObject(tree._getNode(pathId))) {
+                Hf.log(`error`, `TreeElement.select - Unable to start from node at pathId:${pathId}.`);
             }
         }
 
         const node = tree._getNode(pathId);
 
-        if (Hf.DEVELOPMENT) {
-            if (!Hf.isObject(node)) {
-                Hf.log(`error`, `TreeElement.select - Unable to start from node at pathId:${pathId}.`);
-            }
-        }
-
-        const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
         /* reveal only the public properties and functions */
         return revealFrozen(node);
     }
@@ -325,7 +347,6 @@ export default function TreeElement () {
         }
     }
 
-    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
     /* reveal only the public properties and functions */
     return revealFrozen(element);
 }

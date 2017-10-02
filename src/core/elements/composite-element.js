@@ -35,7 +35,9 @@ const INITIALIZATION_PREFIX = `$`;
 const DEFAULT_EXCLUSION_PREFIXES = [ PRIVATE_PREFIX, INITIALIZATION_PREFIX ];
 
 /* number mutations to persist in mutation map before roll-over */
-const DEFAULT_MUTATION_HISTORY_DEPTH = 128;
+const DEFAULT_MUTATION_HISTORY_DEPTH = 64;
+
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
 
 /**
  * @description - A composite element prototypes.
@@ -660,7 +662,6 @@ export default function CompositeElement (definition) {
         }
     }
 
-    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
     /* reveal only the public properties and functions */
     return revealFrozen(element);
 }

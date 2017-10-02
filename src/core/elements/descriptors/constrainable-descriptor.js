@@ -27,6 +27,8 @@
 /* load Hyperflow */
 import { Hf } from '../../../hyperflow';
 
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+
 /**
  * @description - A constraint descriptor prototypes.
  *
@@ -115,8 +117,8 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
         }
 
         if (constrainable.hasConstraint(constraintKey)) {
-            constrainable._description.constraint[constraintKey] = undefined;
             delete constrainable._description.constraint[constraintKey];
+            // constrainable._description.constraint[constraintKey] = undefined;
         }
     },
     /**
@@ -264,8 +266,8 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
             const key = constrainable._description.key;
 
             /* delete current property */
-            constrainable._description.proxy[key] = undefined;
             delete constrainable._description.proxy[key];
+            // constrainable._description.proxy[key] = undefined;
 
             /* restore original property with it descriptor */
             if (constrainable._description.orgDesc.hasOwnProperty(`get`) || constrainable._description.orgDesc.hasOwnProperty(`set`)) {
@@ -330,7 +332,6 @@ export default function ConstrainableDescriptor (id) {
         }
     }
 
-    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
     /* reveal only the public properties and functions */
     return revealFrozen(descriptor);
 }

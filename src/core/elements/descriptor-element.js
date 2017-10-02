@@ -35,6 +35,8 @@ import ConstrainableDescriptor from './descriptors/constrainable-descriptor';
 import ObservableDescriptor from './descriptors/observable-descriptor';
 import ComputableDescriptor from './descriptors/computable-descriptor';
 
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+
 /**
  * @description - A data descriptor element prototypes.
  *
@@ -141,8 +143,8 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
                 }
 
                 registry[id].unassign();
-                registry[id] = undefined;
                 delete registry[id];
+                // registry[id] = undefined;
             }
         };
     }
@@ -182,7 +184,6 @@ export default function DescriptorElement () {
         }
     }
 
-    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
     /* reveal only the public properties and functions */
     return revealFrozen(element);
 }

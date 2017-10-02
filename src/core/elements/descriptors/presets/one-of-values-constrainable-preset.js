@@ -56,7 +56,7 @@ const oneOfValuesPreset = function oneOfValuesPreset (_values) {
                 const result = {
                     verified: true,
                     reject: function reject () {
-                        Hf.log(`warn1`, `oneOf - Property key:${context.key} value is not one of ${values}`);
+                        Hf.log(`warn1`, `oneOf - Property key:${context.key} value:${context.newValue} is not one of ${values}`);
                     }
                 };
                 if (Hf.isArray(context.newValue)) {

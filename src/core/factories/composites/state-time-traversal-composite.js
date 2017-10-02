@@ -40,7 +40,6 @@ import {
  * @return {object}
  */
 export default Hf.Composite({
-    // TODO: Needs more testing. Possible bug in resert and recall methods.
     template: {
         /**
          * @description - Initialized and check that factory is valid for this composite.
@@ -81,6 +80,9 @@ export default Hf.Composite({
          */
         flush: function flush (option = {}) {
             const factory = this;
+
+            option = Hf.isObject(option) ? option : {};
+
             factory.flushState(option);
         },
         /**
@@ -95,6 +97,7 @@ export default Hf.Composite({
         timeTraverse: function timeTraverse (key, timeIndexOffset) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
+            let reconfiguration = {};
 
             if (Hf.DEVELOPMENT) {
                 if (!stateCursor.hasItem(key)) {
@@ -115,13 +118,7 @@ export default Hf.Composite({
                 }
             }
 
-            let reconfiguration = {};
-
-            if (Hf.isObject(content) || Hf.isArray(content)) {
-                reconfiguration = content;
-            } else {
-                reconfiguration[key] = content;
-            }
+            reconfiguration[key] = content;
 
             factory.reconfigState(reconfiguration);
 
@@ -135,8 +132,10 @@ export default Hf.Composite({
             }).with({});
 
             /* emitting a mutation event to interface */
-            factory.outgoing(`as-state-mutated`).emit(() => recalledState);
-            factory.outgoing(`do-sync-reflected-state`).emit(() => recalledState);
+            factory.outgoing(
+                `as-state-mutated`,
+                `do-sync-reflected-state`
+            ).emit(() => recalledState);
             Hf.log(`info0`, `Time traversing to previous state at timestamp:${timestamp} of key:${key}.`);
         },
         /**

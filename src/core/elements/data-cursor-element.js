@@ -51,6 +51,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      */
     _createSchema: function _createSchema (source) {
         const cursor = this;
+
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isObject(source) || Hf.isArray(source))) {
                 Hf.log(`error`, `DataCursorElement._createSchema - Input source object is invalid.`);
@@ -256,6 +257,8 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
     getAccessor: function getAccessor (option = {}) {
         const cursor = this;
         const data = cursor._data;
+
+        option = Hf.isObject(option) ? option : {};
 
         return data._getAccessor(cursor._pathId, option);
     },
@@ -875,7 +878,6 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
                     };
                     descriptor.addDescription(pathId).assign(descPreset).to(cursor._content);
                 } else {
-
                     Object.entries(constraint).forEach(([ constraintKey, constraintValue ]) => {
                         descriptor.getDescription(pathId).addConstraint(
                             constraintValue.contrainer,
@@ -1029,13 +1031,13 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @return void
      */
     forEach: function forEach (iterator, context) {
+        const cursor = this;
+
         if (Hf.DEVELOPMENT) {
             if (!Hf.isFunction(iterator)) {
                 Hf.log(`error`, `DataCursorElement.forEach - Input iterator callback is invalid.`);
             }
         }
-
-        const cursor = this;
 
         Hf.forEach(cursor._content, (item, key) => {
             iterator.call(context, item, key);

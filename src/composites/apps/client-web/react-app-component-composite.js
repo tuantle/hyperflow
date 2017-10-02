@@ -59,7 +59,9 @@ export default Hf.Composite({
          * @param {object} option
          * @return {object|function}
          */
-        getTopComponent: function getTopComponent (option = {}) {
+        getTopComponent: function getTopComponent (option = {
+            doConvertToStandaloneComponent: false
+        }) {
             const app = this;
             const {
                 doConvertToStandaloneComponent

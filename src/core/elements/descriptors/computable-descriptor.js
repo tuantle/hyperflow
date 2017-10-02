@@ -28,6 +28,8 @@
 /* load Hyperflow */
 import { Hf } from '../../../hyperflow';
 
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+
 /**
  * @description - A computable descriptor prototypes.
  *
@@ -127,8 +129,8 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
         if (computable._description.assigned) {
             /* delete the computable property */
             // FIXME: Cannot delete a computable.
-            computable._description.proxy[computable._description.fnName] = undefined;
             delete computable._description.proxy[computable._description.fnName];
+            // computable._description.proxy[computable._description.fnName] = undefined;
 
             computable._description.assigned = false;
             computable._description.fnName = undefined;
@@ -181,7 +183,6 @@ export default function ComputableDescriptor (id) {
         }
     }
 
-    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
     /* reveal only the public properties and functions */
     return revealFrozen(descriptor);
 }

@@ -37,7 +37,9 @@ import DataCursorElement from './data-cursor-element';
 import TreeElement from './tree-element';
 
 /* number mutations to persist in mutation map before roll-over */
-const DEFAULT_MUTATION_HISTORY_DEPTH = 20;
+const DEFAULT_MUTATION_HISTORY_DEPTH = 64;
+
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
 
 /**
  * @description - A data element prototypes.
@@ -56,6 +58,9 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _getAccessor: function _getAccessor (pathId, option = {}) {
+        const data = this;
+
+        option = Hf.isObject(option) ? option : {};
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
         if (Hf.DEVELOPMENT) {
             if (!Hf.isNonEmptyArray(pathId)) {
@@ -63,7 +68,6 @@ const DataElementPrototype = Object.create({}).prototype = {
             }
         }
 
-        const data = this;
         const [ rootKey ] = pathId;
         const mRecords = data._mutation.records;
         const immutableRootKeys = data._mutation.immutableRootKeys;
@@ -84,6 +88,8 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _recordMutation: function _recordMutation (pathId) {
+        const data = this;
+
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
 
         if (Hf.DEVELOPMENT) {
@@ -92,7 +98,6 @@ const DataElementPrototype = Object.create({}).prototype = {
             }
         }
 
-        const data = this;
         const [ rootKey ] = pathId;
         const immutableRootKeys = data._mutation.immutableRootKeys;
         const mRecords = data._mutation.records;
@@ -124,6 +129,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     _deepUpdateMMap: function _deepUpdateMMap (node, pathId, records) {
         const data = this;
+
         if (Hf.DEVELOPMENT) {
             if (!Hf.isObject(node)) {
                 Hf.log(`error`, `DataElement._deepUpdateMMap - Input node is invalid.`);
@@ -135,8 +141,19 @@ const DataElementPrototype = Object.create({}).prototype = {
         }
 
         const cursor = data.select(pathId);
-        let accessor = cursor.getContentType() === `object` ? {} : [];
+        let content = {
+            cache: undefined,
+            accessor: undefined
+        };
         let [ mutatedKeys ] = !Hf.isEmpty(records) ? records : [[]];
+
+        if (cursor.getContentType() === `object`) {
+            content.cache = {};
+            content.accessor = {};
+        } else if (cursor.getContentType() === `array`) {
+            content.cache = [];
+            content.accessor = [];
+        }
 
         cursor.forEach((item, key) => {
             if (Hf.isNonEmptyObject(item) || Hf.isNonEmptyArray(item)) {
@@ -145,33 +162,46 @@ const DataElementPrototype = Object.create({}).prototype = {
                 }
             } else {
                 if (cursor.isItemComputable(key)) {
-                    Object.defineProperty(accessor, key, {
+                    Object.defineProperty(content.accessor, key, {
                         get: function get () {
                             return cursor.getContentItem(key);
                         },
                         configurable: false,
                         enumerable: true
                     });
-                // } else if (cursor.isItemObservable(key)) {
                 // TODO: handle for case where key is an observable.
-                //
+                // } else if (cursor.isItemObservable(key)) {
+                // }
                 } else {
-                    const cachedItem = item;
-                    Object.defineProperty(accessor, key, {
-                        get: function get () {
-                            return cursor.isImmutable() ? cachedItem : cursor.getContentItem(key);
-                        },
-                        set: function set (value) {
-                            cursor.setContentItem(value, key);
-                        },
-                        configurable: true,
-                        enumerable: true
-                    });
+                    if (cursor.isImmutable()) {
+                        content.cache[key] = item;
+                        Object.defineProperty(content.accessor, key, {
+                            get: function get () {
+                                return node.getContentCacheItem(key);
+                            },
+                            set: function set (value) {
+                                cursor.setContentItem(value, key);
+                            },
+                            configurable: true,
+                            enumerable: true
+                        });
+                    } else {
+                        Object.defineProperty(content.accessor, key, {
+                            get: function get () {
+                                return cursor.getContentItem(key);
+                            },
+                            set: function set (value) {
+                                cursor.setContentItem(value, key);
+                            },
+                            configurable: true,
+                            enumerable: true
+                        });
+                    }
                 }
             }
         });
 
-        node.setContent(accessor);
+        node.setContent(content);
     },
     /**
      * @description - Update the mutation map for a root content.
@@ -182,7 +212,9 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return void
      * @private
      */
-    _updateMMap: function _updateMMap (rootKey, option = {}) {
+    _updateMMap: function _updateMMap (rootKey, option = {
+        excludedNonmutatioReferalPathIds: []
+    }) {
         const data = this;
         const mMap = data._mutation.mMap;
         const mutationHistoryDepth = data._mutation.historyDepth;
@@ -251,6 +283,8 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @private
      */
     _assignDescription: function _assignDescription (cursor, bundleItem, bundleKey) {
+        const data = this;
+
         if (Hf.DEVELOPMENT) {
             if (!Hf.isObject(cursor)) {
                 Hf.log(`error`, `DataElement._assignDescription - Input cursor object is invalid.`);
@@ -261,7 +295,6 @@ const DataElementPrototype = Object.create({}).prototype = {
             }
         }
 
-        const data = this;
         const {
             required,
             stronglyTyped,
@@ -356,10 +389,11 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return {boolean}
      */
     hasCursor: function hasCursor (pathId) {
+        const data = this;
+
         if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
             return false;
         }
-        const data = this;
 
         /* convert pathId from array format to string format */
         pathId = Hf.isArray(pathId) ? Hf.arrayToString(pathId, `.`) : pathId;
@@ -401,10 +435,10 @@ const DataElementPrototype = Object.create({}).prototype = {
             if (index !== -1) {
                 immutableRootKeys.splice(index, 1);
                 data.flush(rootKey);
-                data._mutation.timeIndex[rootKey] = undefined;
-                data._mutation.timestamp[rootKey] = undefined;
                 delete data._mutation.timeIndex[rootKey];
                 delete data._mutation.timestamp[rootKey];
+                // data._mutation.timeIndex[rootKey] = undefined;
+                // data._mutation.timestamp[rootKey] = undefined;
             }
         }
     },
@@ -417,6 +451,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      */
     setMutationHistoryDepth: function setMutationHistoryDepth (mutationHistoryDepth) {
         const data = this;
+
         if (Hf.DEVELOPMENT) {
             if (!Hf.isNumeric(mutationHistoryDepth) && mutationHistoryDepth > 1) {
                 Hf.log(`error`, `DataElement.select - Input mutation history depth is invalid.`);
@@ -467,6 +502,8 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return {object}
      */
     select: function select (pathId) {
+        const data = this;
+
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
 
         if (Hf.DEVELOPMENT) {
@@ -475,7 +512,6 @@ const DataElementPrototype = Object.create({}).prototype = {
             }
         }
 
-        const data = this;
         const cursor = DataCursorElement(data, pathId);
 
         if (Hf.DEVELOPMENT) {
@@ -484,7 +520,6 @@ const DataElementPrototype = Object.create({}).prototype = {
             }
         }
 
-        const revealFrozen = Hf.compose(Object.freeze, Hf.reveal);
         /* reveal only the public properties and functions */
         return revealFrozen(cursor);
     },
@@ -765,7 +800,6 @@ export default function DataElement () {
         }
     }
 
-    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
     /* reveal only the public properties and functions */
     return revealFrozen(element);
 }

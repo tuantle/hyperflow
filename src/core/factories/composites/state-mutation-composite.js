@@ -72,6 +72,7 @@ export default Hf.Composite({
          */
         reset: function reset () {
             const factory = this;
+
             factory.resetState();
 
             const resetedState = Hf.mix(factory.getStateAsObject(), {
@@ -82,8 +83,11 @@ export default Hf.Composite({
                     ]
                 }
             }).with({});
-            factory.outgoing(`as-state-mutated`).emit(() => resetedState);
-            factory.outgoing(`do-sync-reflected-state`).emit(() => resetedState);
+
+            factory.outgoing(
+                `as-state-mutated`,
+                `do-sync-reflected-state`
+            ).emit(() => resetedState);
         },
         /**
          * @description -  Reduce and update state on state change/mutation.
@@ -93,7 +97,11 @@ export default Hf.Composite({
          * @param {object} option
          * @return {boolean}
          */
-        reduce: function reduce (reducer, option = {}) {
+        reduce: function reduce (reducer, option = {
+            forceMutationEvent: false,
+            suppressMutationEvent: false,
+            delayMutationEvent: 0
+        }) {
             const factory = this;
             const {
                 forceMutationEvent,
@@ -133,11 +141,15 @@ export default Hf.Composite({
 
                 /* emitting a mutation event to interface */
                 if (delayMutationEvent > 0) {
-                    factory.outgoing(stateMutationEventId).delay(delayMutationEvent).emit(() => newState);
-                    factory.outgoing(`do-sync-reflected-state`).delay(delayMutationEvent).emit(() => newState);
+                    factory.outgoing(
+                        stateMutationEventId,
+                        `do-sync-reflected-state`
+                    ).delay(delayMutationEvent).emit(() => newState);
                 } else {
-                    factory.outgoing(stateMutationEventId).emit(() => newState);
-                    factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
+                    factory.outgoing(
+                        stateMutationEventId,
+                        `do-sync-reflected-state`
+                    ).emit(() => newState);
                 }
             }
             return mutated;
@@ -150,7 +162,11 @@ export default Hf.Composite({
          * @param {object} option
          * @return void
          */
-        reconfig: function reconfig (reconfiguration, option = {}) {
+        reconfig: function reconfig (reconfiguration, option = {
+            forceMutationEvent: false,
+            suppressMutationEvent: false,
+            delayMutationEvent: 0
+        }) {
             const factory = this;
             const {
                 forceMutationEvent,
@@ -189,11 +205,15 @@ export default Hf.Composite({
 
                 /* emitting a mutation event to interface */
                 if (delayMutationEvent > 0) {
-                    factory.outgoing(stateMutationEventId).delay(delayMutationEvent).emit(() => newState);
-                    factory.outgoing(`do-sync-reflected-state`).delay(delayMutationEvent).emit(() => newState);
+                    factory.outgoing(
+                        stateMutationEventId,
+                        `do-sync-reflected-state`
+                    ).delay(delayMutationEvent).emit(() => newState);
                 } else {
-                    factory.outgoing(stateMutationEventId).emit(() => newState);
-                    factory.outgoing(`do-sync-reflected-state`).emit(() => newState);
+                    factory.outgoing(
+                        stateMutationEventId,
+                        `do-sync-reflected-state`
+                    ).emit(() => newState);
                 }
             }
         }

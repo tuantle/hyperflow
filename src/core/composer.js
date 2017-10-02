@@ -30,6 +30,8 @@ import { Hf } from '../hyperflow';
 /* load CompositeElement */
 import CompositeElement from './elements/composite-element';
 
+const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+
 /**
  * @description - A composer factory prototypes.
  *
@@ -89,14 +91,14 @@ const ComposerPrototype = Object.create({}).prototype = {
             state,
             composites
         } = Hf.fallback({
-            constant: {},
+            static: {},
             state: {},
             composites: []
         }).of(definition);
         /* collect and set method if defined */
-        const methodDefinition = Object.entries(definition).filter(([ fnName, fn ]) => Hf.isFunction(fn)).reduce((_method, [ fnName, fn ]) => { // eslint-disable-line
-            _method[fnName] = fn;
-            return _method;
+        const fnDefinition = Object.entries(definition).filter(([ fnName, fn ]) => Hf.isFunction(fn)).reduce((_fn, [ fnName, fn ]) => { // eslint-disable-line
+            _fn[fnName] = fn;
+            return _fn;
         }, {});
         let factory;
         let initialStatic;
@@ -133,9 +135,9 @@ const ComposerPrototype = Object.create({}).prototype = {
         }
 
         if (!Hf.isEmpty(composites)) {
-            factory = composer._composite.compose(...composites).mixin(methodDefinition).resolve(initialStatic, initialState);
+            factory = composer._composite.compose(...composites).mixin(fnDefinition).resolve(initialStatic, initialState);
         } else {
-            factory = composer._composite.mixin(methodDefinition).resolve(initialStatic, initialState);
+            factory = composer._composite.mixin(fnDefinition).resolve(initialStatic, initialState);
         }
 
         if (Hf.DEVELOPMENT) {
@@ -229,7 +231,6 @@ export default function Composer (definition) {
         }
     }
 
-    const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
     /* reveal only the public properties and functions */
     return revealFrozen(composer);
 }
