@@ -2,6 +2,20 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.1.4 (10/02/2017)**
+```
+Notes:
+New Features:
+Changes:
+Breaking Changes:
+    - Renamed componentMethodAndPropertyInclusions option to fnAndPropertyInclusions and componentMethodPrefixInclusions option to fnPrefixInclusions in ReactComponentComposite.
+Improvements:
+Bug fixes:
+    - Fixed potential memory leak issue with setting variable to undefined before delete.
+    - Fixed memory leak issue with outgoing.interval.emit method for EventStreamComposite by not using setInterval and use Rx.Observable.interval instead.
+    - Fixed event order dependency in incoming.await method for EventStreamComposite.
+    - Added rootItem === null check when writing to storage in AsyncStorageComposite.
+```
 **Development Version 0.1.3 (09/13/2017)**
 ```
 Notes:
