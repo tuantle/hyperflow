@@ -35,7 +35,7 @@ const WILL_MOUNT_STAGE = 0;
 const DID_MOUNT_STAGE = 1;
 const WILL_UNMOUNT_STAGE = 2;
 
-const DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS = [
+const DEFAULT_COMPONENT_FN_PREFIX_INCLUSIONS = [
     /* interface reserved method prefixes */
     `on`,
     `do`,
@@ -43,7 +43,7 @@ const DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS = [
     `render`
 ];
 
-const DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
+const DEFAULT_COMPONENT_FN_AND_PROPERTY_INCLUSIONS = [
     /* react reserved methods and properties */
     `propTypes`,
     `defaultProps`,
@@ -68,7 +68,7 @@ const DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
     `getComponentComposites`
 ];
 
-const DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS = [
+const DEFAULT_PURE_COMPONENT_FN_AND_PROPERTY_INCLUSIONS = [
     /* react reserved methods and properties */
     `propTypes`,
     `defaultProps`,
@@ -301,8 +301,8 @@ export default Hf.Composite({
                     exclusion: {
                         keys: [ `*` ],
                         exception: {
-                            prefixes: DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS,
-                            keys: DEFAULT_PURE_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS
+                            prefixes: DEFAULT_COMPONENT_FN_PREFIX_INCLUSIONS,
+                            keys: DEFAULT_PURE_COMPONENT_FN_AND_PROPERTY_INCLUSIONS
                         }
                     },
                     enclosure: {
@@ -377,7 +377,11 @@ export default Hf.Composite({
              * @param {object} option
              * @returns {object}
              */
-            this.toComponent = function toComponent (applet = null, option = {}) {
+            this.toComponent = function toComponent (applet = null, option = {
+                alwaysUpdateAsParent: true,
+                fnPrefixInclusions: [],
+                fnAndPropertyInclusions: []
+            }) {
                 const intf = this;
                 const stateCursor = intf.getStateCursor();
                 const {
@@ -386,12 +390,12 @@ export default Hf.Composite({
                 } = intf.getComponentLib();
                 const {
                     alwaysUpdateAsParent,
-                    componentMethodPrefixInclusions,
-                    componentMethodAndPropertyInclusions
+                    fnPrefixInclusions,
+                    fnAndPropertyInclusions
                 } = Hf.fallback({
                     alwaysUpdateAsParent: true,
-                    componentMethodPrefixInclusions: [],
-                    componentMethodAndPropertyInclusions: []
+                    fnPrefixInclusions: [],
+                    fnAndPropertyInclusions: []
                 }).of(option);
 
                 if (Hf.DEVELOPMENT) {
@@ -434,8 +438,8 @@ export default Hf.Composite({
                     exclusion: {
                         keys: [ `*` ],
                         exception: {
-                            prefixes: DEFAULT_COMPONENT_METHOD_PREFIX_INCLUSIONS.concat(componentMethodPrefixInclusions),
-                            keys: DEFAULT_COMPONENT_METHOD_AND_PROPERTY_INCLUSIONS.concat(componentMethodAndPropertyInclusions)
+                            prefixes: DEFAULT_COMPONENT_FN_PREFIX_INCLUSIONS.concat(fnPrefixInclusions),
+                            keys: DEFAULT_COMPONENT_FN_AND_PROPERTY_INCLUSIONS.concat(fnAndPropertyInclusions)
                         }
                     },
                     enclosure: {
