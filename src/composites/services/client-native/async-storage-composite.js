@@ -113,6 +113,12 @@ export default Hf.Composite({
                             storage.getAllKeys().then((rootKeys) => {
                                 if (rootKeys.includes(rootKey)) {
                                     storage.getItem(rootKey).then((rootItem) => {
+                                        if (Hf.DEVELOPMENT) {
+                                            if (!Hf.isDefined(rootItem) || rootItem === null) {
+                                                Hf.log(`warn1`, `AsyncStorageComposite.fetch.read - Root item key:${rootKey} read from storage is invalid.`);
+                                            }
+                                        }
+
                                         if (!Hf.isEmpty(pathId)) {
                                             resolve(Hf.retrieve(pathId, `.`).from(JSON.parse(rootItem)));
                                         } else {
@@ -140,7 +146,9 @@ export default Hf.Composite({
                  * @param {object} cmd - command statement.
                  * @return {object}
                  */
-                write: function write (cmd = {}) {
+                write: function write (cmd = {
+                    touchRoot: false
+                }) {
                     if (Hf.DEVELOPMENT) {
                         if (!Hf.isSchema({
                             bundle: `object`
@@ -172,6 +180,16 @@ export default Hf.Composite({
                                     if (!Hf.isEmpty(pathId)) {
                                         storage.getItem(rootKey).then((rootItem) => {
                                             const mutator = bundle;
+
+                                            if (Hf.DEVELOPMENT) {
+                                                if (!Hf.isDefined(rootItem) || rootItem === null) {
+                                                    Hf.log(`warn1`, `AsyncStorageComposite.fetch.write - Root item key:${rootKey} read from storage is invalid. Overiding original root item.`);
+                                                    rootItem = {};
+                                                }
+                                            } else {
+                                                rootItem = !Hf.isDefined(rootItem) || rootItem === null ? {} : rootItem;
+                                            }
+
                                             storage.setItem(
                                                 rootKey,
                                                 JSON.stringify(Hf.mutate(JSON.parse(rootItem)).atPathBy(mutator, pathId))
@@ -189,6 +207,16 @@ export default Hf.Composite({
                                                 reject(new Error(`ERROR: Unable to write to storage. Bundle root item key:${rootKey} is undefined.`));
                                             } else {
                                                 const mutator = bundle[rootKey];
+
+                                                if (Hf.DEVELOPMENT) {
+                                                    if (!Hf.isDefined(rootItem) || rootItem === null) {
+                                                        Hf.log(`warn1`, `AsyncStorageComposite.fetch.write - Root item key:${rootKey} read from storage is invalid. Overiding original root item.`);
+                                                        rootItem = {};
+                                                    }
+                                                } else {
+                                                    rootItem = !Hf.isDefined(rootItem) || rootItem === null ? {} : rootItem;
+                                                }
+
                                                 if (Hf.isObject(mutator) || Hf.isArray(mutator)) {
                                                     storage.setItem(
                                                         rootKey,
