@@ -2,6 +2,21 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.1.5 (10/15/2017)**
+```
+Notes:
+New Features:
+Changes:
+    - General code cleanups. Updated package dependencies.
+Breaking Changes:
+    - Removed applet support from toComponent and getTopComponent methods in ReactComponentComposite and ReactAppComponentComposite.
+    - Moved assignComponentRef and lookupComponentRefs methods from InterfaceFactory to ReactComponentComposite.
+Improvements:
+    - Added support for mixing functions to mix method in CommonElement.
+    - Added preReceivingPropertyStage method to ReactComponentComposite.
+    - Code cleanups for ReactComponentComposite.
+Bug fixes:
+```
 **Development Version 0.1.4 (10/02/2017)**
 ```
 Notes:

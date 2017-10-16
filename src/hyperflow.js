@@ -56,7 +56,7 @@ const init = function init ({
 
         /* Hyperflow core element libraries */
         const HfCoreProperty = {
-            VERSION: `0.1.4`,
+            VERSION: `0.1.5`,
             TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
             ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
             /* load Composer & set composer factory namespace */
@@ -76,10 +76,13 @@ const init = function init ({
             Store: require(`./core/factories/store-factory`).default,
             Interface: require(`./core/factories/interface-factory`).default,
             Service: require(`./core/factories/service-factory`).default,
-            /* load test AgentFactory & set app factory namespace */
+            /* load app factory namespace */
             App: require(`./core/factories/app-factory`).default,
             /* set factory event stream id map creator */
             Event: require(`./core/factories/factory-event`).default
+            /* load test agent & fixtures factory namespaces */
+            // Agent: require(`./core/factories/agent-factory`).default,
+            // Fixture: require(`./core/factories/fixture-factory`).default,
         };
 
         Hf = Hf.mix(Hf).with(HfCoreFactoryProperty);
@@ -91,12 +94,8 @@ const init = function init ({
                 MutationComposite: require(`./core/factories/composites/state-mutation-composite`).default,
                 TimeTraversalComposite: require(`./core/factories/composites/state-time-traversal-composite`).default
             }
-            /* load test FixtureFactory and AgentFactory & set test agent & fixtures factory namespace */
-            // Agent: require(`./core/factories/agent-factory`).default,
-            // Fixture: require(`./core/factories/fixture-factory`).default,
-            /* load & set test fixtures composites namespace */
-            // Test: {
-            //     TapeRunnerComposite: require(`./core/factories/composites/tape-test-runner-composite`).default,
+            /* load test fixtures composites namespace */
+            // TestFixture: {
             //     DomainFixtureComposite: require(`./core/factories/composites/test-fixtures/domain-test-fixture-composite`).default,
             //     StoreFixtureComposite: require(`./core/factories/composites/test-fixtures/store-test-fixture-composite`).default,
             //     InterfaceFixtureComposite: require(`./core/factories/composites/test-fixtures/interface-test-fixture-composite`).default,
@@ -108,6 +107,10 @@ const init = function init ({
 
         /* Hyperflow vendor factory composite libraries */
         const HfCompositeProperty = {
+            /* load test runner composites namespace */
+            // TestRunner: {
+            //     TapeTestRunnerComposite: require(`./composites/test-runners/tape-test-runner--composite`).default
+            // },
             /* load React composites library & set composite library namespace */
             React: {
                 ComponentComposite: require(`./composites/interfaces/react-component-composite`).default,
