@@ -61,10 +61,9 @@ export default Hf.Composite({
          */
         getTopComponent: function getTopComponent (option = {}) {
             const app = this;
+            const domain = app.getTopDomain();
 
             option = Hf.isObject(option) ? option : {};
-
-            const domain = app.getTopDomain();
 
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -98,7 +97,7 @@ export default Hf.Composite({
                 }
             }
 
-            const TopComponent = intf.toComponent(null, {
+            const TopComponent = intf.toComponent({
                 ...option,
                 alwaysUpdateAsParent: true
             });

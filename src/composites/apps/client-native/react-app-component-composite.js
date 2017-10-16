@@ -59,16 +59,11 @@ export default Hf.Composite({
          * @param {object} option
          * @return {object|function}
          */
-        getTopComponent: function getTopComponent (option = {
-            doConvertToStandaloneComponent: false
-        }) {
+        getTopComponent: function getTopComponent (option = {}) {
             const app = this;
             const domain = app.getTopDomain();
-            const {
-                doConvertToStandaloneComponent
-            } = Hf.fallback({
-                doConvertToStandaloneComponent: false
-            }).of(option);
+
+            option = Hf.isObject(option) ? option : {};
 
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -89,32 +84,17 @@ export default Hf.Composite({
                 }
             }
 
-            if (doConvertToStandaloneComponent) {
-                const StandaloneComponent = intf.toComponent(app, {
-                    ...option,
-                    alwaysUpdateAsParent: true,
-                    doRenderToTarget: false
-                });
-                if (Hf.DEVELOPMENT) {
-                    if (!Hf.isFunction(StandaloneComponent)) {
-                        Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app standalone component.`);
-                    }
-                }
+            const TopComponent = intf.toComponent({
+                ...option,
+                alwaysUpdateAsParent: true
+            });
 
-                return StandaloneComponent;
-            } else { // eslint-disable-line
-                const TopComponent = intf.toComponent(null, {
-                    ...option,
-                    alwaysUpdateAsParent: true
-                });
-
-                if (Hf.DEVELOPMENT) {
-                    if (!Hf.isFunction(TopComponent)) {
-                        Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
-                    }
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(TopComponent)) {
+                    Hf.log(`error`, `ReactAppComponentComposite.getTopComponent - Unable to initialize a React app top component.`);
                 }
-                return TopComponent;
             }
+            return TopComponent;
         }
     }
 });
