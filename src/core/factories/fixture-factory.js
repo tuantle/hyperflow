@@ -65,6 +65,7 @@ export default Composer({
     },
     FixtureFactory: function FixtureFactory () {
         /* ----- Private Variables ------------- */
+        let _testRunner;
         /* ----- Public Functions -------------- */
         /**
          * @description - Initialize service.
@@ -74,6 +75,39 @@ export default Composer({
          */
         this.$init = function $init () {
             Hf.log(`warn0`, `FixtureFactory.$init - Method is not implemented by default.`);
+        };
+        /**
+         * @description - Get fixture test runner.
+         *
+         * @method getTestRunner
+         * @return {object}
+         */
+        this.getTestRunner = function getTestRunner () {
+            const fixture = this;
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_testRunner)) {
+                    Hf.log(`error`, `FixtureFactory.getTestRunner - Test fixture:${fixture.name} is not registered with a test runner.`);
+                }
+            }
+
+            return _testRunner;
+        };
+        /**
+         * @description - Register fixture with a test runner.
+         *
+         * @method registerTestRunner
+         * @param {function} definition - Test fixture test runner function.
+         * @return void
+         */
+        this.registerTestRunner = function registerTestRunner (testRunner) {
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(testRunner)) {
+                    Hf.log(`error`, `FixtureFactory.registerTestRunner - Input test runner function is invalid.`);
+                }
+            }
+
+            _testRunner = testRunner;
         };
         /**
          * @description - Setup fixture event stream.
