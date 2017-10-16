@@ -60,7 +60,8 @@ export default Composer({
     },
     AppFactory: function AppFactory () {
         /* ----- Private Variables ------------- */
-        let _renderer;
+        let _componentLib;
+        let _componentRenderer;
         let _domain;
         /* ----- Public Functions -------------- */
         /**
@@ -99,21 +100,38 @@ export default Composer({
             Hf.log(`warn0`, `AppFactory.renderToTarget - Method is not implemented by default.`);
         };
         /**
-         * @description - Get app renderer.
+         * @description - Get app component renderer.
          *
-         * @method getRenderer
+         * @method getComponentRenderer
          * @return {object}
          */
-        this.getRenderer = function getRenderer () {
+        this.getComponentRenderer = function getComponentRenderer () {
             const app = this;
 
             if (Hf.DEVELOPMENT) {
-                if (!Hf.isObject(_renderer)) {
-                    Hf.log(`error`, `AppFactory.getRenderer - App:${app.name} is not registered with a component renderer.`);
+                if (!Hf.isObject(_componentRenderer)) {
+                    Hf.log(`error`, `AppFactory.getComponentRenderer - App:${app.name} is not registered with a component renderer.`);
                 }
             }
 
-            return _renderer;
+            return _componentRenderer;
+        };
+        /**
+         * @description - Get app component library.
+         *
+         * @method getComponentLib
+         * @return {object}
+         */
+        this.getComponentLib = function getComponentLib () {
+            const app = this;
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_componentLib)) {
+                    Hf.log(`error`, `AppFactory.getComponentLib - App:${app.name} is not registered with a component library.`);
+                }
+            }
+
+            return _componentLib;
         };
         /**
          * @description - Get the composed app top interface component from top level domain.
@@ -147,7 +165,7 @@ export default Composer({
          *
          * @method register
          * @param {object} definition - App registration definition for domain, renderer, and target.
-         * @return void
+         * @return {object}
          */
         this.register = function register (definition) {
             const app = this;
@@ -157,7 +175,7 @@ export default Composer({
                 if (!Hf.isSchema({
                     domain: `object`,
                     component: {
-                        library: `object`,
+                        lib: `object`,
                         renderer: `object`
                     }
                 }).of(definition)) {
@@ -186,7 +204,8 @@ export default Composer({
             }
 
             _domain = domain;
-            _renderer = component.renderer;
+            _componentLib = component.lib;
+            _componentRenderer = component.renderer;
 
             const intf = domain.getInterface();
 
@@ -198,9 +217,11 @@ export default Composer({
                 }
             }
 
-            intf.registerComponentLib(component.library);
+            intf.registerComponentLib(component.lib);
 
             Hf.log(`info1`, `App:${app.name} registered domain:${domain.name}.`);
+
+            return app;
         };
         /**
          * @description - Start app.
