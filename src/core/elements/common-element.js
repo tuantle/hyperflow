@@ -899,12 +899,12 @@ const CommonElementPrototype = Object.create({}).prototype = {
         };
     },
     /**
-     * @description - Mixing function that do shallow mixing and binding of source and target object to a mixed object.
+     * @description - Mixing function that do shallow mixing and binding of source and target object or fuction to a mixed object or function.
      *
      * @usage TODO: Write usage for CommonElement.mix method.
      *
      * @method mix
-     * @param {object} source - Source or super object that is being extended from.
+     * @param {object|fuction} source - Source object or function that is being extended from.
      * @param {object} option - Exclusion, a list of functions or properties that should not be mixed.
      * @return {object}
      */
@@ -925,6 +925,13 @@ const CommonElementPrototype = Object.create({}).prototype = {
         }
     }) {
         const Hf = this;
+
+        if (!Hf.DEVELOPMENT) {
+            if (!(Hf.isObject(source) || Hf.isFunction(source))) {
+                Hf.log(`error`, `CommonElement.mix - Input source object or function is invalid.`);
+            }
+        }
+
         const {
             fnOverrided,
             exclusion
@@ -944,16 +951,16 @@ const CommonElementPrototype = Object.create({}).prototype = {
                 }
             }
         }).of(option);
-
-        if (!Hf.DEVELOPMENT) {
-            exclusion.prefixes.push(`DEBUG_`);
-        }
-
+        let result;
         /* helper function to filter out key in the exclusion list. */
         const isIncluded = function isIncluded (key) {
             let included = false;
 
-            if (Hf.isString(key)) {
+            if (!Hf.DEVELOPMENT) {
+                exclusion.prefixes.push(`DEBUG_`);
+            }
+
+            if (Hf.isString(key) && key !== `prototype`) {
                 const prefixExcepted = !Hf.isEmpty(exclusion.exception.prefixes) ? exclusion.exception.prefixes.some((prefix) => {
                     return key.substr(0, prefix.length) === prefix;
                 }) : false;
@@ -984,13 +991,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
             return included;
         };
 
-        if (Hf.DEVELOPMENT) {
-            if (!Hf.isObject(source)) {
-                Hf.log(`error`, `CommonElement.mix - Input source object is invalid.`);
-            }
+        if (Hf.isObject(source)) {
+            result = {};
+        } else if (Hf.isFunction(source)) {
+            result = function () {};
         }
-
-        let result = {};
 
         if (!exclusion.prototypes) {
             /* copy source object prototypes to new mixed result object */
@@ -1050,17 +1055,22 @@ const CommonElementPrototype = Object.create({}).prototype = {
 
         return {
             /**
-             * @description - Mixing with the target object...
+             * @description - Mixing with the target object or function...
              *
              * @method mix.with
-             * @param {object} target - Target object that is being extended to.
+             * @param {object|fuction} target - Target object or function that is being extended to.
              * @return {object}
              */
             with: function _with (target) {
                 if (Hf.DEVELOPMENT) {
-                    if (!Hf.isObject(target)) {
-                        Hf.log(`error`, `CommonElement.mix.with - Input target object is invalid.`);
+                    if (!(Hf.isObject(target) || Hf.isFunction(target))) {
+                        Hf.log(`error`, `CommonElement.mix.with - Input target object or function is invalid.`);
                     }
+                    // if (Hf.isObject(source) && !Hf.isObject(target)) {
+                    //     Hf.log(`error`, `CommonElement.mix.with - Input target object is invalid.`);
+                    // } else if (Hf.isFunction(source) && !Hf.isFunction(target)) {
+                    //     Hf.log(`error`, `CommonElement.mix.with - Input target function is invalid.`);
+                    // }
                 }
 
                 if (!exclusion.prototypes) {
