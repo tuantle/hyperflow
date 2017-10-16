@@ -46,7 +46,7 @@ export default Hf.Composite({
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
                     name: `string`,
-                    getRenderer: `function`,
+                    getComponentRenderer: `function`,
                     getTopComponent: `function`
                 }).of(app)) {
                     Hf.log(`error`, `ReactAppRendererComposite.$init - App is invalid. Cannot apply composite.`);
@@ -70,7 +70,7 @@ export default Hf.Composite({
             }
 
             const elId = app.name;
-            const ReactDOMRenderer = app.getRenderer();
+            const ReactDOMRenderer = app.getComponentRenderer();
 
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
