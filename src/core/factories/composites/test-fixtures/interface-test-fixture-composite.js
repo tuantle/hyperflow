@@ -118,12 +118,12 @@ export default Hf.Composite({
             /**
              * @description - Get test fixture renderer.
              *
-             * @method getRenderer
+             * @method getComponentRenderer
              * @return {object}
              */
-            this.getRenderer = function getRenderer () {
+            this.getComponentRenderer = function getComponentRenderer () {
                 if (!Hf.isObject(_componentRenderer)) {
-                    Hf.log(`error`, `InterfaceTestFixtureComposite.getRenderer - Test fixture is not registered with a component renderer.`);
+                    Hf.log(`error`, `InterfaceTestFixtureComposite.getComponentRenderer - Test fixture is not registered with a component renderer.`);
                 } else {
                     return _componentRenderer;
                 }
@@ -133,7 +133,7 @@ export default Hf.Composite({
              *
              * @method register
              * @param {object} definition - Test fixture registration definition for interface.
-             * @return void
+             * @return {object}
              */
             this.register = function register (definition) {
                 const fixture = this;
@@ -175,6 +175,7 @@ export default Hf.Composite({
                         }
                     }
                 }
+                return fixture;
             };
             /**
              * @description - Start test fixture.

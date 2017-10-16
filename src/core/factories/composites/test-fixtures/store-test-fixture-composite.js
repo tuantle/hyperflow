@@ -91,7 +91,7 @@ export default Hf.Composite({
              *
              * @method register
              * @param {object} definition - Test fixture registration definition for store.
-             * @return void
+             * @return {object}
              */
             this.register = function register (definition) {
                 const fixture = this;
@@ -127,6 +127,7 @@ export default Hf.Composite({
                         }
                     }
                 }
+                return fixture;
             };
             /**
              * @description - Start test fixture.
