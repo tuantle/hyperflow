@@ -149,6 +149,7 @@ export default Composer({
          */
         this.getInterface = function getInterface () {
             const domain = this;
+
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isObject(_intf)) {
                     Hf.log(`warn0`, `DomainFactory.getInterface - Domain:${domain.name} is not registered with an interface.`);
@@ -164,6 +165,7 @@ export default Composer({
          */
         this.getStore = function getStore () {
             const domain = this;
+
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isObject(_store)) {
                     Hf.log(`warn0`, `DomainFactory.getStore - Domain:${domain.name} is not registered with a store.`);
@@ -202,10 +204,11 @@ export default Composer({
          *
          * @method register
          * @param {object} definition - Domain registration definition for interface (required), child domains, and store.
-         * @return void
+         * @return {object}
          */
         this.register = function register (definition) {
             const domain = this;
+
             // TODO: Throw error if called outside of $init.
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -369,6 +372,7 @@ export default Composer({
                     return true;
                 }));
             }
+            return domain;
         };
         /**
          * @description - Start domain.
