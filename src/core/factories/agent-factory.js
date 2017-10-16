@@ -60,6 +60,7 @@ export default Composer({
     },
     AgentFactory: function AgentFactory () {
         /* ----- Private Variables ------------- */
+        let _testRunner;
         let _fixtures = [];
         /* ----- Public Functions -------------- */
         /**
@@ -72,26 +73,47 @@ export default Composer({
             Hf.log(`warn0`, `AgentFactory.$init - Method is not implemented by default.`);
         };
         /**
+         * @description - Get agent test runner.
+         *
+         * @method getTestRunner
+         * @return {object}
+         */
+        this.getTestRunner = function getTestRunner () {
+            const agent = this;
+
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isObject(_testRunner)) {
+                    Hf.log(`error`, `AgentFactory.getTestRunner - Test agent:${agent.name} is not registered with a test runner.`);
+                }
+            }
+
+            return _testRunner;
+        };
+        /**
          * @description - Register testable domain, interface, service, or store fixtures.
          *
          * @method register
          * @param {object} definition - Test agent registration definition for domain, interface, service, or store fixtures.
-         * @return void
+         * @return {object}
          */
         this.register = function register (definition) {
             const agent = this;
+
             if (!Hf.isSchema({
+                testRunner: `object`,
                 fixtures: [ `object` ]
             }).of(definition)) {
                 Hf.log(`error`, `AgentFactory.register - Input definition is invalid.`);
             } else {
                 const {
+                    testRunner,
                     fixtures
                 } = definition;
                 if (!fixtures.every((fixture) => {
                     return Hf.isSchema({
                         fId: `string`,
                         name: `string`,
+                        registerTestRunner: `function`,
                         hasStarted: `function`,
                         start: `function`,
                         restart: `function`,
@@ -104,17 +126,21 @@ export default Composer({
                         deactivateOutgoingStream: `function`
                     }).of(fixture) && fixture.fId.substr(0, FIXTURE_FACTORY_CODE.length) === FIXTURE_FACTORY_CODE;
                 })) {
-                    Hf.log(`error`, `AgentFactory.register - Input fixtures are invalid.`);
+                    Hf.log(`error`, `AgentFactory.register - Input test fixtures are invalid.`);
                 } else {
+                    _testRunner = testRunner;
                     _fixtures = _fixtures.concat(fixtures.filter((fixture) => {
                         if (_fixtures.some((_fixture) => _fixture.name === fixture.name)) {
                             Hf.log(`warn1`, `AgentFactory.register - Test fixture:${fixture.name} is already registered.`);
                         }
-                        Hf.log(`info1`, `Test agent:${agent.name} registered fixture:${fixture.name}.`);
+                        Hf.log(`info1`, `Test agent:${agent.name} registered test fixture:${fixture.name}.`);
                         return true;
                     }));
+                    _fixtures.forEach((fixture) => fixture.registerTestRunner(testRunner));
                 }
             }
+
+            return agent;
         };
         /**
          * @description - Run the test agent.
