@@ -16,7 +16,7 @@
  *------------------------------------------------------------------------
  *
  * @module InterfaceFactory
- * @description - An interface component factory.
+ * @description - An interface (container) component factory.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
@@ -68,8 +68,7 @@ export default Composer({
         /* ----- Private Variables ------------- */
         let _stateless = true;
         let _componentLib;
-        let _compositeCache = {};
-        let _compositeRefCache = {};
+        let _compositeIntfCache = {};
         let _initialReflectedState = {};
         /* ----- Public Functions -------------- */
         /**
@@ -178,6 +177,22 @@ export default Composer({
             Hf.log(`warn0`, `InterfaceFactory.postDismountStage - Method is not implemented by default.`);
         };
         /**
+         * @description - Handle logic at component prepare to receive property stage.
+         *
+         * @method preReceivingPropertyStage
+         * @param {function} handler
+         * @return void
+         */
+        this.preReceivingPropertyStage = function preReceivingPropertyStage (handler) {
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isFunction(handler)) {
+                    Hf.log(`error`, `InterfaceFactory.preReceivingPropertyStage - Input handler function is invalid.`);
+                }
+            }
+
+            Hf.log(`warn0`, `InterfaceFactory.preReceivingPropertyStage - Method is not implemented by default.`);
+        };
+        /**
          * @description - Handle logic at component prepare to update stage.
          *
          * @method preUpdateStage
@@ -239,20 +254,10 @@ export default Composer({
          * @description - Convert interface to a component.
          *
          * @method toComponent
-         * @return {object}
-         */
-        this.toPureComponent = function toPureComponent () {
-            Hf.log(`error`, `InterfaceFactory.toPureComponent - Method is not implemented by default. Implementation required.`);
-        };
-        /**
-         * @description - Convert interface to a component.
-         *
-         * @method toComponent
-         * @param {object} applet
          * @param {object} option
          * @return {object}
          */
-        this.toComponent = function toComponent (applet = null, option = {}) {
+        this.toComponent = function toComponent (option = {}) { // eslint-disable-line
             Hf.log(`error`, `InterfaceFactory.toComponent - Method is not implemented by default. Implementation required.`);
         };
         /**
@@ -272,53 +277,6 @@ export default Composer({
             return _componentLib;
         };
         /**
-         * @description - Assign the registered component's reference object.
-         *
-         * @method assignComponentRef
-         * @param {string} key
-         * @returns function
-         */
-        this.assignComponentRef = function assignComponentRef (key) {
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isString(key)) {
-                    Hf.log(`error`, `InterfaceFactory.assignComponentRef - Input component reference key is invalid.`);
-                }
-            }
-
-            /* helper function to set component ref */
-            const setComponentRef = function setComponentRef (componentRef) {
-                _compositeRefCache[key] = Hf.isDefined(componentRef) ? componentRef : null;
-                Hf.log(`warn0`, `InterfaceFactory.assignComponentRef - Assigning null to component reference at key:${key}.`);
-            };
-            return setComponentRef;
-        };
-        /**
-         * @description - Lookup the registered component's reference object.
-         *
-         * @method lookupComponentRefs
-         * @param {array} keys
-         * @returns {array}
-         */
-        this.lookupComponentRefs = function lookupComponentRefs (...keys) {
-            let componentRefs = [];
-            if (!Hf.isEmpty(_compositeRefCache)) {
-                if (!Hf.isEmpty(keys)) {
-                    if (Hf.DEVELOPMENT) {
-                        if (!keys.every((key) => Hf.isString(key))) {
-                            Hf.log(`error`, `InterfaceFactory.lookupComponentRefs - Input component reference key is invalid.`);
-                        } else if (!keys.every((key) => _compositeRefCache.hasOwnProperty(key))) {
-                            Hf.log(`error`, `InterfaceFactory.lookupComponentRefs - Component reference is not found.`);
-                        }
-                    }
-
-                    componentRefs = Hf.collect(...keys).from(_compositeRefCache);
-                } else {
-                    componentRefs = Object.values(_compositeRefCache);
-                }
-            }
-            return componentRefs;
-        };
-        /**
          * @description - Get interface component composite set.
          *
          * @method getComponentComposites
@@ -327,13 +285,13 @@ export default Composer({
          */
         this.getComponentComposites = function getComponentComposites (...intfNames) {
             let components = [];
-            if (!Hf.isEmpty(_compositeCache)) {
+            if (!Hf.isEmpty(_compositeIntfCache)) {
                 if (!Hf.isEmpty(intfNames)) {
                     if (Hf.DEVELOPMENT) {
                         if (!intfNames.every((name) => Hf.isString(name))) {
                             Hf.log(`error`, `InterfaceFactory.getComponentComposites - Input interface name is invalid.`);
                         } else if (!intfNames.every((name) => {
-                            if (_compositeCache.hasOwnProperty(name)) {
+                            if (_compositeIntfCache.hasOwnProperty(name)) {
                                 return true;
                             }
                             Hf.log(`warn1`, `InterfaceFactory.getComponentComposites - Composite component:${name} was not composed to component cache.`);
@@ -343,9 +301,9 @@ export default Composer({
                         }
                     }
 
-                    components = Hf.collect(...intfNames.map((name) => `${name}.component`)).from(_compositeCache);
+                    components = Hf.collect(...intfNames.map((name) => `${name}.component`)).from(_compositeIntfCache);
                 } else {
-                    components = Object.values(_compositeCache).map((composite) => composite.component);
+                    components = Object.values(_compositeIntfCache).map((composite) => composite.component);
                 }
             }
             return components;
@@ -359,18 +317,18 @@ export default Composer({
          */
         this.getInterfaceComposites = function getInterfaceComposites (...intfNames) {
             let intfs = [];
-            if (!Hf.isEmpty(_compositeCache)) {
+            if (!Hf.isEmpty(_compositeIntfCache)) {
                 if (!Hf.isEmpty(intfNames)) {
                     if (Hf.DEVELOPMENT) {
                         if (!intfNames.every((name) => Hf.isString(name))) {
                             Hf.log(`error`, `InterfaceFactory.getInterfaceComposites - Input interface name is invalid.`);
-                        } else if (!intfNames.every((name) => _compositeCache.hasOwnProperty(name))) {
+                        } else if (!intfNames.every((name) => _compositeIntfCache.hasOwnProperty(name))) {
                             Hf.log(`error`, `InterfaceFactory.getInterfaceComposites - Composite is not found.`);
                         }
                     }
-                    intfs = Hf.collect(...intfNames.map((name) => `${name}.intf`)).from(_compositeCache);
+                    intfs = Hf.collect(...intfNames.map((name) => `${name}.intf`)).from(_compositeIntfCache);
                 } else {
-                    intfs = Object.values(_compositeCache).map((composite) => composite.intf);
+                    intfs = Object.values(_compositeIntfCache).map((composite) => composite.intf);
                 }
             }
             return intfs;
@@ -380,10 +338,9 @@ export default Composer({
          *
          * @method registerComponentLib
          * @param {object} componentLib
-         * @returns {object}
+         * @returns void
          */
         this.registerComponentLib = function registerComponentLib (componentLib) {
-            const intf = this;
             // TODO: Throw error if called outside of $init.
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isObject(componentLib)) {
@@ -392,15 +349,15 @@ export default Composer({
             }
 
             _componentLib = componentLib;
-            if (!Hf.isEmpty(_compositeCache)) {
-                _compositeCache = Hf.collect(...Object.keys(_compositeCache).map((name) => {
+            if (!Hf.isEmpty(_compositeIntfCache)) {
+                _compositeIntfCache = Hf.collect(...Object.keys(_compositeIntfCache).map((name) => {
                     return `${name}.intf`;
-                })).from(_compositeCache).reduce((compositeBundle, compositeIntf) => {
-                    compositeIntf.registerComponentLib(_componentLib);
+                })).from(_compositeIntfCache).reduce((compositeBundle, compositeIntf) => {
+                    compositeIntf.registerComponentLib(componentLib);
                     if (Hf.isSchema({
                         render: `function`
                     }).of(compositeIntf)) {
-                        const component = compositeIntf.toComponent(null, {
+                        const component = compositeIntf.toComponent({
                             alwaysUpdateAsParent: true
                         });
                         if (Hf.DEVELOPMENT) {
@@ -410,23 +367,10 @@ export default Composer({
                         }
 
                         compositeBundle[compositeIntf.name].component = component;
-                    } else if (Hf.isSchema({
-                        pureRender: `function`
-                    })) {
-                        const pureComponent = compositeIntf.toPureComponent();
-
-                        if (Hf.DEVELOPMENT) {
-                            if (!Hf.isFunction(pureComponent)) {
-                                Hf.log(`error`, `InterfaceFactory.registerComponentLib - Pure component is invalid.`);
-                            }
-                        }
-
-                        compositeBundle[compositeIntf.name].component = pureComponent;
                     }
                     return compositeBundle;
-                }, _compositeCache);
+                }, _compositeIntfCache);
             }
-            return intf;
         };
         /**
          * @description - Set the composite interfaces that this interface is composed of.
@@ -447,7 +391,6 @@ export default Composer({
                     fId: `string`,
                     name: `string`,
                     toComponent: `function`,
-                    toPureComponent: `function`,
                     registerComponentLib: `function`
                 }).of(compositeIntf) && compositeIntf.fId.substr(0, INTERFACE_FACTORY_CODE.length) === INTERFACE_FACTORY_CODE)) {
                     Hf.log(`error`, `InterfaceFactory.composedOf - Input composite interfaces are invalid.`);
@@ -455,14 +398,14 @@ export default Composer({
                     Hf.log(`error`, `InterfaceFactory.composedOf - Cannot compose interface:${intf.name} as a composite of itself.`);
                 } else {
                     compositeIntfs.forEach((compositeIntf) => {
-                        if (Object.keys(_compositeCache).includes(compositeIntf.name)) {
+                        if (Object.keys(_compositeIntfCache).includes(compositeIntf.name)) {
                             Hf.log(`warn1`, `InterfaceFactory.composedOf - Interface:${intf.name} is already composed of composite interface:${compositeIntf.name}.`);
                         }
                     });
                 }
             }
 
-            _compositeCache = compositeIntfs.map((compositeIntf) => {
+            _compositeIntfCache = compositeIntfs.map((compositeIntf) => {
                 intf.observe(compositeIntf);
                 Hf.log(`info1`, `Interface:${intf.name} is composed of composite interface:${compositeIntf.name}.`);
                 return compositeIntf;
@@ -472,7 +415,7 @@ export default Composer({
                     component: null
                 };
                 return compositeBundle;
-            }, _compositeCache);
+            }, _compositeIntfCache);
             return intf;
         };
         /**
