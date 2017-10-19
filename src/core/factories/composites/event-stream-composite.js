@@ -1260,7 +1260,7 @@ export default Hf.Composite({
                      * @param {function} timeoutError - Time out error callback
                      * @return {object}
                      */
-                    await: function _await (ms = 0, timeoutError = () => {}) {
+                    await: function _await (ms = 0, timeoutError = () => null) {
                         if (eventIds.length > 1) {
                             let sideSubscription;
                             let sideStream = Rx.Observable.never();
@@ -1326,7 +1326,7 @@ export default Hf.Composite({
                             );
 
                             ms = Hf.isNumeric(ms) ? ms : 0;
-                            timeoutError = Hf.isFunction(timeoutError) ? timeoutError : () => {};
+                            timeoutError = Hf.isFunction(timeoutError) ? timeoutError : () => null;
 
                             if (ms > 1) {
                                 timeoutId = setTimeout(() => timeoutError(), ms);
@@ -1483,7 +1483,7 @@ export default Hf.Composite({
                      *
                      * @method incoming.forward
                      * @param {array} forwardEventIds
-                     * @return {void}
+                     * @return void
                      */
                     forward: function forward (...forwardEventIds) {
                         if (Hf.DEVELOPMENT) {
