@@ -277,6 +277,8 @@ export default Hf.Composite({
                         ReactDefinition: function ReactDefinition () {
                             /* ----- Public Statics -------------- */
                             this.refCache = {};
+                            this.mountStage = WILL_MOUNT_STAGE;
+                            this.mutationOccurred = false;
                             this.propTypes = (() => {
                                 let propTypes = Object.keys(intf.getStateAsObject()).reduce((propType, key) => {
                                     if (intf.getStateCursor().isItemStronglyTyped(key)) {
@@ -330,17 +332,10 @@ export default Hf.Composite({
                              * @returns {object}
                              */
                             this.getInitialState = function getInitialState () {
-                                if (intf.isStateless()) {
-                                    return {
-                                        mountStage: WILL_MOUNT_STAGE,
-                                        mutationOccurred: false
-                                    };
+                                if (!intf.isStateless()) {
+                                    return intf.getInitialReflectedState();
                                 } else { // eslint-disable-line
-                                    return {
-                                        ...intf.getInitialReflectedState(),
-                                        mountStage: WILL_MOUNT_STAGE,
-                                        mutationOccurred: false
-                                    };
+                                    return null;
                                 }
                             };
                             /**
@@ -401,35 +396,23 @@ export default Hf.Composite({
                             this.componentWillMount = function componentWillMount () {
                                 const component = this;
 
-                                component.setState(() => {
-                                    return {
-                                        mutationOccurred: WILL_MOUNT_STAGE
-                                    };
-                                });
+                                component.mountStage = WILL_MOUNT_STAGE;
 
                                 if (!component.props.intf.isStateless()) {
                                     /* this event is call ONLY when the state did mutate in store */
                                     component.props.intf.incoming(`as-state-mutated`).handle((reflectedState) => {
-                                        if (Hf.isObject(reflectedState) && (component.state.mountStage === WILL_MOUNT_STAGE || component.state.mountStage === DID_MOUNT_STAGE)) {
-                                            component.setState(() => {
-                                                return {
-                                                    ...reflectedState,
-                                                    mutationOccurred: true
-                                                };
-                                            });
+                                        if (Hf.isObject(reflectedState) && (component.mountStage === WILL_MOUNT_STAGE || component.mountStage === DID_MOUNT_STAGE)) {
+                                            component.mutationOccurred = true;
+                                            component.setState(() => reflectedState);
                                             Hf.log(`info0`, `State mutated for component:${component.props.name}.`);
                                         }
                                     });
                                     /* this event is call ONLY when the state did mutate in store and FORCE component to update */
                                     component.props.intf.incoming(`as-state-forced-to-mutate`).handle((reflectedState) => {
-                                        if (Hf.isObject(reflectedState) && (component.state.mountStage === WILL_MOUNT_STAGE || component.state.mountStage === DID_MOUNT_STAGE)) {
+                                        if (Hf.isObject(reflectedState) && (component.mountStage === WILL_MOUNT_STAGE || component.mountStage === DID_MOUNT_STAGE)) {
+                                            component.mutationOccurred = true;
                                             component.setState(() => reflectedState);
                                             component.forceUpdate();
-                                            component.setState(() => {
-                                                return {
-                                                    mutationOccurred: true
-                                                };
-                                            });
                                             Hf.log(`info0`, `State mutated for component:${component.props.name}.`);
                                             Hf.log(`info0`, `Forced update for component:${component.props.name}.`);
                                         }
@@ -438,11 +421,7 @@ export default Hf.Composite({
 
                                 // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
                                 if (alwaysUpdateAsParent) {
-                                    component.setState(() => {
-                                        return {
-                                            mutationOccurred: true
-                                        };
-                                    });
+                                    component.mutationOccurred = true;
                                 }
 
                                 const defaultProperty = component.props.intf.getStateAsObject();
@@ -458,11 +437,7 @@ export default Hf.Composite({
                                         }
                                     }
                                 }).with({})))) {
-                                    component.setState(() => {
-                                        return {
-                                            mutationOccurred: true
-                                        };
-                                    });
+                                    component.mutationOccurred = true;
                                     Hf.log(`info0`, `Property mutated for component:${component.props.name}.`);
                                 }
                                 component.outgoing(`on-component-${component.props.name}-${component.props.fId}-will-mount`).emit(() => component);
@@ -483,11 +458,7 @@ export default Hf.Composite({
 
                                 // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
                                 if (alwaysUpdateAsParent) {
-                                    component.setState(() => {
-                                        return {
-                                            mutationOccurred: true
-                                        };
-                                    });
+                                    component.mutationOccurred = true;
                                 }
 
                                 if (component.props.intf.reduceState(Hf.fallback(currentProperty).of(Hf.mix(nextProperty, {
@@ -500,11 +471,7 @@ export default Hf.Composite({
                                     }
                                 }).with({})))) {
                                     /* The interface will detect mutation when component gets new props and update accordingly */
-                                    component.setState(() => {
-                                        return {
-                                            mutationOccurred: true
-                                        };
-                                    });
+                                    component.mutationOccurred = true;
                                     Hf.log(`info0`, `Property mutated for component:${component.props.name}.`);
 
                                     component.outgoing(`on-component-${component.props.name}-${component.props.fId}-will-receive-property`).emit(() => component);
@@ -519,11 +486,7 @@ export default Hf.Composite({
                             this.componentDidMount = function componentDidMount () {
                                 const component = this;
 
-                                component.setState(() => {
-                                    return {
-                                        mutationOccurred: DID_MOUNT_STAGE
-                                    };
-                                });
+                                component.mountStage = DID_MOUNT_STAGE;
 
                                 component.outgoing(`on-component-${component.props.name}-${component.props.fId}-did-mount`).emit(() => component);
                             };
@@ -536,11 +499,7 @@ export default Hf.Composite({
                             this.componentWillUnmount = function componentWillUnmount () {
                                 const component = this;
 
-                                component.setState(() => {
-                                    return {
-                                        mutationOccurred: WILL_UNMOUNT_STAGE
-                                    };
-                                });
+                                component.mountStage = WILL_UNMOUNT_STAGE;
 
                                 component.outgoing(`on-component-${component.props.name}-${component.props.fId}-will-unmount`).emit(() => component);
                             };
@@ -552,6 +511,7 @@ export default Hf.Composite({
                              */
                             this.componentWillUpdate = function componentWillUpdate () {
                                 const component = this;
+
                                 component.outgoing(`on-component-${component.props.name}-${component.props.fId}-will-update`).emit(() => component);
                             };
                             /**
@@ -562,6 +522,7 @@ export default Hf.Composite({
                              */
                             this.componentDidUpdate = function componentDidUpdate () {
                                 const component = this;
+
                                 component.outgoing(`on-component-${component.props.name}-${component.props.fId}-did-update`).emit(() => component);
                             };
                             /**
@@ -573,16 +534,14 @@ export default Hf.Composite({
                             this.shouldComponentUpdate = function shouldComponentUpdate () {
                                 const component = this;
 
-                                if (component.state.mutationOccurred) {
-                                    component.setState(() => {
-                                        return {
-                                            mutationOccurred: false
-                                        };
-                                    });
+                                if (component.mutationOccurred) {
+                                    component.mutationOccurred = false;
                                     Hf.log(`info1`, `Rendering component:${component.props.name}.`);
+
                                     return true;
                                 } else { // eslint-disable-line
                                     Hf.log(`info1`, `Skipped rendering for component:${component.props.name}.`);
+
                                     return false;
                                 }
                             };
