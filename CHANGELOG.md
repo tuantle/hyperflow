@@ -2,6 +2,18 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.1.6 (10/18/2017)**
+```
+Notes:
+New Features:
+Changes:
+    - Updated rxjs package dependency.
+Breaking Changes:
+Improvements:
+Bug fixes:
+    - Fixed mutation flag bug that prevent component from updating for ReactComponentComposite.
+    - Changed default from timeoutError = () => {} to timeoutError = () => null for incoming.await method of EventStreamComposite.
+```
 **Development Version 0.1.5 (10/15/2017)**
 ```
 Notes:
