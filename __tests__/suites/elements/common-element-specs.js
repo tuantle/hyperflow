@@ -14,7 +14,18 @@ import test from 'tape';
 import CommonElement from '../../../src/core/elements/common-element';
 
 export function runTests () {
-    const common = CommonElement();
+    const common = CommonElement({
+        enableProductionMode: false,
+        enableInfo0Log: true,
+        enableInfo1Log: true,
+        enableWarn0Log: true,
+        enableWarn1Log: true
+    });
+
+    test(`--------- Running CommonElement Spec Tests ---------`, (assert) => {
+        assert.equal(1, 1);
+        assert.end();
+    });
     test(`common element should be defined as an object.`, (assert) => {
         assert.equal(typeof common, `object`);
         assert.end();
@@ -402,6 +413,12 @@ export function runTests () {
 
         assert.equal(fnZ.getA(), `a`);
         assert.equal(fnZ.getB(), `b`);
+
+        // const fnW = common.mix(fnX).with(fnY);
+        //
+        // assert.equal(fnW.getA(), `a`);
+        // assert.equal(fnW.getB(), `b`);
+
         assert.end();
     });
     test(`CommonElement arrayToString and stringToArray should work.`, (assert) => {
@@ -437,7 +454,7 @@ export function runTests () {
             b: `b`,
             c: `c`
         };
-        common.forEach(obj, function (error, value, key) {
+        common.forEach(obj, (error, value, key) => {
             if (!error) {
                 assert.equal(value, obj[key]);
             }
@@ -448,6 +465,20 @@ export function runTests () {
                 assert.equal(value, array[index]);
             }
         });
+        assert.end();
+    });
+    test(`CommonElement log and getLogHistories should be able to log and record.`, (assert) => {
+        common.log(`info0`, `Logging info0.`);
+        common.log(`info1`, `Logging info1.`);
+        common.log(`warn0`, `Logging warn0.`);
+        common.log(`warn1`, `Logging warn1.`);
+        common.log(`debug`, `Logging debug.`);
+
+        assert.equal(common.getLogHistories(`info0`)[0].message, `INFO-0: Logging info0.`);
+        assert.equal(common.getLogHistories(`info1`)[0].message, `INFO-1: Logging info1.`);
+        assert.equal(common.getLogHistories(`warn0`)[0].message, `WARN-0: Logging warn0.`);
+        assert.equal(common.getLogHistories(`warn1`)[0].message, `WARN-1: Logging warn1.`);
+        assert.equal(common.getLogHistories(`debug`)[0].message, `DEBUG: Logging debug.`);
         assert.end();
     });
 }

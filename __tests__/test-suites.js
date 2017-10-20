@@ -15,7 +15,12 @@ require('babel-register');
 
 /* load and initialize hyperflow */
 require('../src/hyperflow').init({
-    target: `server`
+    target: `server`,
+    enableProductionMode: false,
+    enableInfo0Log: true,
+    enableInfo1Log: true,
+    enableWarn0Log: true,
+    enableWarn1Log: true
 });
 
 /* load test specs for Hf modules */
@@ -26,9 +31,9 @@ var eventStreamCompositeSpecs = require('./suites/factories/composites/event-str
 var storeFactorySpecs = require('./suites/factories/store-factory-specs'); // eslint-disable-line
 var appFactorySpecs = require('./suites/factories/app-factory-specs'); // eslint-disable-line
 
-// commonElementSpecs.runTests();
+commonElementSpecs.runTests();
 // dataElementSpecs.runTests();
 // composerSpecs.runTests();
-eventStreamCompositeSpecs.runTests();
+// eventStreamCompositeSpecs.runTests();
 // storeFactorySpecs.runTests();
 // appFactorySpecs.runTests();

@@ -17,6 +17,10 @@ import CommonElement from '../../../src/core/elements/common-element';
 export function runTests () {
     const common = CommonElement(); // eslint-disable-line
 
+    test(`--------- Running DataElement Spec Tests ---------`, (assert) => {
+        assert.equal(1, 1);
+        assert.end();
+    });
     test(`DataElement should be defined as an object.`, (assert) => {
         const data = DataElement();
         assert.equal(typeof data, `object`);
@@ -230,7 +234,6 @@ export function runTests () {
         const obj = {
             a: {
                 value: `a`,
-                stronglyTyped: true,
                 required: true,
                 oneOf: [ `A`, `a`, 1, 2, 3 ],
                 oneTypeOf: [ `string`, `number` ],

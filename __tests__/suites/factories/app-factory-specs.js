@@ -15,6 +15,10 @@ import React from 'react';
 
 import ReactDOMServer from 'react-dom/server';
 
+import PropTypes from 'prop-types';
+
+import CreateReactClass from "create-react-class";
+
 import test from 'tape';
 
 export function runTests () {
@@ -173,9 +177,14 @@ export function runTests () {
                     }),
                     component: {
                         library: {
-                            React
+                            React,
+                            PropTypes,
+                            CreateReactClass
                         },
                         renderer: ReactDOMServer
+                    },
+                    testFicture: {
+                        Tape: test
                     }
                 });
             }
@@ -184,13 +193,13 @@ export function runTests () {
         });
 
         testApp.start();
-        // setTimeout(() => {
-        //     testApp.stop();
-        // }, 2000);
-
         setTimeout(() => {
-            testApp.start();
-        }, 4000);
+            testApp.stop();
+        }, 2000);
+
+        // setTimeout(() => {
+        //     testApp.start();
+        // }, 4000);
 
         assert.end();
     });
