@@ -2,6 +2,18 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.1.7 (//2017)**
+```
+Notes:
+New Features:
+Changes:
+Breaking Changes:
+Improvements:
+    - Added isMounted method to InterfaceFactory and ReactComponentComposite to check if component of the interface is mounted.
+      This will well to restrict to one component per interface.
+    - Added log limit to history log in CommonElement. Potentially fixing memory issue.
+Bug fixes:
+```
 **Development Version 0.1.6 (10/18/2017)**
 ```
 Notes:
