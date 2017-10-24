@@ -27,6 +27,8 @@
 
 const PRIVATE_PREFIX = `_`;
 
+const LOG_HISTORY_SIZE = 500;
+
 /**
  * @description - Common element prototype object.
  *
@@ -1397,73 +1399,113 @@ const CommonElementPrototype = Object.create({}).prototype = {
                 stringifiedMessage = message;
             }
             const logger = {
-                error () {
+                error: function error () {
                     throw new Error(`ERROR: ${message}`);
                 },
-                warn0 () {
-                    if (Hf._consoleLog.enableWarn0Log) {
-                        console.warn(`WARNING-0: ${stringifiedMessage}`);
-                        Hf._consoleLog.history.warn0Logs.push({
+                warn0: function warn0 () {
+                    if (Hf._consoleLog.enableWarn0Logging) {
+                        console.warn(`WARN-0: ${stringifiedMessage}`);
+
+                        if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                            Hf._consoleLog.history.index = 0;
+                        } else {
+                            Hf._consoleLog.history.index++;
+                        }
+
+                        Hf._consoleLog.history.logs[Hf._consoleLog.history.index] = {
+                            type: `warn0`,
                             timestamp: new Date(),
-                            message: `WARNING-0: ${stringifiedMessage}`
-                        });
+                            message: `WARN-0: ${stringifiedMessage}`
+                        };
                     }
                 },
-                warn1 () {
-                    if (Hf._consoleLog.enableWarn1Log) {
-                        console.warn(`WARNING-1: ${stringifiedMessage}`);
-                        Hf._consoleLog.history.warn1Logs.push({
+                warn1: function warn1 () {
+                    if (Hf._consoleLog.enableWarn1Logging) {
+                        console.warn(`WARN-1: ${stringifiedMessage}`);
+
+                        if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                            Hf._consoleLog.history.index = 0;
+                        } else {
+                            Hf._consoleLog.history.index++;
+                        }
+
+                        Hf._consoleLog.history.logs[Hf._consoleLog.history.index] = {
+                            type: `warn1`,
                             timestamp: new Date(),
-                            message: `WARNING-1: ${stringifiedMessage}`
-                        });
+                            message: `WARN-1: ${stringifiedMessage}`
+                        };
                     }
                 },
-                info0 () {
-                    if (Hf._consoleLog.enableInfo0Log) {
+                info0: function info0 () {
+                    if (Hf._consoleLog.enableInfo0Logging) {
                         console.info(`INFO-0: ${stringifiedMessage}`);
-                        Hf._consoleLog.history.infoLogs.push({
+
+                        if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                            Hf._consoleLog.history.index = 0;
+                        } else {
+                            Hf._consoleLog.history.index++;
+                        }
+
+                        Hf._consoleLog.history.logs[Hf._consoleLog.history.index] = {
+                            type: `info0`,
                             timestamp: new Date(),
                             message: `INFO-0: ${stringifiedMessage}`
-                        });
+                        };
                     }
                 },
-                info1 () {
-                    if (Hf._consoleLog.enableInfo1Log) {
+                info1: function info1 () {
+                    if (Hf._consoleLog.enableInfo1Logging) {
                         console.info(`INFO-1: ${stringifiedMessage}`);
-                        Hf._consoleLog.history.infoLogs.push({
+
+                        if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                            Hf._consoleLog.history.index = 0;
+                        } else {
+                            Hf._consoleLog.history.index++;
+                        }
+
+                        Hf._consoleLog.history.logs[Hf._consoleLog.history.index] = {
+                            type: `info1`,
                             timestamp: new Date(),
                             message: `INFO-1: ${stringifiedMessage}`
-                        });
+                        };
                     }
                 },
-                debug () {
+                debug: function debug () {
                     /* debug log is always enabled */
                     console.log(`DEBUG: ${stringifiedMessage}`);
-                    Hf._consoleLog.history.debugLogs.push({
+
+                    if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                        Hf._consoleLog.history.index = 0;
+                    } else {
+                        Hf._consoleLog.history.index++;
+                    }
+
+                    Hf._consoleLog.history.logs[Hf._consoleLog.history.index] = {
+                        type: `debug`,
                         timestamp: new Date(),
                         message: `DEBUG: ${stringifiedMessage}`
-                    });
+                    };
                 }
             };
             switch (type) { // eslint-disable-line
             case `debug`:
                 logger.debug();
-                break;
+                return;
             case `info0`:
                 logger.info0();
-                break;
+                return;
             case `info1`:
                 logger.info1();
-                break;
+                return;
             case `warn0`:
                 logger.warn0();
-                break;
+                return;
             case `warn1`:
                 logger.warn1();
-                break;
+                return;
             case `error`:
                 logger.error();
-                break;
+                return;
             default:
                 console.warn(`WARNING-1: CommonElement.log - Invalid log type:${type}.`);
                 return;
@@ -1477,22 +1519,47 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} type
      * @returns {array}
      */
-    getLogHistory: function getLogHistory (type) {
+    getLogHistories: function getLogHistories (type) {
         const Hf = this;
         if (Hf.DEVELOPMENT) {
             switch (type) { // eslint-disable-line
             case `debug`:
-                return Hf._consoleLog.history.debugLogs;
+                return Hf._consoleLog.history.logs.filter((log) => log !== null && log.type === `debug`).sort((logA, logB) => {
+                    const timestampA = new Date(logA.timestamp);
+                    const timestampB = new Date(logB.timestamp);
+
+                    return timestampA - timestampB;
+                });
             case `info0`:
-                return Hf._consoleLog.history.info0Logs;
+                return Hf._consoleLog.history.logs.filter((log) => log !== null && log.type === `info0`).sort((logA, logB) => {
+                    const timestampA = new Date(logA.timestamp);
+                    const timestampB = new Date(logB.timestamp);
+
+                    return timestampA - timestampB;
+                });
             case `info1`:
-                return Hf._consoleLog.history.info1Logs;
+                return Hf._consoleLog.history.logs.filter((log) => log !== null && log.type === `info1`).sort((logA, logB) => {
+                    const timestampA = new Date(logA.timestamp);
+                    const timestampB = new Date(logB.timestamp);
+
+                    return timestampA - timestampB;
+                });
             case `warn0`:
-                return Hf._consoleLog.history.warn0Logs;
+                return Hf._consoleLog.history.logs.filter((log) => log !== null && log.type === `warn0`).sort((logA, logB) => {
+                    const timestampA = new Date(logA.timestamp);
+                    const timestampB = new Date(logB.timestamp);
+
+                    return timestampA - timestampB;
+                });
             case `warn1`:
-                return Hf._consoleLog.history.warn1Logs;
+                return Hf._consoleLog.history.logs.filter((log) => log !== null && log.type === `warn1`).sort((logA, logB) => {
+                    const timestampA = new Date(logA.timestamp);
+                    const timestampB = new Date(logB.timestamp);
+
+                    return timestampA - timestampB;
+                });
             default:
-                Hf.log(`warn1`, `CommonElement.getLogHistory - Invalid log type:${type}.`);
+                Hf.log(`warn1`, `CommonElement.getLogHistories - Invalid log type:${type}.`);
                 return;
             }
         }
@@ -1507,24 +1574,24 @@ const CommonElementPrototype = Object.create({}).prototype = {
  */
 export default function CommonElement (option = {
     enableProductionMode: false,
-    enableInfo0Log: false,
-    enableInfo1Log: true,
-    enableWarn0Log: false,
-    enableWarn1Log: true
+    enableInfo0Logging: false,
+    enableInfo1Logging: true,
+    enableWarn0Logging: false,
+    enableWarn1Logging: true
 }) {
     let {
         enableProductionMode,
-        enableInfo0Log,
-        enableInfo1Log,
-        enableWarn0Log,
-        enableWarn1Log
+        enableInfo0Logging,
+        enableInfo1Logging,
+        enableWarn0Logging,
+        enableWarn1Logging
     } = option;
 
     enableProductionMode = CommonElementPrototype.isBoolean(enableProductionMode) ? enableProductionMode : false;
-    enableInfo0Log = CommonElementPrototype.isBoolean(enableInfo0Log) ? enableInfo0Log : true;
-    enableInfo1Log = CommonElementPrototype.isBoolean(enableInfo1Log) ? enableInfo1Log : true;
-    enableWarn0Log = CommonElementPrototype.isBoolean(enableWarn0Log) ? enableWarn0Log : true;
-    enableWarn1Log = CommonElementPrototype.isBoolean(enableWarn1Log) ? enableWarn1Log : true;
+    enableInfo0Logging = CommonElementPrototype.isBoolean(enableInfo0Logging) ? enableInfo0Logging : true;
+    enableInfo1Logging = CommonElementPrototype.isBoolean(enableInfo1Logging) ? enableInfo1Logging : true;
+    enableWarn0Logging = CommonElementPrototype.isBoolean(enableWarn0Logging) ? enableWarn0Logging : true;
+    enableWarn1Logging = CommonElementPrototype.isBoolean(enableWarn1Logging) ? enableWarn1Logging : true;
 
     const element = Object.create(CommonElementPrototype, {
         /* this flag indicates develeopment or production status of the project */
@@ -1537,15 +1604,13 @@ export default function CommonElement (option = {
         _consoleLog: {
             value: {
                 /* this flag enables console log of debug messages when calling method Hf.log(`info`, `a debug message.`) */
-                enableInfo0Log,
-                enableInfo1Log,
-                enableWarn0Log,
-                enableWarn1Log,
+                enableInfo0Logging,
+                enableInfo1Logging,
+                enableWarn0Logging,
+                enableWarn1Logging,
                 history: {
-                    debugLogs: [],
-                    infoLogs: [],
-                    warn0Logs: [],
-                    warn1Logs: []
+                    index: 0,
+                    logs: Array(LOG_HISTORY_SIZE).fill(null)
                 }
             },
             writable: false,
