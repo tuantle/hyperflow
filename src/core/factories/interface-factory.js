@@ -113,6 +113,15 @@ export default Composer({
             done();
         };
         /**
+         * @description - Check if interface has a component that is mounted
+         *
+         * @method isMounted
+         * @return {boolean}
+         */
+        this.isMounted = function isMounted () {
+            Hf.log(`error`, `InterfaceFactory.isMounted - Method is not implemented by default.`);
+        };
+        /**
          * @description - Handle logic at component premounting stage.
          *
          * @method preMountStage
@@ -225,7 +234,7 @@ export default Composer({
             Hf.log(`warn0`, `InterfaceFactory.postUpdateStage - Method is not implemented by default.`);
         };
         /**
-         * @description - Check if interface is pure or stateless.
+         * @description - Check if interface stateless.
          *
          * @method isStateless
          * @return {boolean}
@@ -244,7 +253,7 @@ export default Composer({
 
             if (Hf.DEVELOPMENT) {
                 if (_stateless) {
-                    Hf.log(`warn1`, `InterfaceFactory.getInitialReflectedState - Interface:${intf.name} is pure with no state reflected to a store.`);
+                    Hf.log(`warn1`, `InterfaceFactory.getInitialReflectedState - Interface:${intf.name} is stateless with no state reflected to a store.`);
                 }
             }
 

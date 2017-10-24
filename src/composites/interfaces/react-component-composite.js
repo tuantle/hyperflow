@@ -112,22 +112,6 @@ export default Hf.Composite({
             }
         },
         /**
-         * @description - Handle logic at component premounting stage.
-         *
-         * @method preMountStage
-         * @param {function} handler
-         * @return void
-         */
-        preMountStage: function preMountStage (handler) {
-            const intf = this;
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `ReactComponentComposite.preMountStage - Input handler function is invalid.`);
-                }
-            }
-            intf.incoming(`on-component-${intf.name}-${intf.fId}-will-mount`).handle((component) => handler(component));
-        },
-        /**
          * @description - Handle logic at component postmounting stage.
          *
          * @method postMountStage
@@ -142,22 +126,6 @@ export default Hf.Composite({
                 }
             }
             intf.incoming(`on-component-${intf.name}-${intf.fId}-did-mount`).handle((component) => handler(component));
-        },
-        /**
-         * @description - Handle logic at component predismounting stage.
-         *
-         * @method preDismountStage
-         * @param {function} handler
-         * @return void
-         */
-        preDismountStage: function preDismountStage (handler) {
-            const intf = this;
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `ReactComponentComposite.preDismountStage - Input handler function is invalid.`);
-                }
-            }
-            intf.incoming(`on-component-${intf.name}-${intf.fId}-will-unmount`).handle((component) => handler(component));
         },
         /**
          * @description - Handle logic at component prepare to receive property stage.
@@ -211,7 +179,55 @@ export default Hf.Composite({
     enclosure: {
         ReactComponentComposite: function ReactComponentComposite () {
             /* ----- Private Variables ------------- */
+            let _mounted = false;
             /* ----- Public Functions -------------- */
+            /**
+             * @description - Check if interface has a component that is mounted
+             *
+             * @method isMounted
+             * @return {boolean}
+             */
+            this.isMounted = function isMounted () {
+                return _mounted;
+            };
+            /**
+             * @description - Handle logic at component premounting stage.
+             *
+             * @method preMountStage
+             * @param {function} handler
+             * @return void
+             */
+            this.preMountStage = function preMountStage (handler) {
+                const intf = this;
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isFunction(handler)) {
+                        Hf.log(`error`, `ReactComponentComposite.preMountStage - Input handler function is invalid.`);
+                    }
+                }
+                intf.incoming(`on-component-${intf.name}-${intf.fId}-will-mount`).handle((component) => {
+                    _mounted = true;
+                    handler(component);
+                });
+            };
+            /**
+             * @description - Handle logic at component predismounting stage.
+             *
+             * @method preDismountStage
+             * @param {function} handler
+             * @return void
+             */
+            this.preDismountStage = function preDismountStage (handler) {
+                const intf = this;
+                if (Hf.DEVELOPMENT) {
+                    if (!Hf.isFunction(handler)) {
+                        Hf.log(`error`, `ReactComponentComposite.preDismountStage - Input handler function is invalid.`);
+                    }
+                }
+                intf.incoming(`on-component-${intf.name}-${intf.fId}-will-unmount`).handle((component) => {
+                    _mounted = false;
+                    handler(component);
+                });
+            };
             /**
              * @description - Convert composite to a renderable component.
              *
@@ -247,6 +263,10 @@ export default Hf.Composite({
                     number: PropTypes.number
                 };
                 let Component;
+
+                if (intf.isMounted()) {
+                    Hf.log(`error`, `ReactComponentComposite.toComponent - Interface:${intf.name} already have a mounted component.`);
+                }
 
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isFunction(CreateReactClass)) {
