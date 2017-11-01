@@ -37,6 +37,7 @@ const DEFAULT_COMPONENT_FN_PREFIX_INCLUSIONS = [
     `get`,
     `set`,
     `handle`,
+    `animate`,
     `render`
 ];
 
