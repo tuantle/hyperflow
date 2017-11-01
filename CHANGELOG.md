@@ -2,7 +2,18 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
-**Development Version 0.1.7 (//2017)**
+**Development Version 0.1.8 (11/01/2017)**
+```
+Notes:
+New Features:
+Changes:
+Breaking Changes:
+Improvements:
+    - Added animate prefix inclusion to ReactComponentComposite.
+Bug fixes:
+    - Fixed log enabling option naming typos.
+```
+**Development Version 0.1.7 (10/24/2017)**
 ```
 Notes:
 New Features:
