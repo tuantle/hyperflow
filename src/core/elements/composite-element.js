@@ -233,12 +233,10 @@ const CompositeElementPrototype = Object.create({}).prototype = {
             if (!Hf.isEmpty(initialState)) {
                 const data = DataElement().read(initialState, `state`).asImmutable(true);
                 const stateCursor = data.select(`state`);
-                let originalStateAccessor = stateCursor.getAccessor();
-                let currentStateAccessor = originalStateAccessor;
-                let nextStateAccessor = originalStateAccessor;
-                let originalStateAccessorCache = {
-                    state: originalStateAccessor
-                };
+                let originalStateAccessor;
+                let currentStateAccessor;
+                let nextStateAccessor;
+                let originalStateAccessorCache;
 
                 /* helper function to deep reduce original state by a reducer. */
                 const deepStateReduction = function deepStateReduction (originalState, reducer) {
@@ -415,19 +413,6 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                         return stateCursor.toObject();
                     },
                     /**
-                     * @description - Reset state to initial default and clear all mutation history.
-                     *
-                     * @method resetState
-                     * @return void
-                     */
-                    resetState: function resetState () {
-                        deepStateReconfiguration(originalStateAccessor, originalStateAccessor);
-                        currentStateAccessor = originalStateAccessor;
-                        nextStateAccessor = originalStateAccessor;
-
-                        Hf.clear(originalStateAccessorCache);
-                    },
-                    /**
                      * @description - Clear all state mutation history.
                      *
                      * @method flushState
@@ -528,12 +513,20 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                 }).getTemplate();
 
                 if (Hf.isNonEmptyObject(state)) {
+                    originalStateAccessor = stateCursor.getAccessor();
+                    currentStateAccessor = stateCursor.getAccessor();
                     if (product.reduceState(state)) {
                         originalStateAccessor = stateCursor.getAccessor();
-                        originalStateAccessorCache = {
-                            state: originalStateAccessor
-                        };
                     }
+                    originalStateAccessorCache = {
+                        state: originalStateAccessor
+                    };
+                } else {
+                    originalStateAccessor = stateCursor.getAccessor();
+                    currentStateAccessor = stateCursor.getAccessor();
+                    originalStateAccessorCache = {
+                        state: originalStateAccessor
+                    };
                 }
 
                 product = stateCursor.getContentItemKeys().reduce((productState, key) => {
