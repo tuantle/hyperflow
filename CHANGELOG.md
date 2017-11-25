@@ -2,6 +2,16 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.1.9 (11/25/2017)**
+```
+Notes:
+New Features:
+Changes:
+Breaking Changes:
+    Removed reset and resetState methods in StateMutationComposite and CompositeElement.
+Improvements:
+Bug fixes:
+```
 **Development Version 0.1.8 (11/01/2017)**
 ```
 Notes:
