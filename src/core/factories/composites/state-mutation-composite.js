@@ -54,7 +54,6 @@ export default Hf.Composite({
                     fId: `string`,
                     name: `string`,
                     outgoing: `function`,
-                    resetState: `function`,
                     reduceState: `function`,
                     reconfigState: `function`,
                     getStateAsObject: `function`
@@ -68,27 +67,27 @@ export default Hf.Composite({
          * @description - Reset state to initial default.
          *
          * @method reset
+         * @param {object} option
          * @return void
          */
-        reset: function reset () {
-            const factory = this;
-
-            factory.resetState();
-
-            const resetedState = Hf.mix(factory.getStateAsObject(), {
-                exclusion: {
-                    keys: [
-                        `name`,
-                        `fId`
-                    ]
-                }
-            }).with({});
-
-            factory.outgoing(
-                `as-state-mutated`,
-                `do-sync-reflected-state`
-            ).emit(() => resetedState);
-        },
+        // reset: function reset (option = {
+        //     forceMutationEvent: false,
+        //     suppressMutationEvent: false,
+        //     delayMutationEvent: 0
+        // }) {
+        //     const factory = this;
+        //     const {
+        //         forceMutationEvent,
+        //         suppressMutationEvent,
+        //         delayMutationEvent
+        //     } = Hf.fallback({
+        //         forceMutationEvent: false,
+        //         suppressMutationEvent: false,
+        //         delayMutationEvent: 0
+        //     });
+        //
+        //     // TODO: needs re-implementation
+        // },
         /**
          * @description -  Reduce and update state on state change/mutation.
          *
