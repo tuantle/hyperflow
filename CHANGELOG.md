@@ -2,6 +2,18 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development RC Version 0.2.0-rc1 (12/06/2017)**
+```
+Notes:
+    - Updated RxJs to latest.
+New Features:
+    - Updated dependencies RxJs package to latest version.
+    - Updated peer dependencies React and ReactNative to latest version.
+Changes:
+Breaking Changes:
+Improvements:
+Bug fixes:
+```
 **Development Version 0.1.9 (11/25/2017)**
 ```
 Notes:

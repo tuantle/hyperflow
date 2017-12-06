@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.1.9",
+    "version": "0.2.0-rc1",
     "registry": "github",
     "description": "Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",
@@ -12,7 +12,19 @@
         "type": "git",
         "url": "https://github.com/tuantle/hyperflow.git"
     },
-    "keywords": [],
+    "keywords": [
+        "hypertoxin",
+        "flow",
+        "managment",
+        "functional",
+        "immutable",
+        "rxjs",
+        "react",
+        "react-native",
+        "state",
+        "predictable",
+        "unidirectional"
+    ],
     "bugs": {
         "url": "https://github.com/tuantle/hyperflow/issues"
     },
@@ -26,18 +38,18 @@
     },
     "peerDependencies": {
         "tape": "^4.8.0",
-        "react": "^16.1.1",
-        "react-dom": "^16.1.1",
-        "react-native": "^0.50.4",
+        "react": "^16.2.0",
+        "react-dom": "^16.2.0",
+        "react-native": "^0.51.0",
         "prop-types": "^15.5.10",
         "create-react-class": "^15.6.2"
     },
     "dependencies": {
-        "rxjs": "^5.5.2"
+        "rxjs": "^5.5.5"
     },
     "devDependencies": {
         "babel-core": "^6.26.0",
-        "babel-eslint": "^8.0.2",
+        "babel-eslint": "^8.0.3",
         "babel-plugin-transform-class-properties": "^6.24.1",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
         "babel-plugin-transform-strict-mode": "^6.24.1",
@@ -45,12 +57,13 @@
         "babel-preset-react": "^6.22.0",
         "babel-preset-react-native": "^4.0.0",
         "create-react-class": "^15.6.2",
-        "eslint": "^4.11.0",
+        "eslint": "^4.12.1",
         "eslint-plugin-react": "^7.5.1",
         "eslint-plugin-react-native": "^3.2.0",
         "prop-types": "^15.6.0",
-        "react": "^16.1.1",
-        "react-dom": "^16.1.1",
+        "react": "^16.2.0",
+        "react-dom": "^16.2.0",
+        "react-test-renderer": "^16.2.0",
         "tape": "^4.8.0"
     },
     "scripts": {
