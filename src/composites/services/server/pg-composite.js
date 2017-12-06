@@ -27,12 +27,6 @@
 /* load Hyperflow */
 import { Hf } from '../../../hyperflow';
 
-/**
-* @description - Node postgres composite module.
-*
-* @module PGComposite
-* @return {object}
-*/
 export default Hf.Composite({
     enclosure: {
         PGComposite: function PGComposite () {

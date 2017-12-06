@@ -27,12 +27,6 @@
 /* load Hyperflow */
 import { Hf } from '../../../hyperflow';
 
-/**
- * @description - An async storage composite module.
- *
- * @module AsyncStorageComposite
- * @return {object}
- */
 export default Hf.Composite({
     enclosure: {
         AsyncStorageComposite: function AsyncStorageComposite () {

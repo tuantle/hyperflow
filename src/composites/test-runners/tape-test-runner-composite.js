@@ -30,12 +30,6 @@ import { Hf } from '../../../hyperflow';
 /* factory Ids */
 import { FIXTURE_FACTORY_CODE } from '../factory-code';
 
-/**
- * @description - A tape test runner composite module.
- *
- * @module TapeTestRunnerComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**

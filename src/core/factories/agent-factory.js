@@ -36,11 +36,6 @@ import {
     FIXTURE_FACTORY_CODE
 } from './factory-code';
 
-/**
- * @description - A test agent factory module.
- *
- * @module AgentFactory
- */
 export default Composer({
     state: {
         name: {

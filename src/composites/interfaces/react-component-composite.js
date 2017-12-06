@@ -66,12 +66,6 @@ const DEFAULT_COMPONENT_FN_AND_PROPERTY_INCLUSIONS = [
     `getComponentComposites`
 ];
 
-/**
- * @description - A React component factory composite module.
- *
- * @module ReactComponentComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**

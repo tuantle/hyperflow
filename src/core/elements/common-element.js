@@ -1570,6 +1570,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
  * @description - A common element module export function.
  *
  * @module CommonElement
+ * @param {object} option
  * @return {object}
  */
 export default function CommonElement (option = {

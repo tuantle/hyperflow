@@ -27,12 +27,6 @@
 /* load Hyperflow */
 import { Hf } from '../../../hyperflow';
 
-/**
- * @description - A React server component composite module.
- *
- * @module ReactAppComponentComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**

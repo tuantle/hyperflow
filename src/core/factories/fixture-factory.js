@@ -38,11 +38,6 @@ import {
     FIXTURE_FACTORY_CODE
 } from './factory-code';
 
-/**
- * @description - A generic test fixture factory module.
- *
- * @module TestkitFactory
- */
 export default Composer({
     composites: [
         EventStreamComposite

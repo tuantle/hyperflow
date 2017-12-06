@@ -38,11 +38,6 @@ import {
     SERVICE_FACTORY_CODE
 } from './factory-code';
 
-/**
- * @description - A service factory module.
- *
- * @module ServiceFactory
- */
 export default Composer({
     composites: [
         EventStreamComposite

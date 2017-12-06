@@ -36,11 +36,6 @@ import {
     DOMAIN_FACTORY_CODE
 } from './factory-code';
 
-/**
- * @description - An app factory module.
- *
- * @module AppFactory
- */
 export default Composer({
     state: {
         name: {

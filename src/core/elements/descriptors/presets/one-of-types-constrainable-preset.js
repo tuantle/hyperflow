@@ -15,9 +15,6 @@
  *
  *------------------------------------------------------------------------
  *
- * @module oneOfTypes
- * @description - One of types constrainable descriptor.
- *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
  * @flow

@@ -54,11 +54,6 @@ const DELAY_SERVICE_IN_MS = 2;
 const DEFAULT_SETUP_WAIT_TIME_IN_MS = 10000;
 const DEFAULT_TEARDOWN_WAIT_TIME_IN_MS = 10000;
 
-/**
- * @description - A domain factory module.
- *
- * @module DomainFactory
- */
 export default Composer({
     composites: [
         EventStreamComposite

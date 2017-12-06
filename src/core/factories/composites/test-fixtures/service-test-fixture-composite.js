@@ -36,12 +36,6 @@ import {
 /* delay all data stream from service by 1s as default */
 const DELAY_SERVICE_IN_MS = 1000;
 
-/**
- * @description - A service test fixture composite module.
- *
- * @module ServiceTestFixtureComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**

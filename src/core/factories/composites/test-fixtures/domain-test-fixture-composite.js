@@ -36,12 +36,6 @@ import {
 /* delay all data stream from domain by 1s as default */
 const DELAY_DOMAIN_IN_MS = 1000;
 
-/**
- * @description - A domain test fixture composite module.
- *
- * @module DomainTestFixtureComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**

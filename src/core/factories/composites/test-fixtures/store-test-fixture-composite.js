@@ -36,12 +36,6 @@ import {
 /* delay all data stream from store by 1s as default */
 const DELAY_STORE_IN_MS = 1000;
 
-/**
- * @description - A store test fixture composite module.
- *
- * @module StoreTestFixtureComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**

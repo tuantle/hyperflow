@@ -39,11 +39,6 @@ import {
     INTERFACE_FACTORY_CODE
 } from './factory-code';
 
-/**
- * @description - An interface component factory.
- *
- * @module InterfaceFactory
- */
 export default Composer({
     composites: [
         EventStreamComposite

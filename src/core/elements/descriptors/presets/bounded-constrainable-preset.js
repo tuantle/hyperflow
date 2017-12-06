@@ -15,9 +15,6 @@
  *
  *------------------------------------------------------------------------
  *
- * @module boundedWithin
- * @description - Bounded within constrainable descriptor.
- *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
  * @flow

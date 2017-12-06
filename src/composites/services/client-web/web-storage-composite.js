@@ -27,12 +27,6 @@
 /* load Hyperflow */
 import { Hf } from '../../../hyperflow';
 
-/**
- * @description - A web storage composite module.
- *
- * @module WebStorageComposite
- * @return {object}
- */
 export default Hf.Composite({
     enclosure: {
         WebStorageComposite: function WebStorageComposite () {

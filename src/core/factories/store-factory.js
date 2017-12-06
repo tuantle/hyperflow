@@ -41,11 +41,6 @@ import {
     STORE_FACTORY_CODE
 } from './factory-code';
 
-/**
- * @description - An app state data store factory module.
- *
- * @module StoreFactory
- */
 export default Composer({
     composites: [
         EventStreamComposite,

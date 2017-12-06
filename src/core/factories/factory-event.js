@@ -27,12 +27,6 @@
 /* load Hyperflow */
 import { Hf } from '../../hyperflow';
 
-/**
- * @description - A common element module export function.
- *
- * @module FactoryEvent
- * @return {object}
- */
 export default {
     /**
      * @description - Function to contruct an event id map for factory event stream.

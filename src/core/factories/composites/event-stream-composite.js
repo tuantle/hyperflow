@@ -52,12 +52,6 @@ const REPEATING_EVENT = 3;
 const REPEATED_EVENT = 4;
 const LOOPBACK_EVENT = 5;
 
-/**
- * @description - A reactive event stream composite module.
- *
- * @module EventStreamComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**
@@ -106,7 +100,7 @@ export default Hf.Composite({
 
             let _divertedOutgoingStream = Rx.Observable.never();
             let _divertedIncomingStream = Rx.Observable.never();
-            /* ----- Private FUnctions ------------- */
+            /* ----- Private Functions ------------- */
             /**
              * @description - On subscription to next incoming payload...
              *

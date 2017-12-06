@@ -15,9 +15,6 @@
  *
  *------------------------------------------------------------------------
  *
- * @module stronglyTyped
- * @description - Strongly typed constrainable descriptor.
- *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
  * @flow

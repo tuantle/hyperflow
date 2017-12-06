@@ -16,7 +16,7 @@
  *------------------------------------------------------------------------
  *
  * @module StateTimeTraversalComposite
- * @description - A persistent state time traversal composite.
+ * @description - A persistent state time traversal composite module.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
@@ -33,12 +33,6 @@ import {
     STORE_FACTORY_CODE
 } from '../factory-code';
 
-/**
- * @description - A persistent state time traversal composite module.
- *
- * @module StateTimeTraversalComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**

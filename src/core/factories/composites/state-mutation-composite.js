@@ -16,7 +16,7 @@
  *------------------------------------------------------------------------
  *
  * @module StateMutationComposite
- * @description - A persistent state mutation composite.
+ * @description - A persistent state mutation with reducer/reconfiguration composite module.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
@@ -33,12 +33,6 @@ import {
     STORE_FACTORY_CODE
 } from '../factory-code';
 
-/**
- * @description - A persistent state mutation with reducer/reconfiguration composite module.
- *
- * @module StateMutationComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**

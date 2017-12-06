@@ -36,12 +36,6 @@ import {
 /* delay all data stream from intf by 1s as default */
 const DELAY_INTERFACE_IN_MS = 1000;
 
-/**
- * @description - An interface test fixture composite module.
- *
- * @module InterfaceTestFixtureComposite
- * @return {object}
- */
 export default Hf.Composite({
     template: {
         /**
