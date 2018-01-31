@@ -195,6 +195,58 @@ export default Composer({
             return services;
         };
         /**
+         * @description - Get domain children.
+         *
+         * @method getChildDomains
+         * @param {array} domainNames
+         * @return {array}
+         */
+        this.getChildDomains = function getChildDomains (...domainNames) {
+            let childDomains = [];
+            if (!Hf.isEmpty(_childDomains)) {
+                if (!Hf.isEmpty(domainNames)) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!domainNames.every((name) => Hf.isString(name))) {
+                            Hf.log(`error`, `DomainFactory.getChildDomains - Input domain name is invalid.`);
+                        } else if (!domainNames.every((name) => _childDomains.hasOwnProperty(name))) {
+                            Hf.log(`error`, `DomainFactory.getChildDomains - Domain is not found.`);
+                        }
+                    }
+
+                    childDomains = childDomains.concat(Hf.collect(...domainNames).from(_childDomains));
+                } else {
+                    childDomains = _childDomains;
+                }
+            }
+            return childDomains;
+        };
+        /**
+         * @description - Get domain peers.
+         *
+         * @method getPeerDomains
+         * @param {array} domainNames
+         * @return {array}
+         */
+        this.getPeerDomains = function getPeerDomains (...domainNames) {
+            let peerDomains = [];
+            if (!Hf.isEmpty(_peerDomains)) {
+                if (!Hf.isEmpty(domainNames)) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!domainNames.every((name) => Hf.isString(name))) {
+                            Hf.log(`error`, `DomainFactory.getPeerDomains - Input domain name is invalid.`);
+                        } else if (!domainNames.every((name) => _peerDomains.hasOwnProperty(name))) {
+                            Hf.log(`error`, `DomainFactory.getPeerDomains - Domain is not found.`);
+                        }
+                    }
+
+                    peerDomains = peerDomains.concat(Hf.collect(...domainNames).from(_peerDomains));
+                } else {
+                    peerDomains = _peerDomains;
+                }
+            }
+            return peerDomains;
+        };
+        /**
          * @description - Register child domains, store and interface.
          *
          * @method register
@@ -284,6 +336,7 @@ export default Composer({
                         return Hf.isSchema({
                             fId: `string`,
                             name: `string`,
+                            getChildServices: `function`,
                             setup: `function`,
                             teardown: `function`,
                             observe: `function`,
@@ -318,7 +371,7 @@ export default Composer({
                             getInterface: `function`
                         }).of(childDomain) && childDomain.fId.substr(0, DOMAIN_FACTORY_CODE.length) === DOMAIN_FACTORY_CODE;
                     })) {
-                        Hf.log(`error`, `DomainFactory.register - Input children domains are invalid.`);
+                        Hf.log(`error`, `DomainFactory.register - Input child domains are invalid.`);
                     }
                 }
 
@@ -421,10 +474,19 @@ export default Composer({
                         _intf.observe(_store);
                     }
                 }
-                /* setup event stream observation duplex between domain and servies */
+                /* setup event stream observation duplex between domain and servies and children of services */
                 if (!Hf.isEmpty(_services)) {
                     domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
-                    _services.forEach((service) => service.observe(domain));
+                    _services.forEach((service) => {
+                        const childServices = service.getChildServices();
+
+                        service.observe(domain);
+
+                        if (!Hf.isEmpty(childServices)) {
+                            service.observe(...childServices);
+                            childServices.forEach((childService) => childService.observe(service));
+                        }
+                    });
                 }
                 /* setup event stream observation duplex between domain and children */
                 if (!Hf.isEmpty(_childDomains)) {
@@ -539,6 +601,34 @@ export default Composer({
 
                     /* then activate services... */
                     if (!Hf.isEmpty(_services)) {
+                        /* helper function to activate all child service event stream */
+                        const deepChildServiceActivateStream = function deepChildServiceActivateStream (childService) {
+                            if (Hf.isObject(childService)) {
+                                const childServiceTimeoutId = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.start - Service:${childService.name} is taking longer than ${waitTime}ms to setup.`);
+                                    if (Hf.isFunction(timeout)) {
+                                        timeout(childService.name);
+                                    }
+                                }, waitTime);
+                                childService.setup(() => {
+                                    childService.activateIncomingStream({
+                                        forceBufferingOnAllIncomingStreams: enableSlowRunMode,
+                                        bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                        bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                                    });
+                                    childService.getChildServices().forEach((_childService) => deepChildServiceActivateStream(_childService));
+                                    childService.activateOutgoingStream({
+                                        forceBufferingOnAllOutgoingStreams: enableSlowRunMode,
+                                        bufferTimeSpan: SLOW_MODE_BUFFER_TIME_SPAN_IN_MS,
+                                        bufferTimeShift: SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS
+                                    });
+                                    Hf.log(`info1`, `Activated service:${childService.name}.`);
+                                    clearTimeout(childServiceTimeoutId);
+                                });
+                            } else {
+                                Hf.log(`warn0`, `DomainFactory.start - DomainFactory.start.deepChildServiceActivateStream - Input interface is invalid.`);
+                            }
+                        };
                         _services.forEach((service) => {
                             const serviceTimeoutId = setTimeout(() => {
                                 Hf.log(`warn1`, `DomainFactory.start - Service:${service.name} is taking longer than ${waitTime}ms to setup.`);
@@ -546,6 +636,9 @@ export default Composer({
                                     timeout(service.name);
                                 }
                             }, waitTime);
+
+                            deepChildServiceActivateStream(service);
+
                             service.setup(() => {
                                 service.activateIncomingStream({
                                     forceBufferingOnAllIncomingStreams: enableSlowRunMode,
@@ -698,6 +791,27 @@ export default Composer({
 
                     /* then services... */
                     if (!Hf.isEmpty(_services)) {
+                        /* helper function to deactivate all child services event stream */
+                        const deepChildServiceDeactivateStream = function deepChildServiceDeactivateStream (childService) {
+                            if (Hf.isObject(childService)) {
+                                const childServiceTimeoutId = setTimeout(() => {
+                                    Hf.log(`warn1`, `DomainFactory.stop - Service:${childService.name} is taking longer than ${waitTime}ms to teardown.`);
+                                    if (Hf.isFunction(timeout)) {
+                                        timeout(childService.name);
+                                    }
+                                }, waitTime);
+
+                                childService.teardown(() => {
+                                    childService.getChildServices().forEach((_childService) => deepChildServiceDeactivateStream(_childService));
+                                    childService.deactivateIncomingStream();
+                                    childService.deactivateOutgoingStream();
+                                    Hf.log(`info1`, `Deactivated service:${childService.name}.`);
+                                    clearTimeout(childServiceTimeoutId);
+                                });
+                            } else {
+                                Hf.log(`warn0`, `DomainFactory.stop - DomainFactory.stop.deepChildServiceDeactivateStream - Input service is invalid.`);
+                            }
+                        };
                         _services.forEach((service) => {
                             const serviceTimeoutId = setTimeout(() => {
                                 Hf.log(`warn1`, `DomainFactory.stop - Service:${service.name} is taking longer than ${waitTime}ms to teardown.`);
@@ -705,6 +819,9 @@ export default Composer({
                                     timeout(service.name);
                                 }
                             }, waitTime);
+
+                            deepChildServiceDeactivateStream(service);
+
                             service.teardown(() => {
                                 service.deactivateIncomingStream();
                                 service.deactivateOutgoingStream();
