@@ -2,6 +2,20 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Released Version 0.2.0 (01/31/2018)**
+**Development RC Version 0.2.0-rc2 (01/31/2018)**
+```
+Notes:
+New Features:
+    - Added async function detect to isFunction method for CommonElement.
+    - Added async support to incoming.handle method for EventStreamComposite.
+    - Added child services feature to ServiceFactory.
+    - Added new factory event id responses to ALERT, WARN, and DEBUG.
+Changes:
+Breaking Changes:
+Improvements:
+Bug fixes:
+```
 **Development RC Version 0.2.0-rc1 (12/06/2017)**
 ```
 Notes:
