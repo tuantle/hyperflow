@@ -60,6 +60,8 @@ export default Composer({
     },
     ServiceFactory: function ServiceFactory () {
         /* ----- Private Variables ------------- */
+        /* child services */
+        let _childServices = [];
         /* ----- Public Functions -------------- */
         /**
          * @description - Initialize service.
@@ -69,6 +71,85 @@ export default Composer({
          */
         this.$init = function $init () {
             Hf.log(`warn0`, `ServiceFactory.$init - Method is not implemented by default.`);
+        };
+        /**
+         * @description - Get service children.
+         *
+         * @method getChildServices
+         * @param {array} serviceNames
+         * @return {array}
+         */
+        this.getChildServices = function getChildServices (...serviceNames) {
+            let childServices = [];
+            if (!Hf.isEmpty(_childServices)) {
+                if (!Hf.isEmpty(serviceNames)) {
+                    if (Hf.DEVELOPMENT) {
+                        if (!serviceNames.every((name) => Hf.isString(name))) {
+                            Hf.log(`error`, `ServiceFactory.getChildServices - Input service name is invalid.`);
+                        } else if (!serviceNames.every((name) => _childServices.hasOwnProperty(name))) {
+                            Hf.log(`error`, `ServiceFactory.getChildServices - Service is not found.`);
+                        }
+                    }
+
+                    childServices = childServices.concat(Hf.collect(...serviceNames).from(_childServices));
+                } else {
+                    childServices = _childServices;
+                }
+            }
+            return childServices;
+        };
+        /**
+         * @description - Register child services.
+         *
+         * @method register
+         * @param {object} definition - Service registration definition for child services.
+         * @return {object}
+         */
+        this.register = function register (definition) {
+            const service = this;
+
+            // TODO: Throw error if called outside of $init.
+            if (Hf.DEVELOPMENT) {
+                if (!Hf.isSchema({
+                    childServices: `array|undefined`
+                }).of(definition)) {
+                    Hf.log(`error`, `ServiceFactory.register - Input definition is invalid.`);
+                }
+            }
+
+            const {
+                childServices
+            } = definition;
+
+            if (Hf.isArray(childServices)) {
+                if (Hf.DEVELOPMENT) {
+                    if (!childServices.every((childService) => {
+                        return Hf.isSchema({
+                            fId: `string`,
+                            name: `string`
+                            // setup: `function`,
+                            // teardown: `function`,
+                            // observe: `function`,
+                            // activateIncomingStream: `function`,
+                            // activateOutgoingStream: `function`,
+                            // deactivateIncomingStream: `function`,
+                            // deactivateOutgoingStream: `function`
+                        }).of(childService) && childService.fId.substr(0, SERVICE_FACTORY_CODE.length) === SERVICE_FACTORY_CODE;
+                    })) {
+                        Hf.log(`error`, `ServiceFactory.register - Input child services are invalid.`);
+                    }
+                }
+
+                _childServices = _childServices.concat(childServices.filter((childService) => {
+                    if (service.name === childService.name) {
+                        Hf.log(`warn1`, `ServiceFactory.register - Cannot register service:${childService.name} as a child of itself.`);
+                        return false;
+                    }
+                    Hf.log(`info1`, `Service:${service.name} registered child service:${childService.name}.`);
+                    return true;
+                }));
+            }
+            return service;
         };
         /**
          * @description - Setup service event stream.
