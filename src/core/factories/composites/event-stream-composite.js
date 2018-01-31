@@ -128,22 +128,6 @@ export default Hf.Composite({
                     }).of(payload);
 
                     if (_arbiter.hasOwnProperty(eventId)) {
-                        /**
-                         * @description - Called on cancellation to assign/regsiter a canceller callback.
-                         *
-                         * @method onCancel
-                         * @param {function} canceller
-                         * @return void
-                         */
-                        const onCancel = function onCancel (canceller) {
-                            if (Hf.DEVELOPMENT) {
-                                if (!Hf.isFunction(canceller)) {
-                                    Hf.log(`error`, `EventStreamComposite._next.onCancel - Input canceller callback is invalid.`);
-                                }
-                            }
-
-                            _arbiter[eventId].canceller = canceller;
-                        };
                         const {
                             eventDirectionalState,
                             completed,
@@ -155,39 +139,49 @@ export default Hf.Composite({
                             completed: false,
                             waitTime: 0
                         }).of(_arbiter[eventId]);
+                        /**
+                         * @description - Called on cancellation to assign/regsiter a canceller callback.
+                         *
+                         * @method onCancel
+                         * @return void
+                         */
+                        const onCancel = function onCancel () {
+                            if (Hf.DEVELOPMENT) {
+                                if (!Hf.isFunction(canceller)) {
+                                    Hf.log(`error`, `EventStreamComposite._next.onCancel - Input canceller callback is invalid.`);
+                                }
+                            }
+
+                            _arbiter[eventId].canceller = canceller;
+                        };
+                        /**
+                         * @description - Called on handling async handled value.
+                         *
+                         * @method onAsyncHandle
+                         * @return void
+                         */
+                        const onAsyncHandle = async function onAsyncHandle () {
+                            const handledValue = Hf.isFunction(handler) ? await handler(value, onCancel) : undefined;
+                            if (cancelled && Hf.isFunction(canceller)) {
+                                canceller();
+                            }
+                            if (Hf.isFunction(relayer)) {
+                                relayer(handledValue, cancelled);
+                            }
+                            if (completed) {
+                                delete _arbiter[eventId];
+                                // _arbiter[eventId] = undefined;
+                            }
+                        };
 
                         if (eventDirectionalState !== REPEATED_EVENT) {
                             if (eventDirectionalState === REPEATING_EVENT) {
                                 _arbiter[eventId].eventDirectionalState = REPEATED_EVENT;
                             }
                             if (waitTime > 0) {
-                                setTimeout(() => {
-                                    const handledValue = Hf.isFunction(handler) ? handler(value, onCancel) : undefined;
-
-                                    if (cancelled && Hf.isFunction(canceller)) {
-                                        canceller();
-                                    }
-                                    if (Hf.isFunction(relayer)) {
-                                        relayer(handledValue, cancelled);
-                                    }
-                                    if (completed) {
-                                        delete _arbiter[eventId];
-                                        // _arbiter[eventId] = undefined;
-                                    }
-                                }, waitTime);
+                                setTimeout(() => onAsyncHandle(), waitTime);
                             } else {
-                                const handledValue = Hf.isFunction(handler) ? handler(value, onCancel) : undefined;
-
-                                if (cancelled && Hf.isFunction(canceller)) {
-                                    canceller();
-                                }
-                                if (Hf.isFunction(relayer)) {
-                                    relayer(handledValue, cancelled);
-                                }
-                                if (completed) {
-                                    delete _arbiter[eventId];
-                                    // _arbiter[eventId] = undefined;
-                                }
+                                onAsyncHandle();
                             }
                         } else {
                             _arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
