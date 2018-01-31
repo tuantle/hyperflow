@@ -516,7 +516,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {boolean}
      */
     isFunction: function isFunction (fn) {
-        return Object.prototype.toString.call(fn) === `[object Function]`;
+        return Object.prototype.toString.call(fn) === `[object Function]` || Object.prototype.toString.call(fn) === `[object AsyncFunction]`;
     },
     /**
      * @description - Check for regex type.
