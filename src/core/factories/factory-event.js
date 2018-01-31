@@ -62,7 +62,7 @@ export default {
                 }
             }
             if (key === `asEvents`) {
-                _outputEventMap[`AS`] = sourceEventMap[key].reduce((asEventMap, _key) => {
+                _outputEventMap[`AS`] = sourceEventMap[key].reduce((asEventMap, _key) => { // eslint-disable-line
                     asEventMap[
                         dashToUpperCaseUnderscore(_key)
                     ] = `as-${_key}`;
@@ -70,7 +70,7 @@ export default {
                 }, {});
             }
             if (key === `onEvents`) {
-                _outputEventMap[`ON`] = sourceEventMap[key].reduce((onEventMap, _key) => {
+                _outputEventMap[`ON`] = sourceEventMap[key].reduce((onEventMap, _key) => { // eslint-disable-line
                     onEventMap[
                         dashToUpperCaseUnderscore(_key)
                     ] = `on-${_key}`;
@@ -78,7 +78,7 @@ export default {
                 }, {});
             }
             if (key === `doEvents`) {
-                _outputEventMap[`DO`] = sourceEventMap[key].reduce((doEventMap, _key) => {
+                _outputEventMap[`DO`] = sourceEventMap[key].reduce((doEventMap, _key) => { // eslint-disable-line
                     doEventMap[
                         dashToUpperCaseUnderscore(_key)
                     ] = `do-${_key}`;
@@ -86,7 +86,7 @@ export default {
                 }, {});
             }
             if (key === `broadcastEvents`) {
-                _outputEventMap[`BROADCAST`] = sourceEventMap[key].reduce((broadcastEventMap, _key) => {
+                _outputEventMap[`BROADCAST`] = sourceEventMap[key].reduce((broadcastEventMap, _key) => { // eslint-disable-line
                     broadcastEventMap[
                         dashToUpperCaseUnderscore(_key)
                     ] = `broadcast-${_key}`;
@@ -94,13 +94,13 @@ export default {
                 }, {});
             }
             if (key === `requestEvents`) {
-                _outputEventMap[`REQUEST`] = sourceEventMap[key].reduce((requestForEventMap, _key) => {
+                _outputEventMap[`REQUEST`] = sourceEventMap[key].reduce((requestForEventMap, _key) => { // eslint-disable-line
                     requestForEventMap[
                         dashToUpperCaseUnderscore(_key)
                     ] = `request-for-${_key}`;
                     return requestForEventMap;
                 }, {});
-                _outputEventMap[`RESPONSE`] = {
+                _outputEventMap[`RESPONSE`] = {  // eslint-disable-line
                     WITH: sourceEventMap[key].reduce((responseToEventMap, _key) => {
                         responseToEventMap[
                             dashToUpperCaseUnderscore(_key)
@@ -112,6 +112,8 @@ export default {
                             dashToUpperCaseUnderscore(_key)
                         ] = {
                             OK: `response-to-${_key}-ok`,
+                            ALERT: `response-to-${_key}-alert`,
+                            WARN: `response-to-${_key}-warn`,
                             ERROR: `response-to-${_key}-error`,
                             CANCELED: `response-to-${_key}-canceled`,
                             CONFLICT: `response-to-${_key}-conflict`,
@@ -119,7 +121,8 @@ export default {
                             TIMED_OUT: `response-to-${_key}-timed-out`,
                             NOT_AVAILABLE: `response-to-${_key}-not-available`,
                             NOT_MODIFIED: `response-to-${_key}-not-modified`,
-                            UNAUTHORIZED: `response-to-${_key}-unauthorized`
+                            UNAUTHORIZED: `response-to-${_key}-unauthorized`,
+                            DEBUG: `response-to-${_key}-debug`
                         };
                         return responseToEventMap;
                     }, {})
