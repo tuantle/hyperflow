@@ -1574,30 +1574,22 @@ const CommonElementPrototype = Object.create({}).prototype = {
  * @return {object}
  */
 export default function CommonElement (option = {
-    enableProductionMode: false,
-    enableInfo0Logging: false,
-    enableInfo1Logging: true,
-    enableWarn0Logging: false,
-    enableWarn1Logging: true
+    development: true,
+    logging: {
+        info0: false,
+        info1: true,
+        warn0: false,
+        warn1: true
+    }
 }) {
     let {
-        enableProductionMode,
-        enableInfo0Logging,
-        enableInfo1Logging,
-        enableWarn0Logging,
-        enableWarn1Logging
+        development,
+        logging
     } = option;
-
-    enableProductionMode = CommonElementPrototype.isBoolean(enableProductionMode) ? enableProductionMode : false;
-    enableInfo0Logging = CommonElementPrototype.isBoolean(enableInfo0Logging) ? enableInfo0Logging : true;
-    enableInfo1Logging = CommonElementPrototype.isBoolean(enableInfo1Logging) ? enableInfo1Logging : true;
-    enableWarn0Logging = CommonElementPrototype.isBoolean(enableWarn0Logging) ? enableWarn0Logging : true;
-    enableWarn1Logging = CommonElementPrototype.isBoolean(enableWarn1Logging) ? enableWarn1Logging : true;
-
     const element = Object.create(CommonElementPrototype, {
         /* this flag indicates develeopment or production status of the project */
         DEVELOPMENT: {
-            value: !enableProductionMode,
+            value: CommonElementPrototype.isBoolean(development) ? development : true,
             writable: false,
             configurable: false,
             enumerable: true
@@ -1605,10 +1597,10 @@ export default function CommonElement (option = {
         _consoleLog: {
             value: {
                 /* this flag enables console log of debug messages when calling method Hf.log(`info`, `a debug message.`) */
-                enableInfo0Logging,
-                enableInfo1Logging,
-                enableWarn0Logging,
-                enableWarn1Logging,
+                enableInfo0Logging: CommonElementPrototype.isObject(logging) && CommonElementPrototype.isBoolean(logging.info0) ? logging.info0 : false,
+                enableInfo1Logging: CommonElementPrototype.isObject(logging) && CommonElementPrototype.isBoolean(logging.info1) ? logging.info1 : true,
+                enableWarn0Logging: CommonElementPrototype.isObject(logging) && CommonElementPrototype.isBoolean(logging.warn0) ? logging.warn0 : false,
+                enableWarn1Logging: CommonElementPrototype.isObject(logging) && CommonElementPrototype.isBoolean(logging.warn1) ? logging.warn1 : true,
                 history: {
                     index: 0,
                     logs: Array(LOG_HISTORY_SIZE).fill(null)
