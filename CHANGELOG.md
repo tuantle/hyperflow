@@ -2,6 +2,18 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development Version 0.2.1 (05/07/2018)**
+```
+Notes:
+    - Updated RxJs to latest.
+New Features:
+Changes:
+    - lookupComponentRefs method now returns null and raised warning instead of error if the component reference i snot found for ReactComponentComposite.
+Breaking Changes:
+    - Refactored options for hyperflow when creating an instance with init method.
+Improvements:
+Bug fixes:
+```
 **Released Version 0.2.0 (02/19/2018)**
 **Development RC Version 0.2.0-rc2 (01/31/2018)**
 ```

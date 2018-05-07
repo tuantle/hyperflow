@@ -39,19 +39,18 @@ let Hf = null;
  */
 const init = function init ({
     target = `client-web`,
-    enableProductionMode = false,
-    enableInfo0Logging = false,
-    enableInfo1Logging = true,
-    enableWarn0Logging = false,
-    enableWarn1Logging = true
+    development = true,
+    logging = {
+        info0: false,
+        info1: true,
+        warn0: false,
+        warn1: true
+    }
 } = {}) {
     if (Hf === null) {
         Hf = CommonElement({
-            enableProductionMode,
-            enableInfo0Logging,
-            enableInfo1Logging,
-            enableWarn0Logging,
-            enableWarn1Logging
+            development,
+            logging
         });
 
         /* Hyperflow core element libraries */

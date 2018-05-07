@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "registry": "github",
     "description": "Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",
@@ -33,23 +33,23 @@
         "lib": "src"
     },
     "engines": {
-        "node": ">=7.x",
-        "npm": ">=4.x"
+        "node": ">=9.x",
+        "npm": ">=5.x"
     },
     "peerDependencies": {
-        "tape": "^4.8.0",
-        "react": "^16.2.0",
-        "react-dom": "^16.2.0",
-        "react-native": "^0.53.2",
-        "prop-types": "^15.5.10",
-        "create-react-class": "^15.6.2"
+        "tape": ">=4.x",
+        "react": ">=16.3.x",
+        "react-dom": ">=16.3.x",
+        "react-native": ">=0.54.x",
+        "prop-types": ">=15.6.x",
+        "create-react-class": ">=15.6.x"
     },
     "dependencies": {
-        "rxjs": "^5.5.6"
+        "rxjs": "^6.1.0"
     },
     "devDependencies": {
-        "babel-core": "^6.26.0",
-        "babel-eslint": "^8.2.1",
+        "babel-core": "^6.26.3",
+        "babel-eslint": "^8.2.3",
         "babel-plugin-transform-class-properties": "^6.24.1",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
         "babel-plugin-transform-strict-mode": "^6.24.1",
@@ -57,13 +57,13 @@
         "babel-preset-react": "^6.22.0",
         "babel-preset-react-native": "^4.0.0",
         "create-react-class": "^15.6.3",
-        "eslint": "^4.18.0",
-        "eslint-plugin-react": "^7.6.1",
+        "eslint": "^4.19.1",
+        "eslint-plugin-react": "^7.7.0",
         "eslint-plugin-react-native": "^3.2.1",
-        "prop-types": "^15.6.0",
-        "react": "^16.2.0",
-        "react-dom": "^16.2.0",
-        "react-test-renderer": "^16.2.0",
+        "prop-types": "^15.6.1",
+        "react": "^16.3.2",
+        "react-dom": "^16.3.2",
+        "react-test-renderer": "^16.3.2",
         "tape": "^4.9.0"
     },
     "scripts": {
