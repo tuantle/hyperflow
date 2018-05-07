@@ -391,7 +391,8 @@ export default Hf.Composite({
                                         if (!refNames.every((refName) => Hf.isString(refName))) {
                                             Hf.log(`error`, `ReactComponentComposite.lookupComponentRefs - Input component reference name is invalid.`);
                                         } else if (!refNames.every((refName) => component.refCache.hasOwnProperty(refName))) {
-                                            Hf.log(`error`, `ReactComponentComposite.lookupComponentRefs - Component reference is not found.`);
+                                            Hf.log(`warn1`, `ReactComponentComposite.lookupComponentRefs - Component reference is not found.`);
+                                            return null;
                                         }
                                     }
 
