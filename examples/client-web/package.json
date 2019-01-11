@@ -1,0 +1,85 @@
+{
+  "name": "hyperflow-client-web-examples",
+  "description": "Example client apps built using Hyperflow.",
+  "authors": [
+    "Tuan Le <tuan.t.lei@gmail.com> (https://github.com/tuantle)"
+  ],
+  "private": true,
+  "homepage": "https://github.com/tuantle/hyperflow",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tuantle/hyperflow/issues"
+  },
+  "babel": {
+    "presets": [
+      "react",
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
+    ],
+    "plugins": [
+      "transform-strict-mode",
+      "transform-object-rest-spread"
+    ]
+  },
+  "jspm": {
+    "dependencies": {
+      "create-react-class": "npm:create-react-class@^15.6.0",
+      "material-ui": "npm:material-ui@^0.19.1",
+      "moment": "npm:moment@^2.18.1",
+      "prop-types": "npm:prop-types@^15.5.10",
+      "react": "npm:react@^15.6.1",
+      "react-dom": "npm:react-dom@^15.6.1",
+      "react-router": "npm:react-router@^4.2.0",
+      "react-tap-event-plugin": "npm:react-tap-event-plugin@^2.0.1",
+      "rxjs": "npm:rxjs@^5.4.3",
+      "tape": "npm:tape@^4.8.0"
+    },
+    "devDependencies": {
+      "babel": "npm:babel-core@^6.26.0",
+      "babel-runtime": "npm:babel-runtime@^6.26.0",
+      "core-js": "npm:core-js@^2.5.1"
+    }
+  },
+  "dependencies": {
+    "hyperflow": "latest",
+    "material-ui": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-router": "latest",
+    "react-tap-event-plugin": "latest",
+    "create-react-class": "latest",
+    "prop-types": "latest",
+    "moment": "latest"
+  },
+  "devDependencies": {
+    "babel-loader": "latest",
+    "babel-core": "latest",
+    "babel-plugin-transform-object-rest-spread": "latest",
+    "babel-plugin-transform-strict-mode": "latest",
+    "babel-preset-env": "latest",
+    "babel-preset-react": "latest",
+    "babel-eslint": "latest",
+    "eslint": "latest",
+    "eslint-plugin-react": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/tuantle/hyperflow.git"
+  },
+  "scripts": {
+    "webpack-build-counter": "NODE_ENV=development webpack --progress --colors --config counter-webpack.config.js",
+    "webpack-start-counter": "NODE_ENV=development webpack-dev-server --content-base --progress --colors counter/build",
+    "jspm-start-counter": "NODE_ENV=development live-server --no-browser -q --open=counter/index.html",
+    "jspm-start-calculator": "NODE_ENV=development live-server --no-browser -q --open=calculator/index.html"
+  },
+  "modulePathIgnorePatterns": [
+    "/node_modules/",
+    "/jspm_packages/"
+  ]
+}

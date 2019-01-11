@@ -2,9 +2,9 @@
     "comments": false,
     "sourceMaps": "inline",
     "presets": [
-        "react",
+        "module:metro-react-native-babel-preset",
         [
-            "env",
+            "@babel/preset-env",
             {
                 "targets": {
                     "node": "current"
@@ -13,8 +13,8 @@
         ]
     ],
     "plugins": [
-        "transform-strict-mode",
-        "transform-object-rest-spread",
-        "transform-class-properties"
+        "@babel/plugin-transform-strict-mode",
+        "@babel/plugin-proposal-object-rest-spread",
+        "@babel/plugin-proposal-class-properties"
     ]
 }

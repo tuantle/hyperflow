@@ -15,11 +15,13 @@ import CommonElement from '../../../src/core/elements/common-element';
 
 export function runTests () {
     const common = CommonElement({
-        enableProductionMode: false,
-        enableInfo0Log: true,
-        enableInfo1Log: true,
-        enableWarn0Log: true,
-        enableWarn1Log: true
+        development: true,
+        logging: {
+            info0: true,
+            info1: true,
+            warn0: true,
+            warn1: true
+        }
     });
 
     test(`--------- Running CommonElement Spec Tests ---------`, (assert) => {

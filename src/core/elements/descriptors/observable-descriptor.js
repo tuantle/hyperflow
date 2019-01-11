@@ -29,7 +29,10 @@
 import { Hf } from '../../../hyperflow';
 
 /* load RxJs dependency */
-import Rx from 'rxjs/Rx';
+import {
+    Subscriber as RxSubscriber,
+    Observable as RxObservable,
+} from 'rxjs';
 
 const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
 
@@ -218,7 +221,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
             });
         }
 
-        observable._observer = Rx.Subscriber.create(
+        observable._observer = RxSubscriber.create(
             /**
              * @description - On subscription to next incoming payload...
              *
@@ -287,7 +290,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                 observable._description.proxy = target;
                 observable._description.orgDesc = Object.getOwnPropertyDescriptor(target, key);
 
-                observable._stream = Rx.Observable.create((streamEmitter) => {
+                observable._stream = RxObservable.create((streamEmitter) => {
                     /* create the condition property for the assigned object */
                     Object.defineProperty(observable._description.proxy, key, {
                         get: function get () {

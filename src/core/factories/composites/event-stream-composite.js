@@ -28,7 +28,33 @@
 import { Hf } from '../../../hyperflow';
 
 /* load Rx dependency */
-import Rx from 'rxjs/Rx';
+import {
+    Subject as RxSubject,
+    Subscriber as RxSubscriber,
+    Observable as RxObservable,
+    NEVER as RxObservableNever,
+    merge as rxMerge,
+    of as rxOf,
+    interval as rxInterval
+} from 'rxjs';
+import {
+    bufferTime as rxBufferTimeOp,
+    delay as rxDelayOp,
+    debounceTime as rxDebounceTimeOp,
+    filter as rxFilterOp,
+    flatMap as rxFlatMapOp,
+    map as rxMapOp,
+    merge as rxMergeOp,
+    reduce as rxReduceOp,
+    scan as rxScanOp,
+    startWith as rxStartWithOp,
+    takeLast as rxTakeLastOp,
+    tap as rxTapOp,
+    timeout as rxTimeoutOp,
+    timeInterval as rxTimeIntervalOp,
+    throttle as rxThrottleOp,
+    share as rxShareOp
+} from 'rxjs/operators';
 // TODO: Only import part of Rx that is needed.
 
 /* factory Ids */
@@ -92,14 +118,14 @@ export default Hf.Composite({
             let _outgoingSubscription;
             let _incomingSubscription;
             /* creating factory event stream emitter */
-            let _streamEmitter = new Rx.Subject();
+            let _streamEmitter = new RxSubject();
             /* converting event stream emitter as a subject to an observable */
             let _outgoingStream = _streamEmitter.asObservable();
             /* creating factory incoming and outgoing event stream */
-            let _incomingStream = Rx.Observable.never();
+            let _incomingStream = RxObservableNever;
 
-            let _divertedOutgoingStream = Rx.Observable.never();
-            let _divertedIncomingStream = Rx.Observable.never();
+            let _divertedOutgoingStream = RxObservableNever;
+            let _divertedIncomingStream = RxObservableNever;
             /* ----- Private Functions ------------- */
             /**
              * @description - On subscription to next incoming payload...
@@ -241,16 +267,28 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.delay(ms).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxDelayOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.delay(ms).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxDelayOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.delay(ms).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxDelayOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.delay(ms).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxDelayOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.delay - Invalid direction:${direction}.`);
@@ -278,16 +316,28 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.debounceTime(ms).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxDebounceTimeOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.debounceTIme(ms).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxDebounceTimeOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.debounceTime(ms).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxDebounceTimeOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.debounceTime(ms).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxDebounceTimeOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.debounce - Invalid direction:${direction}.`);
@@ -310,16 +360,28 @@ export default Hf.Composite({
                         }
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.filter(predicate).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxFilterOp(predicate),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.filter(predicate).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxFilterOp(predicate),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.filter(predicate).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxFilterOp(predicate),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.filter(predicate).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxFilterOp(predicate),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.filter - Invalid direction:${direction}.`);
@@ -343,16 +405,28 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.map(selector).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxMapOp(selector),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.map(selector).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxMapOp(selector),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.map(selector).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxMapOp(selector),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.map(selector).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxMapOp(selector),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.map - Invalid direction:${direction}.`);
@@ -379,16 +453,28 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.flatMap(selector, resultSelector).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxFlatMapOp(selector, resultSelector),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.flatMap(selector, resultSelector).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxFlatMapOp(selector, resultSelector),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.flatMap(selector, resultSelector).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxFlatMapOp(selector, resultSelector),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.flatMap(selector, resultSelector).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxFlatMapOp(selector, resultSelector),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.flatMap - Invalid direction:${direction}.`);
@@ -420,16 +506,28 @@ export default Hf.Composite({
                             }
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.reduce(accumulator, defaultPayload).share();
+                                _incomingStream = _incomingStream.pipe(
+                                    rxReduceOp(accumulator, defaultPayload),
+                                    rxShareOp()
+                                );
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.reduce(accumulator, defaultPayload).share();
+                                _outgoingStream = _outgoingStream.pipe(
+                                    rxReduceOp(accumulator, defaultPayload),
+                                    rxShareOp()
+                                );
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.reduce(accumulator, defaultPayload).share();
+                                _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                    rxReduceOp(accumulator, defaultPayload),
+                                    rxShareOp()
+                                );
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.reduce(accumulator, defaultPayload).share();
+                                _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                    rxReduceOp(accumulator, defaultPayload),
+                                    rxShareOp()
+                                );
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.reduce - Invalid direction:${direction}.`);
@@ -437,16 +535,28 @@ export default Hf.Composite({
                         } else {
                             switch (direction) { // eslint-disable-line
                             case INCOMING_DIRECTION:
-                                _incomingStream = _incomingStream.reduce(accumulator).share();
+                                _incomingStream = _incomingStream.pipe(
+                                    rxReduceOp(accumulator),
+                                    rxShareOp()
+                                );
                                 break;
                             case OUTGOING_DIRECTION:
-                                _outgoingStream = _outgoingStream.reduce(accumulator).share();
+                                _outgoingStream = _outgoingStream.pipe(
+                                    rxReduceOp(accumulator),
+                                    rxShareOp()
+                                );
                                 break;
                             case DIVERTED_INCOMING_DIRECTION:
-                                _divertedIncomingStream = _divertedIncomingStream.reduce(accumulator).share();
+                                _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                    rxReduceOp(accumulator),
+                                    rxShareOp()
+                                );
                                 break;
                             case DIVERTED_OUTGOING_DIRECTION:
-                                _divertedOutgoingStream = _divertedOutgoingStream.reduce(accumulator).share();
+                                _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                    rxReduceOp(accumulator),
+                                    rxShareOp()
+                                );
                                 break;
                             default:
                                 Hf.log(`error`, `EventStreamComposite.reduce - Invalid direction:${direction}.`);
@@ -475,16 +585,28 @@ export default Hf.Composite({
                         }
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.startWith(...payloads).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxStartWithOp(...payloads),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.startWith(...payloads).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxStartWithOp(...payloads),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.startWith(...payloads).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxStartWithOp(...payloads),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.startWith(...payloads).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxStartWithOp(...payloads),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.startWith - Invalid direction:${direction}.`);
@@ -507,16 +629,28 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.takeLast(count).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxTakeLastOp(count),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.takeLast(count).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxTakeLastOp(count),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.takeLast(count).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxTakeLastOp(count),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.takeLast(count).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxTakeLastOp(count),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.takeLast - Invalid direction:${direction}.`);
@@ -545,16 +679,28 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.throttle(ms).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxThrottleOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.throttle(ms).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxThrottleOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.throttle(ms).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxThrottleOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.throttle(ms).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxThrottleOp(ms),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.throttle - Invalid direction:${direction}.`);
@@ -584,24 +730,36 @@ export default Hf.Composite({
                         // FIXME: needs to reimplement flat map the outputs of bufferTime.
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.bufferTime(ms).filter((payloads) => {
-                                return !Hf.isEmpty(payloads);
-                            }).flatMap((payload) => payload).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxBufferTimeOp(ms),
+                                rxFilterOp((payloads) => !Hf.isEmpty(payloads)),
+                                rxFlatMapOp((payload) => payload),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.bufferTime(ms).filter((payloads) => {
-                                return !Hf.isEmpty(payloads);
-                            }).flatMap((payload) => payload).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxBufferTimeOp(ms),
+                                rxFilterOp((payloads) => !Hf.isEmpty(payloads)),
+                                rxFlatMapOp((payload) => payload),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.bufferTime(ms).filter((payloads) => {
-                                return !Hf.isEmpty(payloads);
-                            }).flatMap((payload) => payload).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxBufferTimeOp(ms),
+                                rxFilterOp((payloads) => !Hf.isEmpty(payloads)),
+                                rxFlatMapOp((payload) => payload),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.bufferTime(ms).filter((payloads) => {
-                                return !Hf.isEmpty(payloads);
-                            }).flatMap((payload) => payload).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxBufferTimeOp(ms),
+                                rxFilterOp((payloads) => !Hf.isEmpty(payloads)),
+                                rxFlatMapOp((payload) => payload),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.backPressure - Invalid direction:${direction}.`);
@@ -635,16 +793,28 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.timeout(ms, Rx.Observable.of(timeoutPayload)).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxTimeoutOp(ms, rxOf(timeoutPayload)),
+                                rxShareOp()
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.timeout(ms, Rx.Observable.of(timeoutPayload)).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxTimeoutOp(ms, rxOf(timeoutPayload)),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.timeout(ms, Rx.Observable.of(timeoutPayload)).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxTimeoutOp(ms, rxOf(timeoutPayload)),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.timeout(ms, Rx.Observable.of(timeoutPayload)).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxTimeoutOp(ms, rxOf(timeoutPayload)),
+                                rxShareOp()
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.timeout - Invalid direction:${direction}.`);
@@ -693,23 +863,35 @@ export default Hf.Composite({
                             }
                         }).of(logger);
                         /* using a side observer for monitoring */
-                        const sideObserver = Rx.Subscriber.create(
+                        const sideObserver = RxSubscriber.create(
                             logNext,
                             logError,
                             logCompleted
                         );
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.do(sideObserver).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxTapOp(sideObserver),
+                                rxShareOp
+                            );
                             break;
                         case OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.do(sideObserver).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxTapOp(sideObserver),
+                                rxShareOp
+                            );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
-                            _divertedIncomingStream = _divertedIncomingStream.do(sideObserver).share();
+                            _divertedIncomingStream = _divertedIncomingStream.pipe(
+                                rxTapOp(sideObserver),
+                                rxShareOp
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _divertedOutgoingStream.do(sideObserver).share();
+                            _divertedOutgoingStream = _divertedOutgoingStream.pipe(
+                                rxTapOp(sideObserver),
+                                rxShareOp
+                            );
                             break;
                         default:
                             Hf.log(`error`, `EventStreamComposite.monitor - Invalid direction:${direction}.`);
@@ -720,10 +902,16 @@ export default Hf.Composite({
                     recombine: function recombine () {
                         switch (direction) { // eslint-disable-line
                         case DIVERTED_INCOMING_DIRECTION:
-                            _incomingStream = _incomingStream.merge(_divertedIncomingStream).share();
+                            _incomingStream = _incomingStream.pipe(
+                                rxMergeOp(_divertedIncomingStream),
+                                rxShareOp()
+                            );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
-                            _outgoingStream = _outgoingStream.merge(_divertedOutgoingStream).share();
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxMergeOp(_divertedOutgoingStream),
+                                rxShareOp()
+                            );
                             Object.keys(_targetRegistrationCache).forEach((fId) => {
                                 _targetRegistrationCache[fId].connectStream(_divertedOutgoingStream);
                             });
@@ -750,30 +938,34 @@ export default Hf.Composite({
 
                         switch (direction) { // eslint-disable-line
                         case INCOMING_DIRECTION:
-                            _divertedIncomingStream = _incomingStream.filter((payload) => {
-                                return eventIds.includes(payload.eventId);
-                            }).scan((payloads, payload) => {
-                                payloads.push(payload);
-                                return payloads;
-                            }, []).flatMap((payload) => payload);
+                            _divertedIncomingStream = _incomingStream.pipe(
+                                rxFilterOp((payload) => eventIds.includes(payload.eventId)),
+                                rxScanOp((payloads, payload) => {
+                                    payloads.push(payload);
+                                    return payloads;
+                                }, []),
+                                rxFlatMapOp((payload) => payload)
+                            );
                             /* filler out diverted events from main incoming stream */
-                            _incomingStream = _incomingStream.filter((payload) => {
-                                return eventIds.every((eventId) => eventId !== payload.eventId);
-                            }).share();
-
+                            _incomingStream = _incomingStream.pipe(
+                                rxFilterOp((payload) => eventIds.every((eventId) => eventId !== payload.eventId)),
+                                rxShareOp()
+                            );
                             return _createStreamOperatorFor.call(factory, DIVERTED_INCOMING_DIRECTION);
                         case OUTGOING_DIRECTION:
-                            _divertedOutgoingStream = _outgoingStream.filter((payload) => {
-                                return eventIds.includes(payload.eventId);
-                            }).scan((payloads, payload) => {
-                                payloads.push(payload);
-                                return payloads;
-                            }, []).flatMap((payload) => payload);
+                            _divertedOutgoingStream = _outgoingStream.pipe(
+                                rxFilterOp((payload) => eventIds.includes(payload.eventId)),
+                                rxScanOp((payloads, payload) => {
+                                    payloads.push(payload);
+                                    return payloads;
+                                }, []),
+                                rxFlatMapOp((payload) => payload)
+                            );
                             /* filler out diverted events from main outgoing stream */
-                            _outgoingStream = _outgoingStream.filter((payload) => {
-                                return eventIds.every((eventId) => eventId !== payload.eventId);
-                            }).share();
-
+                            _outgoingStream = _outgoingStream.pipe(
+                                rxFilterOp((payload) => eventIds.every((eventId) => eventId !== payload.eventId)),
+                                rxShareOp()
+                            );
                             return _createStreamOperatorFor.call(factory, DIVERTED_OUTGOING_DIRECTION);
                         case `diversion`:
                             Hf.log(`error`, `EventStreamComposite.divert - Cannot divert a diverted stream.`);
@@ -989,8 +1181,8 @@ export default Hf.Composite({
                                         intervalPeriod: 0
                                     }).of(_arbiter[eventId]);
                                     let sideSubscription;
-                                    let sideStream = Rx.Observable;
-                                    const sideObserver = Rx.Subscriber.create(
+                                    let sideStream = RxObservable;
+                                    const sideObserver = RxSubscriber.create(
                                         /**
                                          * @description - On subscription to next incoming side value...
                                          *
@@ -1042,13 +1234,25 @@ export default Hf.Composite({
                                         }, waitTime);
                                     } else if (waitTime > 0 && intervalPeriod > 0) {
                                         setTimeout(() => {
-                                            sideStream = sideStream.interval(intervalPeriod).timeInterval().share();
-                                            _outgoingStream = _outgoingStream.merge(sideStream).share();
+                                            sideStream = rxInterval(intervalPeriod).pipe(
+                                                rxTimeIntervalOp(),
+                                                rxShareOp()
+                                            );
+                                            _outgoingStream = _outgoingStream.pipe(
+                                                rxMergeOp(sideStream),
+                                                rxShareOp()
+                                            );
                                             sideSubscription = sideStream.subscribe(sideObserver);
                                         }, waitTime);
                                     } else if (waitTime === 0 && intervalPeriod > 0) {
-                                        sideStream = sideStream.interval(intervalPeriod).timeInterval().share();
-                                        _outgoingStream = _outgoingStream.merge(sideStream).share();
+                                        sideStream = rxInterval(intervalPeriod).pipe(
+                                            rxTimeIntervalOp(),
+                                            rxShareOp()
+                                        );
+                                        _outgoingStream = _outgoingStream.pipe(
+                                            rxMergeOp(sideStream),
+                                            rxShareOp()
+                                        );
                                         sideSubscription = sideStream.subscribe(sideObserver);
                                     } else {
                                         _streamEmitter.next(payload);
@@ -1251,13 +1455,13 @@ export default Hf.Composite({
                     await: function _await (ms = 0, timeoutError = () => null) {
                         if (eventIds.length > 1) {
                             let sideSubscription;
-                            let sideStream = Rx.Observable.never();
+                            let sideStream = RxObservableNever;
                             let timeoutId = null;
                             const awaitedEventId = eventIds.reduce((_awaitedEventId, eventId) => {
                                 return Hf.isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId},${eventId}`;
                             }, ``);
                             const incomingAwaitOperator = factory.incoming(awaitedEventId);
-                            const sideObserver = Rx.Subscriber.create(
+                            const sideObserver = RxSubscriber.create(
                                 /**
                                  * @description - On subscription to next incoming side value...
                                  *
@@ -1320,16 +1524,17 @@ export default Hf.Composite({
                                 timeoutId = setTimeout(() => timeoutError(), ms);
                             }
 
-                            sideStream = _incomingStream.filter((payload) => {
-                                return eventIds.includes(payload.eventId);
-                            }).scan((awaitedPayloadBundle, payload) => {
-                                awaitedPayloadBundle[payload.eventId] = {
-                                    cancelled: payload.cancelled,
-                                    value: payload.value
-                                };
-                                return awaitedPayloadBundle;
-                            }, {}).share();
-
+                            sideStream = _incomingStream.pipe(
+                                rxFilterOp((payload) => eventIds.includes(payload.eventId)),
+                                rxScanOp((awaitedPayloadBundle, payload) => {
+                                    awaitedPayloadBundle[payload.eventId] = {
+                                        cancelled: payload.cancelled,
+                                        value: payload.value
+                                    };
+                                    return awaitedPayloadBundle;
+                                }, {}),
+                                rxShareOp()
+                            );
                             sideSubscription = sideStream.subscribe(sideObserver);
 
                             return {
@@ -1435,7 +1640,7 @@ export default Hf.Composite({
                      * @return {object}
                      */
                     repeat: function repeat () {
-                        // TODO: use Rx.Observable.repeat?
+                        // TODO: use rxRepeat?
                         _arbiter = eventIds.reduce((arbiter, eventId) => {
                             if (arbiter.hasOwnProperty(eventId)) {
                                 arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
@@ -1521,7 +1726,7 @@ export default Hf.Composite({
                 if (!_incomingStreamActivated) {
                     if (!Hf.isDefined(_observer)) {
                         /* creating factory event stream observer */
-                        _observer = Rx.Subscriber.create(
+                        _observer = RxSubscriber.create(
                             _next,
                             _error,
                             _complete
@@ -1539,9 +1744,11 @@ export default Hf.Composite({
                             bufferTimeShift = 1;
                             Hf.log(`warn1`, `EventStreamComposite.activateIncomingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
                         }
-                        _incomingSubscription = _incomingStream.bufferTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
-                            return !Hf.isEmpty(payloads);
-                        }).flatMap((payload) => payload).subscribe(_observer);
+                        _incomingSubscription = _incomingStream.pipe(
+                            rxBufferTimeOp(bufferTimeSpan, bufferTimeShift),
+                            rxFilterOp((payloads) => !Hf.isEmpty(payloads)),
+                            rxFlatMapOp((payload) => payload)
+                        ).subscribe(_observer);
                     } else {
                         _incomingSubscription = _incomingStream.subscribe(_observer);
                     }
@@ -1576,7 +1783,7 @@ export default Hf.Composite({
                 if (!_outgoingStreamActivated) {
                     if (!Hf.isDefined(_observer)) {
                         /* creating factory event stream observer */
-                        _observer = Rx.Subscriber.create(
+                        _observer = RxSubscriber.create(
                             _next,
                             _error,
                             _complete
@@ -1594,9 +1801,11 @@ export default Hf.Composite({
                             bufferTimeShift = 1;
                             Hf.log(`warn1`, `EventStreamComposite.activateOutgoingStream - Input buffer time shift option should be greater than 0. Reset to 1ms.`);
                         }
-                        _outgoingSubscription = _outgoingStream.bufferTime(bufferTimeSpan, bufferTimeShift).filter((payloads) => {
-                            return !Hf.isEmpty(payloads);
-                        }).flatMap((payload) => payload).subscribe(_observer);
+                        _outgoingSubscription = _outgoingStream.pipe(
+                            rxBufferTimeOp(bufferTimeSpan, bufferTimeShift),
+                            rxFilterOp((payloads) => !Hf.isEmpty(payloads)),
+                            rxFlatMapOp((payload) => payload)
+                        ).subscribe(_observer);
                     } else {
                         _outgoingSubscription = _outgoingStream.subscribe(_observer);
                     }
@@ -1633,8 +1842,8 @@ export default Hf.Composite({
                     Hf.clear(_arbiter);
                     Hf.clear(_targetRegistrationCache);
 
-                    _incomingStream = Rx.Observable.never();
-                    _divertedIncomingStream = Rx.Observable.never();
+                    _incomingStream = RxObservableNever;
+                    _divertedIncomingStream = RxObservableNever;
 
                     _incomingStreamActivated = false;
                 } else {
@@ -1661,10 +1870,10 @@ export default Hf.Composite({
                     Hf.clear(_targetRegistrationCache);
                     Hf.clear(_unemitPayloads);
 
-                    _streamEmitter = new Rx.Subject();
+                    _streamEmitter = new RxSubject();
                     /* converting event stream emitter as a subject to an observable */
                     _outgoingStream = _streamEmitter.asObservable();
-                    _divertedOutgoingStream = Rx.Observable.never();
+                    _divertedOutgoingStream = RxObservableNever;
 
                     _outgoingStreamActivated = false;
                 } else {
@@ -1708,7 +1917,9 @@ export default Hf.Composite({
                             }
                         }
                         /* merge all external incoming event streams into one */
-                        _incomingStream = Rx.Observable.merge(sourceOutgoingStream, _incomingStream).share();
+                        _incomingStream = rxMerge(sourceOutgoingStream, _incomingStream).pipe(
+                            rxShareOp()
+                        );
                     };
                     source.registerStream({
                         fId: factory.fId,

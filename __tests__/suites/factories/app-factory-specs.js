@@ -176,7 +176,7 @@ export function runTests () {
                         name: app.name
                     }),
                     component: {
-                        library: {
+                        lib: {
                             React,
                             PropTypes,
                             CreateReactClass

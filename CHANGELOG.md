@@ -2,13 +2,14 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
+**Development RC Version 0.2.1-rc1 (01/10/2019)**
 **Development Version 0.2.1 (05/07/2018)**
 ```
 Notes:
     - Updated RxJs to latest.
 New Features:
 Changes:
-    - lookupComponentRefs method now returns null and raised warning instead of error if the component reference i snot found for ReactComponentComposite.
+    - lookupComponentRefs method now returns null and raised warning instead of error if the component reference is not found for ReactComponentComposite.
 Breaking Changes:
     - Refactored options for hyperflow when creating an instance with init method.
 Improvements:
@@ -307,7 +308,7 @@ Notes:
 New Features:
 Breaking Changes:
 Improvements:
-    - Removed no empty object or array restriction when set content item for DataElement. Empty object or array is now reconfigurable like null.  
+    - Removed no empty object or array restriction when set content item for DataElement. Empty object or array is now reconfigurable like null.
 Bug fixes:
 ```
 **Development Beta Version 0.1.0-beta20 (01/07/2017)**
@@ -550,7 +551,7 @@ Bug fixes:
 ```
 Notes:
 New Features:
-    - Added the optional Hf.Event.create method. This allows a more opinionated way of naming event Id.  
+    - Added the optional Hf.Event.create method. This allows a more opinionated way of naming event Id.
 Breaking Changes:
     - Commented out getState & getComposite in Composer, and getStateAccessor & getStateSchema in CompositeElement. Will be removed if find no use case.
 Improvements:

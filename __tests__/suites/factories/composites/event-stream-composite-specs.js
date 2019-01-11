@@ -48,23 +48,23 @@ const factoryA = Factory.augment({
     state: {
         name: `factoryA`
     },
-    operateIncomingStream: function operateIncomingStream (operator) {
-        operator.divert(`event1`, `event2`).monitor({
-            logNext: (payload) => console.log(`Monitor factory A incoming event stream id:${payload.eventId} -- ${payload.value}`)
-        }).recombine();
-    },
-    operateOutgoingStream: function operateOutgoingStream (operator) {
-        operator.divert(`event3`).map((payload) => {
-            return {
-                eventId: `event3`,
-                value: payload.value[0] + payload.value[1]
-            };
-        }).monitor({
-            logNext: (payload) => {
-                console.log(`Monitor factory A outgoing event stream id:${payload.eventId} -- ${payload.value}`);
-            }
-        }).recombine();
-    },
+    // operateIncomingStream: function operateIncomingStream (operator) {
+    //     operator.divert(`event1`, `event2`).monitor({
+    //         logNext: (payload) => console.log(`Monitor factory A incoming event stream id:${payload.eventId} -- ${payload.value}`)
+    //     }).recombine();
+    // },
+    // operateOutgoingStream: function operateOutgoingStream (operator) {
+    //     operator.divert(`event3`).map((payload) => {
+    //         return {
+    //             eventId: `event3`,
+    //             value: payload.value[0] + payload.value[1]
+    //         };
+    //     }).monitor({
+    //         logNext: (payload) => {
+    //             console.log(`Monitor factory A outgoing event stream id:${payload.eventId} -- ${payload.value}`);
+    //         }
+    //     }).recombine();
+    // },
     setup: function setup (done) {
         const factory = this;
         factory.incoming(
@@ -222,7 +222,7 @@ export function runTests () {
             factoryC.outgoing(`cancellable-eventA`).delay(1000).emit(() => `A completed!!!`);
             factoryC.outgoing(`cancellable-eventB`).delay(2000).emit(() => `B completed!!!`);
             factoryC.outgoing(`interval-eventC`).delay(3000).interval(1000, (tick) => {
-                return tick > 15;
+                return tick.value > 15;
             }).emit(() => `C`);
 
             factoryC.outgoing(`cancellable-eventA`).delay(2010).cancelLatest();

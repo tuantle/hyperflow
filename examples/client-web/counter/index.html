@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Counter Example</title>
+    <meta "charSet=UTF-8">
+</head>
+
+<body>
+    <!-- load system js -->
+    <script src="../jspm_packages/system.js"></script>
+    <script src="../config.js"></script>
+    <!-- counter app -->
+    <div id="counter"></div>
+    <script>
+        System.import("hyperflow").then(function (Hf) {
+            Hf.init({
+                target: `client-web`,
+                enableProductionMode: false
+            });
+        }).then(function () {
+            System.import("counter/counter-app").then(function (CounterApp) {
+                CounterApp.start();
+            }).catch(console.error.bind(console));
+        });
+    </script>
+</body>
+
+</html>
