@@ -1,0 +1,42 @@
+{
+  "name": "hyperflow-client-web-calculator-example",
+  "description": "Example client apps built using Hyperflow.",
+  "authors": [
+    "Tuan Le <tuan.t.lei@gmail.com> (https://github.com/tuantle)"
+  ],
+  "private": false,
+  "homepage": "https://github.com/tuantle/hyperflow",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tuantle/hyperflow/issues"
+  },
+  "scripts": {
+    "webpack-build-calculator": "NODE_ENV=development webpack --mode development --progress --colors --config calculator-webpack.config.js",
+    "webpack-start-calculator": "NODE_ENV=development webpack-dev-server --mode development --content-base --progress --colors --config calculator-webpack.config.js"
+  },
+  "modulePathIgnorePatterns": [
+    "/node_modules/"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "css-loader": "^2.1.0",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
+  },
+  "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.2.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/plugin-transform-strict-mode": "^7.2.0",
+    "hyperflow": "file:../../../hyperflow-0.2.1.tgz",
+    "material-ui": "^0.20.2",
+    "moment": "^2.23.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
+  }
+}

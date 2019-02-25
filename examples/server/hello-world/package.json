@@ -1,0 +1,56 @@
+{
+    "name": "hello-world-server",
+    "version": "0.1.0",
+    "description": "Example server app built with Hyperflow.",
+    "authors": [
+        "Tuan Le <tuan.t.lei@gmail.com> (https://github.com/tuantle)"
+    ],
+    "readme": "README.md",
+    "license": "MIT",
+    "private": false,
+    "main": "index.server.js",
+    "engines": {
+        "node": ">=10.x",
+        "npm": ">=6.x"
+    },
+    "dependencies": {
+        "create-react-class": ">=15.6.x",
+        "hyperflow": "file:../../../hyperflow-0.2.1.tgz",
+        "kcors": ">=2.2.x",
+        "koa": ">=2.6.x",
+        "koa-better-body": ">=3.0.x",
+        "koa-better-router": ">=2.1.x",
+        "koa-body-parsers": ">=3.1.x",
+        "koa-cache-control": ">=2.0.x",
+        "koa-compress": ">=3.0.x",
+        "koa-conditional-get": ">=2.0.x",
+        "koa-etag": ">=3.0.x",
+        "koa-logger": ">=3.2.x",
+        "prop-types": ">=15.6.x",
+        "react": ">=16.7.x",
+        "react-dom": ">=16.7.x"
+    },
+    "devDependencies": {
+        "@babel/node": ">=7.2.x",
+        "@babel/register": ">=7.0.x",
+        "@babel/core": ">=7.2.x",
+        "@babel/plugin-proposal-class-properties": ">=7.2.x",
+        "@babel/plugin-proposal-object-rest-spread": ">=7.2.x",
+        "@babel/plugin-transform-strict-mode": ">=7.2.x",
+        "@babel/preset-env": ">=7.2.x",
+        "@babel/preset-react": ">=7.0.x",
+        "@babel/runtime": ">=7.2.x",
+        "babel-eslint": ">=10.0.x",
+        "eslint": ">=5.12.x",
+        "eslint-plugin-react": ">=7.12.x"
+    },
+    "scripts": {
+        "start-dev": "NODE_ENV=development nodemon --exec babel-node index.server.js",
+        "start-production": "pm2 start process.json --env production",
+        "stop-production": "pm2 stop all",
+        "restart-production": "pm2 gracefulReload all --env production"
+    },
+    "modulePathIgnorePatterns": [
+        "/node_modules/"
+    ]
+}

@@ -1,0 +1,17 @@
+{
+  "apps" : [{
+    "name"        : "hello-world-server-app",
+    "script"      : "./index.server.js",
+    "instances" : "max",
+    "exec_mode" : "cluster" ,
+    "watch"       : true,
+    "node_args": [
+    ],
+    "env": {
+      "NODE_ENV": "development",
+    },
+    "env_production" : {
+       "NODE_ENV": "production"
+    }
+  }]
+}

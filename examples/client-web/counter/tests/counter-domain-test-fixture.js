@@ -1,12 +1,3 @@
-/**
- *------------------------------------------------------------------------
- *
- * @description -  Counter test fixture for app domain.
- *
- * @author Tuan Le (tuan.t.lei@gmail.com)
- *
- *------------------------------------------------------------------------
- */
 'use strict'; // eslint-disable-line
 
 import Hf from 'hyperflow';
@@ -15,17 +6,12 @@ import { CounterDomain } from '../domains/counter-domain';
 
 import event from '../events/counter-event';
 
-/**
- * @description - Counter app domain test fixture module.
- *
- * @module CounterDomainTestFixture
- */
 const CounterDomainTestFixture = Hf.Fixture.augment({
     composites: [
         Hf.Test.DomainFixtureComposite,
         Hf.Test.TapeRunnerComposite
     ],
-    $init: function $init () {
+    $init () {
         const fixture = this;
         fixture.register({
             testSubject: CounterDomain({
@@ -33,7 +19,7 @@ const CounterDomainTestFixture = Hf.Fixture.augment({
             })
         });
     },
-    setup: function setup (done) {
+    setup (done) {
         const fixture = this;
 
         fixture.test((assert) => {
