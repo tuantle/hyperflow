@@ -24,13 +24,16 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
+import CommonElement from '../../core/elements/common-element';
+
+import CompositeElement from '../../core/elements/composite-element';
 
 /* factory Ids */
 import { FIXTURE_FACTORY_CODE } from '../factory-code';
 
-export default Hf.Composite({
+const Hf = CommonElement();
+
+export default CompositeElement({
     template: {
         /**
          * @description - Initialized and check that factory is valid for this composite.
@@ -38,7 +41,7 @@ export default Hf.Composite({
          * @method $initTapeTestRunnerComposite
          * @return void
          */
-        $initTapeTestRunnerComposite: function $initTapeTestRunnerComposite () {
+        $initTapeTestRunnerComposite () {
             const fixture = this;
 
             if (Hf.DEVELOPMENT) {
@@ -58,7 +61,7 @@ export default Hf.Composite({
          * @param {string} description
          * @return void
          */
-        test: function test (tester, description = ``) {
+        test (tester, description = ``) {
             const fixture = this;
 
             description = Hf.isString(description) ? description : ``;

@@ -24,8 +24,7 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+import CommonElement from '../elements/common-element';
 
 /* load Composer */
 import Composer from '../composer';
@@ -35,6 +34,8 @@ import {
     APP_FACTORY_CODE,
     DOMAIN_FACTORY_CODE
 } from './factory-code';
+
+const Hf = CommonElement();
 
 export default Composer({
     state: {
@@ -53,7 +54,7 @@ export default Composer({
             }
         }
     },
-    AppFactory: function AppFactory () {
+    AppFactory () {
         /* ----- Private Variables ------------- */
         let _componentLib;
         let _componentRenderer;
@@ -65,7 +66,7 @@ export default Composer({
          * @method $init
          * @return void
          */
-        this.$init = function $init () {
+        this.$init = function () {
             Hf.log(`warn0`, `AppFactory.$init - Method is not implemented by default.`);
         };
         /**
@@ -74,7 +75,7 @@ export default Composer({
          * @method hasStarted
          * @return {boolean}
          */
-        this.hasStarted = function hasStarted () {
+        this.hasStarted = function () {
             const app = this;
 
             if (Hf.DEVELOPMENT) {
@@ -91,7 +92,7 @@ export default Composer({
          * @method renderToTarget
          * @return {void|string}
          */
-        this.renderToTarget = function renderToTarget () {
+        this.renderToTarget = function () {
             Hf.log(`warn0`, `AppFactory.renderToTarget - Method is not implemented by default.`);
         };
         /**
@@ -100,7 +101,7 @@ export default Composer({
          * @method getComponentRenderer
          * @return {object}
          */
-        this.getComponentRenderer = function getComponentRenderer () {
+        this.getComponentRenderer = function () {
             const app = this;
 
             if (Hf.DEVELOPMENT) {
@@ -117,7 +118,7 @@ export default Composer({
          * @method getComponentLib
          * @return {object}
          */
-        this.getComponentLib = function getComponentLib () {
+        this.getComponentLib = function () {
             const app = this;
 
             if (Hf.DEVELOPMENT) {
@@ -135,7 +136,7 @@ export default Composer({
          * @param {object} option
          * @return {object|function}
          */
-        this.getTopComponent = function getTopComponent (option = {}) { // eslint-disable-line
+        this.getTopComponent = function (option = {}) { // eslint-disable-line
             Hf.log(`warn0`, `AppFactory.getTopComponent - Method is not implemented by default.`);
         };
         /**
@@ -144,7 +145,7 @@ export default Composer({
          * @method getTopDomain
          * @return {object}
          */
-        this.getTopDomain = function getTopDomain () {
+        this.getTopDomain = function () {
             const app = this;
 
             if (Hf.DEVELOPMENT) {
@@ -162,7 +163,7 @@ export default Composer({
          * @param {object} definition - App registration definition for domain, renderer, and target.
          * @return {object}
          */
-        this.register = function register (definition) {
+        this.register = function (definition) {
             const app = this;
             // TODO: Throw error if called outside of $init.
 
@@ -225,7 +226,7 @@ export default Composer({
          * @param {object} option
          * @return void
          */
-        this.start = function start (option = {
+        this.start = function (option = {
             doRenderToTarget: true
         }) {
             const app = this;
@@ -266,7 +267,7 @@ export default Composer({
          * @param {object} option
          * @return void
          */
-        this.stop = function stop (option = {}) {
+        this.stop = function (option = {}) {
             const app = this;
 
             option = Hf.isObject(option) ? option : {};
@@ -291,7 +292,7 @@ export default Composer({
          * @param {object} option,
          * @return void
          */
-        this.restart = function restart (option = {
+        this.restart = function (option = {
             doRenderToTarget: true
         }) {
             const app = this;

@@ -25,16 +25,16 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
+
+import CommonElement from '../common-element';
 
 /* load RxJs dependency */
 import {
     Subscriber as RxSubscriber,
-    Observable as RxObservable,
+    Observable as RxObservable
 } from 'rxjs';
 
-const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+const Hf = CommonElement();
 
 /**
  * @description - A emitter descriptor prototypes.
@@ -50,7 +50,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} handerKey
      * @return {boolean}
      */
-    hasSubscriber: function hasSubscriber (handerKey) {
+    hasSubscriber (handerKey) {
         const observable = this;
         const eventId = `${observable._id}.${handerKey}`;
 
@@ -63,7 +63,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} conditionKey
      * @return {boolean}
      */
-    hasCondition: function hasCondition (conditionKey) {
+    hasCondition (conditionKey) {
         const observable = this;
 
         return observable._description.condition.hasOwnProperty(conditionKey);
@@ -74,7 +74,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @method getStream
      * @return {object}
      */
-    getStream: function getStream () {
+    getStream () {
         const observable = this;
 
         if (Hf.DEVELOPMENT) {
@@ -93,7 +93,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} handerKey
      * @return void
      */
-    addSubscriber: function addSubscriber (handler, handerKey) {
+    addSubscriber (handler, handerKey) {
         if (Hf.DEVELOPMENT) {
             if (!Hf.isFunction(handler)) {
                 Hf.log(`error`, `ObservableDescriptor.addSubscriber - Input subscription handler function is invalid.`);
@@ -116,7 +116,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} handerKey
      * @return void
      */
-    removeSubscriber: function removeSubscriber (handerKey) {
+    removeSubscriber (handerKey) {
         if (Hf.DEVELOPMENT) {
             if (!Hf.isString(handerKey)) {
                 Hf.log(`error`, `ObservableDescriptor.removeSubscriber - Input subscriber handler key is invalid.`);
@@ -139,7 +139,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} conditionKey
      * @return void
      */
-    addCondition: function addCondition (trigger, conditionKey) {
+    addCondition (trigger, conditionKey) {
         if (Hf.DEVELOPMENT) {
             if (!Hf.isFunction(trigger)) {
                 Hf.log(`error`, `ObservableDescriptor.addCondition - Input condition trigger function is invalid.`);
@@ -162,7 +162,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} conditionKey
      * @return void
      */
-    removeCondition: function removeCondition (conditionKey) {
+    removeCondition (conditionKey) {
         if (Hf.DEVELOPMENT) {
             if (!Hf.isString(conditionKey)) {
                 Hf.log(`error`, `ObservableDescriptor.removeCondition - Input condition key is invalid.`);
@@ -184,7 +184,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @param {object} descPreset - A descriptor preset object.
      * @return {object}
      */
-    assign: function assign (descPreset) {
+    assign (descPreset) {
         if (Hf.DEVELOPMENT) {
             if (!Hf.isSchema({
                 key: `string|number`
@@ -276,7 +276,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
              * @param {object|array} target - Target object.
              * @return void
              */
-            to: function to (target) {
+            to (target) {
                 if (Hf.DEVELOPMENT) {
                     if (!(Hf.isObject(target) || Hf.isArray(target))) {
                         Hf.log(`error`, `ObservableDescriptor.assign.to - Input target is invalid.`);
@@ -293,13 +293,13 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
                 observable._stream = RxObservable.create((streamEmitter) => {
                     /* create the condition property for the assigned object */
                     Object.defineProperty(observable._description.proxy, key, {
-                        get: function get () {
+                        get () {
                             if (observable._description.orgDesc.hasOwnProperty(`get`)) {
                                 return observable._description.orgDesc.get();
                             }
                             return observable._description.orgDesc.value;
                         },
-                        set: function set (value) {
+                        set (value) {
                             if (observable._description.orgDesc.hasOwnProperty(`set`)) {
                                 observable._description.orgDesc.set(value);
                             } else {
@@ -353,7 +353,7 @@ const ObservableDescriptorPrototype = Object.create({}).prototype = {
      * @method unassign
      * @return void
      */
-    unassign: function unassign () {
+    unassign () {
         const observable = this;
 
         if (observable._description.assigned) {
@@ -453,5 +453,5 @@ export default function ObservableDescriptor (id) {
     }
 
     /* reveal only the public properties and functions */
-    return revealFrozen(descriptor);
+    return Hf.compose(Hf.reveal, Object.freeze)(descriptor);
 }

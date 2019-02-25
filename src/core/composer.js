@@ -24,13 +24,13 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../hyperflow';
+
+import CommonElement from './elements/common-element';
 
 /* load CompositeElement */
 import CompositeElement from './elements/composite-element';
 
-const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+const Hf = CommonElement();
 
 /**
  * @description - A composer factory prototypes.
@@ -46,7 +46,7 @@ const ComposerPrototype = Object.create({}).prototype = {
      * @returns {object}
      */
     // TODO: To be removed if find no use case.
-    // getState: function getState () {
+    // getState () {
     //     const composer = this;
     //     return Hf.clone(composer._state);
     // },
@@ -57,7 +57,7 @@ const ComposerPrototype = Object.create({}).prototype = {
      * @returns {object}
      */
     // TODO: To be removed if find no use case.
-    // getComposite: function getComposite () {
+    // getComposite () {
     //     const composer = this;
     //     const compositeDefinition = {
     //         exclusion: composer._composite.getExclusion(),
@@ -73,7 +73,7 @@ const ComposerPrototype = Object.create({}).prototype = {
      * @param {object} definition
      * @returns {function}
      */
-    augment: function augment (definition) {
+    augment (definition) {
         const composer = this;
 
         if (Hf.DEVELOPMENT) {
@@ -134,7 +134,7 @@ const ComposerPrototype = Object.create({}).prototype = {
             initialState = composer._state;
         }
 
-        if (!Hf.isEmpty(composites)) {
+        if (Hf.isNonEmptyArray(composites)) {
             factory = composer._composite.compose(...composites).mixin(fnDefinition).resolve(initialStatic, initialState);
         } else {
             factory = composer._composite.mixin(fnDefinition).resolve(initialStatic, initialState);
@@ -216,7 +216,7 @@ export default function Composer (definition) {
                 if (!Hf.isObject(composite)) {
                     Hf.log(`error`, `Composer - Unable to create a composite.`);
                 } else {
-                    return !Hf.isEmpty(composites) ? composite.compose(...composites) : composite;
+                    return Hf.isNonEmptyArray(composites) ? composite.compose(...composites) : composite;
                 }
             })(),
             writable: false,
@@ -232,5 +232,5 @@ export default function Composer (definition) {
     }
 
     /* reveal only the public properties and functions */
-    return revealFrozen(composer);
+    return Hf.compose(Hf.reveal, Object.freeze)(composer);
 }

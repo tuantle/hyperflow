@@ -24,14 +24,15 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+import CommonElement from '../elements/common-element';
 
 /* load EventStreamComposite */
 import EventStreamComposite from './composites/event-stream-composite';
 
 /* load Composer */
 import Composer from '../composer';
+
+const Hf = CommonElement();
 
 /* factory Ids */
 import {
@@ -74,7 +75,7 @@ export default Composer({
             }
         }
     },
-    DomainFactory: function DomainFactory () {
+    DomainFactory () {
         /* ----- Private Variables ------------- */
         /* flag indicates start method has called */
         let _started = false;
@@ -93,7 +94,7 @@ export default Composer({
          * @method $init
          * @return void
          */
-        this.$init = function $init () {
+        this.$init = function () {
             Hf.log(`warn0`, `DomainFactory.$init - Method is not implemented by default.`);
         };
         /**
@@ -103,7 +104,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.setup = function setup (done) { // eslint-disable-line
+        this.setup = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `DomainFactory.setup - Input done function is invalid.`);
@@ -118,7 +119,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.teardown = function teardown (done) { // eslint-disable-line
+        this.teardown = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `DomainFactory.teardown - Input done function is invalid.`);
@@ -133,7 +134,7 @@ export default Composer({
          * @method hasStarted
          * @return {boolean}
          */
-        this.hasStarted = function hasStarted () {
+        this.hasStarted = function () {
             return _started;
         };
         /**
@@ -142,7 +143,7 @@ export default Composer({
          * @method getInterface
          * @return {object}
          */
-        this.getInterface = function getInterface () {
+        this.getInterface = function () {
             const domain = this;
 
             if (Hf.DEVELOPMENT) {
@@ -158,7 +159,7 @@ export default Composer({
          * @method getStore
          * @return {object}
          */
-        this.getStore = function getStore () {
+        this.getStore = function () {
             const domain = this;
 
             if (Hf.DEVELOPMENT) {
@@ -175,10 +176,10 @@ export default Composer({
          * @param {array} serviceNames
          * @return {array}
          */
-        this.getServices = function getServices (...serviceNames) {
+        this.getServices = function (...serviceNames) {
             let services = [];
-            if (!Hf.isEmpty(_services)) {
-                if (!Hf.isEmpty(serviceNames)) {
+            if (Hf.isNonEmptyArray(_services)) {
+                if (Hf.isNonEmptyArray(serviceNames)) {
                     if (Hf.DEVELOPMENT) {
                         if (!serviceNames.every((name) => Hf.isString(name))) {
                             Hf.log(`error`, `DomainFactory.getServices - Input service name is invalid.`);
@@ -201,10 +202,10 @@ export default Composer({
          * @param {array} domainNames
          * @return {array}
          */
-        this.getChildDomains = function getChildDomains (...domainNames) {
+        this.getChildDomains = function (...domainNames) {
             let childDomains = [];
-            if (!Hf.isEmpty(_childDomains)) {
-                if (!Hf.isEmpty(domainNames)) {
+            if (Hf.isNonEmptyArray(_childDomains)) {
+                if (Hf.isNonEmptyArray(domainNames)) {
                     if (Hf.DEVELOPMENT) {
                         if (!domainNames.every((name) => Hf.isString(name))) {
                             Hf.log(`error`, `DomainFactory.getChildDomains - Input domain name is invalid.`);
@@ -227,10 +228,10 @@ export default Composer({
          * @param {array} domainNames
          * @return {array}
          */
-        this.getPeerDomains = function getPeerDomains (...domainNames) {
+        this.getPeerDomains = function (...domainNames) {
             let peerDomains = [];
-            if (!Hf.isEmpty(_peerDomains)) {
-                if (!Hf.isEmpty(domainNames)) {
+            if (Hf.isNonEmptyArray(_peerDomains)) {
+                if (Hf.isNonEmptyArray(domainNames)) {
                     if (Hf.DEVELOPMENT) {
                         if (!domainNames.every((name) => Hf.isString(name))) {
                             Hf.log(`error`, `DomainFactory.getPeerDomains - Input domain name is invalid.`);
@@ -253,7 +254,7 @@ export default Composer({
          * @param {object} definition - Domain registration definition for interface (required), child domains, and store.
          * @return {object}
          */
-        this.register = function register (definition) {
+        this.register = function (definition) {
             const domain = this;
 
             // TODO: Throw error if called outside of $init.
@@ -430,7 +431,7 @@ export default Composer({
          * @param {object} option
          * @return void
          */
-        this.start = function start (done, option = {
+        this.start = function (done, option = {
             enableSlowRunMode: false,
             waitTime: DEFAULT_SETUP_WAIT_TIME_IN_MS
         }) {
@@ -475,26 +476,26 @@ export default Composer({
                     }
                 }
                 /* setup event stream observation duplex between domain and servies and children of services */
-                if (!Hf.isEmpty(_services)) {
+                if (Hf.isNonEmptyArray(_services)) {
                     domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
                     _services.forEach((service) => {
                         const childServices = service.getChildServices();
 
                         service.observe(domain);
 
-                        if (!Hf.isEmpty(childServices)) {
+                        if (Hf.isNonEmptyArray(childServices)) {
                             service.observe(...childServices);
                             childServices.forEach((childService) => childService.observe(service));
                         }
                     });
                 }
                 /* setup event stream observation duplex between domain and children */
-                if (!Hf.isEmpty(_childDomains)) {
+                if (Hf.isNonEmptyArray(_childDomains)) {
                     domain.observe(..._childDomains);
                     _childDomains.forEach((childDomain) => childDomain.observe(domain));
                 }
                 /* setup event stream observation duplex between domain and peers */
-                if (!Hf.isEmpty(_peerDomains)) {
+                if (Hf.isNonEmptyArray(_peerDomains)) {
                     let index = 0;
                     while (index < _peerDomains.length - 1) {
                         _peerDomains[index].observe(..._peerDomains.slice(index + 1));
@@ -514,7 +515,7 @@ export default Composer({
                     });
 
                     /*  then startup child domains... */
-                    if (!Hf.isEmpty(_childDomains)) {
+                    if (Hf.isNonEmptyArray(_childDomains)) {
                         _childDomains.forEach((childDomain) => {
                             const childDomainTimeoutId = setTimeout(() => {
                                 Hf.log(`warn1`, `DomainFactory.start - Child domain:${childDomain.name} is taking longer than ${waitTime}ms to start.`);
@@ -527,7 +528,7 @@ export default Composer({
                     }
 
                     /* then startup peer domains... */
-                    if (!Hf.isEmpty(_peerDomains)) {
+                    if (Hf.isNonEmptyArray(_peerDomains)) {
                         _peerDomains.forEach((peerDomain) => {
                             const peerDomainTimeoutId = setTimeout(() => {
                                 Hf.log(`warn1`, `DomainFactory.start -  Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to start.`);
@@ -542,7 +543,7 @@ export default Composer({
                     /* then activate parent to child interfaces... */
                     if (Hf.isObject(_intf)) {
                         /* helper function to activate all child interfaces event stream */
-                        const deepInterfaceActivateStream = function deepInterfaceActivateStream (intf) {
+                        const deepInterfaceActivateStream = (intf) => {
                             if (Hf.isObject(intf)) {
                                 const intfTimeoutId = setTimeout(() => {
                                     Hf.log(`warn1`, `DomainFactory.start - Interface:${intf.name} is taking longer than ${waitTime}ms to setup.`);
@@ -600,9 +601,9 @@ export default Composer({
                     }
 
                     /* then activate services... */
-                    if (!Hf.isEmpty(_services)) {
+                    if (Hf.isNonEmptyArray(_services)) {
                         /* helper function to activate all child service event stream */
-                        const deepChildServiceActivateStream = function deepChildServiceActivateStream (childService) {
+                        const deepChildServiceActivateStream = (childService) => {
                             if (Hf.isObject(childService)) {
                                 const childServiceTimeoutId = setTimeout(() => {
                                     Hf.log(`warn1`, `DomainFactory.start - Service:${childService.name} is taking longer than ${waitTime}ms to setup.`);
@@ -681,7 +682,7 @@ export default Composer({
          * @param {object} option
          * @return void
          */
-        this.stop = function stop (done, option = {
+        this.stop = function (done, option = {
             resetStoreState: true,
             resetAllServiceStates: true,
             waitTime: DEFAULT_TEARDOWN_WAIT_TIME_IN_MS
@@ -716,7 +717,7 @@ export default Composer({
                 Hf.log(`info1`, `Stopping domain:${domain.name}...`);
                 domain.teardown(() => {
                     /* first stop child domains... */
-                    if (!Hf.isEmpty(_childDomains)) {
+                    if (Hf.isNonEmptyArray(_childDomains)) {
                         _childDomains.forEach((childDomain) => {
                             const childDomainTimeoutId = setTimeout(() => {
                                 Hf.log(`warn1`, `Child domain:${childDomain.name} is taking longer than ${waitTime}ms to stop.`);
@@ -729,7 +730,7 @@ export default Composer({
                     }
 
                     /* then peer domains... */
-                    if (!Hf.isEmpty(_peerDomains)) {
+                    if (Hf.isNonEmptyArray(_peerDomains)) {
                         _peerDomains.forEach((peerDomain) => {
                             const peerDomainTimeoutId = setTimeout(() => {
                                 Hf.log(`warn1`, `Peer domain:${peerDomain.name} is taking longer than ${waitTime}ms to stop.`);
@@ -744,7 +745,7 @@ export default Composer({
                     /* then stop child to parent interfaces... */
                     if (Hf.isObject(_intf)) {
                         /* helper function to deactivate all child interfaces event stream */
-                        const deepInterfaceDeactivateStream = function deepInterfaceDeactivateStream (intf) {
+                        const deepInterfaceDeactivateStream = (intf) => {
                             if (Hf.isObject(intf)) {
                                 const intfTimeoutId = setTimeout(() => {
                                     Hf.log(`warn1`, `DomainFactory.stop - Interface:${intf.name} is taking longer than ${waitTime}ms to teardown.`);
@@ -790,9 +791,9 @@ export default Composer({
                     }
 
                     /* then services... */
-                    if (!Hf.isEmpty(_services)) {
+                    if (Hf.isNonEmptyArray(_services)) {
                         /* helper function to deactivate all child services event stream */
-                        const deepChildServiceDeactivateStream = function deepChildServiceDeactivateStream (childService) {
+                        const deepChildServiceDeactivateStream = (childService) => {
                             if (Hf.isObject(childService)) {
                                 const childServiceTimeoutId = setTimeout(() => {
                                     Hf.log(`warn1`, `DomainFactory.stop - Service:${childService.name} is taking longer than ${waitTime}ms to teardown.`);
@@ -855,7 +856,7 @@ export default Composer({
          * @param {object} option,
          * @return void
          */
-        this.restart = function restart (done, option = {
+        this.restart = function (done, option = {
             waitTime: DEFAULT_SETUP_WAIT_TIME_IN_MS
         }) {
             const domain = this;

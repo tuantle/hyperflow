@@ -16,7 +16,7 @@
  *------------------------------------------------------------------------
  *
  * @module Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.
- * @description - Hf namespace setup. Initialize Hf, adding core modules, and apply settings.
+ * @description - Hf namespace setup. Initialize Hf, adding core modules, and apply option.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
@@ -24,150 +24,136 @@
  */
 'use strict'; // eslint-disable-line
 
+let TARGET = `server`;
+
 /* load CommonElement */
 const CommonElement = require(`./core/elements/common-element`).default;
 
-/* hyperflow global object */
-let Hf = null;
-
-/**
- * @description - Setup and initialize modules & dependencies for Hf`s namespaces.
- *
- * @function init
- * @param {object} setting - Hf's global settings.
- * @returns {object}
- */
-const init = function init ({
-    target = `client-web`,
-    development = true,
-    logging = {
-        info0: false,
-        info1: true,
-        warn0: false,
-        warn1: true
+if (typeof window === `object` && window.hasOwnProperty(`TARGET`)) {
+    TARGET = window.TARGET === `server` ||
+             window.TARGET === `client-native` ||
+             window.TARGET === `client-web` ? window.TARGET : `client-web`;
+} else if (typeof process === `object` && process.hasOwnProperty(`env`)) {
+    if (typeof process.env === `object` && process.env.hasOwnProperty(`TARGET`)) { // eslint-disable-line
+        TARGET = process.env.TARGET === `server` || // eslint-disable-line
+                 process.env.TARGET === `client-native` || // eslint-disable-line
+                 process.env.TARGET === `client-web` ? process.env.TARGET : `client-web`; // eslint-disable-line
     }
-} = {}) {
-    if (Hf === null) {
-        Hf = CommonElement({
-            development,
-            logging
-        });
+}
 
-        /* Hyperflow core element libraries */
-        const HfCoreProperty = {
-            VERSION: `0.2.0`,
-            TARGET: target === `server` || target === `client-native` || target === `client-web` ? target : `client-web`,
-            ENV: target === `server` || target === `client-native` ? process.env.NODE_ENV : `development`, // eslint-disable-line
-            /* load Composer & set composer factory namespace */
-            Composer: require(`./core/composer`).default,
-            /* load DataElement & set data element namespaces */
-            Data: require(`./core/elements/data-element`).default,
-            /* load CompositeElement & set composite element namespaces */
-            Composite: require(`./core/elements/composite-element`).default
-        };
+let Hf = Object.assign({
+    VERSION: `0.2.1`,
+    TARGET
+}, CommonElement());
 
-        Hf = Hf.mix(Hf).with(HfCoreProperty);
-
-        /* Hyperflow core factory libraries */
-        const HfCoreFactoryProperty = {
-            /* set store, interface, domain, and service factory namespaces */
-            Domain: require(`./core/factories/domain-factory`).default,
-            Store: require(`./core/factories/store-factory`).default,
-            Interface: require(`./core/factories/interface-factory`).default,
-            Service: require(`./core/factories/service-factory`).default,
-            /* load app factory namespace */
-            App: require(`./core/factories/app-factory`).default,
-            /* set factory event stream id map creator */
-            Event: require(`./core/factories/factory-event`).default
-            /* load test agent & fixtures factory namespaces */
-            // Agent: require(`./core/factories/agent-factory`).default,
-            // Fixture: require(`./core/factories/fixture-factory`).default,
-        };
-
-        Hf = Hf.mix(Hf).with(HfCoreFactoryProperty);
-
-        /* Hyperflow core factory composite libraries */
-        const HfCoreCompositeProperty = {
-            /* load state composites library & set state composite factory namespace */
-            State: {
-                MutationComposite: require(`./core/factories/composites/state-mutation-composite`).default,
-                TimeTraversalComposite: require(`./core/factories/composites/state-time-traversal-composite`).default
-            }
-            /* load test fixtures composites namespace */
-            // TestFixture: {
-            //     DomainFixtureComposite: require(`./core/factories/composites/test-fixtures/domain-test-fixture-composite`).default,
-            //     StoreFixtureComposite: require(`./core/factories/composites/test-fixtures/store-test-fixture-composite`).default,
-            //     InterfaceFixtureComposite: require(`./core/factories/composites/test-fixtures/interface-test-fixture-composite`).default,
-            //     ServiceFixtureComposite: require(`./core/factories/composites/test-fixtures/service-test-fixture-composite`).default
-            // }
-        };
-
-        Hf = Hf.mix(Hf).with(HfCoreCompositeProperty);
-
-        /* Hyperflow vendor factory composite libraries */
-        const HfCompositeProperty = {
-            /* load test runner composites namespace */
-            // TestRunner: {
-            //     TapeTestRunnerComposite: require(`./composites/test-runners/tape-test-runner--composite`).default
-            // },
-            /* load React composites library & set composite library namespace */
-            React: {
-                ComponentComposite: require(`./composites/interfaces/react-component-composite`).default,
-                AppComponentComposite: (() => {
-                    switch (target) { // eslint-disable-line
-                    case `client-native`:
-                        return require(`./composites/apps/client-native/react-app-component-composite`).default;
-                    case `client-web`:
-                        return require(`./composites/apps/client-web/react-app-component-composite`).default;
-                    case `server`:
-                        return require(`./composites/apps/server/react-app-component-composite`).default;
-                    default:
-                        Hf.log(`error`, `Hf.Init - Invalid target:${target}.`);
-                    }
-                })(),
-                AppRendererComposite: (() => {
-                    switch (target) { // eslint-disable-line
-                    case `client-native`:
-                        return require(`./composites/apps/client-native/react-app-renderer-composite`).default;
-                    case `client-web`:
-                        return require(`./composites/apps/client-web/react-app-renderer-composite`).default;
-                    case `server`:
-                        return require(`./composites/apps/server/react-app-renderer-composite`).default;
-                    default:
-                        Hf.log(`error`, `Hf.Init - Invalid target:${target}.`);
-                    }
-                })()
-            },
-            /* load service library & set composite library namespace  */
-            Storage: (() => {
-                switch (target) { // eslint-disable-line
-                case `client-native`:
-                    return {
-                        ASyncStorageComposite: require(`./composites/services/client-native/async-storage-composite`).default
-                    };
-                case `client-web`:
-                    return {
-                        WebStorageComposite: require(`./composites/services/client-web/web-storage-composite`).default
-                    };
-                case `server`:
-                    return {
-                        PGComposite: require(`./composites/services/server/pg-composite`).default
-                    };
-                default:
-                    Hf.log(`error`, `Hf.Init - Invalid target:${target}.`);
-                }
-            })()
-        };
-
-        Hf = Hf.mix(Hf).with(HfCompositeProperty);
-
-        /* create an initialized Hf object */
-        Hf = Object.freeze(Hf);
-    }
-    return Hf;
+/* Hyperflow core element libraries */
+const HfCoreProperty = {
+    /* load Composer & set composer factory namespace */
+    Composer: require(`./core/composer`).default,
+    /* load DataElement & set data element namespaces */
+    Data: require(`./core/elements/data-element`).default,
+    /* load CompositeElement & set composite element namespaces */
+    Composite: require(`./core/elements/composite-element`).default
 };
 
+Hf = Hf.mix(Hf).with(HfCoreProperty);
+
+/* Hyperflow core factory libraries */
+const HfCoreFactoryProperty = {
+    /* set store, interface, domain, and service factory namespaces */
+    Domain: require(`./core/factories/domain-factory`).default,
+    Store: require(`./core/factories/store-factory`).default,
+    Interface: require(`./core/factories/interface-factory`).default,
+    Service: require(`./core/factories/service-factory`).default,
+    /* load app factory namespace */
+    App: require(`./core/factories/app-factory`).default,
+    /* set factory event stream id map creator */
+    Event: require(`./core/factories/factory-event`).default
+    /* load test agent & fixtures factory namespaces */
+    // Agent: require(`./core/factories/agent-factory`).default,
+    // Fixture: require(`./core/factories/fixture-factory`).default,
+};
+
+Hf = Hf.mix(Hf).with(HfCoreFactoryProperty);
+
+/* Hyperflow core factory composite libraries */
+const HfCoreCompositeProperty = {
+    /* load state composites library & set state composite factory namespace */
+    State: {
+        MutationComposite: require(`./core/factories/composites/state-mutation-composite`).default,
+        TimeTraversalComposite: require(`./core/factories/composites/state-time-traversal-composite`).default
+    }
+    /* load test fixtures composites namespace */
+    // TestFixture: {
+    //     DomainFixtureComposite: require(`./core/factories/composites/test-fixtures/domain-test-fixture-composite`).default,
+    //     StoreFixtureComposite: require(`./core/factories/composites/test-fixtures/store-test-fixture-composite`).default,
+    //     InterfaceFixtureComposite: require(`./core/factories/composites/test-fixtures/interface-test-fixture-composite`).default,
+    //     ServiceFixtureComposite: require(`./core/factories/composites/test-fixtures/service-test-fixture-composite`).default
+    // }
+};
+
+Hf = Hf.mix(Hf).with(HfCoreCompositeProperty);
+
+/* Hyperflow vendor factory composite libraries */
+const HfCompositeProperty = {
+    /* load test runner composites namespace */
+    // TestRunner: {
+    //     TapeTestRunnerComposite: require(`./composites/test-runners/tape-test-runner--composite`).default
+    // },
+    /* load React composites library & set composite library namespace */
+    React: {
+        ComponentComposite: require(`./composites/interfaces/react-component-composite`).default,
+        AppComponentComposite: (() => {
+            switch (TARGET) { // eslint-disable-line
+            case `client-native`:
+                return require(`./composites/apps/client-native/react-app-component-composite`).default;
+            case `client-web`:
+                return require(`./composites/apps/client-web/react-app-component-composite`).default;
+            case `server`:
+                return require(`./composites/apps/server/react-app-component-composite`).default;
+            default:
+                Hf.log(`error`, `Hf - Invalid target:${TARGET}.`);
+            }
+        })(),
+        AppRendererComposite: (() => {
+            switch (TARGET) { // eslint-disable-line
+            case `client-native`:
+                return require(`./composites/apps/client-native/react-app-renderer-composite`).default;
+            case `client-web`:
+                return require(`./composites/apps/client-web/react-app-renderer-composite`).default;
+            case `server`:
+                return require(`./composites/apps/server/react-app-renderer-composite`).default;
+            default:
+                Hf.log(`error`, `Hf - Invalid target:${TARGET}.`);
+            }
+        })()
+    },
+    /* load service library & set composite library namespace  */
+    Storage: (() => {
+        switch (TARGET) { // eslint-disable-line
+        case `client-native`:
+            return {
+                ASyncStorageComposite: require(`./composites/services/client-native/async-storage-composite`).default
+            };
+        case `client-web`:
+            return {
+                WebStorageComposite: require(`./composites/services/client-web/web-storage-composite`).default
+            };
+        case `server`:
+            return {
+                PGComposite: require(`./composites/services/server/pg-composite`).default
+            };
+        default:
+            Hf.log(`error`, `Hf - Invalid target:${TARGET}.`);
+        }
+    })()
+};
+
+Hf = Hf.mix(Hf).with(HfCompositeProperty);
+
+/* create an initialized Hf object */
+Hf = Object.freeze(Hf);
+
 export {
-    Hf,
-    init
+    Hf
 };

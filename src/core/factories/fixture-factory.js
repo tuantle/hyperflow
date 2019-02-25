@@ -24,8 +24,7 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+import CommonElement from '../elements/common-element';
 
 /* load EventStreamComposite */
 import EventStreamComposite from './composites/event-stream-composite';
@@ -37,6 +36,8 @@ import Composer from '../composer';
 import {
     FIXTURE_FACTORY_CODE
 } from './factory-code';
+
+const Hf = CommonElement();
 
 export default Composer({
     composites: [
@@ -58,7 +59,7 @@ export default Composer({
             }
         }
     },
-    FixtureFactory: function FixtureFactory () {
+    FixtureFactory () {
         /* ----- Private Variables ------------- */
         let _testRunner;
         /* ----- Public Functions -------------- */
@@ -68,7 +69,7 @@ export default Composer({
          * @method $init
          * @return void
          */
-        this.$init = function $init () {
+        this.$init = function () {
             Hf.log(`warn0`, `FixtureFactory.$init - Method is not implemented by default.`);
         };
         /**
@@ -77,7 +78,7 @@ export default Composer({
          * @method getTestRunner
          * @return {object}
          */
-        this.getTestRunner = function getTestRunner () {
+        this.getTestRunner = function () {
             const fixture = this;
 
             if (Hf.DEVELOPMENT) {
@@ -95,7 +96,7 @@ export default Composer({
          * @param {function} definition - Test fixture test runner function.
          * @return void
          */
-        this.registerTestRunner = function registerTestRunner (testRunner) {
+        this.registerTestRunner = function (testRunner) {
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(testRunner)) {
                     Hf.log(`error`, `FixtureFactory.registerTestRunner - Input test runner function is invalid.`);
@@ -111,7 +112,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.setup = function setup (done) { // eslint-disable-line
+        this.setup = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `FixtureFactory.setup - Input done function is invalid.`);
@@ -127,7 +128,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.teardown = function teardown (done) { // eslint-disable-line
+        this.teardown = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `FixtureFactory.teardown - Input done function is invalid.`);
@@ -142,7 +143,7 @@ export default Composer({
          * @method hasStarted
          * @return {boolean}
          */
-        this.hasStarted = function hasStarted () {
+        this.hasStarted = function () {
             return false;
         };
         /**
@@ -152,7 +153,7 @@ export default Composer({
          * @param {object} definition - Test fixture registration definition for domain, interface, service, or store.
          * @return void
          */
-        this.register = function register (definition) { // eslint-disable-line
+        this.register = function (definition) { // eslint-disable-line
             Hf.log(`error`, `FixtureFactory.register - Method is not implemented by default. Implementation required.`);
         };
         /**
@@ -163,7 +164,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.start = function start (option = {}, done) { // eslint-disable-line
+        this.start = function (option = {}, done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `FixtureFactory.start - Input done function is invalid.`);
@@ -182,7 +183,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.stop = function stop (done) {
+        this.stop = function (done) {
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `FixtureFactory.start - Input done function is invalid.`);
@@ -199,7 +200,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.restart = function restart (option = {}, done) {
+        this.restart = function (option = {}, done) {
             const fixture = this;
 
             // TODO: Implement use case for fixture start option.
@@ -223,7 +224,7 @@ export default Composer({
          * @param {string} description
          * @return void
          */
-        this.test = function test (tester, description = ``) { // eslint-disable-line
+        this.test = function (tester, description = ``) { // eslint-disable-line
             Hf.log(`error`, `FixtureFactory.stop - Method is not implemented by default. Implementation required.`);
         };
     }

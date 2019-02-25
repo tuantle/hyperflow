@@ -24,12 +24,15 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
+import CommonElement from '../../../core/elements/common-element';
 
-export default Hf.Composite({
+import CompositeElement from '../../../core/elements/composite-element';
+
+const Hf = CommonElement();
+
+export default CompositeElement({
     enclosure: {
-        AsyncStorageComposite: function AsyncStorageComposite () {
+        AsyncStorageComposite () {
             /* ----- Private Variables ------------- */
             /* ----- Public Functions -------------- */
             /**
@@ -38,7 +41,7 @@ export default Hf.Composite({
              * @method getProvider
              * @return void
             */
-            this.getProvider = function getProvider () {
+            this.getProvider = function () {
                 Hf.log(`error`, `AsyncStorageComposite.getProvider - Method is not implemented by default.`);
             };
         }
@@ -50,7 +53,7 @@ export default Hf.Composite({
          * @method $initAsyncStorageComposite
          * @return void
          */
-        $initAsyncStorageComposite: function $initAsyncStorageComposite () {
+        $initAsyncStorageComposite () {
             const service = this;
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -67,11 +70,11 @@ export default Hf.Composite({
          * @param {string} key
          * @return {object}
          */
-        fetch: function fetch (...pathIds) {
+        fetch (...pathIds) {
             const service = this;
 
             if (Hf.DEVELOPMENT) {
-                if (Hf.isEmpty(pathIds) || !pathIds.every((pathId) => Hf.isString(pathId) || Hf.isArray(pathId))) {
+                if (!Hf.isNonEmptyArray(pathIds) || !pathIds.every((pathId) => Hf.isString(pathId) || Hf.isArray(pathId))) {
                     Hf.log(`error`, `AsyncStorageComposite.fetch - Input pathIds are invalid.`);
                 }
             }
@@ -95,7 +98,7 @@ export default Hf.Composite({
                  * @method fetch.read
                  * @return {object}
                  */
-                read: function read () {
+                read () {
                     if (Hf.DEVELOPMENT) {
                         if (pathIds.some((pathId) => Hf.isEmpty(pathId))) {
                             Hf.log(`warn1`, `AsyncStorageComposite.fetch.read - Input pathId is invalid.`);
@@ -140,7 +143,7 @@ export default Hf.Composite({
                  * @param {object} cmd - command statement.
                  * @return {object}
                  */
-                write: function write (cmd = {
+                write (cmd = {
                     touchRoot: false
                 }) {
                     if (Hf.DEVELOPMENT) {

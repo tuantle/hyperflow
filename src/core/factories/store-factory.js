@@ -24,8 +24,7 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+import CommonElement from '../elements/common-element';
 
 /* load EventStreamComposite */
 import EventStreamComposite from './composites/event-stream-composite';
@@ -40,6 +39,8 @@ import Composer from '../composer';
 import {
     STORE_FACTORY_CODE
 } from './factory-code';
+
+const Hf = CommonElement();
 
 export default Composer({
     composites: [
@@ -62,7 +63,7 @@ export default Composer({
             }
         }
     },
-    StoreFactory: function StoreFactory () {
+    StoreFactory () {
         /* ----- Private Variables ------------- */
         /* ----- Public Functions -------------- */
         /**
@@ -71,7 +72,7 @@ export default Composer({
          * @method $init
          * @return void
          */
-        this.$init = function $init () {
+        this.$init = function () {
             Hf.log(`warn0`, `StoreFactory.$init - Method is not implemented by default.`);
         };
         /**
@@ -81,7 +82,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.setup = function setup (done) { // eslint-disable-line
+        this.setup = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `StoreFactory.setup - Input done function is invalid.`);
@@ -97,7 +98,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.teardown = function teardown (done) { // eslint-disable-line
+        this.teardown = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `StoreFactory.teardown - Input done function is invalid.`);

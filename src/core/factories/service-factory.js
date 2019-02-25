@@ -24,8 +24,7 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+import CommonElement from '../elements/common-element';
 
 /* load EventStreamComposite */
 import EventStreamComposite from './composites/event-stream-composite';
@@ -37,6 +36,8 @@ import Composer from '../composer';
 import {
     SERVICE_FACTORY_CODE
 } from './factory-code';
+
+const Hf = CommonElement();
 
 export default Composer({
     composites: [
@@ -58,7 +59,7 @@ export default Composer({
             }
         }
     },
-    ServiceFactory: function ServiceFactory () {
+    ServiceFactory () {
         /* ----- Private Variables ------------- */
         /* child services */
         let _childServices = [];
@@ -69,7 +70,7 @@ export default Composer({
          * @method $init
          * @return void
          */
-        this.$init = function $init () {
+        this.$init = function () {
             Hf.log(`warn0`, `ServiceFactory.$init - Method is not implemented by default.`);
         };
         /**
@@ -79,10 +80,10 @@ export default Composer({
          * @param {array} serviceNames
          * @return {array}
          */
-        this.getChildServices = function getChildServices (...serviceNames) {
+        this.getChildServices = function (...serviceNames) {
             let childServices = [];
-            if (!Hf.isEmpty(_childServices)) {
-                if (!Hf.isEmpty(serviceNames)) {
+            if (Hf.isNonEmptyArray(_childServices)) {
+                if (Hf.isNonEmptyArray(serviceNames)) {
                     if (Hf.DEVELOPMENT) {
                         if (!serviceNames.every((name) => Hf.isString(name))) {
                             Hf.log(`error`, `ServiceFactory.getChildServices - Input service name is invalid.`);
@@ -105,7 +106,7 @@ export default Composer({
          * @param {object} definition - Service registration definition for child services.
          * @return {object}
          */
-        this.register = function register (definition) {
+        this.register = function (definition) {
             const service = this;
 
             // TODO: Throw error if called outside of $init.
@@ -158,7 +159,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.setup = function setup (done) { // eslint-disable-line
+        this.setup = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `ServiceFactory.setup - Input done function is invalid.`);
@@ -174,7 +175,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.teardown = function teardown (done) { // eslint-disable-line
+        this.teardown = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `ServiceFactory.teardown - Input done function is invalid.`);

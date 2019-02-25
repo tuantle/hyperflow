@@ -27,15 +27,15 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+
+import CommonElement from './common-element';
 
 /* load descriptors */
 import ConstrainableDescriptor from './descriptors/constrainable-descriptor';
 import ObservableDescriptor from './descriptors/observable-descriptor';
 import ComputableDescriptor from './descriptors/computable-descriptor';
 
-const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+const Hf = CommonElement();
 
 /**
  * @description - A data descriptor element prototypes.
@@ -51,7 +51,7 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
      * @param {string} type
      * @return {object}
      */
-    select: function select (type) {
+    select (type) {
         const desc = this;
         let registry;
         let Descriptor;
@@ -87,7 +87,7 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
              * @param id
              * @returns {boolean}
              */
-            hasDescription: function hasDescription (id) {
+            hasDescription (id) {
                 return Hf.isString(id) ? registry.hasOwnProperty(id) : false;
             },
             /**
@@ -96,7 +96,7 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
              * @param id
              * @returns {object}
              */
-            getDescription: function getDescription (id) {
+            getDescription (id) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isString(id)) {
                         Hf.log(`error`, `DescriptorElement.select.getDescription - Input description Id is invalid.`);
@@ -114,7 +114,7 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
              * @param {string} id
              * @return {object}
              */
-            addDescription: function addDescription (id) {
+            addDescription (id) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isString(id)) {
                         Hf.log(`error`, `DescriptorElement.select.addDescription - Input description Id is invalid.`);
@@ -133,7 +133,7 @@ const DescriptorElementPrototype = Object.create({}).prototype = {
              * @param {string} id
              * @return void
              */
-            removeDescription: function removeDescription (id) {
+            removeDescription (id) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isString(id)) {
                         Hf.log(`error`, `DescriptorElement.select.removeDescription - Input descriptor Id is invalid.`);
@@ -185,5 +185,5 @@ export default function DescriptorElement () {
     }
 
     /* reveal only the public properties and functions */
-    return revealFrozen(element);
+    return Hf.compose(Hf.reveal, Object.freeze)(element);
 }

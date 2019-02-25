@@ -24,13 +24,13 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+
+import CommonElement from './common-element';
 
 /* load undirected node */
 import TreeNodeElement from './tree-node-element';
 
-const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+const Hf = CommonElement();
 
 /**
  * @description - An undirected tree element prototypes.
@@ -47,7 +47,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      * @private
      */
-    _getNode: function _getNode (pathId) {
+    _getNode (pathId) {
         const tree = this;
 
         if (Hf.DEVELOPMENT) {
@@ -75,7 +75,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      * @private
      */
-    _createNode: function _createNode (pathId) {
+    _createNode (pathId) {
         const tree = this;
 
         if (Hf.DEVELOPMENT) {
@@ -113,7 +113,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @return void
      * @private
      */
-    _destroyNode: function _destroyNode (pathId) {
+    _destroyNode (pathId) {
         const tree = this;
 
         if (Hf.DEVELOPMENT) {
@@ -156,7 +156,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @return void
      * @private
      */
-    _changeNodePathId: function _changeNodePathId (oldPathId, newPathId) {
+    _changeNodePathId (oldPathId, newPathId) {
         const tree = this;
 
         if (Hf.DEVELOPMENT) {
@@ -191,7 +191,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Node pathId.
      * @return {boolean}
      */
-    hasNode: function hasNode (pathId) {
+    hasNode (pathId) {
         const tree = this;
 
         if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
@@ -208,7 +208,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @method getRootCount
      * @return {number}
      */
-    getRootCount: function getRootCount () {
+    getRootCount () {
         const tree = this;
 
         return Object.values(tree._node).filter((node) => Hf.isDefined(node)).reduce((count, node) => {
@@ -222,7 +222,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @param {string|number} rootKey - Root node key.
      * @return void
      */
-    cutRoot: function cutRoot (rootKey) {
+    cutRoot (rootKey) {
         const tree = this;
 
         if (Hf.DEVELOPMENT) {
@@ -251,7 +251,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @param {*} rootContent - Root node content.
      * @return {object}
      */
-    sproutRoot: function sproutRoot (rootKey, rootContent = {
+    sproutRoot (rootKey, rootContent = {
         cache: undefined,
         accessor: undefined
     }) {
@@ -283,7 +283,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Node pathId.
      * @return {object}
      */
-    select: function select (pathId) {
+    select (pathId) {
         const tree = this;
 
         if (Hf.DEVELOPMENT) {
@@ -299,7 +299,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
         const node = tree._getNode(pathId);
 
         /* reveal only the public properties and functions */
-        return revealFrozen(node);
+        return Hf.compose(Hf.reveal, Object.freeze)(node);
     }
     /**
      * @description - Return an undirected tree element hierarchy as a string for debugging.
@@ -307,7 +307,7 @@ const TreeElementPrototype = Object.create({}).prototype = {
      * @method DEBUG_LOG
      * @return {string}
      */
-    // DEBUG_LOG: function DEBUG_LOG () {
+    // DEBUG_LOG () {
     //     const tree = this;
     //
     //     Hf.forEach(tree._node, (node) => {
@@ -348,5 +348,5 @@ export default function TreeElement () {
     }
 
     /* reveal only the public properties and functions */
-    return revealFrozen(element);
+    return Hf.compose(Hf.reveal, Object.freeze)(element);
 }

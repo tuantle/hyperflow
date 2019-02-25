@@ -24,8 +24,9 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+import CommonElement from '../elements/common-element';
+
+const Hf = CommonElement();
 
 export default {
     /**
@@ -35,7 +36,7 @@ export default {
      * @param {object} sourceEventMap - Event Id map contructor object
      * @returns {object}
      */
-    create: function create (sourceEventMap) {
+    create (sourceEventMap) {
         if (Hf.DEVELOPMENT) {
             if (!Hf.isSchema({
                 asEvents: `array|undefined`,
@@ -49,7 +50,7 @@ export default {
         }
 
         /* helper function to convert dash to uppercase underscore */
-        const dashToUpperCaseUnderscore = function dashToUpperCaseUnderscore (str) {
+        const dashToUpperCaseUnderscore = (str) => {
             return str.replace(/-([a-z])/g, (match, word) => {
                 return `_${word}`;
             }).toUpperCase();

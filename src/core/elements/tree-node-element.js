@@ -24,10 +24,10 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
 
-const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+import CommonElement from './common-element';
+
+const Hf = CommonElement();
 
 /**
  * @description - A tree node prototypes.
@@ -43,7 +43,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {object}
      * @private
      */
-    _getHead: function _getHead () {
+    _getHead () {
         const node = this;
         const tree = node._tree;
 
@@ -62,7 +62,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {array}
      * @private
      */
-    _getTails: function _getTails () {
+    _getTails () {
         const node = this;
         const tree = node._tree;
 
@@ -81,7 +81,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {array}
      * @private
      */
-    _getAncestors: function _getAncestors () {
+    _getAncestors () {
         const node = this;
         let aNodes = [];
 
@@ -103,7 +103,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @return {array}
      * @private
      */
-    _getDescendants: function _getDescendants () {
+    _getDescendants () {
         const node = this;
         let dNodes = [];
 
@@ -124,10 +124,10 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method isSingular
      * @return {boolean}
      */
-    isSingular: function isSingular () {
+    isSingular () {
         const node = this;
 
-        return Hf.isEmpty(node._hPathId) && Hf.isEmpty(node._tPathIds);
+        return Hf.isEmpty(node._hPathId) && !Hf.isNonEmptyArray(node._tPathIds);
     },
     /**
      * @description - Check if this node is a root.
@@ -135,13 +135,13 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method isRoot
      * @return {boolean}
      */
-    isRoot: function isRoot () {
+    isRoot () {
         const node = this;
 
         if (node.isSingular()) {
             return true;
         }
-        return Hf.isEmpty(node._hPathId) && !Hf.isEmpty(node._tPathIds);
+        return Hf.isEmpty(node._hPathId) && Hf.isNonEmptyArray(node._tPathIds);
     },
     /**
      * @description - Check if this node is a leaf.
@@ -149,10 +149,10 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method isLeaf
      * @return {boolean}
      */
-    isLeaf: function isLeaf () {
+    isLeaf () {
         const node = this;
 
-        return !Hf.isEmpty(node._hPathId) && Hf.isEmpty(node._tPathIds);
+        return !Hf.isEmpty(node._hPathId) && !Hf.isNonEmptyArray(node._tPathIds);
     },
     /**
      * @description - Check if this node is a tail of node at pathId.
@@ -161,7 +161,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Node pathId.
      * @return {boolean}
      */
-    isTailOf: function isTailOf (pathId) {
+    isTailOf (pathId) {
         const node = this;
 
         /* convert pathId from array format to string format */
@@ -176,7 +176,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Node pathId.
      * @return {boolean}
      */
-    isHeadOf: function isHeadOf (pathId) {
+    isHeadOf (pathId) {
         const node = this;
 
         /* convert pathId from array format to string format */
@@ -191,7 +191,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Node pathId.
      * @return {boolean}
      */
-    isCommonWith: function isCommonWith (pathId) {
+    isCommonWith (pathId) {
         const node = this;
 
         /* convert pathId from array format to string format */
@@ -212,7 +212,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Node pathId.
      * @return {boolean}
      */
-    isAncestorOf: function isAncestorOf (pathId) {
+    isAncestorOf (pathId) {
         const node = this;
 
         /* convert pathId from array format to string format */
@@ -227,7 +227,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Node pathId.
      * @return {boolean}
      */
-    isDescendantOf: function isDescendantOf (pathId) {
+    isDescendantOf (pathId) {
         const node = this;
 
         /* convert pathId from array format to string format */
@@ -242,7 +242,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Node pathId.
      * @return {boolean}
      */
-    isInHierarchyOf: function isInHierarchyOf (pathId) {
+    isInHierarchyOf (pathId) {
         const node = this;
 
         /* convert pathId from array format to string format */
@@ -256,7 +256,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method getKey
      * @return {string|number}
      */
-    getKey: function getKey () {
+    getKey () {
         const node = this;
 
         return node._key;
@@ -267,7 +267,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method getPathId
      * @return {string}
      */
-    getPathId: function getPathId () {
+    getPathId () {
         const node = this;
 
         return node._pathId;
@@ -278,7 +278,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method getContentType
      * @return {string}
      */
-    getContentType: function getContentType () {
+    getContentType () {
         const node = this;
 
         return Hf.typeOf(node._content.accessor);
@@ -289,7 +289,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method getContent
      * @return {*}
      */
-    getContent: function getContent () {
+    getContent () {
         const node = this;
 
         return node._content.accessor;
@@ -301,7 +301,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {*} cachedItem
      * @return void
      */
-    getContentCacheItem: function getContentCacheItem (key) {
+    getContentCacheItem (key) {
         const node = this;
 
         if (Hf.DEVELOPMENT) {
@@ -325,7 +325,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {object} content
      * @return void
      */
-    setContent: function setContent (content) {
+    setContent (content) {
         const node = this;
 
         if (Hf.isSchema({
@@ -342,7 +342,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
                 }
                 if (!hNode._content.accessor.hasOwnProperty(node._key)) {
                     Object.defineProperty(hNode._content.accessor, node._key, {
-                        get: function get () {
+                        get () {
                             return node._content.accessor;
                         },
                         configurable: false,
@@ -355,7 +355,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
 
                 tNodes.forEach((tNode) => {
                     Object.defineProperty(node._content.accessor, tNode._key, {
-                        get: function get () {
+                        get () {
                             return tNode._content.accessor;
                         },
                         configurable: false,
@@ -371,7 +371,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method freezeContent
      * @return void
      */
-    freezeContent: function freezeContent () {
+    freezeContent () {
         const node = this;
 
         Object.freeze(node._content);
@@ -393,7 +393,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method flushContent
      * @return void
      */
-    // flushContent: function flushContent () {
+    // flushContent () {
     //     const node = this;
     //
     //     if (!node.isLeaf() && !node.isSingular()) {
@@ -418,7 +418,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {*} content - Node content.
      * @return {object}
      */
-    branch: function branch (key, content = {
+    branch (key, content = {
         cache: undefined,
         accessor: undefined
     }) {
@@ -445,7 +445,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {*} content - Node content.
      * @return {object}
      */
-    sprout: function sprout (key, content = {
+    sprout (key, content = {
         cache: undefined,
         accessor: undefined
     }) {
@@ -475,7 +475,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key - Node key.
      * @return {object}
      */
-    graft: function graft (key) {
+    graft (key) {
         const node = this;
 
         if (Hf.DEVELOPMENT) {
@@ -504,7 +504,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
              * @param {string|array} newPathId - Node pathId.
              * @return {object}
              */
-            onto: function onto (newPathId) {
+            onto (newPathId) {
                 if (Hf.DEVELOPMENT) {
                     if (!tree.hasNode(newPathId)) {
                         Hf.log(`error`, `TreeNodeElement.graft.onto - Input node pathId is invalid.`);
@@ -527,7 +527,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key - Node key.
      * @return {object}
      */
-    rootify: function rootify (key) {
+    rootify (key) {
         const node = this;
 
         if (Hf.DEVELOPMENT) {
@@ -564,7 +564,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {object} option - Referal option.
      * @return void
      */
-    refer: function refer (pathId, option = {
+    refer (pathId, option = {
         maxReferDepth: -1,
         excludedPathIds: []
     }) {
@@ -625,9 +625,9 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
                     node.branch(rtdNode._key, rtdNode._content);
                 }
                 // let te = new Date().getTime();
-                // console.log(`TEST execution time: ${te - ts} ms.`);
+                // Hf.log(`debug`, `TreeNodeElement.refer - execution time: ${te - ts} ms.`);
                 // if (te - ts > 20) {
-                //     console.log(`TEST1 pathId: ${rtdNode._pathId}.`);
+                //     Hf.log(`debug`, `TreeNodeElement.refer - pathId: ${rtdNode._pathId}.`);
                 // }
             });
         }
@@ -639,7 +639,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {string|number} newKey
      * @return void
      */
-    rekey: function rekey (newKey) {
+    rekey (newKey) {
         const node = this;
 
         if (Hf.DEVELOPMENT) {
@@ -685,7 +685,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @param {object} context - Object to become context (`this`) for the iterator function.
      * @return void
      */
-    forEach: function forEach (flag, iterator, context) {
+    forEach (flag, iterator, context) {
         const node = this;
 
         if (Hf.DEVELOPMENT) {
@@ -702,6 +702,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
         const fromCommons = !node.isRoot() ? flag === `commons` : false;
         const fromAncestors = !node.isRoot() ? flag === `ancestors` : false;
         const fromDescendants = !node.isLeaf() ? flag === `descendants` : false;
+        const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
 
         if (fromTails) {
             Hf.forEach(node._getTails().map((_node) => revealFrozen(_node)), iterator, context);
@@ -721,7 +722,7 @@ const TreeNodeElementPrototype = Object.create({}).prototype = {
      * @method DEBUG_LOG
      * @return void
      */
-    // DEBUG_LOG: function DEBUG_LOG () {
+    // DEBUG_LOG () {
     //     const node = this;
     //
     //     if (node.isRoot()) {

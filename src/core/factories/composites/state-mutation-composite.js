@@ -24,8 +24,9 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
+import CommonElement from '../../elements/common-element';
+
+import CompositeElement from '../../elements/composite-element';
 
 /* factory Ids */
 import {
@@ -33,7 +34,9 @@ import {
     STORE_FACTORY_CODE
 } from '../factory-code';
 
-export default Hf.Composite({
+const Hf = CommonElement();
+
+export default CompositeElement({
     template: {
         /**
          * @description - Initialized and check that factory is valid for this composite.
@@ -41,7 +44,7 @@ export default Hf.Composite({
          * @method $initStateMutationComposite
          * @return void
          */
-        $initStateMutationComposite: function $initStateMutationComposite () {
+        $initStateMutationComposite () {
             const factory = this;
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -64,7 +67,7 @@ export default Hf.Composite({
          * @param {object} option
          * @return void
          */
-        // reset: function reset (option = {
+        // reset (option = {
         //     forceMutationEvent: false,
         //     suppressMutationEvent: false,
         //     delayMutationEvent: 0
@@ -90,7 +93,7 @@ export default Hf.Composite({
          * @param {object} option
          * @return {boolean}
          */
-        reduce: function reduce (reducer, option = {
+        reduce (reducer, option = {
             forceMutationEvent: false,
             suppressMutationEvent: false,
             delayMutationEvent: 0
@@ -155,7 +158,7 @@ export default Hf.Composite({
          * @param {object} option
          * @return void
          */
-        reconfig: function reconfig (reconfiguration, option = {
+        reconfig (reconfiguration, option = {
             forceMutationEvent: false,
             suppressMutationEvent: false,
             delayMutationEvent: 0

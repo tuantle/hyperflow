@@ -24,10 +24,13 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
+import CommonElement from '../../../core/elements/common-element';
 
-export default Hf.Composite({
+import CompositeElement from '../../../core/elements/composite-element';
+
+const Hf = CommonElement();
+
+export default CompositeElement({
     template: {
         /**
          * @description - Initialized and check that factory is valid for this composite.
@@ -35,7 +38,7 @@ export default Hf.Composite({
          * @method $initReactAppComponentComposite
          * @return void
          */
-        $initReactAppComponentComposite: function $initReactAppComponentComposite () {
+        $initReactAppComponentComposite () {
             const app = this;
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -53,7 +56,7 @@ export default Hf.Composite({
          * @param {object} option
          * @return {object|function}
          */
-        getTopComponent: function getTopComponent (option = {}) {
+        getTopComponent (option = {}) {
             const app = this;
             const domain = app.getTopDomain();
 

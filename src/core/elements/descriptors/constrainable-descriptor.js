@@ -24,10 +24,10 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
 
-const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+import CommonElement from '../common-element';
+
+const Hf = CommonElement();
 
 /**
  * @description - A constraint descriptor prototypes.
@@ -43,7 +43,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} constraintKey
      * @return {boolean}
      */
-    hasConstraint: function hasConstraint (constraintKey) {
+    hasConstraint (constraintKey) {
         const constrainable = this;
 
         return constrainable._description.constraint.hasOwnProperty(constraintKey);
@@ -55,7 +55,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} constraintKey
      * @return {object}
      */
-    getConstraint: function getConstraint (constraintKey) {
+    getConstraint (constraintKey) {
         const constrainable = this;
 
         if (Hf.DEVELOPMENT) {
@@ -77,7 +77,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} constraintKey
      * @return void
      */
-    addConstraint: function addConstraint (constrainer, condition, constraintKey) {
+    addConstraint (constrainer, condition, constraintKey) {
         const constrainable = this;
 
         if (Hf.DEVELOPMENT) {
@@ -107,7 +107,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @param {string} constraintKey
      * @return void
      */
-    removeConstraint: function removeConstraint (constraintKey) {
+    removeConstraint (constraintKey) {
         const constrainable = this;
 
         if (Hf.DEVELOPMENT) {
@@ -129,7 +129,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      *                              Contains target property key and constraint set object.
      * @return {object}
      */
-    assign: function assign (descPreset) {
+    assign (descPreset) {
         const constrainable = this;
 
         if (Hf.DEVELOPMENT) {
@@ -162,7 +162,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
              * @param {object|array} target - Target object.
              * @return void
              */
-            to: function to (target) {
+            to (target) {
                 if (Hf.DEVELOPMENT) {
                     if (!(Hf.isObject(target) || Hf.isArray(target))) {
                         Hf.log(`error`, `ConstrainableDescriptor.assign.to - Input target is invalid.`);
@@ -177,13 +177,13 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                 constrainable._description.orgDesc = Object.getOwnPropertyDescriptor(target, key);
 
                 Object.defineProperty(constrainable._description.proxy, key, {
-                    get: function get () {
+                    get () {
                         if (constrainable._description.orgDesc.hasOwnProperty(`get`)) {
                             return constrainable._description.orgDesc.get();
                         }
                         return constrainable._description.orgDesc.value;
                     },
-                    set: function set (value) {
+                    set (value) {
                         let oldValue;
                         let context = {};
                         let results = [];
@@ -222,7 +222,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
                             } = constraintValue;
                             return Hf.fallback({
                                 verified: true,
-                                reject: function reject () {}
+                                reject () {}
                             }, (_key) => {
                                 Hf.log(`error`, `ConstrainableDescriptor.assign.to - Constraint callback returns invalid result object key${_key}.`);
                             }).of(constrainer.call(context, condition));
@@ -259,7 +259,7 @@ const ConstrainableDescriptorPrototype = Object.create({}).prototype = {
      * @method unassign
      * @return void
      */
-    unassign: function unassign () {
+    unassign () {
         const constrainable = this;
 
         if (constrainable._description.assigned) {
@@ -333,5 +333,5 @@ export default function ConstrainableDescriptor (id) {
     }
 
     /* reveal only the public properties and functions */
-    return revealFrozen(descriptor);
+    return Hf.compose(Hf.reveal, Object.freeze)(descriptor);
 }

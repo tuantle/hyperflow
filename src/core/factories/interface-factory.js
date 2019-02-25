@@ -24,8 +24,7 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+import CommonElement from '../elements/common-element';
 
 /* load EventStreamComposite */
 import EventStreamComposite from './composites/event-stream-composite';
@@ -38,6 +37,8 @@ import {
     STORE_FACTORY_CODE,
     INTERFACE_FACTORY_CODE
 } from './factory-code';
+
+const Hf = CommonElement();
 
 export default Composer({
     composites: [
@@ -59,7 +60,7 @@ export default Composer({
             }
         }
     },
-    InterfaceFactory: function InterfaceFactory () {
+    InterfaceFactory () {
         /* ----- Private Variables ------------- */
         let _stateless = true;
         let _componentLib;
@@ -72,7 +73,7 @@ export default Composer({
          * @method $init
          * @return void
          */
-        this.$init = function $init () {
+        this.$init = function () {
             Hf.log(`warn0`, `InterfaceFactory.$init - Method is not implemented by default.`);
         };
         /**
@@ -82,7 +83,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.setup = function setup (done) { // eslint-disable-line
+        this.setup = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `InterfaceFactory.setup - Input done function is invalid.`);
@@ -98,7 +99,7 @@ export default Composer({
          * @param {function} done
          * @return void
          */
-        this.teardown = function teardown (done) { // eslint-disable-line
+        this.teardown = function (done) { // eslint-disable-line
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `InterfaceFactory.teardown - Input done function is invalid.`);
@@ -108,133 +109,12 @@ export default Composer({
             done();
         };
         /**
-         * @description - Check if interface has a component that is mounted
-         *
-         * @method isMounted
-         * @return {boolean}
-         */
-        this.isMounted = function isMounted () {
-            Hf.log(`error`, `InterfaceFactory.isMounted - Method is not implemented by default.`);
-        };
-        /**
-         * @description - Handle logic at component premounting stage.
-         *
-         * @method preMountStage
-         * @param {function} handler
-         * @return void
-         */
-        this.preMountStage = function preMountStage (handler) {
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `InterfaceFactory.preMountStage - Input handler function is invalid.`);
-                }
-            }
-
-            Hf.log(`warn0`, `InterfaceFactory.preMountStage - Method is not implemented by default.`);
-        };
-        /**
-         * @description - Handle logic at component postmounting stage.
-         *
-         * @method postMountStage
-         * @param {function} handler
-         * @return void
-         */
-        this.postMountStage = function postMountStage (handler) {
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `InterfaceFactory.postMountStage - Input handler function is invalid.`);
-                }
-            }
-
-            Hf.log(`warn0`, `InterfaceFactory.postMountStage - Method is not implemented by default.`);
-        };
-        /**
-         * @description - Handle logic at component predismounting stage.
-         *
-         * @method preDismountStage
-         * @param {function} handler
-         * @return void
-         */
-        this.preDismountStage = function preDismountStage (handler) {
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `InterfaceFactory.preDismountStage - Input handler function is invalid.`);
-                }
-            }
-
-            Hf.log(`warn0`, `InterfaceFactory.preDismountStage - Method is not implemented by default.`);
-        };
-        /**
-         * @description - Handle logic at component postdismounting stage.
-         *
-         * @method postDismountStage
-         * @param {function} handler
-         * @return void
-         */
-        this.postDismountStage = function postDismountStage (handler) {
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `InterfaceFactory.postDismountStage - Input handler function is invalid.`);
-                }
-            }
-
-            Hf.log(`warn0`, `InterfaceFactory.postDismountStage - Method is not implemented by default.`);
-        };
-        /**
-         * @description - Handle logic at component prepare to receive property stage.
-         *
-         * @method preReceivingPropertyStage
-         * @param {function} handler
-         * @return void
-         */
-        this.preReceivingPropertyStage = function preReceivingPropertyStage (handler) {
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `InterfaceFactory.preReceivingPropertyStage - Input handler function is invalid.`);
-                }
-            }
-
-            Hf.log(`warn0`, `InterfaceFactory.preReceivingPropertyStage - Method is not implemented by default.`);
-        };
-        /**
-         * @description - Handle logic at component prepare to update stage.
-         *
-         * @method preUpdateStage
-         * @param {function} handler
-         * @return void
-         */
-        this.preUpdateStage = function preUpdateStage (handler) {
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `InterfaceFactory.preUpdateStage - Input handler function is invalid.`);
-                }
-            }
-
-            Hf.log(`warn0`, `InterfaceFactory.preUpdateStage - Method is not implemented by default.`);
-        };
-        /**
-         * @description - Handle logic at component after updating stage.
-         *
-         * @method postUpdateStage
-         * @param {function} handler
-         * @return void
-         */
-        this.postUpdateStage = function postUpdateStage (handler) {
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isFunction(handler)) {
-                    Hf.log(`error`, `InterfaceFactory.postUpdateStage - Input handler function is invalid.`);
-                }
-            }
-
-            Hf.log(`warn0`, `InterfaceFactory.postUpdateStage - Method is not implemented by default.`);
-        };
-        /**
          * @description - Check if interface stateless.
          *
          * @method isStateless
          * @return {boolean}
          */
-        this.isStateless = function isStateless () {
+        this.isStateless = function () {
             return _stateless;
         };
         /**
@@ -243,7 +123,7 @@ export default Composer({
          * @method getInitialReflectedState
          * @return {object}
          */
-        this.getInitialReflectedState = function getInitialReflectedState () {
+        this.getInitialReflectedState = function () {
             const intf = this;
 
             if (Hf.DEVELOPMENT) {
@@ -261,7 +141,7 @@ export default Composer({
          * @param {object} option
          * @return {object}
          */
-        this.toComponent = function toComponent (option = {}) { // eslint-disable-line
+        this.toComponent = function (option = {}) { // eslint-disable-line
             Hf.log(`error`, `InterfaceFactory.toComponent - Method is not implemented by default. Implementation required.`);
         };
         /**
@@ -270,7 +150,7 @@ export default Composer({
          * @method getComponentLib
          * @returns {object}
          */
-        this.getComponentLib = function getComponentLib () {
+        this.getComponentLib = function () {
             const intf = this;
 
             if (Hf.DEVELOPMENT) {
@@ -287,10 +167,10 @@ export default Composer({
          * @param {array} intfNames
          * @return {array}
          */
-        this.getComponentComposites = function getComponentComposites (...intfNames) {
+        this.getComponentComposites = function (...intfNames) {
             let components = [];
             if (!Hf.isEmpty(_compositeIntfCache)) {
-                if (!Hf.isEmpty(intfNames)) {
+                if (Hf.isNonEmptyArray(intfNames)) {
                     if (Hf.DEVELOPMENT) {
                         if (!intfNames.every((name) => Hf.isString(name))) {
                             Hf.log(`error`, `InterfaceFactory.getComponentComposites - Input interface name is invalid.`);
@@ -319,10 +199,10 @@ export default Composer({
          * @param {array} intfNames
          * @return {array}
          */
-        this.getInterfaceComposites = function getInterfaceComposites (...intfNames) {
+        this.getInterfaceComposites = function (...intfNames) {
             let intfs = [];
             if (!Hf.isEmpty(_compositeIntfCache)) {
-                if (!Hf.isEmpty(intfNames)) {
+                if (Hf.isNonEmptyArray(intfNames)) {
                     if (Hf.DEVELOPMENT) {
                         if (!intfNames.every((name) => Hf.isString(name))) {
                             Hf.log(`error`, `InterfaceFactory.getInterfaceComposites - Input interface name is invalid.`);
@@ -344,7 +224,7 @@ export default Composer({
          * @param {object} componentLib
          * @returns void
          */
-        this.registerComponentLib = function registerComponentLib (componentLib) {
+        this.registerComponentLib = function (componentLib) {
             // TODO: Throw error if called outside of $init.
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isObject(componentLib)) {
@@ -383,13 +263,13 @@ export default Composer({
          * @param {array} compositeIntfs
          * @return {object}
          */
-        this.composedOf = function composedOf (...compositeIntfs) {
+        this.composedOf = function (...compositeIntfs) {
             const intf = this;
             // TODO: Throw error if called outside of $init.
             // TODO: Allows composition of component also.
             // TODO: If possible, rename method to compose and return a newly created interface instead.
             if (Hf.DEVELOPMENT) {
-                if (Hf.isEmpty(compositeIntfs)) {
+                if (!Hf.isNonEmptyArray(compositeIntfs)) {
                     Hf.log(`warn0`, `InterfaceFactory.composedOf - Input composite interface array is empty.`);
                 } else if (!compositeIntfs.every((compositeIntf) => Hf.isSchema({
                     fId: `string`,
@@ -429,7 +309,7 @@ export default Composer({
          * @param {object} store
          * @return {object}
          */
-        this.reflectStateOf = function reflectStateOf (store) {
+        this.reflectStateOf = function (store) {
             const intf = this;
 
             if (Hf.DEVELOPMENT) {

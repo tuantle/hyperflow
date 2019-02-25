@@ -24,8 +24,9 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../../hyperflow';
+import CommonElement from '../../../elements/common-element';
+
+import CompositeElement from '../../../elements/composite-element';
 
 /* factory Ids */
 import {
@@ -36,7 +37,9 @@ import {
 /* delay all data stream from intf by 1s as default */
 const DELAY_INTERFACE_IN_MS = 1000;
 
-export default Hf.Composite({
+const Hf = CommonElement();
+
+export default CompositeElement({
     template: {
         /**
          * @description - Initialized and check that provider is valid for this composite.
@@ -44,7 +47,7 @@ export default Hf.Composite({
          * @method $initInterfaceTestFixtureComposite
          * @return void
          */
-        $initInterfaceTestFixtureComposite: function $initInterfaceTestFixtureComposite () {
+        $initInterfaceTestFixtureComposite () {
             const fixture = this;
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -64,7 +67,7 @@ export default Hf.Composite({
         }
     },
     enclosure: {
-        InterfaceTestFixtureComposite: function InterfaceTestFixtureComposite () {
+        InterfaceTestFixtureComposite () {
             /* ----- Private Variables ------------- */
             /* flag indicates start method has called */
             let _started = false;
@@ -78,7 +81,7 @@ export default Hf.Composite({
              * @method hasStarted
              * @return {boolean}
              */
-            this.hasStarted = function hasStarted () {
+            this.hasStarted = function () {
                 return _started;
             };
             /**
@@ -87,7 +90,7 @@ export default Hf.Composite({
              * @method getTopComponent
              * @return {object|function}
              */
-            this.getTopComponent = function getTopComponent () {
+            this.getTopComponent = function () {
                 Hf.log(`warn0`, `InterfaceTestFixtureComposite.getTopComponent - Method is not implemented by default.`);
             };
             /**
@@ -96,7 +99,7 @@ export default Hf.Composite({
              * @method getTopDomain
              * @return {object}
              */
-            this.getTopDomain = function getTopDomain () {
+            this.getTopDomain = function () {
                 const fixture = this;
                 return fixture;
             };
@@ -106,7 +109,7 @@ export default Hf.Composite({
              * @method renderToTarget
              * @return {void|string}
              */
-            this.renderToTarget = function renderToTarget () {
+            this.renderToTarget = function () {
                 Hf.log(`warn0`, `InterfaceTestFixtureComposite.renderToTarget - Method is not implemented by default.`);
             };
             /**
@@ -115,7 +118,7 @@ export default Hf.Composite({
              * @method getComponentRenderer
              * @return {object}
              */
-            this.getComponentRenderer = function getComponentRenderer () {
+            this.getComponentRenderer = function () {
                 if (!Hf.isObject(_componentRenderer)) {
                     Hf.log(`error`, `InterfaceTestFixtureComposite.getComponentRenderer - Test fixture is not registered with a component renderer.`);
                 } else {
@@ -129,7 +132,7 @@ export default Hf.Composite({
              * @param {object} definition - Test fixture registration definition for interface.
              * @return {object}
              */
-            this.register = function register (definition) {
+            this.register = function (definition) {
                 const fixture = this;
                 if (!Hf.isSchema({
                     testSubject: `object`,
@@ -179,9 +182,7 @@ export default Hf.Composite({
              * @param {function} done
              * @return void
              */
-            this.start = function start (option = {}, done) {
-                const fixture = this;
-
+            this.start = function (option = {}, done) {
                 // TODO: Implement use case for fixture start option.
                 option = Hf.isObject(option) ? option : {};
 
@@ -198,7 +199,7 @@ export default Hf.Composite({
              * @param {function} done
              * @return void
              */
-            this.stop = function stop (done) {
+            this.stop = function (done) {
                 const fixture = this;
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `InterfaceTestFixtureComposite.stop - Input done function is invalid.`);

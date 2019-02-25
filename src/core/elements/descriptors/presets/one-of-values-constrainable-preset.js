@@ -21,8 +21,10 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../../hyperflow';
+
+import CommonElement from '../../common-element';
+
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for the one of values.
@@ -31,9 +33,9 @@ import { Hf } from '../../../../hyperflow';
  * @param {array} values
  * @return {object}
  */
-const oneOfValuesPreset = function oneOfValuesPreset (_values) {
+const oneOfValuesPreset = (_values) => {
     if (Hf.DEVELOPMENT) {
-        if (!Hf.isArray(_values) || Hf.isEmpty(_values)) {
+        if (!Hf.isArray(_values) || !Hf.isNonEmptyArray(_values)) {
             Hf.log(`error`, `oneOf - Input values are invalid.`);
         } else if (!_values.every((value) => Hf.isString(value) || Hf.isNumeric(value))) {
             Hf.log(`error`, `oneOf - Value must be either number or string.`);
@@ -45,14 +47,14 @@ const oneOfValuesPreset = function oneOfValuesPreset (_values) {
             /**
              * @description - Ensures value (can be a number or string) is one of values.
              *
-             * @method oneOf
+             * @method constrainer
              * @return {object}
              */
-            constrainer: function oneOf (values) {
+            constrainer (values) {
                 const context = this;
                 const result = {
                     verified: true,
-                    reject: function reject () {
+                    reject () {
                         Hf.log(`warn1`, `oneOf - Property key:${context.key} value:${context.newValue} is not one of ${values}`);
                     }
                 };

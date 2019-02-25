@@ -24,12 +24,15 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
+import CommonElement from '../../../core/elements/common-element';
 
-export default Hf.Composite({
+import CompositeElement from '../../../core/elements/composite-element';
+
+const Hf = CommonElement();
+
+export default CompositeElement({
     enclosure: {
-        PGComposite: function PGComposite () {
+        PGComposite () {
             /* ----- Private Variables ------------- */
             /* ----- Public Functions -------------- */
             /**
@@ -38,7 +41,7 @@ export default Hf.Composite({
              * @method getProvider
              * @return void
              */
-            this.getProvider = function getProvider () {
+            this.getProvider = function () {
                 Hf.log(`error`, `PGComposite.getProvider - Method is not implemented by default.`);
             };
         }
@@ -50,7 +53,7 @@ export default Hf.Composite({
          * @method $initPGComposite
          * @return void
          */
-        $initPGComposite: function $initPGComposite () {
+        $initPGComposite () {
             const service = this;
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -71,7 +74,7 @@ export default Hf.Composite({
          * @param {string} tableName
          * @return {object}
          */
-        query: function query (tableName) {
+        query (tableName) {
             const service = this;
 
             if (Hf.DEVELOPMENT) {
@@ -113,7 +116,7 @@ export default Hf.Composite({
                  * @param {function} sqlCreate
                  * @method query.select
                  */
-                select: function select (sqlCreate) {
+                select (sqlCreate) {
                     if (Hf.DEVELOPMENT) {
                         if (!Hf.isFunction(sqlCreate)) {
                             Hf.log(`error`, `PGComposite.query.select - Input squel function is invalid.`);
@@ -163,7 +166,7 @@ export default Hf.Composite({
                  * @param {function} sqlCreate
                  * @method query.update
                  */
-                update: function update (sqlCreate) {
+                update (sqlCreate) {
                     if (Hf.DEVELOPMENT) {
                         if (!Hf.isFunction(sqlCreate)) {
                             Hf.log(`error`, `PGComposite.query.update - Input squel function is invalid.`);
@@ -214,7 +217,7 @@ export default Hf.Composite({
                  * @param {function} sqlCreate
                  * @method query.insert
                  */
-                insert: function insert (sqlCreate) {
+                insert (sqlCreate) {
                     if (Hf.DEVELOPMENT) {
                         if (!Hf.isFunction(sqlCreate)) {
                             Hf.log(`error`, `PGComposite.query.insert - Input squel function is invalid.`);
@@ -265,7 +268,7 @@ export default Hf.Composite({
                  * @param {function} sqlCreate
                  * @method query.delete
                  */
-                delete: function _delete (sqlCreate) {
+                delete (sqlCreate) {
                     if (Hf.DEVELOPMENT) {
                         if (!Hf.isFunction(sqlCreate)) {
                             Hf.log(`error`, `PGComposite.query.delete - Input squel function is invalid.`);

@@ -21,8 +21,10 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../../hyperflow';
+
+import CommonElement from '../../common-element';
+
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for required value.
@@ -30,21 +32,21 @@ import { Hf } from '../../../../hyperflow';
  * @method requiredPreset
  * @return {object}
  */
-const requiredPreset = function requiredPreset () {
+const requiredPreset = () => {
     return {
         required: {
             condition: null,
             /**
              * @description - Ensures value is not null or undefined or empty.
              *
-             * @method required
+             * @method constrainer
              * @return {object}
              */
-            constrainer: function required () {
+            constrainer () {
                 const context = this;
                 const result = {
                     verified: true,
-                    reject: function reject () {
+                    reject () {
                         Hf.log(`warn1`, `required - Required property key:${context.key} cannot be not null or undefined or empty.`);
                     }
                 };

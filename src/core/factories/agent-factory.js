@@ -24,8 +24,7 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+import CommonElement from '../elements/common-element';
 
 /* load Composer */
 import Composer from '../composer';
@@ -35,6 +34,8 @@ import {
     AGENT_FACTORY_CODE,
     FIXTURE_FACTORY_CODE
 } from './factory-code';
+
+const Hf = CommonElement();
 
 export default Composer({
     state: {
@@ -53,7 +54,7 @@ export default Composer({
             }
         }
     },
-    AgentFactory: function AgentFactory () {
+    AgentFactory () {
         /* ----- Private Variables ------------- */
         let _testRunner;
         let _fixtures = [];
@@ -64,7 +65,7 @@ export default Composer({
          * @method $init
          * @return void
          */
-        this.$init = function $init () {
+        this.$init = function () {
             Hf.log(`warn0`, `AgentFactory.$init - Method is not implemented by default.`);
         };
         /**
@@ -73,7 +74,7 @@ export default Composer({
          * @method getTestRunner
          * @return {object}
          */
-        this.getTestRunner = function getTestRunner () {
+        this.getTestRunner = function () {
             const agent = this;
 
             if (Hf.DEVELOPMENT) {
@@ -91,7 +92,7 @@ export default Composer({
          * @param {object} definition - Test agent registration definition for domain, interface, service, or store fixtures.
          * @return {object}
          */
-        this.register = function register (definition) {
+        this.register = function (definition) {
             const agent = this;
 
             if (!Hf.isSchema({
@@ -144,12 +145,12 @@ export default Composer({
          * @param {object} option
          * @return void
          */
-        this.run = function run (option = {}) {
+        this.run = function (option = {}) {
             const agent = this;
 
             option = Hf.isObject(option) ? option : {};
 
-            if (Hf.isEmpty(_fixtures)) {
+            if (!Hf.isNonEmptyArray(_fixtures)) {
                 Hf.log(`error`, `AgentFactory.run - Test agent:${agent.name} is not registered with a test fixture.`);
             } else {
                 _fixtures.forEach((fixture) => {

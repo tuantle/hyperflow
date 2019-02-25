@@ -21,8 +21,10 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../../hyperflow';
+
+import CommonElement from '../../common-element';
+
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for strongly typed value.
@@ -30,23 +32,23 @@ import { Hf } from '../../../../hyperflow';
  * @method stronglyTypedPreset
  * @return {object}
  */
-const stronglyTypedPreset = function stronglyTypedPreset () {
+const stronglyTypedPreset = () => {
     return {
         stronglyTyped: {
             condition: null,
             /**
              * @description - Ensures strongly typed and that new and old values are the same type.
              *
-             * @method stronglyTyped
+             * @method constrainer
              * @return {object}
              */
-            constrainer: function stronglyTyped () {
+            constrainer () {
                 const context = this;
                 const oldValueType = Hf.typeOf(context.oldValue);
                 const newValueType = Hf.typeOf(context.newValue);
                 const result = {
                     verified: true,
-                    reject: function reject () {
+                    reject () {
                         Hf.log(`warn1`, `stronglyTyped - Value of key:${context.key} is strongly typed to ${oldValueType}.`);
                     }
                 };

@@ -25,10 +25,10 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
 
-const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
+import CommonElement from '../common-element';
+
+const Hf = CommonElement();
 
 /**
  * @description - A computable descriptor prototypes.
@@ -45,7 +45,7 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
      *                              Contains computable name, context keys, and computable callback.
      * @return {object}
      */
-    assign: function assign (descPreset) {
+    assign (descPreset) {
         const computable = this;
 
         if (Hf.DEVELOPMENT) {
@@ -78,7 +78,7 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
              * @param {object|array} target - Target object.
              * @return void
              */
-            to: function to (target) {
+            to (target) {
                 if (!(Hf.isObject(target) || Hf.isArray(target))) {
                     Hf.log(`error`, `ComputableDescriptor.assign.to - Input target is invalid.`);
                 } else if (target.hasOwnProperty(fnName) && target[fnName] !== null) {
@@ -94,7 +94,7 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
                     contextPathId = Hf.isString(contextPathId) ? Hf.stringToArray(contextPathId, `.`) : contextPathId;
                     const key = contextPathId.pop();
                     Object.defineProperty(_context, key, {
-                        get: function get () {
+                        get () {
                             if (Hf.isEmpty(contextPathId)) {
                                 return computable._description.proxy[key];
                             }
@@ -108,7 +108,7 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
 
                 /* create the computable property for the assigned object */
                 Object.defineProperty(computable._description.proxy, fnName, {
-                    get: function get () {
+                    get () {
                         return computable._description.compute.call(computable._description.context);
                     },
                     configurable: false,
@@ -123,7 +123,7 @@ const ComputableDescriptorPrototype = Object.create({}).prototype = {
      * @method unassign
      * @return void
      */
-    unassign: function unassign () {
+    unassign () {
         const computable = this;
 
         if (computable._description.assigned) {
@@ -184,5 +184,5 @@ export default function ComputableDescriptor (id) {
     }
 
     /* reveal only the public properties and functions */
-    return revealFrozen(descriptor);
+    return Hf.compose(Hf.reveal, Object.freeze)(descriptor);
 }

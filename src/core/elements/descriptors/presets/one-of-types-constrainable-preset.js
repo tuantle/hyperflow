@@ -21,8 +21,10 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../../hyperflow';
+
+import CommonElement from '../../common-element';
+
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for the one of types.
@@ -31,9 +33,9 @@ import { Hf } from '../../../../hyperflow';
  * @param {array} types
  * @return {object}
  */
-const oneOfTypesPreset = function oneOfTypesPreset (_types) {
+const oneOfTypesPreset = (_types) => {
     if (Hf.DEVELOPMENT) {
-        if (!Hf.isArray(_types) || Hf.isEmpty(_types)) {
+        if (!Hf.isArray(_types) || !Hf.isNonEmptyArray(_types)) {
             Hf.log(`error`, `oneTypeOf - Input types are invalid.`);
         } else if (!_types.every((type) => Hf.isString(type))) {
             Hf.log(`error`, `oneTypeOf - Type value must be string.`);
@@ -46,16 +48,16 @@ const oneOfTypesPreset = function oneOfTypesPreset (_types) {
             /**
              * @description - Ensures value is one of types.
              *
-             * @method oneTypeOf
+             * @method constrainer
              * @return {object}
              */
-            constrainer: function oneTypeOf (types) {
+            constrainer (types) {
                 const context = this;
                 const oldValueType = Hf.typeOf(context.oldValue);
                 const newValueType = Hf.typeOf(context.newValue);
                 const result = {
                     verified: true,
-                    reject: function reject () {
+                    reject () {
                         Hf.log(`warn1`, `oneTypeOf - Property key:${context.key} value:${context.newValue} is not one type of ${types}`);
                     }
                 };

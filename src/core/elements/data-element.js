@@ -24,8 +24,8 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+
+import CommonElement from './common-element';
 
 /* load descriptor element */
 import DescriptorElement from './descriptor-element';
@@ -35,6 +35,8 @@ import DataCursorElement from './data-cursor-element';
 
 /* load undirected data tree element */
 import TreeElement from './tree-element';
+
+const Hf = CommonElement();
 
 /* number mutations to persist in mutation map before roll-over */
 const DEFAULT_MUTATION_HISTORY_DEPTH = 64;
@@ -57,7 +59,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return {object}
      * @private
      */
-    _getAccessor: function _getAccessor (pathId, option = {}) {
+    _getAccessor (pathId, option = {}) {
         const data = this;
 
         option = Hf.isObject(option) ? option : {};
@@ -72,7 +74,7 @@ const DataElementPrototype = Object.create({}).prototype = {
         const mRecords = data._mutation.records;
         const immutableRootKeys = data._mutation.immutableRootKeys;
 
-        if (immutableRootKeys.includes(rootKey) && !Hf.isEmpty(mRecords)) {
+        if (immutableRootKeys.includes(rootKey) && Hf.isNonEmptyArray(mRecords)) {
             data._updateMMap(rootKey, option);
             Hf.clear(data._mutation.records);
         }
@@ -87,7 +89,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return void
      * @private
      */
-    _recordMutation: function _recordMutation (pathId) {
+    _recordMutation (pathId) {
         const data = this;
 
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
@@ -127,7 +129,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return void
      * @private
      */
-    _deepUpdateMMap: function _deepUpdateMMap (node, pathId, records) {
+    _deepUpdateMMap (node, pathId, records) {
         const data = this;
 
         if (Hf.DEVELOPMENT) {
@@ -145,7 +147,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             cache: undefined,
             accessor: undefined
         };
-        let [ mutatedKeys ] = !Hf.isEmpty(records) ? records : [[]];
+        let [ mutatedKeys ] = Hf.isNonEmptyArray(records) ? records : [[]];
 
         if (cursor.getContentType() === `object`) {
             content.cache = {};
@@ -163,7 +165,7 @@ const DataElementPrototype = Object.create({}).prototype = {
             } else {
                 if (cursor.isItemComputable(key)) {
                     Object.defineProperty(content.accessor, key, {
-                        get: function get () {
+                        get () {
                             return cursor.getContentItem(key);
                         },
                         configurable: false,
@@ -176,10 +178,10 @@ const DataElementPrototype = Object.create({}).prototype = {
                     if (cursor.isImmutable()) {
                         content.cache[key] = item;
                         Object.defineProperty(content.accessor, key, {
-                            get: function get () {
+                            get () {
                                 return node.getContentCacheItem(key);
                             },
-                            set: function set (value) {
+                            set (value) {
                                 cursor.setContentItem(value, key);
                             },
                             configurable: true,
@@ -187,10 +189,10 @@ const DataElementPrototype = Object.create({}).prototype = {
                         });
                     } else {
                         Object.defineProperty(content.accessor, key, {
-                            get: function get () {
+                            get () {
                                 return cursor.getContentItem(key);
                             },
-                            set: function set (value) {
+                            set (value) {
                                 cursor.setContentItem(value, key);
                             },
                             configurable: true,
@@ -212,7 +214,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return void
      * @private
      */
-    _updateMMap: function _updateMMap (rootKey, option = {
+    _updateMMap (rootKey, option = {
         excludedNonmutatioReferalPathIds: []
     }) {
         const data = this;
@@ -282,7 +284,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @return void
      * @private
      */
-    _assignDescription: function _assignDescription (cursor, bundleItem, bundleKey) {
+    _assignDescription (cursor, bundleItem, bundleKey) {
         const data = this;
 
         if (Hf.DEVELOPMENT) {
@@ -388,7 +390,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId - Cursor pathId.
      * @return {boolean}
      */
-    hasCursor: function hasCursor (pathId) {
+    hasCursor (pathId) {
         const data = this;
 
         if (!(Hf.isString(pathId) || Hf.isArray(pathId))) {
@@ -410,7 +412,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @param {boolean} immutable
      * @return void
      */
-    setImmutability: function setImmutability (rootKey, immutable = true) {
+    setImmutability (rootKey, immutable = true) {
         const data = this;
         const rootContent = data._rootContent;
         let immutableRootKeys = data._mutation.immutableRootKeys;
@@ -449,7 +451,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @param {number} mutationHistoryDepth
      * @return void
      */
-    setMutationHistoryDepth: function setMutationHistoryDepth (mutationHistoryDepth) {
+    setMutationHistoryDepth (mutationHistoryDepth) {
         const data = this;
 
         if (Hf.DEVELOPMENT) {
@@ -470,7 +472,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @param {string} rootKey
      * @return void
      */
-    flush: function flush (rootKey) {
+    flush (rootKey) {
         const data = this;
         const rootContent = data._rootContent;
 
@@ -501,7 +503,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @param {string|array} pathId
      * @return {object}
      */
-    select: function select (pathId) {
+    select (pathId) {
         const data = this;
 
         pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
@@ -530,7 +532,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @param {bundle} bundle
      * @return {object}
      */
-    format: function format (bundle) {
+    format (bundle) {
         if (Hf.DEVELOPMENT) {
             if (!Hf.isObject(bundle)) {
                 Hf.log(`error`, `DataElement.format - Input bundle object is invalid.`);
@@ -684,7 +686,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @param {string} bundleName
      * @return {object}
      */
-    read: function read (bundle, bundleName) {
+    read (bundle, bundleName) {
         // FIXME: Crash occurs when bundle object has circular reference.
         const data = this;
 
@@ -738,7 +740,7 @@ const DataElementPrototype = Object.create({}).prototype = {
              * @param {boolean} immutable
              * @return {object}
              */
-            asImmutable: function asImmutable (immutable = true) {
+            asImmutable (immutable = true) {
                 immutable = Hf.isBoolean(immutable) ? immutable : true;
                 data.setImmutability(rootKey, immutable);
                 return data;
@@ -751,7 +753,7 @@ const DataElementPrototype = Object.create({}).prototype = {
      * @method DEBUG_LOG
      * @return void
      */
-    // DEBUG_LOG: function DEBUG_LOG () {
+    // DEBUG_LOG () {
     //     const data = this;
     //     data._mutation.mMap.DEBUG_LOG();
     //     Hf.log(`debug`, JSON.stringify(data._mutation.records, null, `\t`));
@@ -801,5 +803,5 @@ export default function DataElement () {
     }
 
     /* reveal only the public properties and functions */
-    return revealFrozen(element);
+    return Hf.compose(Hf.reveal, Object.freeze)(element);
 }

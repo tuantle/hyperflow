@@ -27,7 +27,43 @@
 
 const PRIVATE_PREFIX = `_`;
 
-const LOG_HISTORY_SIZE = 500;
+let DEVELOPMENT = true;
+
+let LOGGING = {
+    info0: true,
+    info1: true,
+    warn0: true,
+    warn1: true,
+    historySize: 500
+};
+
+if (typeof window === `object` && window.hasOwnProperty(`DEVELOPMENT`)) {
+    DEVELOPMENT = window.DEVELOPMENT;
+} else if (typeof process === `object` && process.hasOwnProperty(`env`)) {
+    if (typeof process.env === `object` && process.env.hasOwnProperty(`NODE_ENV`)) { // eslint-disable-line
+        DEVELOPMENT = process.env.NODE_ENV === `development`; // eslint-disable-line
+    }
+}
+
+if (typeof window === `object`) {
+    LOGGING = {
+        info0: window.hasOwnProperty(`LOGGING_INFO0`) ? window.LOGGING_INFO0 : LOGGING.info0,
+        info1: window.hasOwnProperty(`LOGGING_INFO1`) ? window.LOGGING_INFO1 : LOGGING.info1,
+        warn0: window.hasOwnProperty(`LOGGING_WARN0`) ? window.LOGGING_WARN0 : LOGGING.warn0,
+        warn1: window.hasOwnProperty(`LOGGING_WARN1`) ? window.LOGGING_WARN1 : LOGGING.warn1,
+        historySize: window.hasOwnProperty(`LOGGING_HISTORY_SIZE`) ? window.LOGGING_HISTORY_SIZE : LOGGING.historySize
+    };
+} else if (typeof process === `object` && process.hasOwnProperty(`env`)) {
+    if (typeof process.env === `object`) { // eslint-disable-line
+        LOGGING = {
+            info0: process.env.hasOwnProperty(`LOGGING_INFO0`) ? process.env.LOGGING_INFO0 === `true` : LOGGING.info0, // eslint-disable-line
+            info1: process.env.hasOwnProperty(`LOGGING_INFO1`) ? process.env.LOGGING_INFO1 === `true` : LOGGING.info1, // eslint-disable-line
+            warn0: process.env.hasOwnProperty(`LOGGING_WARN0`) ? process.env.LOGGING_WARN0 === `true` : LOGGING.warn0, // eslint-disable-line
+            warn1: process.env.hasOwnProperty(`LOGGING_WARN1`) ? process.env.LOGGING_WARN1 === `true` : LOGGING.warn1, // eslint-disable-line
+            historySize: process.env.hasOwnProperty(`LOGGING_HISTORY_SIZE`) ? parseInt(process.env.LOGGING_HISTORY_SIZE) : LOGGING.historySize // eslint-disable-line
+        };
+    }
+}
 
 /**
  * @description - Common element prototype object.
@@ -45,7 +81,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      * @private
      */
-    _deepCompareSchema: function _deepCompareSchema (schema, target) {
+    _deepCompareSchema (schema, target) {
         const Hf = this;
         let verified = true;
 
@@ -117,7 +153,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      * @private
      */
-    _deepMutation: function _deepMutation (source, mutator, pathId = []) {
+    _deepMutation (source, mutator, pathId = []) {
         const Hf = this;
         let result;
 
@@ -130,6 +166,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
         if (Hf.isEmpty(pathId)) {
             if (Hf.isObject(source) && Hf.isObject(mutator)) {
                 result = Object.assign({}, source);
+                // result = { ...source };
                 const sourceKeys = Object.keys(source);
                 const mutatorKeys = Object.keys(mutator);
 
@@ -186,6 +223,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
             const key = pathId.shift();
             if (Hf.isObject(source) && source.hasOwnProperty(key)) {
                 result = Object.assign({}, source);
+                // result = { ...source };
                 if (Hf.isEmpty(pathId)) {
                     if (Hf.isObject(mutator) && mutator.hasOwnProperty(key)) {
                         result[key] = Hf._deepMutation(source[key], mutator[key], pathId.slice(0));
@@ -226,7 +264,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      * @private
      */
-    _deepMerge: function _deepMerge (source, target, pathId = []) {
+    _deepMerge (source, target, pathId = []) {
         const Hf = this;
         let result;
 
@@ -256,6 +294,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
             } else {
                 if (Hf.isObject(source)) {
                     result = Object.assign({}, source);
+                    // result = { ...source };
                 }
 
                 Object.entries(target).forEach(([ key, targetValue ]) => {
@@ -274,6 +313,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
             const key = pathId.shift();
             if (Hf.isObject(source) && source.hasOwnProperty(key)) {
                 result = Object.assign({}, source);
+                // result = { ...source };
                 if (Hf.isEmpty(pathId)) {
                     if (Hf.isObject(target) && target.hasOwnProperty(key)) {
                         result[key] = Hf._deepMerge(source[key], target[key], pathId.slice(0));
@@ -306,7 +346,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      * @private
      */
-    _deepCompareAndFallback: function _deepCompareAndFallback (source, target, notify) {
+    _deepCompareAndFallback (source, target, notify) {
         const Hf = this;
         let result;
 
@@ -369,7 +409,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @returns {object}
      * @private
      */
-    _deepRetrieval: function _deepRetrieval (target, pathId, asNestedObject) {
+    _deepRetrieval (target, pathId, asNestedObject) {
         const Hf = this;
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isObject(target) || Hf.isArray(target))) {
@@ -418,7 +458,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {number} value - To be checked if it is an integer.
      * @returns {boolean}
      */
-    isInteger: function isInteger (value) {
+    isInteger (value) {
         return (/^-?\d+$/.test(String(value)));
     },
 
@@ -429,7 +469,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {number} value - To be checked if it is a float.
      * @returns {boolean}
      */
-    isFloat: function isFloat (value) {
+    isFloat (value) {
         return (/^[+-]?\d+(\.\d+)?$/.test(String(value)));
     },
 
@@ -440,7 +480,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {number} value - To be checked if it is a number.
      * @returns {boolean}
      */
-    isNumeric: function isNumeric (value) {
+    isNumeric (value) {
         return !isNaN(parseFloat(value)) && isFinite(value);
     },
     /**
@@ -450,7 +490,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object|array|string} value - To be checked if it is an empty object, array, or string.
      * @returns {boolean}
      */
-    isEmpty: function isEmpty (value) {
+    isEmpty (value) {
         const Hf = this;
 
         if (Hf.isObject(value)) {
@@ -467,7 +507,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} str - To be checked if it is a string.
      * @returns {boolean}
      */
-    isString: function isString (str) {
+    isString (str) {
         const Hf = this;
 
         return Hf.typeOf(str) === `string` || (Hf.typeOf(str) === `object` && str.constructor === String);
@@ -479,7 +519,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} str - To be checked if it is a string and not empty.
      * @returns {boolean}
      */
-    isNonEmptyString: function isNonEmptyString (str) {
+    isNonEmptyString (str) {
         const Hf = this;
 
         return Hf.isString(str) && !Hf.isEmpty(str);
@@ -491,7 +531,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param value - To be checked if it is a boolean.
      * @returns {boolean}
      */
-    isBoolean: function isBoolean (value) {
+    isBoolean (value) {
         const Hf = this;
 
         return Hf.typeOf(value) === `boolean` || (Hf.isString(value) && (value.toLowerCase() === `true` || value.toLowerCase() === `false`));
@@ -503,7 +543,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {*} value - To be checked if value is defined.
      * @returns {boolean}
      */
-    isDefined: function isDefined (value) {
+    isDefined (value) {
         const Hf = this;
 
         return Hf.typeOf(value) !== `undefined`;
@@ -515,7 +555,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {function} fn - To be checked if it is a function.
      * @returns {boolean}
      */
-    isFunction: function isFunction (fn) {
+    isFunction (fn) {
         return Object.prototype.toString.call(fn) === `[object Function]` || Object.prototype.toString.call(fn) === `[object AsyncFunction]`;
     },
     /**
@@ -525,7 +565,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {*} regex
      * @returns {boolean}
      */
-    isRegEx: function isRegEx (regex) {
+    isRegEx (regex) {
         return Object.prototype.toString.call(regex) === `[object RegEx]`;
     },
     /**
@@ -535,7 +575,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {*} date
      * @returns {boolean}
      */
-    isDate: function isDate (date) {
+    isDate (date) {
         return Object.prototype.toString.call(date) === `[object Date]`;
     },
     /**
@@ -545,7 +585,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {array} array - To be checked if it is an array.
      * @returns {boolean}
      */
-    isArray: function isArray (array) {
+    isArray (array) {
         return Object.prototype.toString.call(array) === `[object Array]` || Array.isArray(array) && array !== null;
     },
     /**
@@ -555,7 +595,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {array} array - To be checked if it is an array and not empty.
      * @returns {boolean}
      */
-    isNonEmptyArray: function isNonEmptyArray (array) {
+    isNonEmptyArray (array) {
         const Hf = this;
 
         return Hf.isArray(array) && !Hf.isEmpty(array);
@@ -567,7 +607,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} obj - To be checked if it is an object.
      * @returns {boolean}
      */
-    isObject: function isObject (obj) {
+    isObject (obj) {
         const Hf = this;
 
         return Hf.typeOf(obj) === `object` && obj === Object(obj) && !Hf.isArray(obj) && obj !== null;
@@ -579,7 +619,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {array} array - To be checked if it is an object and not empty.
      * @returns {boolean}
      */
-    isNonEmptyObject: function isNonEmptyObject (array) {
+    isNonEmptyObject (array) {
         const Hf = this;
 
         return Hf.isObject(array) && !Hf.isEmpty(array);
@@ -593,7 +633,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} schema - Predefined schema.
      * @returns {object}
      */
-    isSchema: function isSchema (schema) {
+    isSchema (schema) {
         const Hf = this;
         return {
             /**
@@ -603,7 +643,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @param {object} target - Target object be compared with.
              * @returns {boolean}
              */
-            of: function of (target) {
+            of (target) {
                 return Hf._deepCompareSchema(schema, target);
             }
         };
@@ -615,7 +655,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {*} value
      * @returns {string}
      */
-    typeOf: function typeOf (value) {
+    typeOf (value) {
         // FIXME: Crash occurs when value is an object with circular reference.
         return ({}).toString.call(value).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
     },
@@ -626,7 +666,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {array} fns
      * @return {function}
      */
-    compose: function compose (...fns) {
+    compose (...fns) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -660,7 +700,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {array} pathIds
      * @return {object}
      */
-    collect: function collect (...pathIds) {
+    collect (...pathIds) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -677,7 +717,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
          * @return {array}
          */
         return {
-            from: function from (target) {
+            from (target) {
                 if (Hf.DEVELOPMENT) {
                     if (!(Hf.isObject(target) || Hf.isArray(target))) {
                         Hf.log(`error`, `CommonElement.collect.from - Input target is invalid.`);
@@ -695,7 +735,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object|array} value
      * @return void
      */
-    clear: function clear (value) {
+    clear (value) {
         const Hf = this;
 
         if (Hf.isObject(value)) {
@@ -716,7 +756,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object|array} source - Source object or array to be cloned.
      * @returns {object}
      */
-    clone: function clone (source) {
+    clone (source) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -727,6 +767,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
         let result;
         if (Hf.isObject(source)) {
             result = Object.assign({}, source);
+            // result = { ...source };
         }
         if (Hf.isArray(source)) {
             result = source.map((value) => {
@@ -743,7 +784,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object|function} source
      * @return {object}
      */
-    freeze: function freeze (source) {
+    freeze (source) {
         const Hf = this;
 
         if ((Hf.isObject(source) || Hf.isFunction(source)) && !Object.isFrozen(source)) {
@@ -761,7 +802,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} source - Source object to be mutated from.
      * @returns {object}
      */
-    mutate: function mutate (source) {
+    mutate (source) {
         const Hf = this;
         if (Hf.DEVELOPMENT) {
             if (!Hf.isObject(source)) {
@@ -778,7 +819,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @param {string|array} pathId - Path of the property to retrieve.
              * @returns {object}
              */
-            atPathBy: function atPathBy (mutator, pathId) {
+            atPathBy (mutator, pathId) {
                 pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isObject(mutator)) {
@@ -797,7 +838,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @param {object} mutator - Target reference mutator object.
              * @returns {object}
              */
-            by: function by (mutator) {
+            by (mutator) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isObject(mutator)) {
                         Hf.log(`error`, `CommonElement.mutate.by - Input mutator is invalid.`);
@@ -815,7 +856,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} source - Source object be merged from.
      * @returns {object}
      */
-    merge: function merge (source) {
+    merge (source) {
         const Hf = this;
         if (Hf.DEVELOPMENT) {
             if (!Hf.isObject(source)) {
@@ -832,7 +873,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @param {string|array} pathId - Path of the property to retrieve.
              * @returns {object}
              */
-            atPathWith: function atPathWith (target, pathId) {
+            atPathWith (target, pathId) {
                 pathId = Hf.isString(pathId) ? Hf.stringToArray(pathId, `.`) : pathId;
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isObject(target)) {
@@ -851,7 +892,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @param {object} target - Target object be merged to.
              * @returns {object}
              */
-            with: function _with (target) {
+            with (target) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isObject(target)) {
                         Hf.log(`error`, `CommonElement.merge.with - Input target is invalid.`);
@@ -873,7 +914,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {function} notify - Notify when a fallback has occured.
      * @return {object}
      */
-    fallback: function fallback (source, notify) {
+    fallback (source, notify) {
         const Hf = this;
         if (Hf.DEVELOPMENT) {
             if (!(Hf.isObject(source) || Hf.isArray(source))) {
@@ -889,7 +930,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @param {object|array} target - Target object or array.
              * @return {object}
              */
-            of: function of (target) {
+            of (target) {
                 if (Hf.DEVELOPMENT) {
                     if ((Hf.isObject(source) && !Hf.isObject(target)) || Hf.isArray(source) && !Hf.isArray(target)) {
                         Hf.log(`error`, `CommonElement.fallback.of - Input target object is invalid.`);
@@ -910,7 +951,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} option - Exclusion, a list of functions or properties that should not be mixed.
      * @return {object}
      */
-    mix: function mix (source, option = {
+    mix (source, option = {
         fnOverrided: true,
         exclusion: {
             prototypes: false,
@@ -928,7 +969,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
     }) {
         const Hf = this;
 
-        if (!Hf.DEVELOPMENT) {
+        if (!DEVELOPMENT) {
             if (!(Hf.isObject(source) || Hf.isFunction(source))) {
                 Hf.log(`error`, `CommonElement.mix - Input source object or function is invalid.`);
             }
@@ -955,31 +996,31 @@ const CommonElementPrototype = Object.create({}).prototype = {
         }).of(option);
         let result;
         /* helper function to filter out key in the exclusion list. */
-        const isIncluded = function isIncluded (key) {
+        const isIncluded = (key) => {
             let included = false;
 
-            if (!Hf.DEVELOPMENT) {
+            if (!DEVELOPMENT) {
                 exclusion.prefixes.push(`DEBUG_`);
             }
 
             if (Hf.isString(key) && key !== `prototype`) {
-                const prefixExcepted = !Hf.isEmpty(exclusion.exception.prefixes) ? exclusion.exception.prefixes.some((prefix) => {
+                const prefixExcepted = Hf.isNonEmptyArray(exclusion.exception.prefixes) ? exclusion.exception.prefixes.some((prefix) => {
                     return key.substr(0, prefix.length) === prefix;
                 }) : false;
-                const postfixExcepted = !Hf.isEmpty(exclusion.exception.postfixes) ? exclusion.exception.postfixes.some((postfix) => {
+                const postfixExcepted = Hf.isNonEmptyArray(exclusion.exception.postfixes) ? exclusion.exception.postfixes.some((postfix) => {
                     return key.substr(0, postfix.length) === postfix;
                 }) : false;
-                const keyExcepted = !Hf.isEmpty(exclusion.exception.keys) ? exclusion.exception.keys.includes(key) : false;
+                const keyExcepted = Hf.isNonEmptyArray(exclusion.exception.keys) ? exclusion.exception.keys.includes(key) : false;
 
                 included = true;
 
-                if (included && !Hf.isEmpty(exclusion.prefixes)) {
+                if (included && Hf.isNonEmptyArray(exclusion.prefixes)) {
                     included = exclusion.prefixes.every((prefix) => key.substr(0, prefix.length) !== prefix);
                 }
-                if (included && !Hf.isEmpty(exclusion.postfixes)) {
+                if (included && Hf.isNonEmptyArray(exclusion.postfixes)) {
                     included = exclusion.postfixes.every((postfix) => key.substr(0, postfix.length) !== postfix);
                 }
-                if (included && !Hf.isEmpty(exclusion.keys)) {
+                if (included && Hf.isNonEmptyArray(exclusion.keys)) {
                     if (exclusion.keys.length === 1 && exclusion.keys[0] === `*`) {
                         included = false;
                     } else {
@@ -996,7 +1037,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
         if (Hf.isObject(source)) {
             result = {};
         } else if (Hf.isFunction(source)) {
-            result = function () {};
+            result = () => {};
         }
 
         if (!exclusion.prototypes) {
@@ -1029,10 +1070,10 @@ const CommonElementPrototype = Object.create({}).prototype = {
 
                 if (Hf.isObject(sourceObjDesc)) {
                     Object.defineProperty(_result, key, {
-                        get: function get () {
+                        get () {
                             return source[key];
                         },
-                        set: function set (value) {
+                        set (value) {
                             source[key] = value;
                         },
                         configurable: sourceObjDesc.configurable,
@@ -1040,10 +1081,10 @@ const CommonElementPrototype = Object.create({}).prototype = {
                     });
                 } else {
                     Object.defineProperty(_result, key, {
-                        get: function get () {
+                        get () {
                             return source[key];
                         },
-                        set: function set (value) {
+                        set (value) {
                             source[key] = value;
                         },
                         configurable: false,
@@ -1063,7 +1104,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @param {object|fuction} target - Target object or function that is being extended to.
              * @return {object}
              */
-            with: function _with (target) {
+            with (target) {
                 if (Hf.DEVELOPMENT) {
                     if (!(Hf.isObject(target) || Hf.isFunction(target))) {
                         Hf.log(`error`, `CommonElement.mix.with - Input target object or function is invalid.`);
@@ -1123,10 +1164,10 @@ const CommonElementPrototype = Object.create({}).prototype = {
 
                         if (Hf.isObject(targetObjDesc)) {
                             Object.defineProperty(_result, key, {
-                                get: function get () {
+                                get () {
                                     return target[key];
                                 },
-                                set: function set (value) {
+                                set (value) {
                                     target[key] = value;
                                 },
                                 configurable: targetObjDesc.configurable,
@@ -1134,10 +1175,10 @@ const CommonElementPrototype = Object.create({}).prototype = {
                             });
                         } else {
                             Object.defineProperty(_result, key, {
-                                get: function get () {
+                                get () {
                                     return target[key];
                                 },
-                                set: function set (value) {
+                                set (value) {
                                     target[key] = value;
                                 },
                                 configurable: false,
@@ -1160,7 +1201,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} option
      * @return {object}
      */
-    reveal: function reveal (closure, option = {}) {
+    reveal (closure, option = {}) {
         const Hf = this;
 
         option = Hf.isObject(option) ? option : {};
@@ -1193,7 +1234,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} asNestedObject - Flag to indicate the return value is a nested object of pathId.
      * @return {object}
      */
-    retrieve: function retrieve (pathId, delimiter, asNestedObject = false) {
+    retrieve (pathId, delimiter, asNestedObject = false) {
         const Hf = this;
 
         asNestedObject = Hf.isBoolean(asNestedObject) ? asNestedObject : false;
@@ -1215,7 +1256,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
              * @param {object|array} target
              * @returns {*}
              */
-            from: function from (target) {
+            from (target) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isObject(target)) {
                         Hf.log(`error`, `CommonElement.retrieve.from - Input target object is invalid.`);
@@ -1235,7 +1276,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {object} context - Object to become context (`this`) for the iterator function.
      * @returns void
      */
-    forEach: function forEach (value, iterator, context) {
+    forEach (value, iterator, context) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -1267,7 +1308,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} delimiter
      * @return {string}
      */
-    arrayToString: function arrayToString (array, delimiter) {
+    arrayToString (array, delimiter) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -1288,7 +1329,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} delimiter
      * @return {array}
      */
-    stringToArray: function stringToArray (str, delimiter) {
+    stringToArray (str, delimiter) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -1315,7 +1356,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} str
      * @return {string}
      */
-    camelcaseToUnderscore: function camelcaseToUnderscore (str) {
+    camelcaseToUnderscore (str) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -1333,7 +1374,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} str
      * @return {string}
      */
-    underscoreToCamelcase: function underscoreToCamelcase (str) {
+    underscoreToCamelcase (str) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -1351,7 +1392,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} str
      * @return {string}
      */
-    camelcaseToDash: function camelcaseToDash (str) {
+    camelcaseToDash (str) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -1369,7 +1410,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} str
      * @return {string}
      */
-    dashToCamelcase: function dashToCamelcase (str) {
+    dashToCamelcase (str) {
         const Hf = this;
 
         if (Hf.DEVELOPMENT) {
@@ -1388,7 +1429,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} message
      * @returns void
      */
-    log: function log (type, message) {
+    log (type, message) {
         const Hf = this;
         if (Hf.DEVELOPMENT) {
             let stringifiedMessage = ``;
@@ -1399,14 +1440,14 @@ const CommonElementPrototype = Object.create({}).prototype = {
                 stringifiedMessage = message;
             }
             const logger = {
-                error: function error () {
+                error () {
                     throw new Error(`ERROR: ${message}`);
                 },
-                warn0: function warn0 () {
-                    if (Hf._consoleLog.enableWarn0Logging) {
+                warn0 () {
+                    if (LOGGING.warn0) {
                         console.warn(`WARN-0: ${stringifiedMessage}`);
 
-                        if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                        if (Hf._consoleLog.history.index >= LOGGING.historySize) {
                             Hf._consoleLog.history.index = 0;
                         } else {
                             Hf._consoleLog.history.index++;
@@ -1419,11 +1460,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         };
                     }
                 },
-                warn1: function warn1 () {
-                    if (Hf._consoleLog.enableWarn1Logging) {
+                warn1 () {
+                    if (LOGGING.warn1) {
                         console.warn(`WARN-1: ${stringifiedMessage}`);
 
-                        if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                        if (Hf._consoleLog.history.index >= LOGGING.historySize) {
                             Hf._consoleLog.history.index = 0;
                         } else {
                             Hf._consoleLog.history.index++;
@@ -1436,11 +1477,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         };
                     }
                 },
-                info0: function info0 () {
-                    if (Hf._consoleLog.enableInfo0Logging) {
+                info0 () {
+                    if (LOGGING.info0) {
                         console.info(`INFO-0: ${stringifiedMessage}`);
 
-                        if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                        if (Hf._consoleLog.history.index >= LOGGING.historySize) {
                             Hf._consoleLog.history.index = 0;
                         } else {
                             Hf._consoleLog.history.index++;
@@ -1453,11 +1494,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         };
                     }
                 },
-                info1: function info1 () {
-                    if (Hf._consoleLog.enableInfo1Logging) {
+                info1 () {
+                    if (LOGGING.info1) {
                         console.info(`INFO-1: ${stringifiedMessage}`);
 
-                        if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                        if (Hf._consoleLog.history.index >= LOGGING.historySize) {
                             Hf._consoleLog.history.index = 0;
                         } else {
                             Hf._consoleLog.history.index++;
@@ -1470,11 +1511,11 @@ const CommonElementPrototype = Object.create({}).prototype = {
                         };
                     }
                 },
-                debug: function debug () {
+                debug () {
                     /* debug log is always enabled */
                     console.log(`DEBUG: ${stringifiedMessage}`);
 
-                    if (Hf._consoleLog.history.index >= LOG_HISTORY_SIZE) {
+                    if (Hf._consoleLog.history.index >= LOGGING.historySize) {
                         Hf._consoleLog.history.index = 0;
                     } else {
                         Hf._consoleLog.history.index++;
@@ -1519,7 +1560,7 @@ const CommonElementPrototype = Object.create({}).prototype = {
      * @param {string} type
      * @returns {array}
      */
-    getLogHistories: function getLogHistories (type) {
+    getLogHistories (type) {
         const Hf = this;
         if (Hf.DEVELOPMENT) {
             switch (type) { // eslint-disable-line
@@ -1570,40 +1611,21 @@ const CommonElementPrototype = Object.create({}).prototype = {
  * @description - A common element module export function.
  *
  * @module CommonElement
- * @param {object} option
  * @return {object}
  */
-export default function CommonElement (option = {
-    development: true,
-    logging: {
-        info0: false,
-        info1: true,
-        warn0: false,
-        warn1: true
-    }
-}) {
-    let {
-        development,
-        logging
-    } = option;
+export default function CommonElement () {
     const element = Object.create(CommonElementPrototype, {
-        /* this flag indicates develeopment or production status of the project */
         DEVELOPMENT: {
-            value: CommonElementPrototype.isBoolean(development) ? development : true,
+            value: DEVELOPMENT,
             writable: false,
-            configurable: false,
-            enumerable: true
+            configurable: true,
+            enumerable: false
         },
         _consoleLog: {
             value: {
-                /* this flag enables console log of debug messages when calling method Hf.log(`info`, `a debug message.`) */
-                enableInfo0Logging: CommonElementPrototype.isObject(logging) && CommonElementPrototype.isBoolean(logging.info0) ? logging.info0 : false,
-                enableInfo1Logging: CommonElementPrototype.isObject(logging) && CommonElementPrototype.isBoolean(logging.info1) ? logging.info1 : true,
-                enableWarn0Logging: CommonElementPrototype.isObject(logging) && CommonElementPrototype.isBoolean(logging.warn0) ? logging.warn0 : false,
-                enableWarn1Logging: CommonElementPrototype.isObject(logging) && CommonElementPrototype.isBoolean(logging.warn1) ? logging.warn1 : true,
                 history: {
                     index: 0,
-                    logs: Array(LOG_HISTORY_SIZE).fill(null)
+                    logs: Array(LOGGING.historySize).fill(null)
                 }
             },
             writable: false,

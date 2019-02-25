@@ -24,8 +24,8 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+
+import CommonElement from './common-element';
 
 /* load default constrainable descriptor presets */
 import requiredPreset from './descriptors/presets/required-constrainable-preset';
@@ -33,6 +33,8 @@ import boundedPreset from './descriptors/presets/bounded-constrainable-preset';
 import oneOfValuesPreset from './descriptors/presets/one-of-values-constrainable-preset';
 import oneOfTypesPreset from './descriptors/presets/one-of-types-constrainable-preset';
 import stronglyTypedPreset from './descriptors/presets/strongly-typed-constrainable-preset';
+
+const Hf = CommonElement();
 
 /**
  * @description - A data cursor prototypes.
@@ -49,7 +51,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @return {object}
      * @private
      */
-    _createSchema: function _createSchema (source) {
+    _createSchema (source) {
         const cursor = this;
 
         if (Hf.DEVELOPMENT) {
@@ -85,7 +87,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    hasItem: function hasItem (key) {
+    hasItem (key) {
         const cursor = this;
 
         return cursor._content.hasOwnProperty(key);
@@ -96,7 +98,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @method isImmutable
      * @return {boolean}
      */
-    isImmutable: function isImmutable () {
+    isImmutable () {
         const cursor = this;
 
         return cursor._immutable;
@@ -108,7 +110,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    isItemBounded: function isItemBounded (key) {
+    isItemBounded (key) {
         const cursor = this;
 
         if (cursor.isItemConstrainable(key)) {
@@ -125,7 +127,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    isItemStronglyTyped: function isItemStronglyTyped (key) {
+    isItemStronglyTyped (key) {
         const cursor = this;
 
         if (cursor.isItemConstrainable(key)) {
@@ -142,7 +144,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    isItemOneOfValues: function isItemRequired (key) {
+    isItemOneOfValues (key) {
         const cursor = this;
 
         if (cursor.isItemConstrainable(key)) {
@@ -159,7 +161,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    isItemOneOfTypes: function isItemRequired (key) {
+    isItemOneOfTypes (key) {
         const cursor = this;
 
         if (cursor.isItemConstrainable(key)) {
@@ -176,7 +178,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    isItemRequired: function isItemRequired (key) {
+    isItemRequired (key) {
         const cursor = this;
 
         if (cursor.isItemConstrainable(key)) {
@@ -193,7 +195,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    isItemConstrainable: function isItemConstrainable (key) {
+    isItemConstrainable (key) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -206,7 +208,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    isItemComputable: function isItemComputable (key) {
+    isItemComputable (key) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -219,7 +221,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {boolean}
      */
-    isItemObservable: function isItemObservable (key) {
+    isItemObservable (key) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -231,7 +233,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @method getPathId
      * @return {string}
      */
-    getPathId: function getPathId () {
+    getPathId () {
         const cursor = this;
 
         return cursor._pathId;
@@ -242,7 +244,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @method getKey
      * @return {string|number}
      */
-    getKey: function getKey () {
+    getKey () {
         const cursor = this;
 
         return cursor._key;
@@ -254,7 +256,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {object} option
      * @return {object}
      */
-    getAccessor: function getAccessor (option = {}) {
+    getAccessor (option = {}) {
         const cursor = this;
         const data = cursor._data;
 
@@ -268,7 +270,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @method getContentType
      * @return {string}
      */
-    getContentType: function getContentType () {
+    getContentType () {
         const cursor = this;
 
         return Hf.typeOf(cursor._content);
@@ -279,7 +281,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @method getContentItemKeys
      * @return {string|number}
      */
-    getContentItemKeys: function getContentItemKeys () {
+    getContentItemKeys () {
         const cursor = this;
 
         return Object.keys(cursor._content);
@@ -291,7 +293,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {*}
      */
-    getContentItem: function getContentItem (key) {
+    getContentItem (key) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -313,7 +315,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return void
      */
-    setContentItem: function setContentItem (item, key) {
+    setContentItem (item, key) {
         const cursor = this;
         const data = cursor._data;
         const pathId = `${cursor._pathId}.${key}`;
@@ -473,7 +475,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {number} timeIndexOffset
      * @return {object}
      */
-    recallContentItem: function recallContentItem (key, timeIndexOffset) {
+    recallContentItem (key, timeIndexOffset) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -489,13 +491,14 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
 
         const data = cursor._data;
         const mMap = data._mutation.mMap;
+        const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
         const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
         const recallTimeIndex = currentTimeIndex + timeIndexOffset;
-        const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
+        const recallTimeCount = cursorTimestamps.length;
         const leafType = cursor.getContentType(key) !== `object` || cursor.getContentType(key) !== `array`;
         let pathIdAtTimeIndex = Hf.stringToArray(pathId, `.`);
 
-        if (cursorTimestamps.length > recallTimeIndex) {
+        if (recallTimeCount > recallTimeIndex) {
             if (leafType) {
                 pathIdAtTimeIndex.pop();
             }
@@ -503,20 +506,32 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
             pathIdAtTimeIndex.unshift(`${cursor._rootKey}${recallTimeIndex}`);
             pathIdAtTimeIndex = Hf.arrayToString(pathIdAtTimeIndex, `.`);
 
-            if (Hf.DEVELOPMENT) {
-                if (!mMap.hasNode(pathIdAtTimeIndex)) {
-                    Hf.log(`error`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
+            if (!mMap.hasNode(pathIdAtTimeIndex)) {
+                if (Hf.DEVELOPMENT) {
+                    Hf.log(`warn1`, `DataCursorElement.recallContentItem - Data item key:${key} at pathId:${pathId} is undefine at time index:${recallTimeIndex}.`);
                 }
+                return {
+                    timestamp: null,
+                    key,
+                    recallTimeIndex: null,
+                    recallTimeCount: null,
+                    content: null
+                };
             }
 
             return {
                 timestamp: cursorTimestamps[recallTimeIndex],
                 key,
+                recallTimeIndex: -recallTimeIndex,
+                recallTimeCount,
                 content: leafType ? mMap.select(pathIdAtTimeIndex).getContent()[key] : mMap.select(pathIdAtTimeIndex).getContent()
             };
         } else { // eslint-disable-line
             return {
                 timestamp: null,
+                key,
+                recallTimeIndex: null,
+                recallTimeCount: null,
                 content: null
             };
         }
@@ -528,7 +543,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {object}
      */
-    recallAllContentItems: function recallContentItem (key) {
+    recallAllContentItems (key) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -542,8 +557,9 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
 
         const data = cursor._data;
         const mMap = data._mutation.mMap;
-        const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
         const cursorTimestamps = data._mutation.timestamp[cursor._rootKey];
+        const currentTimeIndex = data._mutation.timeIndex[cursor._rootKey];
+        const recallTimeCount = cursorTimestamps.length;
         const leafType = cursor.getContentType(key) !== `object` || cursor.getContentType(key) !== `array`;
         let timeIndexOffset = -1;
 
@@ -568,6 +584,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
             return {
                 timestamp: timeCursor.timestamp,
                 key,
+                recallTimeCount,
                 content: leafType ? mMap.select(timeCursor.pathIdAtTimeIndex).getContent()[key] : mMap.select(timeCursor.pathIdAtTimeIndex).getContent()
             };
         });
@@ -579,7 +596,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string} type
      * @return {object}
      */
-    getItemDescription: function getItemDescription (key) {
+    getItemDescription (key) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -596,7 +613,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @method getItemDescription.ofConstrainable
              * @return {object}
              */
-            ofConstrainable: function ofConstrainable () {
+            ofConstrainable () {
                 if (Hf.DEVELOPMENT) {
                     if (!cursor.isItemConstrainable(key)) {
                         Hf.log(`error`, `DataCursorElement.getItemDescription.ofConstrainable - Data item key:${key} at pathId:${pathId} does not have a constrainable description.`);
@@ -611,7 +628,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @method getItemDescription.ofComputable
              * @return {object}
              */
-            ofComputable: function ofComputable () {
+            ofComputable () {
                 if (Hf.DEVELOPMENT) {
                     if (!cursor.isItemComputable(key)) {
                         Hf.log(`error`, `DataCursorElement.getItemDescription.ofComputable - Data item key:${key} at pathId:${pathId} does not have a computable description.`);
@@ -626,7 +643,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @method getItemDescription.ofObservable
              * @return {object}
              */
-            ofObservable: function ofObservable () {
+            ofObservable () {
                 if (Hf.DEVELOPMENT) {
                     if (!cursor.isItemObservable(key)) {
                         Hf.log(`error`, `DataCursorElement.getItemDescription.ofObservable - Data item key:${key} at pathId:${pathId} does not have an observable description.`);
@@ -644,7 +661,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {object}
      */
-    describeItem: function describeItem (key) {
+    describeItem (key) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -666,9 +683,9 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @param {array} values
              * @return {object}
              */
-            asOneOfValues: function asOneOfValues (values) {
+            asOneOfValues (values) {
                 if (Hf.DEVELOPMENT) {
-                    if (!Hf.isArray(values) || Hf.isEmpty(values)) {
+                    if (!Hf.isArray(values) || !Hf.isNonEmptyArray(values)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Input values are invalid.`);
                     } else if (!values.every((value) => Hf.isString(value) || Hf.isNumeric(value))) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asOneOfValues - Value must be either numeric or string.`);
@@ -703,9 +720,9 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @param {array} types
              * @return {object}
              */
-            asOneOfTypes: function asOneOfTypes (types) {
+            asOneOfTypes (types) {
                 if (Hf.DEVELOPMENT) {
-                    if (!Hf.isArray(types) || Hf.isEmpty(types)) {
+                    if (!Hf.isArray(types) || !Hf.isNonEmptyArray(types)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Input types are invalid.`);
                     } else if (!types.every((type) => Hf.isString(type))) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asOneOfTypes - Type value must be string.`);
@@ -738,7 +755,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @method describeItem.asRequired
              * @return {object}
              */
-            asRequired: function asRequired () {
+            asRequired () {
                 function deepAssignDescription (_pathId, _content, _key) {
                     const descriptor = cursor._descriptor.select(`constrainable`);
                     const constraint = requiredPreset();
@@ -780,7 +797,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @method describeItem.asStronglyTyped
              * @return void
              */
-            asStronglyTyped: function asStronglyTyped () {
+            asStronglyTyped () {
                 function deepAssignDescription (_pathId, _content, _key) {
                     const descriptor = cursor._descriptor.select(`constrainable`);
                     const constraint = stronglyTypedPreset();
@@ -823,7 +840,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @param {object} upperBound
              * @return {object}
              */
-            asBounded: function asBounded (lowerBound, upperBound) {
+            asBounded (lowerBound, upperBound) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isNumeric(lowerBound) && !Hf.isNumeric(upperBound)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asBounded - Input bouding range values are must be numeric.`);
@@ -856,7 +873,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @param {object} constraint
              * @return void
              */
-            asConstrainable: function asConstrainable (constraint) {
+            asConstrainable (constraint) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isObject(constraint) && Object.key(constraint).forEach((constraintKey) => {
                         return Hf.isSchema({
@@ -897,7 +914,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @param {object} subscriber
              * @return void
              */
-            asObservable: function asObservable (condition, subscriber) {
+            asObservable (condition, subscriber) {
                 if (Hf.DEVELOPMENT) {
                     if (computableItem) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asObservable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);
@@ -935,7 +952,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @param {function} compute
              * @return void
              */
-            asComputable: function asComputable (contexts, compute) {
+            asComputable (contexts, compute) {
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isArray(contexts)) {
                         Hf.log(`error`, `DataCursorElement.describeItem.asComputable - Input computable contexts are invalid.`);
@@ -969,7 +986,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {string|number} key
      * @return {object}
      */
-    unDescribeItem: function unDescribeItem (key) {
+    unDescribeItem (key) {
         const cursor = this;
         const pathId = `${cursor._pathId}.${key}`;
 
@@ -990,7 +1007,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @method unDescribeItem.asConstrainable
              * @return void
              */
-            asConstrainable: function asConstrainable () {
+            asConstrainable () {
                 if (constrainableItem) {
                     cursor._descriptor.select(`constrainable`).removeDescription(pathId);
                 }
@@ -1002,7 +1019,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @method unDescribeItem.asObservable
              * @return void
              */
-            asObservable: function asObservable () {
+            asObservable () {
                 if (observableItem) {
                     cursor._descriptor.select(`observable`).removeDescription(pathId);
                 }
@@ -1014,7 +1031,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
              * @method unDescribeItem.asComputable
              * @return void
              */
-            asComputable: function asComputable () {
+            asComputable () {
                 if (computableItem) {
                     cursor._descriptor.select(`computable`).removeDescription(pathId);
                 }
@@ -1030,7 +1047,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {object} context - Object to become context (`this`) for the iterator function.
      * @return void
      */
-    forEach: function forEach (iterator, context) {
+    forEach (iterator, context) {
         const cursor = this;
 
         if (Hf.DEVELOPMENT) {
@@ -1049,7 +1066,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @method getSchema
      * @return {object}
      */
-    getSchema: function getSchema () {
+    getSchema () {
         const cursor = this;
         return cursor._createSchema(cursor._content);
     },
@@ -1059,7 +1076,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @method toObject
      * @return {object}
      */
-    toObject: function toObject () {
+    toObject () {
         const cursor = this;
         return Hf.clone(cursor._content);
     },
@@ -1070,7 +1087,7 @@ const DataCursorElementPrototype = Object.create({}).prototype = {
      * @param {boolean} beautified
      * @return {string}
      */
-    toString: function toString (beautified = true) {
+    toString (beautified = true) {
         const cursor = this;
 
         beautified = Hf.isBoolean(beautified) ? beautified : true;
@@ -1126,7 +1143,7 @@ export default function DataCursorElement (data, pathId) {
             enumerable: false
         },
         _immutable: {
-            get: function get () {
+            get () {
                 return data._mutation.immutableRootKeys.includes(rootKey);
             },
             configurable: false,

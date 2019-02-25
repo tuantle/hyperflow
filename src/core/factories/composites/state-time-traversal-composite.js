@@ -24,8 +24,9 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../hyperflow';
+import CommonElement from '../../elements/common-element';
+
+import CompositeElement from '../../elements/composite-element';
 
 /* factory Ids */
 import {
@@ -33,7 +34,9 @@ import {
     STORE_FACTORY_CODE
 } from '../factory-code';
 
-export default Hf.Composite({
+const Hf = CommonElement();
+
+export default CompositeElement({
     template: {
         /**
          * @description - Initialized and check that factory is valid for this composite.
@@ -41,7 +44,7 @@ export default Hf.Composite({
          * @method $initStateTimeTraversalComposite
          * @return void
          */
-        $initStateTimeTraversalComposite: function $initStateTimeTraversalComposite () {
+        $initStateTimeTraversalComposite () {
             const factory = this;
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -72,7 +75,7 @@ export default Hf.Composite({
          * @param {object} option
          * @return void
          */
-        flush: function flush (option = {}) {
+        flush (option = {}) {
             const factory = this;
 
             option = Hf.isObject(option) ? option : {};
@@ -86,9 +89,9 @@ export default Hf.Composite({
          * @method timeTraverse
          * @param {string} key
          * @param {number} timeIndexOffset
-         * @return void
+         * @return {bool}
          */
-        timeTraverse: function timeTraverse (key, timeIndexOffset) {
+        timeTraverse (key, timeIndexOffset) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
             let reconfiguration = {};
@@ -106,14 +109,14 @@ export default Hf.Composite({
                 content
             } = stateCursor.recallContentItem(key, timeIndexOffset);
 
-            if (Hf.DEVELOPMENT) {
-                if (!(Hf.isDefined(content) || Hf.isNumeric(timestamp))) {
-                    Hf.log(`error`, `StateTimeTraversalComposite.timeTraverse - Unable to time traverse to undefined state of key:${key} at time index.`);
+            if (!(Hf.isDefined(content) && Hf.isNumeric(timestamp))) {
+                if (Hf.DEVELOPMENT) {
+                    Hf.log(`warn1`, `StateTimeTraversalComposite.timeTraverse - Unable to time traverse to undefined state of key:${key} at time index.`);
                 }
+                return false;
             }
 
             reconfiguration[key] = content;
-
             factory.reconfigState(reconfiguration);
 
             const recalledState = Hf.mix(factory.getStateAsObject(), {
@@ -131,6 +134,7 @@ export default Hf.Composite({
                 `do-sync-reflected-state`
             ).emit(() => recalledState);
             Hf.log(`info0`, `Time traversing to previous state at timestamp:${timestamp} of key:${key}.`);
+            return true;
         },
         /**
          * @description - Traverse and recall the previous state mutation from time history.
@@ -139,9 +143,9 @@ export default Hf.Composite({
          * @method recall
          * @param {string} key
          * @param {number} timeIndexOffset
-         * @return {object}
+         * @return {object|null}
          */
-        recall: function recall (key, timeIndexOffset) {
+        recall (key, timeIndexOffset) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
 
@@ -158,13 +162,13 @@ export default Hf.Composite({
                 content
             } = stateCursor.recallContentItem(key, timeIndexOffset);
 
-            if (Hf.DEVELOPMENT) {
-                if (!(Hf.isDefined(content) || Hf.isNumeric(timestamp))) {
-                    Hf.log(`error`, `StateTimeTraversalComposite.recall - Unable to recall an undefined state of key:${key} at time index.`);
+            if (!(Hf.isDefined(content) && Hf.isNumeric(timestamp))) {
+                if (Hf.DEVELOPMENT) {
+                    Hf.log(`warn1`, `StateTimeTraversalComposite.recall - Unable to recall an undefined state of key:${key} at time index.`);
                 }
+            } else {
+                Hf.log(`info0`, `Recalling previous state at timestamp:${timestamp} of key:${key}.`);
             }
-
-            Hf.log(`info0`, `Recalling previous state at timestamp:${timestamp} of key:${key}.`);
             return content;
         },
         /**
@@ -175,7 +179,7 @@ export default Hf.Composite({
          * @param {string} key
          * @return {array}
          */
-        recallAll: function recallAll (key) {
+        recallAll (key) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
 
@@ -187,13 +191,13 @@ export default Hf.Composite({
 
             const contentHistoryItems = stateCursor.recallAllContentItems(key);
 
-            if (Hf.DEVELOPMENT) {
-                if (!Hf.isArray(contentHistoryItems)) {
+            if (!Hf.isArray(contentHistoryItems)) {
+                if (Hf.DEVELOPMENT) {
                     Hf.log(`error`, `StateTimeTraversalComposite.recallAll - Unable to recall all previous states of key:${key}.`);
                 }
+            } else {
+                Hf.log(`info0`, `Recalling all previous states of key:${key}.`);
             }
-
-            Hf.log(`info0`, `Recalling all previous states of key:${key}.`);
             return contentHistoryItems;
         }
     }

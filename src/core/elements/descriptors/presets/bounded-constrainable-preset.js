@@ -21,8 +21,10 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../../hyperflow';
+
+import CommonElement from '../../common-element';
+
+const Hf = CommonElement();
 
 /**
  * @description - Create a constrainable descriptor for the bounding range.
@@ -32,9 +34,9 @@ import { Hf } from '../../../../hyperflow';
  * @param {number} upperBound
  * @return {function}
  */
-const boundedPreset = function boundedPreset (_lowerBound, _upperBound) {
+const boundedPreset = (_lowerBound, _upperBound) => {
     // TODO: Add +infinity and -infinity to lower & upper bound range values.
-    if (Hf.DEVELOPMENT) {
+    if ((Hf.DEVELOPMENT)) {
         if (!Hf.isNumeric(_lowerBound) && !Hf.isNumeric(_upperBound)) {
             Hf.log(`error`, `bounded - Input bouding range values are invalid.`);
         }
@@ -47,10 +49,10 @@ const boundedPreset = function boundedPreset (_lowerBound, _upperBound) {
              * @description - Ensures value (can be a number or string) is bounded within a range.
              *  If a string, the string length is bounded.
              *
-             * @method bounded
+             * @method constrainer
              * @return {object}
              */
-            constrainer: function bounded (condition) {
+            constrainer (condition) {
                 const context = this;
                 const [
                     lowerBound,
@@ -58,7 +60,7 @@ const boundedPreset = function boundedPreset (_lowerBound, _upperBound) {
                 ] = condition;
                 const result = {
                     verified: true,
-                    reject: function reject () {
+                    reject () {
                         if (Hf.isString(context.newValue)) {
                             Hf.log(`warn1`, `bounded - Property key:${context.key} length is not in a bounded range of ${lowerBound} to ${upperBound}`);
                         } else {

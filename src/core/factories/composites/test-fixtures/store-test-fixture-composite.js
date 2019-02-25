@@ -24,8 +24,9 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../../../hyperflow';
+import CommonElement from '../../../elements/common-element';
+
+import CompositeElement from '../../../elements/composite-element';
 
 /* factory Ids */
 import {
@@ -36,7 +37,9 @@ import {
 /* delay all data stream from store by 1s as default */
 const DELAY_STORE_IN_MS = 1000;
 
-export default Hf.Composite({
+const Hf = CommonElement();
+
+export default CompositeElement({
     template: {
         /**
          * @description - Initialized and check that provider is valid for this composite.
@@ -44,7 +47,7 @@ export default Hf.Composite({
          * @method $initStoreTestFixtureComposite
          * @return void
          */
-        $initStoreTestFixtureComposite: function $initStoreTestFixtureComposite () {
+        $initStoreTestFixtureComposite () {
             const fixture = this;
             if (Hf.DEVELOPMENT) {
                 if (!Hf.isSchema({
@@ -64,7 +67,7 @@ export default Hf.Composite({
         }
     },
     enclosure: {
-        StoreTestFixtureComposite: function StoreTestFixtureComposite () {
+        StoreTestFixtureComposite () {
             /* ----- Private Variables ------------- */
             /* flag indicates start method has called */
             let _started = false;
@@ -77,7 +80,7 @@ export default Hf.Composite({
              * @method hasStarted
              * @return {boolean}
              */
-            this.hasStarted = function hasStarted () {
+            this.hasStarted = function () {
                 return _started;
             };
             /**
@@ -87,7 +90,7 @@ export default Hf.Composite({
              * @param {object} definition - Test fixture registration definition for store.
              * @return {object}
              */
-            this.register = function register (definition) {
+            this.register = function (definition) {
                 const fixture = this;
                 if (!Hf.isSchema({
                     testSubject: `object`
@@ -131,7 +134,7 @@ export default Hf.Composite({
              * @param {function} done
              * @return void
              */
-            this.start = function start (option = {}, done) {
+            this.start = function (option = {}, done) {
                 const fixture = this;
 
                 // TODO: Implement use case for fixture start option.
@@ -169,7 +172,7 @@ export default Hf.Composite({
              * @param {function} done
              * @return void
              */
-            this.stop = function stop (done) {
+            this.stop = function (done) {
                 const fixture = this;
                 if (!Hf.isFunction(done)) {
                     Hf.log(`error`, `StoreTestFixtureComposite.stop - Input done function is invalid.`);

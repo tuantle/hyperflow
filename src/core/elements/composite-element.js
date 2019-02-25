@@ -24,11 +24,13 @@
  */
 'use strict'; // eslint-disable-line
 
-/* load Hyperflow */
-import { Hf } from '../../hyperflow';
+
+import CommonElement from './common-element';
 
 /* load DataElement */
 import DataElement from './data-element';
+
+const Hf = CommonElement();
 
 const PRIVATE_PREFIX = `_`;
 const INITIALIZATION_PREFIX = `$`;
@@ -36,8 +38,6 @@ const DEFAULT_EXCLUSION_PREFIXES = [ PRIVATE_PREFIX, INITIALIZATION_PREFIX ];
 
 /* number mutations to persist in mutation map before roll-over */
 const DEFAULT_MUTATION_HISTORY_DEPTH = 64;
-
-const revealFrozen = Hf.compose(Hf.reveal, Object.freeze);
 
 /**
  * @description - A composite element prototypes.
@@ -53,11 +53,11 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      * @param {array} fnNames - Names of the composed enclosures to retrieve.
      * @return {object}
      */
-    getEnclosure: function getEnclosure (...fnNames) {
+    getEnclosure (...fnNames) {
         const composite = this;
         let clonedEnclosure = Hf.clone(composite._enclosure);
 
-        if (Hf.isEmpty(fnNames)) {
+        if (!Hf.isNonEmptyArray(fnNames)) {
             Hf.log(`warn0`, `CompositeElement.getEnclosure - Input enclosure function name array is empty.`);
             return clonedEnclosure;
         } else { // eslint-disable-line
@@ -79,11 +79,11 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      * @param {array} keys - Names of the template methods and properties to retrieve.
      * @return {object}
      */
-    getTemplate: function getTemplate (...keys) {
+    getTemplate (...keys) {
         const composite = this;
         let clonedTemplate = Hf.clone(composite._template);
 
-        if (Hf.isEmpty(keys)) {
+        if (!Hf.isNonEmptyArray(keys)) {
             Hf.log(`warn0`, `CompositeElement.getTemplate - Input template key array is empty.`);
             return clonedTemplate;
         } else { // eslint-disable-line
@@ -104,7 +104,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      * @method getExclusion
      * @return {object}
      */
-    getExclusion: function getExclusion () {
+    getExclusion () {
         const composite = this;
         return Hf.clone(composite._exclusion);
     },
@@ -115,11 +115,11 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      * @param {array} sources
      * @return {object}
      */
-    mixin: function mixin (...sources) {
+    mixin (...sources) {
         const composite = this;
 
         if (Hf.DEVELOPMENT) {
-            if (Hf.isEmpty(sources)) {
+            if (!Hf.isNonEmptyArray(sources)) {
                 Hf.log(`warn0`, `CompositeElement.mixin - Input source array is empty.`);
             } else if (sources.filter((source) => !(Hf.isObject(source) || Hf.isFunction(source)))) {
                 Hf.log(`warn0`, `CompositeElement.mixin - Input source is invalid.`);
@@ -163,11 +163,11 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      * @param {array} composites - A set of composites.
      * @return {object}
      */
-    compose: function compose (...composites) {
+    compose (...composites) {
         const composite = this;
 
         if (Hf.DEVELOPMENT) {
-            if (Hf.isEmpty(composites)) {
+            if (!Hf.isNonEmptyArray(composites)) {
                 Hf.log(`warn0`, `CompositeElement.compose - Input composites set is empty.`);
             } else if (!composites.every((_composite) => Hf.isSchema({
                 // NOTE: for composite with internal private state, use enclosure.
@@ -218,7 +218,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
      * @param {object} initialState - The initial state of a factory.
      * @return {object}
      */
-    resolve: function resolve (initialStatic = {}, initialState = {}) {
+    resolve (initialStatic = {}, initialState = {}) {
         const composite = this;
 
         initialStatic = Hf.isObject(initialStatic) ? initialStatic : {};
@@ -239,7 +239,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                 let originalStateAccessorCache;
 
                 /* helper function to deep reduce original state by a reducer. */
-                const deepStateReduction = function deepStateReduction (originalState, reducer) {
+                const deepStateReduction = (originalState, reducer) => {
                     if (Hf.isObject(originalState) && Hf.isObject(reducer)) {
                         const originalStateKeys = Object.keys(originalState);
                         const reducerKeys = Object.keys(reducer);
@@ -304,7 +304,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                 };
 
                 /* helper function to deep reconfig original state by a reconfiguration. */
-                const deepStateReconfiguration = function deepStateReconfiguration (originalState, reconfiguration, parentState, parentKey = ``) {
+                const deepStateReconfiguration = (originalState, reconfiguration, parentState, parentKey = ``) => {
                     let reconfigurationPathIds = [];
                     parentKey = Hf.isString(parentKey) ? parentKey : ``;
                     if (Hf.isObject(originalState) && Hf.isObject(reconfiguration)) {
@@ -390,7 +390,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @return {object}
                      */
                     // TODO: Need to find a way to not expose the state cursor.
-                    getStateCursor: function getStateCursor () {
+                    getStateCursor () {
                         return stateCursor;
                     },
                     /**
@@ -400,7 +400,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @return {object}
                      */
                     // TODO: Remove if find no use case.
-                    getStateSchema: function getStateSchema () {
+                    getStateSchema () {
                         return stateCursor.getSchema();
                     },
                     /**
@@ -409,7 +409,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @method getStateAsObject
                      * @return {object}
                      */
-                    getStateAsObject: function getStateAsObject () {
+                    getStateAsObject () {
                         return stateCursor.toObject();
                     },
                     /**
@@ -419,7 +419,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @param {object} option
                      * @return void
                      */
-                    flushState: function flushState (option = {}) {
+                    flushState (option = {}) {
                         const {
                             /* skip referal of pathIds in the exclusion list. */
                             mutationHistoryDepth
@@ -440,7 +440,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @param {object} reducer
                      * @return {boolean}
                      */
-                    reduceState: function reduceState (reducer) {
+                    reduceState (reducer) {
                         let mutated = false;
 
                         if (Hf.DEVELOPMENT) {
@@ -468,7 +468,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
                      * @return void
                      * @return void
                      */
-                    reconfigState: function reconfigState (reconfiguration) {
+                    reconfigState (reconfiguration) {
                         if (Hf.DEVELOPMENT) {
                             if (!Hf.isObject(reconfiguration)) {
                                 Hf.log(`error`, `Factory.reconfigState - Input reconfiguration is invalid.`);
@@ -531,7 +531,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
 
                 product = stateCursor.getContentItemKeys().reduce((productState, key) => {
                     Object.defineProperty(productState, key, {
-                        get: function get () {
+                        get () {
                             return currentStateAccessor[key];
                         },
                         configurable: false,
@@ -550,7 +550,7 @@ const CompositeElementPrototype = Object.create({}).prototype = {
             if (!Hf.isEmpty(initialStatic)) {
                 product = Object.entries(initialStatic).reduce((productStatic, [ key, value ]) => {
                     Object.defineProperty(productStatic, key, {
-                        get: function get () {
+                        get () {
                             return Hf.freeze(value);
                         },
                         configurable: false,
@@ -656,5 +656,5 @@ export default function CompositeElement (definition) {
     }
 
     /* reveal only the public properties and functions */
-    return revealFrozen(element);
+    return Hf.compose(Hf.reveal, Object.freeze)(element);
 }
