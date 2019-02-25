@@ -2,8 +2,32 @@
 ## A state flow and mutation management toolkit & library for developing universal app
 
 ----
-**Development RC Version 0.2.1-rc1 (01/10/2019)**
-**Development Version 0.2.1 (05/07/2018)**
+**Development RC Version 0.2.1-rc3 (02/11/2019)**
+```
+Notes:
+    - Updated package dependencies to latest.
+New Features:
+Changes:
+Breaking Changes:
+    - Removed global init call requirement
+Improvements:
+    - Code cleanups & refactored
+    - Updated ReactComponentComposite compability with latest React. No longer use React createClass to create component.
+Bug fixes:
+    - Fixed EventStreamComposite onCancel canceller callback
+```
+**Development RC Version 0.2.1-rc2 (01/10/2019)**
+```
+Notes:
+New Features:
+Changes:
+Breaking Changes:
+Improvements:
+    - Code cleanups & refactored
+    - Updated ReactComponentComposite compability with latest React. No longer use React createClass to create component.
+Bug fixes:
+```
+**Development Version 0.2.1-rc1 (05/07/2018)**
 ```
 Notes:
     - Updated RxJs to latest.
@@ -16,6 +40,7 @@ Improvements:
 Bug fixes:
 ```
 **Released Version 0.2.0 (02/19/2018)**
+
 **Development RC Version 0.2.0-rc2 (01/31/2018)**
 ```
 Notes:
@@ -150,6 +175,7 @@ Improvements:
 Bug fixes:
 ```
 **Released Version 0.1.0 (07/20/2017)**
+
 **Development RC Version 0.1.0-rc4 (06/22/2017)**
 ```
 Notes:
