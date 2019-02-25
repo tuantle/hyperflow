@@ -35,8 +35,8 @@ const Factory = Composer({
             }
         }
     },
-    Factory: function Factory () {
-        this.connectStream = function connectStream (source, duplex = false) {
+    Factory () {
+        this.connectStream = function (source, duplex = false) {
             this.observe(source).delay(10);
             if (duplex) {
                 source.observe(this);
@@ -48,12 +48,12 @@ const factoryA = Factory.augment({
     state: {
         name: `factoryA`
     },
-    // operateIncomingStream: function operateIncomingStream (operator) {
+    // operateIncomingStream (operator) {
     //     operator.divert(`event1`, `event2`).monitor({
     //         logNext: (payload) => console.log(`Monitor factory A incoming event stream id:${payload.eventId} -- ${payload.value}`)
     //     }).recombine();
     // },
-    // operateOutgoingStream: function operateOutgoingStream (operator) {
+    // operateOutgoingStream (operator) {
     //     operator.divert(`event3`).map((payload) => {
     //         return {
     //             eventId: `event3`,
@@ -65,7 +65,7 @@ const factoryA = Factory.augment({
     //         }
     //     }).recombine();
     // },
-    setup: function setup (done) {
+    setup (done) {
         const factory = this;
         factory.incoming(
             `event1`,
@@ -102,7 +102,7 @@ const factoryB = Factory.augment({
     state: {
         name: `factoryB`
     },
-    setup: function setup (done) {
+    setup (done) {
         const factory = this;
         factory.outgoing(`event1`).emit(() => `1`);
         factory.outgoing(`event4`).emit(() => `4a`);
@@ -115,7 +115,7 @@ const factoryC = Factory.augment({
     state: {
         name: `factoryC`
     },
-    setup: function setup (done) {
+    setup (done) {
         const factory = this;
         factory.outgoing(`event2`).emit(() => `2`);
         factory.outgoing(`event4`).emit(() => `4b`);
@@ -127,7 +127,7 @@ const factoryD = Factory.augment({
     state: {
         name: `factoryD`
     },
-    // operateIncomingStream: function operateIncomingStream (operator) {
+    // operateIncomingStream (operator) {
     //     operator.divert(`event3`).map((payload) => {
     //         return {
     //             eventId: `event3`,
@@ -137,7 +137,7 @@ const factoryD = Factory.augment({
     //         logOnNext: (payload) => console.log(`Monitor factory D incoming event stream id:${payload.eventId} -- ${payload.value}`)
     //     }).recombine();
     // },
-    setup: function setup (done) {
+    setup (done) {
         const factory = this;
         factory.incoming(`event3`).handle((results) => {
             console.log(results);

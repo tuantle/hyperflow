@@ -14,15 +14,7 @@ import test from 'tape';
 import CommonElement from '../../../src/core/elements/common-element';
 
 export function runTests () {
-    const common = CommonElement({
-        development: true,
-        logging: {
-            info0: true,
-            info1: true,
-            warn0: true,
-            warn1: true
-        }
-    });
+    const common = CommonElement();
 
     test(`--------- Running CommonElement Spec Tests ---------`, (assert) => {
         assert.equal(1, 1);
@@ -140,8 +132,8 @@ export function runTests () {
             }]
         };
         const objA = {
-            fnA: function fnA () {},
-            fnB: function fnB () {},
+            fnA () {},
+            fnB () {},
             a: {
                 b: 123,
                 c: `abc`
@@ -150,7 +142,7 @@ export function runTests () {
         const objB = {
             a: 123,
             b: [],
-            fnC: function fnC () {}
+            fnC () {}
         };
         const objC1 = {
             a: [ 1, 2, 3 ],

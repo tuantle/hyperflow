@@ -17,14 +17,12 @@ import ReactDOMServer from 'react-dom/server';
 
 import PropTypes from 'prop-types';
 
-import CreateReactClass from "create-react-class";
-
 import test from 'tape';
 
 export function runTests () {
     test(`AppFactory should work with all its features.`, (assert) => {
         const TestStoreA = Hf.Store.augment({
-            setup: function setup (done) {
+            setup (done) {
                 setTimeout(() => {
                     done();
                 }, 20000);
@@ -34,10 +32,10 @@ export function runTests () {
             composites: [
                 Hf.React.ComponentComposite
             ],
-            setup: function setup (done) {
+            setup (done) {
                 done();
             },
-            render: function render () {
+            render () {
                 const component = this;
                 const {
                     name
@@ -60,10 +58,10 @@ export function runTests () {
             composites: [
                 Hf.React.ComponentComposite
             ],
-            setup: function setup (done) {
+            setup (done) {
                 done();
             },
-            render: function render () {
+            render () {
                 return (
                     <h1> Child Interface B </h1>
                 );
@@ -73,27 +71,27 @@ export function runTests () {
             composites: [
                 Hf.React.ComponentComposite
             ],
-            setup: function setup (done) {
+            setup (done) {
                 done();
             },
-            render: function render () {
+            render () {
                 return (
                     <h1> Child Interface C </h1>
                 );
             }
         });
         const TestServiceA = Hf.Service.augment({
-            setup: function setup (done) {
+            setup (done) {
                 done();
             }
         });
         const TestServiceB = Hf.Service.augment({
-            setup: function setup (done) {
+            setup (done) {
                 done();
             }
         });
         const TestPeerDomain = Hf.Domain.augment({
-            $init: function $init () {
+            $init () {
                 const domain = this;
                 domain.register({
                     services: [
@@ -103,12 +101,12 @@ export function runTests () {
                     ]
                 });
             },
-            setup: function setup (done) {
+            setup (done) {
                 done();
             }
         });
         const TestChildDomainA = Hf.Domain.augment({
-            $init: function $init () {
+            $init () {
                 const domain = this;
                 domain.register({
                     intf: TestInterfaceB({
@@ -116,12 +114,12 @@ export function runTests () {
                     })
                 });
             },
-            setup: function setup (done) {
+            setup (done) {
                 done();
             }
         });
         const TestChildDomainB = Hf.Domain.augment({
-            $init: function $init () {
+            $init () {
                 const domain = this;
                 domain.register({
                     intf: TestInterfaceC({
@@ -131,7 +129,7 @@ export function runTests () {
             }
         });
         const TestDomain = Hf.Domain.augment({
-            $init: function $init () {
+            $init () {
                 const domain = this;
                 domain.register({
                     store: TestStoreA({
@@ -160,7 +158,7 @@ export function runTests () {
                     ]
                 });
             },
-            setup: function setup (done) {
+            setup (done) {
                 done();
             }
         });
@@ -169,7 +167,7 @@ export function runTests () {
                 Hf.React.AppRendererComposite,
                 Hf.React.AppComponentComposite
             ],
-            $init: function $init () {
+            $init () {
                 const app = this;
                 app.register({
                     domain: TestDomain({
@@ -178,8 +176,7 @@ export function runTests () {
                     component: {
                         lib: {
                             React,
-                            PropTypes,
-                            CreateReactClass
+                            PropTypes
                         },
                         renderer: ReactDOMServer
                     },

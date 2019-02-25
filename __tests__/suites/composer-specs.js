@@ -19,14 +19,14 @@ export function runTests () {
             state: {
                 message: `Hello World!`
             },
-            Factory: function Factory () {
-                this.getMessage = function getMessage () {
+            Factory () {
+                this.getMessage = function () {
                     return this.message;
                 };
             }
         });
         const Factory = FactoryBase.augment({
-            getMessageUpperCase: function getMessageUpperCase () {
+            getMessageUpperCase () {
                 return this.getMessage().toUpperCase();
             }
         });
