@@ -9,20 +9,28 @@
  */
 'use strict'; // eslint-disable-line
 
+require('./env');
 /* load babel */
 /* eslint quotes: 0 */
-require("@babel/register");
-
-/* load and initialize hyperflow */
-require('../src/hyperflow').init({
-    target: 'server',
-    development: true,
-    logging: {
-        info0: true,
-        info1: true,
-        warn0: false,
-        warn1: true
-    }
+require('@babel/register')({
+    comments: false,
+    sourceMaps: 'inline',
+    presets: [
+        '@babel/react',
+        [
+            '@babel/preset-env',
+            {
+                targets: {
+                    node: 'current'
+                }
+            }
+        ]
+    ],
+    plugins: [
+        '@babel/plugin-transform-strict-mode',
+        '@babel/plugin-proposal-object-rest-spread',
+        '@babel/plugin-proposal-class-properties'
+    ]
 });
 
 /* load test specs for Hf modules */
@@ -33,7 +41,7 @@ var eventStreamCompositeSpecs = require('./suites/factories/composites/event-str
 var storeFactorySpecs = require('./suites/factories/store-factory-specs'); // eslint-disable-line
 var appFactorySpecs = require('./suites/factories/app-factory-specs'); // eslint-disable-line
 
-commonElementSpecs.runTests();
+// commonElementSpecs.runTests();
 // dataElementSpecs.runTests();
 // composerSpecs.runTests();
 // eventStreamCompositeSpecs.runTests();
