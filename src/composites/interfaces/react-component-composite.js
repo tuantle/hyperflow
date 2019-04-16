@@ -36,10 +36,18 @@ const DEFAULT_COMPONENT_FN_PREFIX_INCLUSIONS = [
     `render`
 ];
 
-const DEFAULT_COMPONENT_FN_AND_PROPERTY_INCLUSIONS = [
+const DEFAULT_COMPONENT_FN_INCLUSIONS = [
     `outgoing`,
     `getComponentComposites`,
     `getInterfaceComposites`
+];
+
+const DEFAULT_COMPONENT_STATICS = [
+    `fId`,
+    `contextType`,
+    `propTypes`,
+    `defaultProps`,
+    `router`
 ];
 
 const Hf = CommonElement();
@@ -62,7 +70,6 @@ export default CompositeElement({
                     outgoing: `function`,
                     reduceState: `function`,
                     getStateCursor: `function`,
-                    getStateAsObject: `function`,
                     getComponentLib: `function`,
                     getInitialReflectedState: `function`
                 }).of(intf)) {
@@ -100,7 +107,7 @@ export default CompositeElement({
                     Hf.log(`error`, `ReactComponentComposite.onCompleteUpdating - Input handler function is invalid.`);
                 }
             }
-            intf.incoming(`on-component-${intf.name}-${intf.fId}-did-update`).handle((component) => handler(component));
+            intf.incoming(`on-component-${intf.fId}-did-update`).handle((component) => handler(component));
         }
     },
     enclosure: {
@@ -131,7 +138,7 @@ export default CompositeElement({
                         Hf.log(`error`, `ReactComponentComposite.onMounting - Input handler function is invalid.`);
                     }
                 }
-                intf.incoming(`on-component-${intf.name}-${intf.fId}-did-mount`).handle((component) => {
+                intf.incoming(`on-component-${intf.fId}-did-mount`).handle((component) => {
                     _mounted = true;
                     handler(component);
                 });
@@ -150,7 +157,7 @@ export default CompositeElement({
                         Hf.log(`error`, `ReactComponentComposite.onDismounting - Input handler function is invalid.`);
                     }
                 }
-                intf.incoming(`on-component-${intf.name}-${intf.fId}-will-unmount`).handle((component) => {
+                intf.incoming(`on-component-${intf.fId}-will-unmount`).handle((component) => {
                     _mounted = false;
                     handler(component);
                 });
@@ -181,14 +188,6 @@ export default CompositeElement({
                     fnPrefixInclusions: [],
                     fnAndPropertyInclusions: []
                 }).of(option);
-                const reactPropTypeAlias = {
-                    boolean: PropTypes.bool,
-                    array: PropTypes.array,
-                    object: PropTypes.object,
-                    function: PropTypes.func,
-                    string: PropTypes.string,
-                    number: PropTypes.number
-                };
 
                 if (intf.isMounted()) {
                     Hf.log(`error`, `ReactComponentComposite.toComponent - Interface:${intf.name} already have a mounted component.`);
@@ -200,54 +199,13 @@ export default CompositeElement({
                     }).of(React)) {
                         Hf.log(`error`, `ReactComponentComposite.toComponent - React library is invalid.`);
                     } else if (!Hf.isSchema({
-                        bool: `function`,
-                        array: `function`,
-                        object: `function`,
-                        func: `function`,
-                        string: `function`,
-                        number: `function`,
-                        oneOf: `function`,
-                        oneOfType: `function`
+                        string: `function`
                     }).of(PropTypes)) {
                         Hf.log(`error`, `ReactComponentComposite.toComponent - React prop-types library is invalid.`);
                     }
                 }
 
                 const Component = class Component extends React.Component {
-                    // static defaultProps = intf.getStateAsObject();
-                    // static propTypes = (() => {
-                    //     let propTypes = Object.keys(intf.getStateAsObject()).reduce((propType, key) => {
-                    //         if (intf.getStateCursor().isItemStronglyTyped(key)) {
-                    //             const propertyTypeAliasKey = Hf.typeOf(intf.getStateAsObject()[key]);
-                    //             if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
-                    //                 if (intf.getStateCursor().isItemRequired(key)) {
-                    //                     propType[key] = reactPropTypeAlias[propertyTypeAliasKey].isRequired;
-                    //                 } else {
-                    //                     propType[key] = reactPropTypeAlias[propertyTypeAliasKey];
-                    //                 }
-                    //             }
-                    //         }
-                    //         return propType;
-                    //     }, {});
-                    //
-                    //     return Object.keys(intf.getStateAsObject()).reduce((propType, key) => {
-                    //         if (intf.getStateCursor().isItemOneOfValues(key)) {
-                    //             const {
-                    //                 condition: values
-                    //             } = intf.getStateCursor().getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
-                    //             propType[key] = PropTypes.oneOf(values);
-                    //         }
-                    //         if (intf.getStateCursor().isItemOneOfTypes(key)) {
-                    //             const {
-                    //                 condition: types
-                    //             } = intf.getStateCursor().getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
-                    //             propType[key] = PropTypes.oneOfType(types.map((typeAliasKey) => {
-                    //                 return reactPropTypeAlias[typeAliasKey];
-                    //             }));
-                    //         }
-                    //         return propType;
-                    //     }, propTypes);
-                    // })();
                     constructor (props) {
                         super(props);
                         const component = this;
@@ -261,7 +219,7 @@ export default CompositeElement({
                                 properties: true,
                                 exception: {
                                     prefixes: DEFAULT_COMPONENT_FN_PREFIX_INCLUSIONS.concat(fnPrefixInclusions),
-                                    keys: DEFAULT_COMPONENT_FN_AND_PROPERTY_INCLUSIONS.concat(fnAndPropertyInclusions)
+                                    keys: DEFAULT_COMPONENT_FN_INCLUSIONS.concat(fnAndPropertyInclusions)
                                 }
                             }
                         }).with({})).forEach(([ key, value ]) => {
@@ -340,7 +298,7 @@ export default CompositeElement({
                                 if (Hf.isObject(reflectedState)) {
                                     component.setState(() => reflectedState, () => {
                                         component.mutationOccurred = true;
-                                        Hf.log(`info0`, `State mutated for component:${component.props.name}.`);
+                                        Hf.log(`info0`, `State mutated for component:${intf.fId}.`);
                                     });
                                 }
                             });
@@ -350,34 +308,14 @@ export default CompositeElement({
                                     component.setState(() => reflectedState, () => {
                                         component.mutationOccurred = true;
                                         component.forceUpdate();
-                                        Hf.log(`info0`, `State mutated for component:${component.props.name}.`);
-                                        Hf.log(`info0`, `Forced update for component:${component.props.name}.`);
+                                        Hf.log(`info0`, `State mutated for component:${intf.fId}.`);
+                                        Hf.log(`info0`, `Forced update for component:${intf.fId}.`);
                                     });
                                 }
                             });
                         }
 
-                        // if (alwaysUpdateAsParent && Hf.isDefined(component.props.children)) {
-                        if (alwaysUpdateAsParent) {
-                            component.mutationOccurred = true;
-                        }
-
-                        const defaultProperty = intf.getStateAsObject();
-
-                        /* needs to sync up interface state and component props after mounting */
-                        if (intf.reduceState(Hf.fallback(defaultProperty).of(Hf.mix(component.props, {
-                            exclusion: {
-                                enumerablePropertiesOnly: true,
-                                keys: [ `*` ],
-                                exception: {
-                                    keys: Object.keys(defaultProperty).filter((key) => key !== `name` && key !== `fId` && key !== `intf`)
-                                }
-                            }
-                        }).with({})))) {
-                            component.mutationOccurred = true;
-                            Hf.log(`info0`, `Property mutated for component:${component.props.name}.`);
-                        }
-                        component.outgoing(`on-component-${component.props.name}-${component.props.fId}-did-mount`).emit(() => component);
+                        component.outgoing(`on-component-${intf.fId}-did-mount`).emit(() => component);
                     }
                     /**
                      * @description - React method for tearing down component before unmounting.
@@ -388,7 +326,7 @@ export default CompositeElement({
                     componentWillUnmount () {
                         const component = this;
 
-                        component.outgoing(`on-component-${component.props.name}-${component.props.fId}-will-unmount`).emit(() => component);
+                        component.outgoing(`on-component-${intf.fId}-will-unmount`).emit(() => component);
                     }
                     /**
                      * @description - React method for preparing component after updating.
@@ -399,7 +337,7 @@ export default CompositeElement({
                     componentDidUpdate () {
                         const component = this;
 
-                        component.outgoing(`on-component-${component.props.name}-${component.props.fId}-did-update`).emit(() => component);
+                        component.outgoing(`on-component-${intf.fId}-did-update`).emit(() => component);
                     }
                     /**
                      * @description - React method for checking if component should update.
@@ -410,52 +348,21 @@ export default CompositeElement({
                     shouldComponentUpdate () {
                         const component = this;
 
-                        if (component.mutationOccurred) {
-                            component.mutationOccurred = false;
-                            Hf.log(`info1`, `Rendering component:${component.props.name}.`);
-
-                            return true;
-                        } else { // eslint-disable-line
-                            Hf.log(`info1`, `Skipped rendering for component:${component.props.name}.`);
-
-                            return false;
-                        }
-                    }
-                };
-                Component.defaultProps = intf.getStateAsObject();
-                Component.propTypes = (() => {
-                    let propTypes = Object.keys(intf.getStateAsObject()).reduce((propType, key) => {
-                        if (intf.getStateCursor().isItemStronglyTyped(key)) {
-                            const propertyTypeAliasKey = Hf.typeOf(intf.getStateAsObject()[key]);
-                            if (reactPropTypeAlias.hasOwnProperty(propertyTypeAliasKey)) {
-                                if (intf.getStateCursor().isItemRequired(key)) {
-                                    propType[key] = reactPropTypeAlias[propertyTypeAliasKey].isRequired;
-                                } else {
-                                    propType[key] = reactPropTypeAlias[propertyTypeAliasKey];
-                                }
+                        if (alwaysUpdateAsParent) {
+                            Hf.log(`info1`, `Rendering component:${intf.fId}.`);
+                        } else {
+                            if (component.mutationOccurred) {
+                                component.mutationOccurred = false;
+                                Hf.log(`info1`, `Rendering component:${intf.fId}.`);
+                                return true;
+                            } else { // eslint-disable-line
+                                Hf.log(`info1`, `Skipped rendering for component:${intf.fId}.`);
+                                return false;
                             }
                         }
-                        return propType;
-                    }, {});
-
-                    return Object.keys(intf.getStateAsObject()).reduce((propType, key) => {
-                        if (intf.getStateCursor().isItemOneOfValues(key)) {
-                            const {
-                                condition: values
-                            } = intf.getStateCursor().getItemDescription(key).ofConstrainable().getConstraint(`oneOf`);
-                            propType[key] = PropTypes.oneOf(values);
-                        }
-                        if (intf.getStateCursor().isItemOneOfTypes(key)) {
-                            const {
-                                condition: types
-                            } = intf.getStateCursor().getItemDescription(key).ofConstrainable().getConstraint(`oneTypeOf`);
-                            propType[key] = PropTypes.oneOfType(types.map((typeAliasKey) => {
-                                return reactPropTypeAlias[typeAliasKey];
-                            }));
-                        }
-                        return propType;
-                    }, propTypes);
-                })();
+                        return true;
+                    }
+                };
 
                 if (Hf.DEVELOPMENT) {
                     if (!Hf.isFunction(Component)) {
@@ -463,7 +370,24 @@ export default CompositeElement({
                     }
                 }
 
-                return Component;
+                return DEFAULT_COMPONENT_STATICS.reduce((_Component, componentStatic) => {
+                    if (Hf.isObject(Object.getOwnPropertyDescriptor(intf, componentStatic))) {
+                        _Component[componentStatic] = intf[componentStatic];
+                    }
+                    if (componentStatic === `propTypes`) {
+                        _Component[componentStatic] = {
+                            ..._Component[componentStatic],
+                            fId: PropTypes.string
+                        };
+                    }
+                    if (componentStatic === `defaultProps`) {
+                        _Component[componentStatic] = {
+                            ..._Component[componentStatic],
+                            fId: intf.fId
+                        };
+                    }
+                    return _Component;
+                }, Component);
             };
         }
     }
