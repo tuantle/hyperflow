@@ -15,8 +15,8 @@
  *
  *------------------------------------------------------------------------
  *
- * @module Hyperflow (Hf) - A state flow and mutation management toolkit & library for developing universal app.
- * @description - Hf namespace setup. Initialize Hf, adding core modules, and apply option.
+ * @module Hyperflow (Hf)
+ * @description - A javascript state flow and mutation management toolkit & library for developing universal app.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
@@ -24,10 +24,34 @@
  */
 'use strict'; // eslint-disable-line
 
-let TARGET = `server`;
-
 /* load CommonElement */
-const CommonElement = require(`./core/elements/common-element`).default;
+import CommonElement from './core/elements/common-element';
+
+import Composer from './core/composer';
+import Data from './core/elements/data-element';
+import Composite from './core/elements/composite-element';
+
+import Domain from './core/factories/domain-factory';
+import Store from './core/factories/store-factory';
+import Interface from './core/factories/interface-factory';
+import Service from './core/factories/service-factory';
+import App from './core/factories/app-factory';
+import Event from './core/factories/factory-event';
+// import Agent from './core/factories/agent-factory';
+// import Fixture from './core/factories/fixture-factory';
+
+import MutationComposite from './core/factories/composites/state-mutation-composite';
+import TimeTraversalComposite from './core/factories/composites/state-time-traversal-composite';
+
+// import TapeTestRunnerComposite from './composites/test-runners/tape-test-runner--composite';
+// import DomainTestFixtureComposite from './core/factories/composites/test-fixtures/domain-test-fixture-composite';
+// import StoreTestFixtureComposite from './core/factories/composites/test-fixtures/store-test-fixture-composite';
+// import InterfaceTestFixtureComposite from './core/factories/composites/test-fixtures/interface-test-fixture-composite';
+// import ServiceTestFixtureComposite from './core/factories/composites/test-fixtures/service-test-fixture-composite';
+
+import ComponentComposite from './composites/interfaces/react-component-composite';
+
+let TARGET = `server`;
 
 if (typeof window === `object` && window.hasOwnProperty(`TARGET`)) {
     TARGET = window.TARGET === `server` ||
@@ -48,61 +72,47 @@ let Hf = Object.assign({
 
 /* Hyperflow core element libraries */
 const HfCoreProperty = {
-    /* load Composer & set composer factory namespace */
-    Composer: require(`./core/composer`).default,
-    /* load DataElement & set data element namespaces */
-    Data: require(`./core/elements/data-element`).default,
-    /* load CompositeElement & set composite element namespaces */
-    Composite: require(`./core/elements/composite-element`).default
+    Composer,
+    Data,
+    Composite
 };
 
 Hf = Hf.mix(Hf).with(HfCoreProperty);
 
-/* Hyperflow core factory libraries */
 const HfCoreFactoryProperty = {
-    /* set store, interface, domain, and service factory namespaces */
-    Domain: require(`./core/factories/domain-factory`).default,
-    Store: require(`./core/factories/store-factory`).default,
-    Interface: require(`./core/factories/interface-factory`).default,
-    Service: require(`./core/factories/service-factory`).default,
-    /* load app factory namespace */
-    App: require(`./core/factories/app-factory`).default,
-    /* set factory event stream id map creator */
-    Event: require(`./core/factories/factory-event`).default
-    /* load test agent & fixtures factory namespaces */
-    // Agent: require(`./core/factories/agent-factory`).default,
-    // Fixture: require(`./core/factories/fixture-factory`).default,
+    Domain,
+    Store,
+    Interface,
+    Service,
+    App,
+    Event
+    // Agent,
+    // Fixture,
 };
 
 Hf = Hf.mix(Hf).with(HfCoreFactoryProperty);
 
-/* Hyperflow core factory composite libraries */
 const HfCoreCompositeProperty = {
-    /* load state composites library & set state composite factory namespace */
     State: {
-        MutationComposite: require(`./core/factories/composites/state-mutation-composite`).default,
-        TimeTraversalComposite: require(`./core/factories/composites/state-time-traversal-composite`).default
+        MutationComposite,
+        TimeTraversalComposite
     }
-    /* load test fixtures composites namespace */
     // TestFixture: {
-    //     DomainFixtureComposite: require(`./core/factories/composites/test-fixtures/domain-test-fixture-composite`).default,
-    //     StoreFixtureComposite: require(`./core/factories/composites/test-fixtures/store-test-fixture-composite`).default,
-    //     InterfaceFixtureComposite: require(`./core/factories/composites/test-fixtures/interface-test-fixture-composite`).default,
-    //     ServiceFixtureComposite: require(`./core/factories/composites/test-fixtures/service-test-fixture-composite`).default
+    //     DomainTestFixtureComposite,
+    //     StoreTestFixtureComposite,
+    //     InterTestfaceFixtureComposite,
+    //     ServiceTestFixtureComposite
     // }
 };
 
 Hf = Hf.mix(Hf).with(HfCoreCompositeProperty);
 
-/* Hyperflow vendor factory composite libraries */
 const HfCompositeProperty = {
-    /* load test runner composites namespace */
     // TestRunner: {
-    //     TapeTestRunnerComposite: require(`./composites/test-runners/tape-test-runner--composite`).default
+    //     TapeTestRunnerComposite
     // },
-    /* load React composites library & set composite library namespace */
     React: {
-        ComponentComposite: require(`./composites/interfaces/react-component-composite`).default,
+        ComponentComposite,
         AppComponentComposite: (() => {
             switch (TARGET) { // eslint-disable-line
             case `client-native`:
@@ -128,7 +138,6 @@ const HfCompositeProperty = {
             }
         })()
     },
-    /* load service library & set composite library namespace  */
     Storage: (() => {
         switch (TARGET) { // eslint-disable-line
         case `client-native`:

@@ -1,7 +1,23 @@
 # [Hyperflow](https://github.com/tuantle/hyperflow)
-## A state flow and mutation management toolkit & library for developing universal app
+## A javascript state flow and mutation management toolkit & library for developing universal app.
 
 ----
+**Development RC Version 0.2.1-rc4 (04/16/2019)**
+```
+Notes:
+    - Updated package dependencies to latest.
+New Features:
+Changes:
+Breaking Changes:
+Improvements:
+    - Removed handler for incoming 'do-sync-reflected-state' event for InterfaceFactory.
+    - Minor variable renamings for CompositeElement, StateTimeTraversalComposite, & StateMutationComposite.
+    - Minor updates to timing values for DomainFactory.
+    - Removed 'do-sync-reflected-state' outgoing event for StateMutationComposite.
+    - Refactored ReactComponentComposite.
+Bug fixes:
+    - Fixed EventStreamComposite monitor method bug. Updated console logging.
+```
 **Development RC Version 0.2.1-rc3 (02/11/2019)**
 ```
 Notes:
