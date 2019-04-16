@@ -332,10 +332,12 @@ export default Composer({
                     ]
                 }
             }).with({});
-            intf.incoming(`do-sync-reflected-state`).handle((reflectedState) => {
-                /* update initial reflected state snapshot as state from store mutated */
-                _initialReflectedState = reflectedState;
-            });
+
+            // intf.incoming(`do-sync-reflected-state`).handle((reflectedState) => {
+            //     /* update initial reflected state snapshot as state from store mutated */
+            //     _initialReflectedState = reflectedState;
+            // });
+
             _stateless = false;
             Hf.log(`info1`, `Interface:${intf.name} is reflecting state of store:${store.name}.`);
 
