@@ -44,12 +44,8 @@ import {
 
 
 /* slow mode buffer timings */
-const SLOW_MODE_BUFFER_TIME_SPAN_IN_MS = 450;
-const SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS = 450;
-
-/* delay all data stream from service by 2ms as default */
-// FIXME: needs to know why this delay is needed!
-const DELAY_SERVICE_IN_MS = 2;
+const SLOW_MODE_BUFFER_TIME_SPAN_IN_MS = 500;
+const SLOW_MODE_BUFFER_TIME_SHIFT_IN_MS = 500;
 
 /* time waiting for factory setup/teardown to complete */
 const DEFAULT_SETUP_WAIT_TIME_IN_MS = 10000;
@@ -477,7 +473,7 @@ export default Composer({
                 }
                 /* setup event stream observation duplex between domain and servies and children of services */
                 if (Hf.isNonEmptyArray(_services)) {
-                    domain.observe(..._services).delay(DELAY_SERVICE_IN_MS);
+                    domain.observe(..._services);
                     _services.forEach((service) => {
                         const childServices = service.getChildServices();
 
