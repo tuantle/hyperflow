@@ -16,7 +16,7 @@
  *------------------------------------------------------------------------
  *
  * @module StateMutationComposite
- * @description - A persistent state mutation with reducer/reconfiguration composite module.
+ * @description - A persistent state mutation with reducer/reconfigurator composite module.
  *
  * @author Tuan Le (tuan.t.lei@gmail.com)
  *
@@ -138,13 +138,13 @@ export default CompositeElement({
                 /* emitting a mutation event to interface */
                 if (delayMutationEvent > 0) {
                     factory.outgoing(
-                        stateMutationEventId,
-                        `do-sync-reflected-state`
+                        // `do-sync-reflected-state,
+                        stateMutationEventId
                     ).delay(delayMutationEvent).emit(() => newState);
                 } else {
                     factory.outgoing(
-                        stateMutationEventId,
-                        `do-sync-reflected-state`
+                        // `do-sync-reflected-state,
+                        stateMutationEventId
                     ).emit(() => newState);
                 }
             }
@@ -154,11 +154,11 @@ export default CompositeElement({
          * @description -  Reconfig and update state.
          *
          * @method reconfig
-         * @param {object|function} reconfiguration
+         * @param {object|function} reconfigurator
          * @param {object} option
          * @return void
          */
-        reconfig (reconfiguration, option = {
+        reconfig (reconfigurator, option = {
             forceMutationEvent: false,
             suppressMutationEvent: false,
             delayMutationEvent: 0
@@ -182,10 +182,10 @@ export default CompositeElement({
                 }
             }).with({});
 
-            if (Hf.isFunction(reconfiguration)) {
-                factory.reconfigState(reconfiguration(currentState));
-            } else if (Hf.isObject(reconfiguration)) {
-                factory.reconfigState(reconfiguration);
+            if (Hf.isFunction(reconfigurator)) {
+                factory.reconfigState(reconfigurator(currentState));
+            } else if (Hf.isObject(reconfigurator)) {
+                factory.reconfigState(reconfigurator);
             }
 
             if (forceMutationEvent || !suppressMutationEvent) {
@@ -202,13 +202,13 @@ export default CompositeElement({
                 /* emitting a mutation event to interface */
                 if (delayMutationEvent > 0) {
                     factory.outgoing(
-                        stateMutationEventId,
-                        `do-sync-reflected-state`
+                        // `do-sync-reflected-state,
+                        stateMutationEventId
                     ).delay(delayMutationEvent).emit(() => newState);
                 } else {
                     factory.outgoing(
-                        stateMutationEventId,
-                        `do-sync-reflected-state`
+                        // `do-sync-reflected-state,
+                        stateMutationEventId
                     ).emit(() => newState);
                 }
             }
