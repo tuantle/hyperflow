@@ -876,25 +876,25 @@ export default CompositeElement({
                         case INCOMING_DIRECTION:
                             _incomingStream = _incomingStream.pipe(
                                 rxTapOp(sideObserver),
-                                rxShareOp
+                                rxShareOp()
                             );
                             break;
                         case OUTGOING_DIRECTION:
                             _outgoingStream = _outgoingStream.pipe(
                                 rxTapOp(sideObserver),
-                                rxShareOp
+                                rxShareOp()
                             );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
                             _divertedIncomingStream = _divertedIncomingStream.pipe(
                                 rxTapOp(sideObserver),
-                                rxShareOp
+                                rxShareOp()
                             );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
                             _divertedOutgoingStream = _divertedOutgoingStream.pipe(
                                 rxTapOp(sideObserver),
-                                rxShareOp
+                                rxShareOp()
                             );
                             break;
                         default:
@@ -1270,7 +1270,7 @@ export default CompositeElement({
                                     };
                                     _streamEmitter.next(payload);
                                 }
-                                // Hf.log(`info0`, `Factory:${factory.name} is emitting eventIds:[${eventIds}].`);
+                                Hf.log(`info0`, `Emitting eventIds:[${eventIds}].`);
                             }
                         });
                     },
@@ -1323,7 +1323,7 @@ export default CompositeElement({
                                 } else {
                                     Hf.log(`warn1`, `EventStreamComposite.outgoing.cancelLatest - Cancelling payload with eventId:${eventId} before emitting.`);
                                 }
-                                // Hf.log(`info0`, `Factory:${factory.name} is cancelling eventIds:[${eventIds}].`);
+                                Hf.log(`info0`, `Cancelling eventIds:[${eventIds}].`);
                             }
                         });
                     }
@@ -1617,7 +1617,7 @@ export default CompositeElement({
                                         } else {
                                             factory.outgoing(...relayEventIds).cancelLatest();
                                         }
-                                        // Hf.log(`info0`, `Factory:${factory.name} is relaying eventIds:[${relayEventIds}].`);
+                                        Hf.log(`info0`, `Relaying eventIds:[${relayEventIds}].`);
                                     };
                                     return arbiter;
                                 }, _arbiter);
@@ -1633,7 +1633,7 @@ export default CompositeElement({
                                     arbiter[eventId].completed = true;
                                     return arbiter;
                                 }, _arbiter);
-                                // Hf.log(`info0`, `Factory:${factory.name} is completing eventIds:[${eventIds}].`);
+                                Hf.log(`info0`, `Completing eventIds:[${eventIds}].`);
                             }
                         };
                     },
@@ -1655,7 +1655,7 @@ export default CompositeElement({
                                     } else {
                                         factory.outgoing(eventId).cancelLatest();
                                     }
-                                    // Hf.log(`info0`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
+                                    Hf.log(`info0`, `Repeating eventIds:[${eventId}].`);
                                 };
                             } else {
                                 arbiter[eventId] = {
@@ -1668,7 +1668,7 @@ export default CompositeElement({
                                         } else {
                                             factory.outgoing(eventId).cancelLatest();
                                         }
-                                        // Hf.log(`info0`, `Factory:${factory.name} is repeating eventIds:[${eventId}].`);
+                                        Hf.log(`info0`, `Repeating eventIds:[${eventId}].`);
                                     }
                                 };
                             }
