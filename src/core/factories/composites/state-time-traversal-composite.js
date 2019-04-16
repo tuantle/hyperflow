@@ -94,7 +94,7 @@ export default CompositeElement({
         timeTraverse (key, timeIndexOffset) {
             const factory = this;
             const stateCursor = factory.getStateCursor();
-            let reconfiguration = {};
+            let reconfigurator = {};
 
             if (Hf.DEVELOPMENT) {
                 if (!stateCursor.hasItem(key)) {
@@ -116,8 +116,8 @@ export default CompositeElement({
                 return false;
             }
 
-            reconfiguration[key] = content;
-            factory.reconfigState(reconfiguration);
+            reconfigurator[key] = content;
+            factory.reconfigState(reconfigurator);
 
             const recalledState = Hf.mix(factory.getStateAsObject(), {
                 exclusion: {
