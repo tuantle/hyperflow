@@ -4,21 +4,33 @@ import { Hf } from 'hyperflow';
 
 import CalculatorStore from '../stores/calculator-store';
 
-import CalculatorService from '../services/calculator-service';
-
 import CalculatorInterface from '../interfaces/calculator-interface';
 
 import EVENT from '../events/calculator-event';
+
+const assignOperand = (nextValue, prevValue) => {
+    if (nextValue === `Pi`) {
+        return Math.PI.toPrecision(9).toString();
+    } else if (nextValue === `.` && (Hf.isEmpty(prevValue) || prevValue === `0`)) {
+        return `0.`;
+    } else if (nextValue === `0` && (Hf.isEmpty(prevValue) || prevValue === `0`)) {
+        return `0`;
+    } else if (nextValue === `±` && Hf.isNumeric(prevValue)) {
+        if (Hf.isEmpty(prevValue) || prevValue === `0`) {
+            return `0`;
+        } else if (prevValue.charAt(0) === `-`) {
+            return `${prevValue.substr(1)}`;
+        } else { // eslint-disable-line
+            return `-${prevValue}`;
+        }
+    }
+    return `${prevValue}${nextValue}`;
+};
 
 const CalculatorDomain = Hf.Domain.augment({
     $init () {
         const domain = this;
         domain.register({
-            services: [
-                CalculatorService({
-                    name: `calculator-service`
-                })
-            ],
             store: CalculatorStore({
                 name: `calculator-store`
             }),
@@ -30,129 +42,111 @@ const CalculatorDomain = Hf.Domain.augment({
     setup (done) {
         const domain = this;
         domain.incoming(EVENT.ON.RESET).forward(EVENT.DO.RESET);
-        domain.incoming(EVENT.ON.UPDATE_OPERATION).handle((value) => (state) => {
-            if (!state.computeReady) {
-                return {
-                    operation: value,
-                    operand: {
-                        current: `y`,
-                        y: ``
-                    }
-                };
-            }
-            return {
-                operation: value,
-                operand: {
-                    current: `y`,
-                    x: state.operand.y,
-                    y: ``
-                }
-            };
-        }).relay(EVENT.DO.UPDATE_OPERATION);
-        domain.incoming(EVENT.ON.NEGATE_OPERAND).handle(() => (state) => {
-            function negateOperand (operand) {
-                if (!Hf.isEmpty(operand)) {
-                    if (operand.charAt(0) === `-`) {
-                        return operand.slice(1);
-                    }
-                    return `-${operand}`;
-                }
-                return operand;
-            }
-            if (state.operand.current === `x`) {
-                return {
-                    operand: {
-                        x: negateOperand(state.operand.x)
-                    }
-                };
-            }
-            return {
-                computeReady: true,
-                operand: {
-                    y: negateOperand(state.operand.y)
-                }
-            };
-        }).relay(EVENT.DO.UPDATE_OPERAND);
 
-        domain.incoming(EVENT.ON.UPDATE_OPERAND).handle((value) => (state) => {
-            function assignOperand (operand) {
-                if (value === `Pi`) {
-                    return Math.PI.toString();
-                } else if (value === `.` && (Hf.isEmpty(operand) || operand === `0`)) {
-                    return `0.`;
-                } else if (value === `0` && (Hf.isEmpty(operand) || operand === `0`)) {
-                    return `0`;
+        domain.incoming(EVENT.ON.COMPUTE).handle(() => (state) => {
+            if (state.computes.length === 2) {
+                let result = parseFloat(state.result);
+                const operation = state.computes[1];
+                if (operation === `+`) {
+                    result += parseFloat(state.computes[0]);
+                } else if (operation === `-`) {
+                    result -= parseFloat(state.computes[0]);
+                } else if (operation === `×`) {
+                    result *= parseFloat(state.computes[0]);
+                } else if (operation === `÷`) {
+                    result /= parseFloat(state.computes[0]);
                 }
-                return `${operand}${value}`;
-            }
-            if (state.operand.current === `x`) {
                 return {
-                    operand: {
-                        x: assignOperand(state.operand.x)
+                    result: `${result}`,
+                    computes: [ `${result}`, operation ]
+                };
+            } else if (state.computes.length > 2) {
+                let operation = null;
+                const result = state.computes.slice(1).reduce((_result, value) => {
+                    if (value === `+` || value === `-` || value === `×` || value === `÷`) {
+                        operation = value;
+                        return _result;
+                    } else { // eslint-disable-line
+                        if (operation === `+`) {
+                            _result += parseFloat(value);
+                        } else if (operation === `-`) {
+                            _result -= parseFloat(value);
+                        } else if (operation === `×`) {
+                            _result *= parseFloat(value);
+                        } else if (operation === `÷`) {
+                            _result /= parseFloat(value);
+                        }
+                        return _result;
                     }
+                }, parseFloat(state.computes[0]));
+                return {
+                    result: `${result}`,
+                    computes: [ state.computes.slice(-1)[0], operation ]
+                };
+            } else { // eslint-disable-line
+                return {
+                    computes: state.computes
                 };
             }
-            return {
-                computeReady: true,
-                operand: {
-                    y: assignOperand(state.operand.y)
+        }).relay(EVENT.DO.UPDATE);
+
+        domain.incoming(EVENT.ON.OPERATION).handle((value) => (state) => {
+            if (state.computes.length > 0) {
+                const prevValue = state.computes.slice(-1)[0];
+                if (prevValue === `+` || prevValue === `-` || prevValue === `×` || prevValue === `÷`) {
+                    state.computes[state.computes.length - 1] = value;
+                    return {
+                        computes: state.computes
+                    };
+                } else { // eslint-disable-line
+                    return {
+                        computes: [
+                            ...state.computes,
+                            value
+                        ]
+                    };
                 }
-            };
-        }).relay(EVENT.DO.UPDATE_OPERAND);
-        domain.incoming(
-            EVENT.AS.OPERAND_UPDATED,
-            EVENT.AS.OPERATION_UPDATED,
-            EVENT.AS.UPDATED_AFTER_COMPUTE
-        ).forward(EVENT.REQUEST.OPERAND_FROM_BUFFER);
-        domain.incoming(EVENT.RESPONSE.WITH.OPERAND_FROM_BUFFER).handle((operand) => {
-            let result = 0;
-            const xValue = !Hf.isEmpty(operand.x) ? parseFloat(operand.x) : 0;
-            const yValue = !Hf.isEmpty(operand.y) ? parseFloat(operand.y) : 0;
-            domain.incoming(EVENT.ON.COMPUTE).handle(() => (state) => {
-                if (state.computeReady) {
-                    if (state.operation === `+`) {
+            } else { // eslint-disable-line
+                return {
+                    computes: state.computes
+                };
+            }
+        }).relay(EVENT.DO.UPDATE);
+
+        domain.incoming(EVENT.ON.OPERAND).handle((value) => (state) => {
+            if (state.computes.length > 0) {
+                const prevValue = state.computes.slice(-1)[0];
+                if (prevValue === `+` || prevValue === `-` || prevValue === `×` || prevValue === `÷`) {
+                    if (Hf.isNumeric(value) || value === `Pi`) {
+                        const result = assignOperand(value, ``);
                         return {
-                            operand: {
-                                current: `x`,
-                                x: `${xValue + yValue}`
-                            }
+                            result,
+                            computes: [
+                                ...state.computes,
+                                result
+                            ]
                         };
-                    } else if (state.operation === `-`) {
+                    } else { // eslint-disable-line
                         return {
-                            operand: {
-                                current: `x`,
-                                x: `${xValue - yValue}`
-                            }
-                        };
-                    } else if (state.operation === `×`) {
-                        return {
-                            operand: {
-                                current: `x`,
-                                x: `${xValue * yValue}`
-                            }
-                        };
-                    } else if (state.operation === `÷`) {
-                        return {
-                            operand: {
-                                current: `x`,
-                                x: `${xValue / yValue}`
-                            }
+                            computes: state.computes
                         };
                     }
+                } else { // eslint-disable-line
+                    const result = assignOperand(value, prevValue);
+                    state.computes[state.computes.length - 1] = result;
+                    return {
+                        result,
+                        computes: state.computes
+                    };
                 }
-            }).relay(EVENT.DO.UPDATE_AFTER_COMPUTE);
-
-            if (operand.current === `y` && yValue !== 0) {
-                result = yValue;
             } else {
-                result = xValue;
-            }
-            return function updateResult () {
+                const result = assignOperand(value, ``);
                 return {
-                    result: Hf.isInteger(result) ? `${result}`.replace(/(\d)(?=(\d{3})+(?!\d))/g, `$1,`) : `${result}`.replace(/(\d)(?=(\d{3})+\.)/g, `$1,`)
+                    result,
+                    computes: [ result ]
                 };
-            };
-        }).relay(EVENT.DO.UPDATE_DISPLAY_RESULT);
+            }
+        }).relay(EVENT.DO.UPDATE);
         done();
     }
 });

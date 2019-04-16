@@ -8,7 +8,7 @@ import ReactDOMServer from 'react-dom/server';
 
 import PropTypes from 'prop-types';
 
-import { AppDomain } from './domains/app-domain';
+import AppDomain from './domains/app-domain';
 
 const HelloWorldServerApp = Hf.App.augment({
     composites: [

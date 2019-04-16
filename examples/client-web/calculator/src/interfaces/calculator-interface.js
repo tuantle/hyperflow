@@ -64,20 +64,6 @@ const KeypadInterface = Hf.Interface.augment({
         Hf.React.ComponentComposite
     ],
     setup (done) {
-        const intf = this;
-        intf.incoming(EVENT.ON.KEYPAD).handle((label) => {
-            if (label === `C`) {
-                intf.outgoing(EVENT.ON.RESET).emit();
-            } else if (label === `÷` || label === `×` || label === `+` || label === `-`) {
-                intf.outgoing(EVENT.ON.UPDATE_OPERATION).emit(() => label);
-            } else if (Hf.isNumeric(label) || label === `.` || label === `Pi`) {
-                intf.outgoing(EVENT.ON.UPDATE_OPERAND).emit(() => label);
-            } else if (label === `±`) {
-                intf.outgoing(EVENT.ON.NEGATE_OPERAND).emit();
-            } else if (label === `=`) {
-                intf.outgoing(EVENT.ON.COMPUTE).emit();
-            }
-        });
         done();
     },
     render () {
@@ -103,10 +89,10 @@ const KeypadInterface = Hf.Interface.augment({
                     keypadLabels.map((cells, col) => {
                         return (
                             <div key = { col }>{
-                                cells.map((cell) => {
+                                cells.map((cellLabel) => {
                                     return (
                                         <div
-                                            key = { cell }
+                                            key = { cellLabel }
                                             style = {{
                                                 flex: [ 1, 1, `auto` ],
                                                 alignSelf: `center`,
@@ -114,7 +100,17 @@ const KeypadInterface = Hf.Interface.augment({
                                                 margin: 10
                                             }}
                                         >
-                                            <KeypadButtonComponent label = { cell } onClick = {() => component.outgoing(EVENT.ON.KEYPAD).emit(() => cell)}/>
+                                            <KeypadButtonComponent label = { cellLabel } onClick = {() => {
+                                                if (cellLabel === `C`) {
+                                                    component.outgoing(EVENT.ON.RESET).emit();
+                                                } else if (cellLabel === `÷` || cellLabel === `×` || cellLabel === `+` || cellLabel === `-`) {
+                                                    component.outgoing(EVENT.ON.OPERATION).emit(() => cellLabel);
+                                                } else if (Hf.isNumeric(cellLabel) || cellLabel === `.` || cellLabel === `Pi` || cellLabel === `±`) {
+                                                    component.outgoing(EVENT.ON.OPERAND).emit(() => cellLabel);
+                                                } else if (cellLabel === `=`) {
+                                                    component.outgoing(EVENT.ON.COMPUTE).emit();
+                                                }
+                                            }}/>
                                         </div>
                                     );
                                 })
@@ -143,15 +139,18 @@ const CalculatorInterface = Hf.Interface.augment({
         const intf = this;
         intf.incoming(
             EVENT.ON.RESET,
-            EVENT.ON.UPDATE_OPERAND,
-            EVENT.ON.NEGATE_OPERAND,
-            EVENT.ON.UPDATE_OPERATION,
+            EVENT.ON.OPERATION,
+            EVENT.ON.OPERAND,
             EVENT.ON.COMPUTE
         ).repeat();
         done();
     },
     render () {
         const component = this;
+        const {
+            displayResult,
+            displayComputes
+        } = component.state;
         const [
             Keypad
         ] = component.getComponentComposites(`keypad-view`);
@@ -180,15 +179,22 @@ const CalculatorInterface = Hf.Interface.augment({
                             paddingRight: 5,
                             paddingLeft: 5,
                             width: `100%`
-                        }}>{ component.state.result }</h2>
+                        }}>{ displayResult }</h2>
                     </div>
+                    <h1 style = {{
+                        color: `gray`,
+                        fontFamily: `helvetica`,
+                        fontSize: 16,
+                        textAlign: `right`,
+                        paddingRight: 310
+                    }}>{ displayComputes }</h1>
                     <h1 style = {{
                         color: `gray`,
                         fontFamily: `helvetica`,
                         fontSize: 12,
                         textAlign: `right`,
                         paddingRight: 310
-                    }}>v0.5</h1>
+                    }}>Version: 0.6 </h1>
                     <Keypad/>
                 </div>
             </MuiThemeProvider>

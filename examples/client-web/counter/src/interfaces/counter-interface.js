@@ -96,14 +96,14 @@ const CounterInterface = Hf.Interface.augment({
                         fontFamily: `helvetica`,
                         fontSize: 32,
                         textAlign: `left`
-                    }}>Count = { count }</h1>
+                    }}> Count = { count } </h1>
                     <h2 style = {{
                         color: `gray`,
                         fontFamily: `helvetica`,
                         fontSize: 12,
                         textAlign: `left`,
                         paddingRight: 175
-                    }}>v0.5</h2>
+                    }}> Version: 0.5 </h2>
                     <TextField
                         hintText = 'Integer'
                         floatingLabelText = 'Offset Value'

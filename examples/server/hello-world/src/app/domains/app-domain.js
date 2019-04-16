@@ -46,4 +46,4 @@ const AppDomain = Hf.Domain.augment({
     }
 });
 
-export { AppDomain };
+export default AppDomain;
