@@ -2,6 +2,8 @@
 ## A javascript state flow and mutation management toolkit & library for developing universal app.
 
 ----
+**Released Version 0.2.1 (05/10/2019)**
+
 **Development RC Version 0.2.1-rc4 (04/16/2019)**
 ```
 Notes:
