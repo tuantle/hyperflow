@@ -2,6 +2,19 @@
 ## A javascript state flow and mutation management toolkit & library for developing universal app.
 
 ----
+**Development RC Version 0.3.0-rc1 (02/24/2020)**
+```
+Notes:
+    - Project restructured & refactored.
+    - Updated to React hooks.
+New Features:
+Changes:
+    - Added additional examples.
+Breaking Changes:
+    - Project restructured & refactored..
+Improvements:
+Bug fixes:
+```
 **Released Version 0.2.1 (05/10/2019)**
 
 **Development RC Version 0.2.1-rc4 (04/16/2019)**

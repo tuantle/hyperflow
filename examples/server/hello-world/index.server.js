@@ -1,16 +1,16 @@
 /* eslint quotes: 0 */
-require('./env');
-
 require('@babel/register')({
     comments: false,
     sourceMaps: 'inline',
     only: [
         './src',
-        './node_modules/hyperflow/src'
+        './node_modules/hyperflow'
     ]
 });
 
-/* load & start server app */
-const HelloWorldServerApp = require('./src/app/hello-world-server-app').default;
+/* load & start server domain */
+const ServerDomain = require('./src/server/domains/server-domain').default;
 
-HelloWorldServerApp.start();
+ServerDomain(`server-domain`).start('root', () => {
+    console.log('-------Welcome to Hello World Example (Server)-------');
+});

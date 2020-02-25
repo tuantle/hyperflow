@@ -1,4 +1,4 @@
-'use strict'; // eslint-disable-line
+/* eslint no-process-env: 0 */
 
 process.env.TARGET = `server`;
 process.env.NODE_ENV = `development`;

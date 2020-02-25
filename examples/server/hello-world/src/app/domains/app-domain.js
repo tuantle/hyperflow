@@ -2,46 +2,44 @@
 
 import { Hf } from 'hyperflow';
 
-import AppViewInterface from '../interfaces/app-view-interface';
+import AppInterface from '../interfaces/app-interface';
 
-import AppHttpsService from '../services/app-https-service';
+import AppStore from '../stores/app-store';
 
-import constant from '../../common/constant';
+import CONSTANT from '../../common/constant';
 
-import EVENT from '../events/app-event';
+import EVENT from '../../common/event';
 
-const {
-    SERVER_IPADDRESS,
-    SERVER_PORT
-} = constant;
+const { MESSAGE } = CONSTANT;
+
+function getRandomInt (min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+}
 
 const AppDomain = Hf.Domain.augment({
     $init () {
         const domain = this;
         domain.register({
-            intf: AppViewInterface({
-                name: `app-view`
-            }),
-            services: [
-                AppHttpsService({
-                    name: `app-https-service`,
-                    path: {
-                        root: `/`
-                    },
-                    server: {
-                        ipAddress: SERVER_IPADDRESS,
-                        port: SERVER_PORT
-                    }
-                })
-            ]
+            interface: AppInterface(`app-interface`),
+            store: AppStore(`app-store`)
         });
     },
     setup (done) {
         const domain = this;
-        domain.incoming(EVENT.ON.RENDER_MARKUP_TO_STRING).handle((renderedMarkup) => {
-            domain.incoming(EVENT.REQUEST.RENDERED_MARKUP).handle(() => renderedMarkup).relay(EVENT.RESPONSE.WITH.RENDERED_MARKUP);
-        });
-        domain.incoming(EVENT.DO.BROADCAST_SECURED_API).forward(EVENT.BROADCAST.SECURED_API);
+
+        domain.outgoing(EVENT.REQUEST.DATAREAD).emit();
+
+        domain.incoming(EVENT.RESPONSE.TO.DATAREAD.OK).forward(EVENT.DO.INIT_STORE);
+
+        domain.incoming(EVENT.ON.SAY_HELLO_WORLD).handle(() => {
+            const languages = Object.keys(MESSAGE);
+            return languages[ getRandomInt(0, languages.length) ];
+        }).relay(EVENT.DO.CHANGE_LANGUAGE);
+
+        domain.incoming(EVENT.AS.STORE_MUTATED).forward(EVENT.REQUEST.DATAWRITE);
+
         done();
     }
 });

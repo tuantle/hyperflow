@@ -10,5 +10,10 @@ export default {
     HTTP_UNAUTHORIZED_CODE: 401,
     HTTP_NOT_FOUND_CODE: 404,
     HTTP_CONFLICTED_CODE: 409,
-    HTTP_SERVER_ERROR_CODE: 500
+    HTTP_SERVER_ERROR_CODE: 500,
+
+    MESSAGE: {
+        english: `Hello world!`,
+        vietnamese: `Chào thế giới!`
+    }
 };

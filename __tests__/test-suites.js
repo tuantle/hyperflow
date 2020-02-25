@@ -9,41 +9,38 @@
  */
 'use strict'; // eslint-disable-line
 
-require('./env');
-/* load babel */
 /* eslint quotes: 0 */
-require('@babel/register')({
-    comments: false,
-    sourceMaps: 'inline',
-    presets: [
-        '@babel/react',
-        [
-            '@babel/preset-env',
-            {
-                targets: {
-                    node: 'current'
-                }
-            }
-        ]
-    ],
-    plugins: [
-        '@babel/plugin-transform-strict-mode',
-        '@babel/plugin-proposal-object-rest-spread',
-        '@babel/plugin-proposal-class-properties'
-    ]
-});
 
-/* load test specs for Hf modules */
-var commonElementSpecs = require('./suites/elements/common-element-specs'); // eslint-disable-line
-var dataElementSpecs = require('./suites/elements/data-element-specs'); // eslint-disable-line
-var composerSpecs = require('./suites/composer-specs'); // eslint-disable-line
-var eventStreamCompositeSpecs = require('./suites/factories/composites/event-stream-composite-specs'); // eslint-disable-line
-var storeFactorySpecs = require('./suites/factories/store-factory-specs'); // eslint-disable-line
-var appFactorySpecs = require('./suites/factories/app-factory-specs'); // eslint-disable-line
+require('./env');
 
-// commonElementSpecs.runTests();
-// dataElementSpecs.runTests();
-// composerSpecs.runTests();
-// eventStreamCompositeSpecs.runTests();
-// storeFactorySpecs.runTests();
-appFactorySpecs.runTests();
+require('@babel/register');
+
+const commonUtilSpec = require('./util-specs/common-util-spec');
+//
+// const composerAndCompositeSpec = require('./composer-and-composite-spec');
+//
+// const immutableDataSpecs = require('./data-specs/immutable-data-spec');
+//
+// const eventStreamCompositeSpec = require('./composite-specs/event-stream-composite-spec');
+//
+// const storeFactorySpec = require('./factory-specs/store-factory-spec');
+//
+// const tAgentFactoriesSpec = require('./factory-specs/test-agent-factories-spec');
+
+// const appFactorySpec = require('./app-specs/react-web-app-specs');
+
+// #########################
+
+commonUtilSpec.runTests();
+
+// composerAndCompositeSpec.runTests();
+
+// immutableDataSpecs.runTests();
+
+// eventStreamCompositeSpec.runTests();
+
+// storeFactorySpec.runTests();
+
+// tAgentFactoriesSpec.runTests();
+
+// appFactorySpec.runTests();

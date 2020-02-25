@@ -1,0 +1,52 @@
+{
+  "name": "hyperflow-client-web-counter-example",
+  "description": "Example counter client apps built using Hyperflow.",
+  "authors": [
+    "Tuan Le <tuan.t.lei@gmail.com> (https://github.com/tuantle)"
+  ],
+  "private": false,
+  "homepage": "https://github.com/tuantle/hyperflow",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tuantle/hyperflow/issues"
+  },
+  "scripts": {
+    "build-counter": "NODE_ENV=development webpack --mode development --progress --colors --config webpack.config.js",
+    "start-counter": "NODE_ENV=development webpack-dev-server --mode development --content-base --progress --colors --config webpack.config.js"
+  },
+  "modulePathIgnorePatterns": [
+    "/node_modules/"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/preset-react": "^7.7.4",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.4.0",
+    "file-loader": "^5.0.2",
+    "less": "^3.10.3",
+    "less-loader": "^5.0.0",
+    "node-sass": "^4.13.0",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.1.2",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.1"
+  },
+  "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.7.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.7.7",
+    "@babel/plugin-proposal-optional-chaining": "^7.7.5",
+    "@babel/plugin-syntax-dynamic-import": "^7.7.4",
+    "@babel/plugin-transform-strict-mode": "^7.7.4",
+    "@material-ui/core": "^4.8.1",
+    "@material-ui/icons": "^4.5.1",
+    "antd": "^3.26.4",
+    "hyperflow": "file:../../../hyperflow-0.3.0.tgz",
+    "jss": "^10.0.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  }
+}

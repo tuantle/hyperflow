@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.2.1",
+    "version": "0.3.0-rc1",
     "registry": "github",
     "description": "A javascript state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",
@@ -28,7 +28,7 @@
     "bugs": {
         "url": "https://github.com/tuantle/hyperflow/issues"
     },
-    "main": "src/hyperflow.js",
+    "main": "index.js",
     "directories": {
         "lib": "src"
     },
@@ -36,39 +36,36 @@
         "node": ">=9.x",
         "npm": ">=5.x"
     },
-    "peerDependencies": {
-        "tape": ">=4.9.x",
-        "semver": ">=5.6.0",
-        "react": ">=16.8.x",
-        "react-dom": ">=16.8.x",
-        "react-native": ">=0.59.x",
-        "prop-types": ">=15.6.x"
-    },
     "dependencies": {
-        "rxjs": ">=6.5.x"
+        "rxjs": "^6.5.4"
     },
     "devDependencies": {
-        "@babel/core": ">=7.4.x",
-        "@babel/node": ">=7.2.x",
-        "@babel/plugin-proposal-class-properties": ">=7.4.x",
-        "@babel/plugin-proposal-object-rest-spread": ">=7.4.x",
-        "@babel/plugin-transform-strict-mode": ">=7.2.x",
-        "@babel/preset-env": ">=7.4.x",
-        "@babel/preset-react": ">=7.0.x",
-        "@babel/register": ">=7.4.x",
-        "@babel/runtime": ">=7.4.x",
-        "babel-eslint": ">=10.0.x",
-        "eslint": ">=5.16.x",
-        "eslint-plugin-react": ">=7.13.x",
-        "eslint-plugin-react-native": ">=3.7.x",
-        "metro-react-native-babel-preset": ">=0.54.x",
-        "prop-types": ">=15.7.x",
-        "react": ">=16.8.x",
-        "react-dom": ">=16.8.x",
-        "react-test-renderer": ">=16.8.x",
-        "tape": ">=4.10.x"
+        "@babel/core": "^7.8.4",
+        "@babel/node": "^7.8.4",
+        "@babel/plugin-proposal-class-properties": "^7.8.3",
+        "@babel/plugin-proposal-nullish-coalescing-operator": "^7.8.3",
+        "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
+        "@babel/plugin-proposal-optional-chaining": "^7.8.3",
+        "@babel/plugin-transform-strict-mode": "^7.8.3",
+        "@babel/preset-env": "^7.8.4",
+        "@babel/preset-react": "^7.8.3",
+        "@babel/register": "^7.8.3",
+        "@babel/runtime": "^7.8.4",
+        "babel-eslint": "^10.0.3",
+        "babel-jest": "^25.1.0",
+        "eslint": "^6.8.0",
+        "eslint-plugin-react": "^7.18.3",
+        "eslint-plugin-react-native": "^3.8.1",
+        "jest": "^25.1.0",
+        "metro-react-native-babel-preset": "^0.58.0",
+        "prop-types": "^15.7.2",
+        "react": "^16.12.0",
+        "react-dom": "^16.12.0",
+        "react-test-renderer": "^16.12.0",
+        "tape": "^4.13.0"
     },
     "scripts": {
-        "start-unit-tests": "NODE_ENV=development babel-node ./__tests__/test-suites"
+        "start-unit-tests": "NODE_ENV=development babel-node ./__tests__/test-suites",
+        "start-jest-unit-tests": "NODE_ENV=development jest ./__tests__/factory-specs/test-agent-factories-spec"
     }
 }
