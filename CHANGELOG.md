@@ -2,6 +2,17 @@
 ## A javascript state flow and mutation management toolkit & library for developing universal app.
 
 ----
+**Development RC Version 0.3.0-rc2 (03/05/2020)**
+```
+Notes:
+New Features:
+    - Updated eslint. Added no-prototype-builtins.
+    - Replaced .hasOwnProperty with Object.prototype.hasOwnProperty.call.
+Changes:
+Breaking Changes:
+Improvements:
+Bug fixes:
+```
 **Development RC Version 0.3.0-rc1 (02/24/2020)**
 ```
 Notes:

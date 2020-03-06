@@ -39,7 +39,7 @@ import TestAgent from './factories/test-agent-factory';
 
 const Hf = {
     ENV,
-    VERSION: `0.3.0-rc1`,
+    VERSION: `0.3.0-rc2`,
 
     Composer,
     Composite,
