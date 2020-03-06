@@ -343,7 +343,7 @@ const NodePrototype = Object.create({}).prototype = {
         }
 
         if (isObject(node._content.cache)) {
-            return node._content.cache.hasOwnProperty(key) ? node._content.cache[key] : undefined;
+            return Object.prototype.hasOwnProperty.call(node._content.cache, key) ? node._content.cache[key] : undefined;
         } else if (isArray(node._content.cache)) {
             return node._content.cache.length > key ? node._content.cache[key] : undefined;
         }
@@ -365,7 +365,7 @@ const NodePrototype = Object.create({}).prototype = {
         //     cache: `object|array`,
         //     accessor: `object|array`
         // }).of(content)) {
-        if (isObject(content) && content.hasOwnProperty(`cache`) && content.hasOwnProperty(`accessor`) &&
+        if (isObject(content) && Object.prototype.hasOwnProperty.call(content, `cache`) && Object.prototype.hasOwnProperty.call(content, `accessor`) &&
            (isObject(content.cache) || isArray(content.cache)) &&
            (isObject(content.accessor) || isArray(content.accessor))) {
             node._content = content;
@@ -376,7 +376,7 @@ const NodePrototype = Object.create({}).prototype = {
                 if (!isDefined(hNode._content.accessor)) {
                     hNode._content.accessor = isString(node._key) ? {} : [];
                 }
-                if (!hNode._content.accessor.hasOwnProperty(node._key)) {
+                if (!Object.prototype.hasOwnProperty.call(hNode._content.accessor, node._key)) {
                     Object.defineProperty(hNode._content.accessor, node._key, {
                         get () {
                             return node._content.accessor;
@@ -1045,7 +1045,7 @@ const MutationMapPrototype = Object.create({}).prototype = {
 
         /* convert pathId from array format to string format */
         pathId = isArray(pathId) ? arrayToString(pathId, `.`) : pathId;
-        return mMap._node.hasOwnProperty(pathId) && isDefined(mMap._node[pathId]);
+        return Object.prototype.hasOwnProperty.call(mMap._node, pathId) && isDefined(mMap._node[pathId]);
     },
 
     /**

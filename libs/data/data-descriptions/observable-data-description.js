@@ -64,7 +64,7 @@ const ObservableDataDescriptionPrototype = Object.create({}).prototype = {
         const observable = this;
         const eventId = `${observable._id}.${handerKey}`;
 
-        return observable._description.subscriber.hasOwnProperty(eventId);
+        return Object.prototype.hasOwnProperty.call(observable._description.subscriber, eventId);
     },
 
     /**
@@ -77,7 +77,7 @@ const ObservableDataDescriptionPrototype = Object.create({}).prototype = {
     hasCondition (conditionKey) {
         const observable = this;
 
-        return observable._description.condition.hasOwnProperty(conditionKey);
+        return Object.prototype.hasOwnProperty.call(observable._description.condition, conditionKey);
     },
 
     /**
@@ -259,7 +259,7 @@ const ObservableDataDescriptionPrototype = Object.create({}).prototype = {
                     eventId,
                     value
                 } = payload;
-                if (observable._description.subscriber.hasOwnProperty(eventId)) {
+                if (Object.prototype.hasOwnProperty.call(observable._description.subscriber, eventId)) {
                     const handler = observable._description.subscriber[eventId];
                     handler(value);
                 }
@@ -297,7 +297,7 @@ const ObservableDataDescriptionPrototype = Object.create({}).prototype = {
                 if (ENV.DEVELOPMENT) {
                     if (!(isObject(target) || isArray(target))) {
                         log(`error`, `ObservableDataDescription.assign.to - Input target is invalid.`);
-                    } else if (!target.hasOwnProperty(key)) {
+                    } else if (!Object.prototype.hasOwnProperty.call(target, key)) {
                         log(`error`, `ObservableDataDescription.assign.to - Property key:${key} is not defined.`);
                     }
                 }
@@ -311,20 +311,20 @@ const ObservableDataDescriptionPrototype = Object.create({}).prototype = {
                     /* create the condition property for the assigned object */
                     Object.defineProperty(observable._description.proxy, key, {
                         get () {
-                            if (observable._description.orgDesc.hasOwnProperty(`get`)) {
+                            if (Object.prototype.hasOwnProperty.call(observable._description.orgDesc, `get`)) {
                                 return observable._description.orgDesc.get();
                             }
                             return observable._description.orgDesc.value;
                         },
                         set (value) {
-                            if (observable._description.orgDesc.hasOwnProperty(`set`)) {
+                            if (Object.prototype.hasOwnProperty.call(observable._description.orgDesc, `set`)) {
                                 observable._description.orgDesc.set(value);
                             } else {
                                 observable._description.orgDesc.value = value;
                             }
 
                             try {
-                                if (observable._description.orgDesc.hasOwnProperty(`get`)) {
+                                if (Object.prototype.hasOwnProperty.call(observable._description.orgDesc, `get`)) {
                                     streamEmitter.next(observable._description.orgDesc.get());
                                 } else {
                                     streamEmitter.next(value);
@@ -385,7 +385,8 @@ const ObservableDataDescriptionPrototype = Object.create({}).prototype = {
             // observable._description.proxy[key] = undefined;
 
             /* restore original property with it data description */
-            if (observable._description.orgDesc.hasOwnProperty(`get`) || observable._description.orgDesc.hasOwnProperty(`set`)) {
+            if (Object.prototype.hasOwnProperty.call(observable._description.orgDesc, `get`) ||
+                Object.prototype.hasOwnProperty.call(observable._description.orgDesc, `set`)) {
                 Object.defineProperty(observable._description.proxy, key, {
                     get: observable._description.orgDesc.get,
                     set: observable._description.orgDesc.set,

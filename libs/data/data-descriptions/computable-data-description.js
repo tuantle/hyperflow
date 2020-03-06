@@ -90,7 +90,7 @@ const ComputableDataDescriptionPrototype = Object.create({}).prototype = {
                 if (ENV.DEVELOPMENT) {
                     if (!(isObject(target) || isArray(target))) {
                         log(`error`, `ComputableDataDescription.assign.to - Input target is invalid.`);
-                    } else if (target.hasOwnProperty(fnName) && target[fnName] !== null) {
+                    } else if (Object.prototype.hasOwnProperty.call(target, fnName) && target[fnName] !== null) {
                         log(`error`, `ComputableDataDescription.assign.to - Target already has a defined property key:${fnName}`);
                     }
                 }

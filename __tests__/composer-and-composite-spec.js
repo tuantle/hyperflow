@@ -66,7 +66,7 @@ export function runTests () {
     });
     test(`Composite should be able to create a factory composite.`, (assert) => {
         assert.equal(typeof FactoryStateComposite, `object`);
-        assert.equal(FactoryStateComposite.getTemplate().hasOwnProperty(`getUpperCaseName`), true);
+        assert.equal(Object.prototype.hasOwnProperty.call(FactoryStateComposite.getTemplate(), `getUpperCaseName`), true);
         assert.equal(typeof FactoryStateComposite.getTemplate().getUpperCaseName, `function`);
         assert.end();
     });

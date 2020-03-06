@@ -133,7 +133,7 @@ export default Composite({
                         const parse = compose(storage.getItem.bind(storage), JSON.parse);
 
                         return new Promise((resolve) => {
-                            if (storage.hasOwnProperty(rootKey)) {
+                            if (Object.prototype.hasOwnProperty.call(storage, rootKey)) {
                                 try {
                                     const rootItem = parse(rootKey);
                                     if (!isEmpty(pathId)) {
@@ -164,7 +164,7 @@ export default Composite({
                         const parse = compose(storage.getItem.bind(storage), JSON.parse);
 
                         return new Promise((resolve, reject) => {
-                            if (storage.hasOwnProperty(rootKey)) {
+                            if (Object.prototype.hasOwnProperty.call(storage, rootKey)) {
                                 try {
                                     const rootItem = parse(rootKey);
 
@@ -216,7 +216,7 @@ export default Composite({
                                         reject(new Error(`ERROR: Unable to write to storage. Path Id:${pathId} is invalid.`));
                                     }
                                     /* this part check if the setItem operation above was successfull or not */
-                                    if (storage.hasOwnProperty(rootKey)) {
+                                    if (Object.prototype.hasOwnProperty.call(storage, rootKey)) {
                                         resolve(bundle);
                                     } else {
                                         reject(new Error(`ERROR: Unable to write to storage root item key:${rootKey}.`));
@@ -228,7 +228,7 @@ export default Composite({
                                 try {
                                     storage.setItem(rootKey, JSON.stringify(bundle));
                                     /* this part check if the setItem operation above was successfull or not */
-                                    if (storage.hasOwnProperty(rootKey)) {
+                                    if (Object.prototype.hasOwnProperty.call(storage, rootKey)) {
                                         resolve(bundle);
                                     } else {
                                         reject(new Error(`ERROR: Unable to write to storage root item key:${rootKey}.`));

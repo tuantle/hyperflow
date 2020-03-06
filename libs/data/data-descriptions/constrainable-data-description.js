@@ -54,7 +54,7 @@ const ConstrainableDataDescriptionPrototype = Object.create({}).prototype = {
     hasConstraint (constraintKey) {
         const constrainable = this;
 
-        return constrainable._description.constraint.hasOwnProperty(constraintKey);
+        return Object.prototype.hasOwnProperty.call(constrainable._description.constraint, constraintKey);
     },
 
     /**
@@ -178,7 +178,7 @@ const ConstrainableDataDescriptionPrototype = Object.create({}).prototype = {
                 if (ENV.DEVELOPMENT) {
                     if (!(isObject(target) || isArray(target))) {
                         log(`error`, `ConstrainableDataDescription.assign.to - Input target is invalid.`);
-                    } else if (!target.hasOwnProperty(key)) {
+                    } else if (!Object.prototype.hasOwnProperty.call(target, key)) {
                         log(`error`, `ConstrainableDataDescription.assign.to - Property key:${key} is not defined.`);
                     }
                 }
@@ -190,7 +190,7 @@ const ConstrainableDataDescriptionPrototype = Object.create({}).prototype = {
 
                 Object.defineProperty(constrainable._description.proxy, key, {
                     get () {
-                        if (constrainable._description.orgDesc.hasOwnProperty(`get`)) {
+                        if (Object.prototype.hasOwnProperty.call(constrainable._description.orgDesc, `get`)) {
                             return constrainable._description.orgDesc.get();
                         }
                         return constrainable._description.orgDesc.value;
@@ -201,7 +201,7 @@ const ConstrainableDataDescriptionPrototype = Object.create({}).prototype = {
                         let results = [];
                         let verified = true;
 
-                        if (constrainable._description.orgDesc.hasOwnProperty(`get`)) {
+                        if (Object.prototype.hasOwnProperty.call(constrainable._description.orgDesc, `get`)) {
                             oldValue = constrainable._description.orgDesc.get();
                         } else {
                             oldValue = constrainable._description.orgDesc.value;
@@ -247,7 +247,7 @@ const ConstrainableDataDescriptionPrototype = Object.create({}).prototype = {
                             }
                         });
                         if (verified) {
-                            if (constrainable._description.orgDesc.hasOwnProperty(`set`)) {
+                            if (Object.prototype.hasOwnProperty.call(constrainable._description.orgDesc, `set`)) {
                                 constrainable._description.orgDesc.set(value);
                             } else {
                                 constrainable._description.orgDesc.value = value;
@@ -286,7 +286,8 @@ const ConstrainableDataDescriptionPrototype = Object.create({}).prototype = {
             // constrainable._description.proxy[key] = undefined;
 
             /* restore original property with it data description */
-            if (constrainable._description.orgDesc.hasOwnProperty(`get`) || constrainable._description.orgDesc.hasOwnProperty(`set`)) {
+            if (Object.prototype.hasOwnProperty.call(constrainable._description.orgDesc, `get`) ||
+                Object.prototype.hasOwnProperty.call(constrainable._description.orgDesc, `set`)) {
                 Object.defineProperty(constrainable._description.proxy, key, {
                     get: constrainable._description.orgDesc.get,
                     set: constrainable._description.orgDesc.set,

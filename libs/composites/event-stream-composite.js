@@ -159,7 +159,7 @@ export default Composite({
                         }
                     }).of(payload);
 
-                    if (_arbiter.hasOwnProperty(eventId)) {
+                    if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
                         const {
                             eventDirectionalState,
                             completed,
@@ -1089,7 +1089,7 @@ export default Composite({
                 }
 
                 eventIds = eventIds.filter((eventId) => {
-                    if (_arbiter.hasOwnProperty(eventId)) {
+                    if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
                         return _arbiter[eventId].eventDirectionalState !== REPEATING_EVENT;
                     }
                     return true;
@@ -1115,7 +1115,7 @@ export default Composite({
                         }
 
                         _arbiter = eventIds.reduce((arbiter, eventId) => {
-                            if (arbiter.hasOwnProperty(eventId)) {
+                            if (Object.prototype.hasOwnProperty.call(arbiter, eventId)) {
                                 arbiter[eventId].waitTime = ms;
                                 if (arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
                                     arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
@@ -1159,7 +1159,7 @@ export default Composite({
                         }
 
                         _arbiter = eventIds.reduce((arbiter, eventId) => {
-                            if (arbiter.hasOwnProperty(eventId)) {
+                            if (Object.prototype.hasOwnProperty.call(arbiter, eventId)) {
                                 arbiter[eventId].period = ms;
                                 arbiter[eventId].stopper = stopper;
                                 if (arbiter[eventId].eventDirectionalState === INCOMING_EVENT) {
@@ -1208,7 +1208,7 @@ export default Composite({
                             if (!factory.isOutgoingStreamActivated()) {
                                 _unemitPayloads.push(payload);
                             } else {
-                                if (_arbiter.hasOwnProperty(eventId)) {
+                                if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
                                     const {
                                         waitTime,
                                         period,
@@ -1342,7 +1342,7 @@ export default Composite({
                             if (!_outgoingStreamActivated) {
                                 _unemitPayloads = _unemitPayloads.filter((unemitPayload) => unemitPayload.eventId !== eventId);
                             } else {
-                                if (_arbiter.hasOwnProperty(eventId)) {
+                                if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
                                     const {
                                         waitTime,
                                         period
@@ -1397,7 +1397,7 @@ export default Composite({
                 }
 
                 eventIds = eventIds.filter((eventId) => {
-                    if (_arbiter.hasOwnProperty(eventId)) {
+                    if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
                         return _arbiter[eventId].eventDirectionalState !== REPEATED_EVENT;
                     }
                     return true;
@@ -1423,7 +1423,7 @@ export default Composite({
                         }
 
                         _arbiter = eventIds.reduce((arbiter, eventId) => {
-                            if (arbiter.hasOwnProperty(eventId)) {
+                            if (Object.prototype.hasOwnProperty.call(arbiter, eventId)) {
                                 arbiter[eventId].waitTime = ms;
                                 if (arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
                                     arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
@@ -1458,7 +1458,7 @@ export default Composite({
                         if (eventIds.length === 1) {
                             const [ eventId ] = eventIds;
                             return new Promise((resolve) => {
-                                if (_arbiter.hasOwnProperty(eventId)) {
+                                if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
                                     _arbiter[eventId].handler = (value) => resolve(value);
                                     if (_arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
                                         _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
@@ -1475,7 +1475,7 @@ export default Composite({
                         }
                         return eventIds.map((eventId) => {
                             return new Promise((resolve) => {
-                                if (_arbiter.hasOwnProperty(eventId)) {
+                                if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
                                     _arbiter[eventId].handler = (value) => resolve(value);
                                     if (_arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
                                         _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
@@ -1623,7 +1623,7 @@ export default Composite({
                         }
 
                         _arbiter = eventIds.reduce((arbiter, eventId) => {
-                            if (arbiter.hasOwnProperty(eventId)) {
+                            if (Object.prototype.hasOwnProperty.call(arbiter, eventId)) {
                                 arbiter[eventId].handler = handler;
                                 if (arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
                                     arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
@@ -1701,7 +1701,7 @@ export default Composite({
                     repeat () {
                         // TODO: use rxRepeat?
                         _arbiter = eventIds.reduce((arbiter, eventId) => {
-                            if (arbiter.hasOwnProperty(eventId)) {
+                            if (Object.prototype.hasOwnProperty.call(arbiter, eventId)) {
                                 arbiter[eventId].eventDirectionalState = REPEATING_EVENT;
                                 arbiter[eventId].handler = (value) => value;
                                 arbiter[eventId].relayer = (handledValue, cancellation) => {

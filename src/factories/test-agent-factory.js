@@ -103,7 +103,7 @@ export default Composer({
                 }
             }
 
-            return _subjectCache.hasOwnProperty(subjectName);
+            return Object.prototype.hasOwnProperty.call(_subjectCache, subjectName);
         };
 
         /**
@@ -121,7 +121,7 @@ export default Composer({
                     if (ENV.DEVELOPMENT) {
                         if (!subjectNames.every((subjectName) => isString(subjectName))) {
                             log(`error`, `TestAgentFactory.getSubjects - Input subject name is invalid.`);
-                        } else if (!subjectNames.every((subjectName) => _subjectCache.hasOwnProperty(subjectName))) {
+                        } else if (!subjectNames.every((subjectName) => Object.prototype.hasOwnProperty.call(_subjectCache, subjectName))) {
                             log(`error`, `TestAgentFactory.getSubjects - Subject is not found.`);
                         }
                     }
@@ -186,7 +186,7 @@ export default Composer({
                 }
 
                 _subjectCache = subjects.reduce((__subjectCache, subject) => {
-                    if (__subjectCache.hasOwnProperty(subject.name)) {
+                    if (Object.prototype.hasOwnProperty.call(__subjectCache, subject.name)) {
                         log(`warn1`, `TestAgentFactory.register - Test agent:${tAgent.name} already has subject:${subject.name} registered.`);
                     }
 

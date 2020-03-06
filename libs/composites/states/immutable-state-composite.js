@@ -203,7 +203,7 @@ export default Composite({
                             }
                         });
                     } else {
-                        if (isObject(parentState) && parentState.hasOwnProperty(parentKey)) {
+                        if (isObject(parentState) && Object.prototype.hasOwnProperty.call(parentState, parentKey)) {
                             if (parentState[parentKey] === null || isEmpty(parentState[parentKey])) {
                                 parentState[parentKey] = mutator;
                             } else {
@@ -230,7 +230,7 @@ export default Composite({
                             }
                         });
                     } else {
-                        if (isObject(parentState) && parentState.hasOwnProperty(parentKey)) {
+                        if (isObject(parentState) && Object.prototype.hasOwnProperty.call(parentState, parentKey)) {
                             if (parentState[parentKey] === null || isEmpty(parentState[parentKey])) {
                                 parentState[parentKey] = mutator;
                             } else {
@@ -302,7 +302,7 @@ export default Composite({
                         const pathId = `state.${key}`;
 
                         if (_originalStateAccessor[key] !== null && (isNonEmptyObject(_originalStateAccessor[key]) || isNonEmptyArray(_originalStateAccessor[key]))) {
-                            if (!_originalStateAccessorCache.hasOwnProperty(pathId)) {
+                            if (!Object.prototype.hasOwnProperty.call(_originalStateAccessorCache, pathId)) {
                                 stateAccessorAtPath = _data.select(pathId).getAccessor({
                                     maxReferalDepth: DEFAULT_MUTATION_MAX_REFERAL_DEPTH
                                 });
@@ -378,7 +378,7 @@ export default Composite({
 
                 _stateCursor.getContentItemKeys().forEach((key) => {
                     if (ENV.DEVELOPMENT) {
-                        if (revealedFactory.hasOwnProperty(key)) {
+                        if (Object.prototype.hasOwnProperty.call(revealedFactory, key)) {
                             log(`error`, `ImmutableStateComposite.$initImmutableDataState - Cannot assign factory state property key:${key} due to naming conflict.`);
                         }
                     }

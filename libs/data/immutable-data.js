@@ -231,7 +231,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
         }).of(option);
 
         if (ENV.DEVELOPMENT) {
-            if (!isString(rootKey) || !rootContent.hasOwnProperty(rootKey)) {
+            if (!isString(rootKey) || !Object.prototype.hasOwnProperty.call(rootContent, rootKey)) {
                 log(`error`, `ImmutableData._updateMMap - Root data content key:${rootKey} is undefined.`);
             }
         }
@@ -344,7 +344,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
 
             if (!isEmpty(target)) {
                 Object.entries(target).filter(([ constraintKey, constraintValue ]) => { // eslint-disable-line
-                    return constraint.hasOwnProperty(constraintKey);
+                    return Object.prototype.hasOwnProperty.call(constraint, constraintKey);
                 }).reduce((targetPaths, [ constraintKey, constraintValue ]) => { // eslint-disable-line
                     return targetPaths.concat(constraintValue);
                 }, []).filter((targetPath) => {
@@ -425,7 +425,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
         immutable = isBoolean(immutable) ? immutable : true;
 
         if (ENV.DEVELOPMENT) {
-            if (!isString(rootKey) || !rootContent.hasOwnProperty(rootKey)) {
+            if (!isString(rootKey) || !Object.prototype.hasOwnProperty.call(rootContent, rootKey)) {
                 log(`error`, `ImmutableData.setImmutability - Root data content key:${rootKey} is undefined.`);
             }
         }
@@ -484,7 +484,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
         const rootContent = data._rootContent;
 
         if (ENV.DEVELOPMENT) {
-            if (!isString(rootKey) || !rootContent.hasOwnProperty(rootKey)) {
+            if (!isString(rootKey) || !Object.prototype.hasOwnProperty.call(rootContent, rootKey)) {
                 log(`error`, `ImmutableData.flush - Root data content key:${rootKey} is undefined.`);
             }
         }
@@ -556,8 +556,8 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
                 formatedBundle[bundleKey] = {};
                 formatedBundleItem = formatedBundle[bundleKey];
 
-                if (bundleItem.hasOwnProperty(`value`) && isDefined(bundleItem.value)) {
-                    if (bundleItem.hasOwnProperty(`required`)) {
+                if (Object.prototype.hasOwnProperty.call(bundleItem, `value`) && isDefined(bundleItem.value)) {
+                    if (Object.prototype.hasOwnProperty.call(bundleItem, `required`)) {
                         if (ENV.DEVELOPMENT) {
                             if (!isBoolean(bundleItem.required)) {
                                 log(`error`, `ImmutableData.format - Bundle constrainable required for key:${bundleKey} is invalid.`);
@@ -565,22 +565,22 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
                         }
                         formatedBundleItem.required = bundleItem.required;
                     }
-                    if (bundleItem.hasOwnProperty(`stronglyTyped`)) {
+                    if (Object.prototype.hasOwnProperty.call(bundleItem, `stronglyTyped`)) {
                         if (ENV.DEVELOPMENT) {
                             if (!isBoolean(bundleItem.stronglyTyped)) {
                                 log(`error`, `ImmutableData.format - Bundle constrainable strongly typed for key:${bundleKey} is invalid.`);
-                            } else if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
+                            } else if (Object.prototype.hasOwnProperty.call(bundleItem, `oneTypeOf`)) {
                                 log(`error`, `ImmutableData.format - Bundle constrainable for key:${bundleKey} is conflicted with one of types.`);
                             }
                         }
                         formatedBundleItem.stronglyTyped = bundleItem.stronglyTyped;
                     } else {
-                        if (!bundleItem.hasOwnProperty(`oneTypeOf`)) {
+                        if (!Object.prototype.hasOwnProperty.call(bundleItem, `oneTypeOf`)) {
                             formatedBundleItem.stronglyTyped = true;
                             log(`warn0`, `ImmutableData.format - Bundle constrainable strongly typed for key:${bundleKey} is set to true by default if not set.`);
                         }
                     }
-                    if (bundleItem.hasOwnProperty(`oneTypeOf`)) {
+                    if (Object.prototype.hasOwnProperty.call(bundleItem, `oneTypeOf`)) {
                         if (ENV.DEVELOPMENT) {
                             if (!isSchema({
                                 oneTypeOf: [ `string` ]
@@ -588,14 +588,14 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
                                 log(`error`, `ImmutableData.format - Bundle constrainable one of types for key:${bundleKey} is invalid.`);
                             } else if (isEmpty(bundleItem.oneTypeOf)) {
                                 log(`error`, `ImmutableData.format - Bundle constrainable one of types for key:${bundleKey} is empty.`);
-                            } else if (bundleItem.hasOwnProperty(`stronglyTyped`)) {
+                            } else if (Object.prototype.hasOwnProperty.call(bundleItem, `stronglyTyped`)) {
                                 log(`error`, `ImmutableData.format - Bundle constrainable for key:${bundleKey} is conflicted with strongly typed.`);
                             }
                         }
 
                         formatedBundleItem.oneOfTypes = bundleItem.oneTypeOf;
                     }
-                    if (bundleItem.hasOwnProperty(`oneOf`)) {
+                    if (Object.prototype.hasOwnProperty.call(bundleItem, `oneOf`)) {
                         if (ENV.DEVELOPMENT) {
                             if (!isSchema({
                                 oneOf: [ `number|string` ]
@@ -608,7 +608,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
 
                         formatedBundleItem.oneOfValues = bundleItem.oneOf;
                     }
-                    if (bundleItem.hasOwnProperty(`bounded`)) {
+                    if (Object.prototype.hasOwnProperty.call(bundleItem, `bounded`)) {
                         if (ENV.DEVELOPMENT) {
                             if (!isSchema({
                                 bounded: [
@@ -623,7 +623,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
 
                         formatedBundleItem.boundarydValues = bundleItem.bounded;
                     }
-                    if (bundleItem.hasOwnProperty(`constrainable`)) {
+                    if (Object.prototype.hasOwnProperty.call(bundleItem, `constrainable`)) {
                         if (ENV.DEVELOPMENT) {
                             if (!isSchema({
                                 constrainable: {
@@ -637,7 +637,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
 
                         formatedBundleItem.constrainable = bundleItem.constrainable;
                     }
-                    if (bundleItem.hasOwnProperty(`observable`)) {
+                    if (Object.prototype.hasOwnProperty.call(bundleItem, `observable`)) {
                         if (ENV.DEVELOPMENT) {
                             if (!isSchema({
                                 observable: {
@@ -653,7 +653,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
                     }
 
                     formatedBundleItem.value = bundleItem.value;
-                } else if (isObject(bundleItem) && bundleItem.hasOwnProperty(`computable`)) {
+                } else if (isObject(bundleItem) && Object.prototype.hasOwnProperty.call(bundleItem, `computable`)) {
                     if (ENV.DEVELOPMENT) {
                         if (!isSchema({
                             computable: {
@@ -718,7 +718,7 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
 
         /* read bundle and assign descriptors */
         forEach(formatedBundle, (bundleItem, bundleKey) => {
-            if (bundleItem.hasOwnProperty(`value`)) {
+            if (Object.prototype.hasOwnProperty.call(bundleItem, `value`)) {
                 const value = bundleItem.value;
 
                 if (ENV.DEVELOPMENT) {

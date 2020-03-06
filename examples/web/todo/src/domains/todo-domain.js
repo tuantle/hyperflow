@@ -39,7 +39,7 @@ const TodoDomain = Hf.Domain.augment({
 
         domain.incoming(EVENT.ON.EDIT_TASK).handle((editedTask) => (store) => ({
             tasks: store.tasks.map((task) => {
-                if (editedTask.hasOwnProperty(`timestamp`) && task.timestamp === editedTask.timestamp) {
+                if (Object.prototype.hasOwnProperty.call(editedTask, `timestamp`) && task.timestamp === editedTask.timestamp) {
                     return {
                         ...task,
                         ...editedTask

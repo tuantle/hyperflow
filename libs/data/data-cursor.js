@@ -110,7 +110,7 @@ const DataCursorPrototype = Object.create({}).prototype = {
     hasItem (key) {
         const cursor = this;
 
-        return cursor._content.hasOwnProperty(key);
+        return Object.prototype.hasOwnProperty.call(cursor._content, key);
     },
 
     /**
@@ -916,7 +916,7 @@ const DataCursorPrototype = Object.create({}).prototype = {
             asConstrainable (constraint) {
                 if (ENV.DEVELOPMENT) {
                     if (!isObject(constraint) && Object.key(constraint).forEach((constraintKey) => {
-                        return constraint[constraintKey].hasOwnProperty(`constrainer`) && isFunction(constraint[constraintKey].constrainer);
+                        return Object.prototype.hasOwnProperty.call(constraint[constraintKey], `constrainer`) && isFunction(constraint[constraintKey].constrainer);
                         // return isSchema({
                         //     constrainer: `function`
                         // }).of(constraint[constraintKey]);

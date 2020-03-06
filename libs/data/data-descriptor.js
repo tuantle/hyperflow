@@ -93,7 +93,7 @@ const DataDescriptorPrototype = Object.create({}).prototype = {
              * @returns {boolean}
              */
             hasDescription (id) {
-                return isString(id) ? registry.hasOwnProperty(id) : false;
+                return isString(id) ? Object.prototype.hasOwnProperty.call(registry, id) : false;
             },
             /**
              * @description - Get a description.

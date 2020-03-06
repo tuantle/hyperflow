@@ -80,7 +80,7 @@ const CompositePrototype = Object.create({}).prototype = {
             }
         }
 
-        return fnNames.filter((fnName) => composite._enclosure.hasOwnProperty(fnName)).reduce((enclosure, fnName) => {
+        return fnNames.filter((fnName) => Object.prototype.hasOwnProperty.call(composite._enclosure, fnName)).reduce((enclosure, fnName) => {
             enclosure[fnName] = clonedEnclosure[fnName];
             return enclosure;
         }, {});
@@ -107,8 +107,7 @@ const CompositePrototype = Object.create({}).prototype = {
                 log(`error`, `Composite.getTemplate - Input template key is invalid.`);
             }
         }
-
-        return keys.filter((key) => composite._template.hasOwnProperty(key)).reduce((template, key) => {
+        return keys.filter((key) => Object.prototype.hasOwnProperty.call(composite._template, key)).reduce((template, key) => {
             template[key] = clonedTemplate[key];
             return template;
         }, {});

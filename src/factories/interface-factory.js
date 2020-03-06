@@ -134,7 +134,7 @@ export default Composer({
                 }
             }
 
-            return _childIntfCache.hasOwnProperty(intfName);
+            return Object.prototype.hasOwnProperty.call(_childIntfCache, intfName);
         };
 
         /**
@@ -224,7 +224,7 @@ export default Composer({
                         if (!intfNames.every((name) => isString(name))) {
                             log(`error`, `InterfaceFactory.getChildInterfacedComponents - Input interface name is invalid.`);
                         } else if (!intfNames.every((name) => {
-                            if (_childIntfCache.hasOwnProperty(name)) {
+                            if (Object.prototype.hasOwnProperty.call(_childIntfCache, name)) {
                                 return true;
                             }
                             log(`warn1`, `InterfaceFactory.getChildInterfacedComponents - Composite component:${name} was not composed to component cache.`);
@@ -258,7 +258,7 @@ export default Composer({
                     if (ENV.DEVELOPMENT) {
                         if (!intfNames.every((name) => isString(name))) {
                             log(`error`, `InterfaceFactory.getChildInterfaces - Input interface name is invalid.`);
-                        } else if (!intfNames.every((name) => _childIntfCache.hasOwnProperty(name))) {
+                        } else if (!intfNames.every((name) => Object.prototype.hasOwnProperty.call(_childIntfCache, name))) {
                             log(`error`, `InterfaceFactory.getChildInterfaces - Child interface is not found.`);
                         }
                     }
@@ -350,7 +350,7 @@ export default Composer({
                 _childIntfCache = childIntfs.reduce((__childIntfCache, childIntf) => {
                     if (intf.name === childIntf.name) {
                         log(`warn1`, `InterfaceFactory.register - Cannot register interface:${intf.name} as a child of itself.`);
-                    } else if (__childIntfCache.hasOwnProperty(childIntf.name)) {
+                    } else if (Object.prototype.hasOwnProperty.call(__childIntfCache, childIntf.name)) {
                         log(`warn1`, `InterfaceFactory.register - Interface:${intf.name} already has child interface:${childIntf.name} registered.`);
                     } else {
                         __childIntfCache[childIntf.name] = childIntf;

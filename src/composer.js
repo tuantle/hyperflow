@@ -91,7 +91,7 @@ const ComposerPrototype = Object.create({}).prototype = {
                 }
                 if (isNonEmptyObject(composer._static)) {
                     Object.keys(factoryStatic).forEach((key) => {
-                        if (composer._static.hasOwnProperty(key)) {
+                        if (Object.prototype.hasOwnProperty.call(composer, key)) {
                             log(`warn1`, `Composer.augment - Overriding factory static property key:${key}.`);
                         }
                     });

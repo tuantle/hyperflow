@@ -69,6 +69,8 @@ if (typeof window === `object`) {
     }
 }
 
+export { ENV };
+
 /**
  * @description - Get the type string of input value.
  *
@@ -76,7 +78,7 @@ if (typeof window === `object`) {
  * @param {*} value
  * @returns {string}
  */
-function typeOf (value) {
+export function typeOf (value) {
     // FIXME: Crash occurs when value is an object with circular reference.
     return ({}).toString.call(value).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
 }
@@ -88,7 +90,7 @@ function typeOf (value) {
  * @param {number} value - To be checked if it is an integer.
  * @returns {boolean}
  */
-function isInteger (value) {
+export function isInteger (value) {
     return (/^-?\d+$/.test(String(value)));
 }
 
@@ -99,7 +101,7 @@ function isInteger (value) {
  * @param {number} value - To be checked if it is a float.
  * @returns {boolean}
  */
-function isFloat (value) {
+export function isFloat (value) {
     return (/^[+-]?\d+(\.\d+)?$/.test(String(value)));
 }
 
@@ -110,7 +112,7 @@ function isFloat (value) {
  * @param {number} value - To be checked if it is a number.
  * @returns {boolean}
  */
-function isNumeric (value) {
+export function isNumeric (value) {
     return !isNaN(parseFloat(value)) && isFinite(value);
 }
 
@@ -121,7 +123,7 @@ function isNumeric (value) {
  * @param {string} str - To be checked if it is a string.
  * @returns {boolean}
  */
-function isString (str) {
+export function isString (str) {
     return typeOf(str) === `string` || (typeOf(str) === `object` && str.constructor === String);
 }
 
@@ -132,7 +134,7 @@ function isString (str) {
  * @param value - To be checked if it is a boolean.
  * @returns {boolean}
  */
-function isBoolean (value) {
+export function isBoolean (value) {
     return typeOf(value) === `boolean` || (isString(value) && (value.toLowerCase() === `true` || value.toLowerCase() === `false`));
 }
 
@@ -143,7 +145,7 @@ function isBoolean (value) {
  * @param {*} value - To be checked if value is defined.
  * @returns {boolean}
  */
-function isDefined (value) {
+export function isDefined (value) {
     return typeOf(value) !== `undefined`;
 }
 
@@ -154,7 +156,7 @@ function isDefined (value) {
  * @param {*} value - To be checked if value is null.
  * @returns {boolean}
  */
-function isNull (value) {
+export function isNull (value) {
     return value === null;
 }
 
@@ -166,7 +168,7 @@ function isNull (value) {
  * @returns {boolean}
  */
 
-function isRegEx (regex) {
+export function isRegEx (regex) {
     return Object.prototype.toString.call(regex) === `[object RegExp]`;
 }
 
@@ -177,7 +179,7 @@ function isRegEx (regex) {
  * @param {*} date
  * @returns {boolean}
  */
-function isDate (date) {
+export function isDate (date) {
     return Object.prototype.toString.call(date) === `[object Date]`;
 }
 
@@ -188,7 +190,7 @@ function isDate (date) {
  * @param {array} array - To be checked if it is an array.
  * @returns {boolean}
  */
-function isArray (array) {
+export function isArray (array) {
     return Object.prototype.toString.call(array) === `[object Array]` || Array.isArray(array) && array !== null;
 }
 
@@ -199,7 +201,7 @@ function isArray (array) {
  * @param {object} obj - To be checked if it is an object.
  * @returns {boolean}
  */
-function isObject (obj) {
+export function isObject (obj) {
     return typeOf(obj) === `object` && obj === Object(obj) && !isArray(obj) && obj !== null;
 }
 
@@ -210,7 +212,7 @@ function isObject (obj) {
  * @param {function} fn - To be checked if it is a function.
  * @returns {boolean}
  */
-function isFunction (fn) {
+export function isFunction (fn) {
     return Object.prototype.toString.call(fn) === `[object Function]` || Object.prototype.toString.call(fn) === `[object AsyncFunction]`;
 }
 
@@ -221,7 +223,7 @@ function isFunction (fn) {
  * @param {generator} fn - To be checked if it is a generator.
  * @returns {boolean}
  */
-function isGenerator (fn) {
+export function isGenerator (fn) {
     return fn.constructor?.name === `GeneratorFunction`;
 }
 
@@ -232,7 +234,7 @@ function isGenerator (fn) {
  * @param {iterator} iter - To be checked if it is an iterator.
  * @returns {boolean}
  */
-function isIterator (iter) {
+export function isIterator (iter) {
     return iter && (typeof iter[Symbol.iterator] === `function` || typeof iter[Symbol.asyncIterator] === `function`);
 }
 
@@ -243,7 +245,7 @@ function isIterator (iter) {
  * @param {object|array|string} value - To be checked if it is an empty object, array, or string.
  * @returns {boolean}
  */
-function isEmpty (value) {
+export function isEmpty (value) {
     if (isObject(value)) {
         return Object.getOwnPropertyNames(value).length === 0;
     } else if (isArray(value) || isString(value)) {
@@ -259,7 +261,7 @@ function isEmpty (value) {
  * @param {array} array - To be checked if it is an array and not empty.
  * @returns {boolean}
  */
-function isNonEmptyArray (array) {
+export function isNonEmptyArray (array) {
     return isArray(array) && !isEmpty(array);
 }
 
@@ -270,7 +272,7 @@ function isNonEmptyArray (array) {
  * @param {array} array - To be checked if it is an object and not empty.
  * @returns {boolean}
  */
-function isNonEmptyObject (array) {
+export function isNonEmptyObject (array) {
     return isObject(array) && !isEmpty(array);
 }
 
@@ -281,7 +283,7 @@ function isNonEmptyObject (array) {
  * @param {string} str - To be checked if it is a string and not empty.
  * @returns {boolean}
  */
-function isNonEmptyString (str) {
+export function isNonEmptyString (str) {
     return isString(str) && !isEmpty(str);
 }
 
@@ -293,7 +295,7 @@ function isNonEmptyString (str) {
  * @param {string} message
  * @returns void
  */
-function log (type, message) {
+export function log (type, message) {
     if (ENV.DEVELOPMENT) {
         let stringifiedMessage = ``;
 
@@ -424,7 +426,7 @@ function log (type, message) {
  * @param {string} type
  * @returns {array}
  */
-function getLogHistories (type) {
+export function getLogHistories (type) {
     if (ENV.DEVELOPMENT) {
         switch (type) {
         case `debug`:
@@ -478,7 +480,7 @@ function getLogHistories (type) {
  * @param {object} context - Object to become context (`this`) for the iterator function.
  * @returns void
  */
-function forEach (value, iterator, context) {
+export function forEach (value, iterator, context) {
     if (ENV.DEVELOPMENT) {
         if (!(isObject(value) || isArray(value))) {
             log(`error`, `CommonUtility.forEach - Input value is invalid.`);
@@ -509,7 +511,7 @@ function forEach (value, iterator, context) {
  * @param {string} delimiter
  * @return {string}
  */
-function arrayToString (array, delimiter) {
+export function arrayToString (array, delimiter) {
     if (ENV.DEVELOPMENT) {
         if (!isArray(array)) {
             log(`error`, `CommonUtility.arrayToString - Input array is invalid.`);
@@ -529,7 +531,7 @@ function arrayToString (array, delimiter) {
  * @param {string} delimiter
  * @return {array}
  */
-function stringToArray (str, delimiter) {
+export function stringToArray (str, delimiter) {
     if (ENV.DEVELOPMENT) {
         if (!isString(str)) {
             log(`error`, `CommonUtility.stringToArray - Input string is invalid.`);
@@ -557,7 +559,7 @@ function stringToArray (str, delimiter) {
  * @param {string} str
  * @return {string}
  */
-function camelcaseToUnderscore (str) {
+export function camelcaseToUnderscore (str) {
     if (ENV.DEVELOPMENT) {
         if (!isString(str)) {
             log(`error`, `CommonUtility.camelcaseToUnderscore - Input string is invalid.`);
@@ -574,7 +576,7 @@ function camelcaseToUnderscore (str) {
  * @param {string} str
  * @return {string}
  */
-function underscoreToCamelcase (str) {
+export function underscoreToCamelcase (str) {
     if (ENV.DEVELOPMENT) {
         if (!isString(str)) {
             log(`error`, `CommonUtility.underscoreToCamelcase - Input string is invalid.`);
@@ -590,7 +592,7 @@ function underscoreToCamelcase (str) {
  * @param {string} str
  * @return {string}
  */
-function camelcaseToDash (str) {
+export function camelcaseToDash (str) {
     if (ENV.DEVELOPMENT) {
         if (!isString(str)) {
             log(`error`, `CommonUtility.camelcaseToDash - Input string is invalid.`);
@@ -607,7 +609,7 @@ function camelcaseToDash (str) {
  * @param {string} str
  * @return {string}
  */
-function dashToCamelcase (str) {
+export function dashToCamelcase (str) {
     if (ENV.DEVELOPMENT) {
         if (!isString(str)) {
             log(`error`, `CommonUtility.dashToCamelcase - Input string is invalid.`);
@@ -624,7 +626,7 @@ function dashToCamelcase (str) {
  * @param {array} fns
  * @return {function}
  */
-function compose (...fns) {
+export function compose (...fns) {
     if (ENV.DEVELOPMENT) {
         if (fns.length < 2) {
             log(`error`, `CommonUtility.compose - Input function array must have more than two functions.`);
@@ -657,7 +659,7 @@ function compose (...fns) {
  * @param {object|array} value
  * @return void
  */
-function clear (value) {
+export function clear (value) {
     if (ENV.DEVELOPMENT) {
         if (!(isObject(value) || isArray(value))) {
             log(`error`, `CommonUtility.clear - Input is not an object or array type.`);
@@ -681,7 +683,7 @@ function clear (value) {
  * @param {object|array} source - Source object or array to be cloned.
  * @returns {object}
  */
-function clone (source) {
+export function clone (source) {
     if (ENV.DEVELOPMENT) {
         if (!(isObject(source) || isArray(source))) {
             log(`error`, `CommonUtility.clone - Input is not an object or array type.`);
@@ -713,7 +715,7 @@ function clone (source) {
  * @param {object|function} source
  * @return {object}
  */
-function freeze (source) {
+export function freeze (source) {
     if ((isObject(source) || isFunction(source)) && !Object.isFrozen(source)) {
         Object.freeze(source);
         Object.getOwnPropertyNames(source).forEach((key) => freeze(source[key]));
@@ -738,7 +740,7 @@ function _deepCompareSchema (schema, target) {
         forEach(schema, (schemaItem, key) => {
             if (verified) {
                 let itemTypes = [];
-                if (target.hasOwnProperty(key) || Object.getPrototypeOf(target).hasOwnProperty(key)) {
+                if (Object.prototype.hasOwnProperty.call(target, key) || Object.prototype.hasOwnProperty.call(Object.getPrototypeOf(target), key)) {
                     const targetItem = target[key];
                     if ((isObject(targetItem) && isObject(schemaItem)) || (isArray(targetItem) && isArray(schemaItem))) {
                         verified = _deepCompareSchema(schemaItem, targetItem);
@@ -802,7 +804,7 @@ function _deepCompareSchema (schema, target) {
  * @param {object} schema - Predefined schema.
  * @returns {object}
  */
-function isSchema (schema) {
+export function isSchema (schema) {
     return {
         /**
          * @description - Compare schema of the target object...
@@ -843,7 +845,7 @@ function _deepCompareAndFallback (source, target, notify) {
     if (isObject(source) && isObject(target)) {
         result = Object.assign({}, target); // clone(target);
         forEach(source, (sourceItem, key) => {
-            if (target.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(target, key)) {
                 const targetItem = target[key];
                 if ((isObject(targetItem) && isObject(sourceItem)) || (isArray(targetItem) && isArray(sourceItem))) {
                     result[key] = _deepCompareAndFallback(sourceItem, targetItem, notify);
@@ -892,7 +894,7 @@ function _deepCompareAndFallback (source, target, notify) {
  * @param {function|undefined} notify - Notify when a fallback has occured.
  * @return {object}
  */
-function fallback (source, notify = () => null) {
+export function fallback (source, notify = () => null) {
     if (ENV.DEVELOPMENT) {
         if (!(isObject(source) || isArray(source))) {
             log(`error`, `CommonUtility.fallback - Input source object is invalid.`);
@@ -1010,7 +1012,7 @@ function _deepMutation (source, mutator, pathId = [], reconfig = false) {
         }
     } else {
         const key = pathId.shift();
-        if (isObject(source) && source.hasOwnProperty(key)) {
+        if (isObject(source) && Object.prototype.hasOwnProperty.call(source, key)) {
             result = Object.assign({}, source);
             if (isEmpty(pathId)) {
                 if (reconfig) {
@@ -1022,7 +1024,7 @@ function _deepMutation (source, mutator, pathId = [], reconfig = false) {
                         result[key] = mutator[key];
                     }
                 } else {
-                    if (isObject(mutator) && mutator.hasOwnProperty(key)) {
+                    if (isObject(mutator) && Object.prototype.hasOwnProperty.call(mutator, key)) {
                         result[key] = _deepMutation(source[key], mutator[key], pathId.slice(0), reconfig);
                     } else {
                         log(`warn1`, `CommonUtility._deepMutation - Key:${key} of path Id:${pathId} is not defined in mutator.`);
@@ -1075,7 +1077,7 @@ function _deepMutation (source, mutator, pathId = [], reconfig = false) {
  * @param {object} source - Source object to be mutated from.
  * @returns {object}
  */
-function mutate (source, option = {
+export function mutate (source, option = {
     reconfig: false
 }) {
     if (ENV.DEVELOPMENT) {
@@ -1186,11 +1188,11 @@ function _deepMerge (source, target, pathId = []) {
         }
     } else {
         const key = pathId.shift();
-        if (isObject(source) && source.hasOwnProperty(key)) {
+        if (isObject(source) && Object.prototype.hasOwnProperty.call(source, key)) {
             result = Object.assign({}, source);
             // result = { ...source };
             if (isEmpty(pathId)) {
-                if (isObject(target) && target.hasOwnProperty(key)) {
+                if (isObject(target) && Object.prototype.hasOwnProperty.call(target, key)) {
                     result[key] = _deepMerge(source[key], target[key], pathId.slice(0));
                 }
             } else {
@@ -1223,7 +1225,7 @@ function _deepMerge (source, target, pathId = []) {
  * @param {object} source - Source object be merged from.
  * @returns {object}
  */
-function merge (source) {
+export function merge (source) {
     if (ENV.DEVELOPMENT) {
         if (!isObject(source)) {
             log(`error`, `CommonUtility.merge - Input source is invalid.`);
@@ -1295,7 +1297,7 @@ function _deepRetrieval (target, pathId, asNestedObject) {
     let resultAtPath = isObject(target) ? {} : Array(key).fill(null);
     let propertyAtPath;
 
-    if (isObject(target) && target.hasOwnProperty(key)) {
+    if (isObject(target) && Object.prototype.hasOwnProperty.call(target, key)) {
         if (pathId.length > 1) {
             propertyAtPath = _deepRetrieval(target[key], pathId.slice(1), asNestedObject);
             resultAtPath[key] = propertyAtPath;
@@ -1333,7 +1335,7 @@ function _deepRetrieval (target, pathId, asNestedObject) {
  * @param {object} asNestedObject - Flag to indicate the return value is a nested object of pathId.
  * @return {object}
  */
-function retrieve (pathId, delimiter, asNestedObject = false) {
+export function retrieve (pathId, delimiter, asNestedObject = false) {
     asNestedObject = isBoolean(asNestedObject) ? asNestedObject : false;
 
     if (ENV.DEVELOPMENT) {
@@ -1373,7 +1375,7 @@ function retrieve (pathId, delimiter, asNestedObject = false) {
  * @param {array} pathIds
  * @return {object}
  */
-function collect (...pathIds) {
+export function collect (...pathIds) {
     if (ENV.DEVELOPMENT) {
         if (!pathIds.every((pathId) => isString(pathId) || isArray(pathId))) {
             log(`error`, `CommonUtility.collect - Input pathId is invalid.`);
@@ -1410,7 +1412,7 @@ function collect (...pathIds) {
  * @param {object} option - Exclusion, a list of functions or properties that should not be mixed.
  * @return {object}
  */
-function mix (source, option = {
+export function mix (source, option = {
     fnOverrided: true,
     exclusion: {
         prototypes: false,
@@ -1581,7 +1583,7 @@ function mix (source, option = {
                 result = Object.entries(Object.getPrototypeOf(target)).filter(([ fnName, fn ]) => {
                     if (isFunction(fn) && isIncluded(fnName)) {
                         if (!fnOverrided) {
-                            if (!result.hasOwnProperty(fnName)) {
+                            if (!Object.prototype.hasOwnProperty.call(result, fnName)) {
                                 return true;
                             }
                             return false;
@@ -1600,7 +1602,7 @@ function mix (source, option = {
                     if (isFunction(fn) && isIncluded(fnName)) {
                         /* mix prototypes only */
                         if (!fnOverrided) {
-                            if (!result.hasOwnProperty(fnName)) {
+                            if (!Object.prototype.hasOwnProperty.call(result, fnName)) {
                                 return true;
                             }
                             return false;
@@ -1618,7 +1620,10 @@ function mix (source, option = {
                 result = Object.keys(Object.getPrototypeOf(target)).concat(
                     exclusion.enumerablePropertiesOnly ? Object.keys(target) : Object.getOwnPropertyNames(target)
                 ).filter((key) => {
-                    return !isFunction(target[key]) && target.hasOwnProperty(key) && !result.hasOwnProperty(key) && isIncluded(key);
+                    return !isFunction(target[key]) &&
+                           Object.prototype.hasOwnProperty.call(target, key) &&
+                           !Object.prototype.hasOwnProperty.call(result, key) &&
+                           isIncluded(key);
                 }).reduce((_result, key) => {
                     const targetObjDesc = Object.getOwnPropertyDescriptor(target, key);
 
@@ -1662,7 +1667,7 @@ function mix (source, option = {
  * @param {object} option
  * @return {object}
  */
-function reveal (closure, option = {}) {
+export function reveal (closure, option = {}) {
     if (ENV.DEVELOPMENT) {
         if (!(isObject(closure) || isFunction(closure))) {
             log(`error`, `CommonUtility.reveal - Input closure is invalid.`);
@@ -1681,47 +1686,3 @@ function reveal (closure, option = {}) {
         return mix(enclosedObj, option).with({});
     }
 }
-
-export {
-    ENV,
-    typeOf,
-    isInteger,
-    isFloat,
-    isNumeric,
-    isString,
-    isBoolean,
-    isDefined,
-    isNull,
-    isObject,
-    isArray,
-    isFunction,
-    isGenerator,
-    isIterator,
-    isRegEx,
-    isDate,
-    isNonEmptyString,
-    isNonEmptyObject,
-    isNonEmptyArray,
-    isEmpty,
-    isSchema,
-    arrayToString,
-    stringToArray,
-    camelcaseToDash,
-    dashToCamelcase,
-    underscoreToCamelcase,
-    camelcaseToUnderscore,
-    clear,
-    clone,
-    compose,
-    mutate,
-    merge,
-    fallback,
-    retrieve,
-    collect,
-    mix,
-    freeze,
-    reveal,
-    forEach,
-    log,
-    getLogHistories
-};

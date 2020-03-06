@@ -147,7 +147,7 @@ export default Composer({
                 }
             }
 
-            return _serviceCache.hasOwnProperty(serviceName);
+            return Object.prototype.hasOwnProperty.call(_serviceCache, serviceName);
         };
 
         /**
@@ -164,7 +164,7 @@ export default Composer({
                 }
             }
 
-            return _childDomainCache.hasOwnProperty(domainName);
+            return Object.prototype.hasOwnProperty.call(_childDomainCache, domainName);
         };
 
         /**
@@ -181,7 +181,7 @@ export default Composer({
                 }
             }
 
-            return _peerDomainCache.hasOwnProperty(domainName);
+            return Object.prototype.hasOwnProperty.call(_peerDomainCache, domainName);
         };
 
         /**
@@ -244,7 +244,7 @@ export default Composer({
                     if (ENV.DEVELOPMENT) {
                         if (!serviceNames.every((serviceName) => isString(serviceName))) {
                             log(`error`, `DomainFactory.getServices - Input service name is invalid.`);
-                        } else if (!serviceNames.every((serviceName) => _serviceCache.hasOwnProperty(serviceName))) {
+                        } else if (!serviceNames.every((serviceName) => Object.prototype.hasOwnProperty.call(_serviceCache, serviceName))) {
                             log(`error`, `DomainFactory.getServices - Service is not found.`);
                         }
                     }
@@ -275,7 +275,7 @@ export default Composer({
                     if (ENV.DEVELOPMENT) {
                         if (!domainNames.every((domainName) => isString(domainName))) {
                             log(`error`, `DomainFactory.getChildDomains - Input domain name is invalid.`);
-                        } else if (!domainNames.every((domainName) => _childDomainCache.hasOwnProperty(domainName))) {
+                        } else if (!domainNames.every((domainName) => Object.prototype.hasOwnProperty.call(_childDomainCache, domainName))) {
                             log(`error`, `DomainFactory.getChildDomains - Domain is not found.`);
                         }
                     }
@@ -306,7 +306,7 @@ export default Composer({
                     if (ENV.DEVELOPMENT) {
                         if (!domainNames.every((domainName) => isString(domainName))) {
                             log(`error`, `DomainFactory.getPeerDomains - Input domain name is invalid.`);
-                        } else if (!domainNames.every((domainName) => _peerDomainCache.hasOwnProperty(domainName))) {
+                        } else if (!domainNames.every((domainName) => Object.prototype.hasOwnProperty.call(_peerDomainCache, domainName))) {
                             log(`error`, `DomainFactory.getPeerDomains - Domain is not found.`);
                         }
                     }
@@ -442,7 +442,7 @@ export default Composer({
                 }
 
                 _serviceCache = services.reduce((__serviceCache, service) => {
-                    if (__serviceCache.hasOwnProperty(service.name)) {
+                    if (Object.prototype.hasOwnProperty.call(__serviceCache, service.name)) {
                         log(`warn1`, `DomainFactory.register - Domain:${domain.name} already has service:${service.name} registered.`);
                     } else {
                         __serviceCache[service.name] = service;
@@ -471,7 +471,7 @@ export default Composer({
                 _childDomainCache = childDomains.reduce((__childDomainCache, childDomain) => {
                     if (domain.name === childDomain.name) {
                         log(`warn1`, `DomainFactory.register - Cannot register domain:${childDomain.name} as a child of itself.`);
-                    } else if (__childDomainCache.hasOwnProperty(childDomain.name)) {
+                    } else if (Object.prototype.hasOwnProperty.call(__childDomainCache, childDomain.name)) {
                         log(`warn1`, `DomainFactory.register - Domain:${domain.name} already has child domain:${childDomain.name} registered.`);
                     } else {
                         __childDomainCache[childDomain.name] = childDomain;
@@ -506,7 +506,7 @@ export default Composer({
                 _peerDomainCache = peerDomains.reduce((__peerDomainCache, peerDomain) => {
                     if (domain.name === peerDomain.name) {
                         log(`warn1`, `DomainFactory.register - Cannot register domain:${peerDomain.name} as a peer of itself.`);
-                    } else if (__peerDomainCache.hasOwnProperty(peerDomain.name)) {
+                    } else if (Object.prototype.hasOwnProperty.call(__peerDomainCache, peerDomain.name)) {
                         log(`warn1`, `DomainFactory.register - Domain:${domain.name} already has peer domain:${peerDomain.name} registered.`);
                     } else {
                         __peerDomainCache[peerDomain.name] = peerDomain;
