@@ -28,13 +28,13 @@ const AppDomain = Hf.Domain.augment({
     },
     setup (done) {
         const domain = this;
+        const languages = Object.keys(MESSAGE);
 
         domain.outgoing(EVENT.REQUEST.DATAREAD).emit();
 
         domain.incoming(EVENT.RESPONSE.TO.DATAREAD.OK).forward(EVENT.DO.INIT_STORE);
 
         domain.incoming(EVENT.ON.SAY_HELLO_WORLD).handle(() => {
-            const languages = Object.keys(MESSAGE);
             return languages[ getRandomInt(0, languages.length) ];
         }).relay(EVENT.DO.CHANGE_LANGUAGE);
 

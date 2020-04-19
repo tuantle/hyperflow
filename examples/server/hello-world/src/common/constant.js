@@ -14,6 +14,14 @@ export default {
 
     MESSAGE: {
         english: `Hello world!`,
-        vietnamese: `Chào thế giới!`
+        vietnamese: `Chào thế giới!`,
+        portuguese: `Olá Mundo!`,
+        korean: `안녕하세요 세계!`,
+        latin: `Orbis Terrarum salve!`,
+        french: `Bonjour le monde!`,
+        hebrew: `שלום עולם!`,
+        german: `Hallo Welt!`,
+        persian: `سلام دنیا!`,
+        greek: `Γειά σου Κόσμε!`
     }
 };

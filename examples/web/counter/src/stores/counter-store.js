@@ -38,24 +38,20 @@ const CounterStore = Hf.Store.augment({
             if (store.mutate({
                 offset
             })) {
-                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => {
-                    return {
-                        count: store.count,
-                        offset: store.offset
-                    };
-                });
+                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => ({
+                    count: store.count,
+                    offset: store.offset
+                }));
                 console.log(`Store mutated`);
             }
         });
 
         store.incoming(EVENT.DO.COUNT).handle((mutateCount) => {
             if (store.mutate(mutateCount)) {
-                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => {
-                    return {
-                        count: store.count,
-                        offset: store.offset
-                    };
-                });
+                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => ({
+                    count: store.count,
+                    offset: store.offset
+                }));
                 console.log(`Store mutated.`);
             }
         });

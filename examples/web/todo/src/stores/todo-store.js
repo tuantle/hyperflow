@@ -77,14 +77,12 @@ const TodoStore = Hf.Store.augment({
             if (store.mutate(insertTask, {
                 reconfig: true
             })) {
-                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => {
-                    return {
-                        bundle: {
-                            tasks: store.tasks
-                        },
-                        pathId: `todo.tasks`
-                    };
-                });
+                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => ({
+                    bundle: {
+                        tasks: store.tasks
+                    },
+                    pathId: `todo.tasks`
+                }));
                 console.log(`Store mutated`);
             }
         });
@@ -93,14 +91,12 @@ const TodoStore = Hf.Store.augment({
             if (store.mutate(deleteTask, {
                 reconfig: true
             })) {
-                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => {
-                    return {
-                        bundle: {
-                            tasks: store.tasks
-                        },
-                        pathId: `todo.tasks`
-                    };
-                });
+                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => ({
+                    bundle: {
+                        tasks: store.tasks
+                    },
+                    pathId: `todo.tasks`
+                }));
                 console.log(`Store mutated`);
             }
         });
@@ -125,14 +121,12 @@ const TodoStore = Hf.Store.augment({
                     currentFilter: newFilter
                 }
             })) {
-                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => {
-                    return {
-                        bundle: {
-                            setting: store.setting
-                        },
-                        pathId: `todo.setting`
-                    };
-                });
+                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => ({
+                    bundle: {
+                        setting: store.setting
+                    },
+                    pathId: `todo.setting`
+                }));
                 console.log(`Store mutated.`);
             }
         });

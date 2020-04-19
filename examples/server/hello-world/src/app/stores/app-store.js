@@ -48,11 +48,9 @@ const ClientAppStore = Hf.Store.augment({
             if (store.mutate({
                 language
             })) {
-                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => {
-                    return {
-                        language: store.language
-                    };
-                });
+                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => ({
+                    language: store.language
+                }));
                 console.log(`Store mutated`);
             }
         });

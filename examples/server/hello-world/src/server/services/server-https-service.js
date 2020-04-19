@@ -103,7 +103,10 @@ const AppHttpsService = Hf.Service.augment({
             async (ctx) => {
                 service.outgoing(EVENT.REQUEST.RENDERED_TARGET).emit();
 
-                const renderedTarget = await service.incoming(EVENT.RESPONSE.WITH.RENDERED_TARGET).asPromised();
+                const {
+                    css,
+                    html
+                } = await service.incoming(EVENT.RESPONSE.WITH.RENDERED_TARGET).asPromised();
                 const response = {
                     status: HTTP_OK_CODE,
                     body: `
@@ -114,11 +117,11 @@ const AppHttpsService = Hf.Service.augment({
                                 <title>Hello World Example</title>
                                 <link rel="icon" href="/dist/favicon.ico?v=2" type="image/x-icon" />
                                 <link rel="shortcut icon" href="/dist/favicon.ico?v=2" type="image/x-icon" />
-                                <style id="jss-server-side">${renderedTarget.css}</style>
+                                <style id="jss-server-side">${css}</style>
                                 <script type="text/javascript" src="/dist/client.bundle.js" async></script>
                             </head>
                             <body>
-                                <div id="root">${renderedTarget.html}</div>
+                                <div id="root">${html}</div>
                             </body>
                         </html>
                     `

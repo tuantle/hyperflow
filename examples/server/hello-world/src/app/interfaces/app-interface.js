@@ -4,7 +4,7 @@ import { Hf } from 'hyperflow';
 
 import ReactComponentInterfaceComposite from 'hyperflow/libs/composites/interfaces/react-component-interface-composite';
 
-import App from '../components/app-component';
+import App from '../components/app-mui-component';
 
 import EVENT from '../../common/event';
 

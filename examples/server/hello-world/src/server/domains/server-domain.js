@@ -21,10 +21,10 @@ const ServerDomain = Hf.Domain.augment({
     },
     setup (done) {
         const domain = this;
-
-        domain.incoming(EVENT.DO.BROADCAST_RENDERED_TARGET).handle((renderedTarget) => {
-            domain.incoming(EVENT.REQUEST.RENDERED_TARGET).handle(() => renderedTarget).relay(EVENT.RESPONSE.WITH.RENDERED_TARGET);
-        });
+        domain.incoming(
+            EVENT.DO.BROADCAST_RENDERED_TARGET,
+            EVENT.REQUEST.RENDERED_TARGET
+        ).await().handle(([ renderedTarget ]) => renderedTarget).relay(EVENT.RESPONSE.WITH.RENDERED_TARGET);
         domain.incoming(EVENT.DO.BROADCAST_SECURED_API).forward(EVENT.BROADCAST.SECURED_API);
         done();
     }
