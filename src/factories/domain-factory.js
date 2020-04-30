@@ -423,20 +423,18 @@ export default Composer({
 
             if (isArray(services)) {
                 if (ENV.DEVELOPMENT) {
-                    if (!services.every((service) => {
-                        return isSchema({
-                            name: `string`,
-                            type: `string`,
-                            setup: `function`,
-                            teardown: `function`,
-                            observe: `function`,
-                            reset: `function`,
-                            activateIncomingStream: `function`,
-                            activateOutgoingStream: `function`,
-                            deactivateIncomingStream: `function`,
-                            deactivateOutgoingStream: `function`
-                        }).of(service) && service.type === `service`;
-                    })) {
+                    if (!services.every((service) => isSchema({
+                        name: `string`,
+                        type: `string`,
+                        setup: `function`,
+                        teardown: `function`,
+                        observe: `function`,
+                        reset: `function`,
+                        activateIncomingStream: `function`,
+                        activateOutgoingStream: `function`,
+                        deactivateIncomingStream: `function`,
+                        deactivateOutgoingStream: `function`
+                    }).of(service) && service.type === `service`)) {
                         log(`error`, `DomainFactory.register - Input services are invalid.`);
                     }
                 }
@@ -454,16 +452,14 @@ export default Composer({
 
             if (isArray(childDomains)) {
                 if (ENV.DEVELOPMENT) {
-                    if (!childDomains.every((childDomain) => {
-                        return isSchema({
-                            name: `string`,
-                            type: `string`,
-                            start: `function`,
-                            stop: `function`,
-                            observe: `function`,
-                            getInterface: `function`
-                        }).of(childDomain) && childDomain.type === `domain`;
-                    })) {
+                    if (!childDomains.every((childDomain) => isSchema({
+                        name: `string`,
+                        type: `string`,
+                        start: `function`,
+                        stop: `function`,
+                        observe: `function`,
+                        getInterface: `function`
+                    }).of(childDomain) && childDomain.type === `domain`)) {
                         log(`error`, `DomainFactory.register - Input child domains are invalid.`);
                     }
                 }
@@ -489,16 +485,14 @@ export default Composer({
 
             if (isArray(peerDomains)) {
                 if (ENV.DEVELOPMENT) {
-                    if (!peerDomains.every((peerDomain) => {
-                        return isSchema({
-                            name: `string`,
-                            type: `string`,
-                            start: `function`,
-                            stop: `function`,
-                            observe: `function`,
-                            getInterface: `function`
-                        }).of(peerDomain) && peerDomain.type === `domain`;
-                    })) {
+                    if (!peerDomains.every((peerDomain) => isSchema({
+                        name: `string`,
+                        type: `string`,
+                        start: `function`,
+                        stop: `function`,
+                        observe: `function`,
+                        getInterface: `function`
+                    }).of(peerDomain) && peerDomain.type === `domain`)) {
                         log(`error`, `DomainFactory.register - Input peer domains are invalid.`);
                     }
                 }

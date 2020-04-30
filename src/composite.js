@@ -297,11 +297,11 @@ const CompositePrototype = Object.create({}).prototype = {
             });
 
             /* if a function with initialization prefix is defined, call it once at init */
-            Object.entries(_product).filter(([ fnName, fn ]) => {
-                return isFunction(fn) && fnName.charAt(0) === INITIALIZATION_PREFIX;
-            }).sort(([ fnNameA, fnA ], [ fnNameB, fnB ]) => fnNameA <= fnNameB ? -1 : 1).forEach(([ fnName, fn ]) => { // eslint-disable-line
-                fn.call(_revealedProduct);
-            });
+            Object.entries(_product)
+                .filter(([ fnName, fn ]) => isFunction(fn) && fnName.charAt(0) === INITIALIZATION_PREFIX)
+                .sort(([ fnNameA, fnA ], [ fnNameB, fnB ]) => fnNameA <= fnNameB ? -1 : 1).forEach(([ fnName, fn ]) => { // eslint-disable-line
+                    fn.call(_revealedProduct);
+                });
 
             _initialized = true;
 

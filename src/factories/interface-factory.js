@@ -234,9 +234,9 @@ export default Composer({
                         }
                     }
 
-                    interfacedComponents = Object.values(_childIntfCache).filter((childIntf) => {
-                        return intfNames.some((intfName) => childIntf.name === intfName);
-                    }).map((childIntf) => childIntf.getInterfacedComponent());
+                    interfacedComponents = Object.values(_childIntfCache)
+                        .filter((childIntf) => intfNames.some((intfName) => childIntf.name === intfName))
+                        .map((childIntf) => childIntf.getInterfacedComponent());
                 } else {
                     interfacedComponents = Object.values(_childIntfCache).map((childIntf) => childIntf.getInterfacedComponent());
                 }
@@ -336,13 +336,11 @@ export default Composer({
 
             if (isArray(childIntfs)) {
                 if (ENV.DEVELOPMENT) {
-                    if (!childIntfs.every((childIntf) => {
-                        return isSchema({
-                            name: `string`,
-                            type: `string`,
-                            getComponent: `function`
-                        }).of(childIntf) && childIntf.type === `interface`;
-                    })) {
+                    if (!childIntfs.every((childIntf) => isSchema({
+                        name: `string`,
+                        type: `string`,
+                        getComponent: `function`
+                    }).of(childIntf) && childIntf.type === `interface`)) {
                         log(`error`, `InterfaceFactory.register - Input child domains are invalid.`);
                     }
                 }

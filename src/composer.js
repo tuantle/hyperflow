@@ -68,18 +68,18 @@ const ComposerPrototype = Object.create({}).prototype = {
             }
         }
 
-        const factoryFnDefinition = Object.entries(definition).filter(([ fnName, fn ]) => {
-            return !RESERVED_KEYWORDS.includes(fnName) && isFunction(fn);
-        }).reduce((fnDefinition, [ fnName, fn ]) => {
-            fnDefinition[fnName] = fn;
-            return fnDefinition;
-        }, {});
-        let factoryNonFnDefinition = Object.entries(definition).filter(([ key, value ]) => {
-            return !RESERVED_KEYWORDS.includes(key) && !isFunction(value);
-        }).reduce((nonFnDefinition, [ key, value ]) => {
-            nonFnDefinition[key] = value;
-            return nonFnDefinition;
-        }, {});
+        const factoryFnDefinition = Object.entries(definition)
+            .filter(([ fnName, fn ]) => !RESERVED_KEYWORDS.includes(fnName) && isFunction(fn))
+            .reduce((fnDefinition, [ fnName, fn ]) => {
+                fnDefinition[fnName] = fn;
+                return fnDefinition;
+            }, {});
+        let factoryNonFnDefinition = Object.entries(definition)
+            .filter(([ key, value ]) => !RESERVED_KEYWORDS.includes(key) && !isFunction(value))
+            .reduce((nonFnDefinition, [ key, value ]) => {
+                nonFnDefinition[key] = value;
+                return nonFnDefinition;
+            }, {});
         const factoryComposites = definition.composites;
         let factoryStatic = definition.static;
         let factory;
@@ -178,12 +178,12 @@ export default function Composer (definition) {
         }, {});
     }
 
-    compositeDefinition.enclosure = Object.entries(definition).filter(([ key, value ]) => {
-        return !RESERVED_KEYWORDS.includes(key) && isFunction(value);
-    }).reduce((_enclosure, [ key, value ]) => {
-        _enclosure[key] = value;
-        return _enclosure;
-    }, {});
+    compositeDefinition.enclosure = Object.entries(definition)
+        .filter(([ key, value ]) => !RESERVED_KEYWORDS.includes(key) && isFunction(value))
+        .reduce((_enclosure, [ key, value ]) => {
+            _enclosure[key] = value;
+            return _enclosure;
+        }, {});
 
     if (ENV.DEVELOPMENT) {
         if (isEmpty(compositeDefinition.enclosure)) {

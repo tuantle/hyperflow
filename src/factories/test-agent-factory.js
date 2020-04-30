@@ -167,20 +167,17 @@ export default Composer({
 
             if (isArray(subjects)) {
                 if (ENV.DEVELOPMENT) {
-                    if (!subjects.every((subject) => {
-                        return isSchema({
-                            name: `string`,
-                            type: `string`,
-                            setup: `function`,
-                            teardown: `function`,
-                            observe: `function`,
-                            activateIncomingStream: `function`,
-                            activateOutgoingStream: `function`,
-                            deactivateIncomingStream: `function`,
-                            deactivateOutgoingStream: `function`
-                        }).of(subject) &&
-                        (subject.type === `domain` || subject.type === `store` || subject.type === `interface` || subject.type === `service`);
-                    })) {
+                    if (!subjects.every((subject) => isSchema({
+                        name: `string`,
+                        type: `string`,
+                        setup: `function`,
+                        teardown: `function`,
+                        observe: `function`,
+                        activateIncomingStream: `function`,
+                        activateOutgoingStream: `function`,
+                        deactivateIncomingStream: `function`,
+                        deactivateOutgoingStream: `function`
+                    }).of(subject) && (subject.type === `domain` || subject.type === `store` || subject.type === `interface` || subject.type === `service`))) {
                         log(`error`, `TestAgentFactory.register - Input subjects are invalid.`);
                     }
                 }
@@ -343,19 +340,17 @@ export default Composer({
             _running = true;
 
             const runAsyncUnitTests = async () => {
-                const asyncUnitTests = await _unitTests.map((unitTest) => {
-                    return new Promise((resolve) => {
-                        unitTest((end) => {
-                            if (ENV.DEVELOPMENT) {
-                                if (!isFunction(end)) {
-                                    log(`error`, `TestAgentFactory.run - Input unit test end function is invalid.`);
-                                }
+                const asyncUnitTests = await _unitTests.map((unitTest) => new Promise((resolve) => {
+                    unitTest((end) => {
+                        if (ENV.DEVELOPMENT) {
+                            if (!isFunction(end)) {
+                                log(`error`, `TestAgentFactory.run - Input unit test end function is invalid.`);
                             }
-                            resolve();
-                            end();
-                        });
+                        }
+                        resolve();
+                        end();
                     });
-                });
+                }));
 
                 Promise.all(asyncUnitTests).then(() => {
                     log(`info1`, `Finished running test agent:${tAgent.name}.`);
