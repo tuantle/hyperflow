@@ -128,11 +128,9 @@ const NodePrototype = Object.create({}).prototype = {
         if (!node.isLeaf()) {
             const tNodes = node._getTails();
 
-            dNodes = dNodes.concat.apply(dNodes, tNodes.concat(tNodes.filter((tNode) => {
-                return !tNode.isLeaf();
-            }).map((tNode) => {
-                return tNode._getDescendants();
-            })));
+            dNodes = dNodes.concat.apply(dNodes, tNodes.concat(
+                tNodes.filter((tNode) => !tNode.isLeaf()).map((tNode) => tNode._getDescendants())
+            ));
         }
         return dNodes;
     },
@@ -1057,9 +1055,14 @@ const MutationMapPrototype = Object.create({}).prototype = {
     getRootCount () {
         const mMap = this;
 
-        return Object.values(mMap._node).filter((node) => isDefined(node)).reduce((count, node) => {
-            return node.isRoot() ? count++ : count;
-        }, 0);
+        return Object.values(mMap._node)
+            .filter((node) => isDefined(node))
+            .reduce((count, node) => {
+                if (node.isRoot()) {
+                    return count++;
+                }
+                return count;
+            }, 0);
     },
 
     /**

@@ -78,7 +78,12 @@ export default Composite({
 
             const storage = AsyncStorage;
 
-            pathIds = pathIds.map((pathId) => isString(pathId) ? stringToArray(pathId, `.`) : pathId);
+            pathIds = pathIds.map((pathId) => {
+                if (isString(pathId)) {
+                    return stringToArray(pathId, `.`);
+                }
+                return pathId;
+            });
 
             if (ENV.DEVELOPMENT) {
                 if (pathIds.some((pathId) => isEmpty(pathId))) {
@@ -143,9 +148,7 @@ export default Composite({
                             });
                         });
                     });
-                    return Promise.all(promises).then((rootItems) => {
-                        return rootItems;
-                    });
+                    return Promise.all(promises).then((rootItems) => rootItems);
                 },
                 /**
                  * @description - Do a write operation to async storage.

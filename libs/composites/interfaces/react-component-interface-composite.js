@@ -191,7 +191,7 @@ export default Composite({
                     }
                 }).with({});
                 const interfacedComponent = (property) => {
-                    const [ , forceUpdate ] = React.useReducer(toggle => !toggle, false);
+                    const [ , forceUpdate ] = React.useReducer((toggle) => !toggle, false);
                     const [ state, setState ] = !intf.isStateless() ? React.useState(intf.getInitialState()) : [ null, null ];
                     const extendedProperty = {
                         ...property,

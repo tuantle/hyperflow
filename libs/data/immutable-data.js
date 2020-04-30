@@ -122,9 +122,9 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
         const mRecords = data._mutation.records;
 
         if (immutableRootKeys.includes(rootKey)) {
-            data._mutation.records = mRecords.concat(pathId.filter((key, index) => {
-                return mRecords.length <= index;
-            }).map((key) => [ key ])).map((layers, index) => {
+            data._mutation.records = mRecords.concat(
+                pathId.filter((key, index) => mRecords.length <= index).map((key) => [ key ])
+            ).map((layers, index) => {
                 if (pathId.length > index) {
                     const key = pathId[index];
 
@@ -343,20 +343,21 @@ const ImmutableDataPrototype = Object.create({}).prototype = {
             } = constrainable;
 
             if (!isEmpty(target)) {
-                Object.entries(target).filter(([ constraintKey, constraintValue ]) => { // eslint-disable-line
-                    return Object.prototype.hasOwnProperty.call(constraint, constraintKey);
-                }).reduce((targetPaths, [ constraintKey, constraintValue ]) => { // eslint-disable-line
-                    return targetPaths.concat(constraintValue);
-                }, []).filter((targetPath) => {
-                    return isString(targetPath) || isArray(targetPath);
-                }).map((targetPath) => {
-                    return isString(targetPath) ? stringToArray(targetPath, `.`) : targetPath;
-                }).forEach((targetPath) => {
-                    const targetKey = targetPath.pop();
-                    const pathId = `${cursor.pathId}.${bundleKey}.${arrayToString(targetPath, `.`)}`;
-
-                    data.select(pathId).describeItem(targetKey).asConstrainable(constraint);
-                });
+                Object.entries(target)
+                    .filter(([ constraintKey, constraintValue ]) => Object.prototype.hasOwnProperty.call(constraint, constraintKey)) // eslint-disable-line
+                    .reduce((targetPaths, [ constraintKey, constraintValue ]) => targetPaths.concat(constraintValue), [])  // eslint-disable-line
+                    .filter((targetPath) => isString(targetPath) || isArray(targetPath))
+                    .map((targetPath) => {
+                        if (isString(targetPath)) {
+                            return stringToArray(targetPath, `.`);
+                        }
+                        return targetPath;
+                    })
+                    .forEach((targetPath) => {
+                        const targetKey = targetPath.pop();
+                        const pathId = `${cursor.pathId}.${bundleKey}.${arrayToString(targetPath, `.`)}`;
+                        data.select(pathId).describeItem(targetKey).asConstrainable(constraint);
+                    });
             } else {
                 cursor.describeItem(bundleKey).asConstrainable(constraint);
             }

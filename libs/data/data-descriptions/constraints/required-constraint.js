@@ -35,32 +35,30 @@ import {
  * @method requiredConstraint
  * @return {object}
  */
-const requiredConstraint = () => {
-    return {
-        required: {
-            condition: null,
-            /**
-             * @description - Ensures value is not null or undefined or empty.
-             *
-             * @method constrainer
-             * @return {object}
-             */
-            constrainer () {
-                const context = this;
-                const result = {
-                    verified: true,
-                    reject () {
-                        log(`warn1`, `required - Required property key:${context.key} cannot be not null or undefined or empty.`);
-                    }
-                };
-                if (isString(context.newValue) || isObject(context.newValue) || isArray(context.newValue)) {
-                    result.verified = !isEmpty(context.newValue);
-                } else {
-                    result.verified = context.newValue !== null && context.newValue !== undefined;
+const requiredConstraint = () => ({
+    required: {
+        condition: null,
+        /**
+         * @description - Ensures value is not null or undefined or empty.
+         *
+         * @method constrainer
+         * @return {object}
+         */
+        constrainer () {
+            const context = this;
+            const result = {
+                verified: true,
+                reject () {
+                    log(`warn1`, `required - Required property key:${context.key} cannot be not null or undefined or empty.`);
                 }
-                return result;
+            };
+            if (isString(context.newValue) || isObject(context.newValue) || isArray(context.newValue)) {
+                result.verified = !isEmpty(context.newValue);
+            } else {
+                result.verified = context.newValue !== null && context.newValue !== undefined;
             }
+            return result;
         }
-    };
-};
+    }
+});
 export default requiredConstraint;

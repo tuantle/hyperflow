@@ -105,7 +105,12 @@ export default Composite({
                 break;
             }
 
-            pathIds = pathIds.map((pathId) => isString(pathId) ? stringToArray(pathId, `.`) : pathId);
+            pathIds = pathIds.map((pathId) => {
+                if (isString(pathId)) {
+                    return stringToArray(pathId, `.`);
+                }
+                return pathId;
+            });
 
             if (ENV.DEVELOPMENT) {
                 if (pathIds.some((pathId) => isEmpty(pathId))) {

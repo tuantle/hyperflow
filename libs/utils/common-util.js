@@ -701,7 +701,10 @@ export function clone (source) {
         }, {});
     } else if (isArray(source)) {
         result = source.map((value) => {
-            return isObject(value) || isArray(value) ? clone(value) : value;
+            if (isObject(value) || isArray(value)) {
+                return clone(value);
+            }
+            return value;
         });
     }
     // return Object.isFrozen(source) ? Object.freeze(result) : result;
@@ -1466,12 +1469,10 @@ export function mix (source, option = {
         }
 
         if (isString(key) && key !== `prototype`) {
-            const prefixExcepted = isNonEmptyArray(exclusion.exception.prefixes) ? exclusion.exception.prefixes.some((prefix) => {
-                return key.substr(0, prefix.length) === prefix;
-            }) : false;
-            const postfixExcepted = isNonEmptyArray(exclusion.exception.postfixes) ? exclusion.exception.postfixes.some((postfix) => {
-                return key.substr(0, postfix.length) === postfix;
-            }) : false;
+            const prefixExcepted = isNonEmptyArray(exclusion.exception.prefixes) ?
+                exclusion.exception.prefixes.some((prefix) => key.substr(0, prefix.length) === prefix) : false;
+            const postfixExcepted = isNonEmptyArray(exclusion.exception.postfixes) ?
+                exclusion.exception.postfixes.some((postfix) => key.substr(0, postfix.length) === postfix) : false;
             const keyExcepted = isNonEmptyArray(exclusion.exception.keys) ? exclusion.exception.keys.includes(key) : false;
 
             included = true;
@@ -1506,28 +1507,26 @@ export function mix (source, option = {
 
     if (!exclusion.prototypes) {
         /* copy source object prototypes to new mixed result object */
-        result = Object.entries(Object.getPrototypeOf(source)).filter(([ fnName, fn ]) => {
-            return isFunction(fn) && isIncluded(fnName);
-        }).reduce((_result, [ fnName, fn ]) => {
-            _result[fnName] = bindPrototypesToSource ? fn.bind(source) : fn;
-            return _result;
-        }, result);
+        result = Object.entries(Object.getPrototypeOf(source))
+            .filter(([ fnName, fn ]) => isFunction(fn) && isIncluded(fnName))
+            .reduce((_result, [ fnName, fn ]) => {
+                _result[fnName] = bindPrototypesToSource ? fn.bind(source) : fn;
+                return _result;
+            }, result);
 
         /* copy source object functions to new mixed result object */
-        result = Object.entries(source).filter(([ fnName, fn ]) => {
-            return isFunction(fn) && isIncluded(fnName);
-        }).reduce((_result, [ fnName, fn ]) => {
-            _result[fnName] = bindFnsToSource ? fn.bind(source) : fn;
-            return _result;
-        }, result);
+        result = Object.entries(source)
+            .filter(([ fnName, fn ]) => isFunction(fn) && isIncluded(fnName))
+            .reduce((_result, [ fnName, fn ]) => {
+                _result[fnName] = bindFnsToSource ? fn.bind(source) : fn;
+                return _result;
+            }, result);
     }
 
     if (!exclusion.properties) {
         result = Object.keys(Object.getPrototypeOf(source)).concat(
             exclusion.enumerablePropertiesOnly ? Object.keys(source) : Object.getOwnPropertyNames(source)
-        ).filter((key) => {
-            return !isFunction(source[key]) && isIncluded(key);
-        }).reduce((_result, key) => {
+        ).filter((key) => !isFunction(source[key]) && isIncluded(key)).reduce((_result, key) => {
             const sourceObjDesc = Object.getOwnPropertyDescriptor(source, key);
 
             if (isObject(sourceObjDesc)) {
@@ -1619,40 +1618,40 @@ export function mix (source, option = {
             if (!exclusion.properties) {
                 result = Object.keys(Object.getPrototypeOf(target)).concat(
                     exclusion.enumerablePropertiesOnly ? Object.keys(target) : Object.getOwnPropertyNames(target)
-                ).filter((key) => {
-                    return !isFunction(target[key]) &&
-                           Object.prototype.hasOwnProperty.call(target, key) &&
-                           !Object.prototype.hasOwnProperty.call(result, key) &&
-                           isIncluded(key);
-                }).reduce((_result, key) => {
-                    const targetObjDesc = Object.getOwnPropertyDescriptor(target, key);
+                )
+                    .filter((key) => !isFunction(target[key]) &&
+                       Object.prototype.hasOwnProperty.call(target, key) &&
+                       !Object.prototype.hasOwnProperty.call(result, key) &&
+                       isIncluded(key))
+                    .reduce((_result, key) => {
+                        const targetObjDesc = Object.getOwnPropertyDescriptor(target, key);
 
-                    if (isObject(targetObjDesc)) {
-                        Object.defineProperty(_result, key, {
-                            get () {
-                                return target[key];
-                            },
-                            set (value) {
-                                target[key] = value;
-                            },
-                            configurable: targetObjDesc.configurable,
-                            enumerable: targetObjDesc.enumerable
-                        });
-                    } else {
-                        Object.defineProperty(_result, key, {
-                            get () {
-                                return target[key];
-                            },
-                            set (value) {
-                                target[key] = value;
-                            },
-                            configurable: false,
-                            enumerable: true
-                        });
-                    }
+                        if (isObject(targetObjDesc)) {
+                            Object.defineProperty(_result, key, {
+                                get () {
+                                    return target[key];
+                                },
+                                set (value) {
+                                    target[key] = value;
+                                },
+                                configurable: targetObjDesc.configurable,
+                                enumerable: targetObjDesc.enumerable
+                            });
+                        } else {
+                            Object.defineProperty(_result, key, {
+                                get () {
+                                    return target[key];
+                                },
+                                set (value) {
+                                    target[key] = value;
+                                },
+                                configurable: false,
+                                enumerable: true
+                            });
+                        }
 
-                    return _result;
-                }, result);
+                        return _result;
+                    }, result);
             }
             return result;
         }

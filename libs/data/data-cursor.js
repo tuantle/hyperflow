@@ -618,14 +618,12 @@ const DataCursorPrototype = Object.create({}).prototype = {
                 timestamp: cursorTimestamp,
                 pathIdAtTimeIndex
             };
-        }).filter((timeCursor) => mMap.hasNode(timeCursor.pathIdAtTimeIndex)).map((timeCursor) => {
-            return {
-                timestamp: timeCursor.timestamp,
-                key,
-                recallTimeCount,
-                content: leafType ? mMap.select(timeCursor.pathIdAtTimeIndex).getContent()[key] : mMap.select(timeCursor.pathIdAtTimeIndex).getContent()
-            };
-        });
+        }).filter((timeCursor) => mMap.hasNode(timeCursor.pathIdAtTimeIndex)).map((timeCursor) => ({
+            timestamp: timeCursor.timestamp,
+            key,
+            recallTimeCount,
+            content: leafType ? mMap.select(timeCursor.pathIdAtTimeIndex).getContent()[key] : mMap.select(timeCursor.pathIdAtTimeIndex).getContent()
+        }));
     },
 
     /**
@@ -915,12 +913,10 @@ const DataCursorPrototype = Object.create({}).prototype = {
              */
             asConstrainable (constraint) {
                 if (ENV.DEVELOPMENT) {
-                    if (!isObject(constraint) && Object.key(constraint).forEach((constraintKey) => {
-                        return Object.prototype.hasOwnProperty.call(constraint[constraintKey], `constrainer`) && isFunction(constraint[constraintKey].constrainer);
-                        // return isSchema({
-                        //     constrainer: `function`
-                        // }).of(constraint[constraintKey]);
-                    })) {
+                    if (!isObject(constraint) &&
+                        Object.key(constraint)
+                            .every((constraintKey) => Object.prototype.hasOwnProperty.call(constraint[constraintKey], `constrainer`) &&
+                                isFunction(constraint[constraintKey].constrainer))) {
                         log(`error`, `DataCursor.describeItem.asConstrainable - Input constraint is invalid.`);
                     } else if (computableItem) {
                         log(`error`, `DataCursor.describeItem.asConstrainable - Cannot redescribe computable data item key:${key} at pathId:${pathId}.`);

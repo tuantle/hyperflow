@@ -32,35 +32,33 @@ import {
  * @method stronglyTypedConstraint
  * @return {object}
  */
-const stronglyTypedConstraint = () => {
-    return {
-        stronglyTyped: {
-            condition: null,
-            /**
-             * @description - Ensures strongly typed and that new and old values are the same type.
-             *
-             * @method constrainer
-             * @return {object}
-             */
-            constrainer () {
-                const context = this;
-                const oldValueType = typeOf(context.oldValue);
-                const newValueType = typeOf(context.newValue);
-                const result = {
-                    verified: true,
-                    reject () {
-                        log(`warn1`, `stronglyTyped - Value of key:${context.key} is strongly typed to ${oldValueType}.`);
-                    }
-                };
-                if (oldValueType === `null` || newValueType === `null`) {
-                    result.verified = true;
-                    log(`warn0`, `stronglyTyped - Ignoring type constraint of key:${context.key} as it is null or being set to null.`);
-                } else {
-                    result.verified = oldValueType === newValueType;
+const stronglyTypedConstraint = () => ({
+    stronglyTyped: {
+        condition: null,
+        /**
+         * @description - Ensures strongly typed and that new and old values are the same type.
+         *
+         * @method constrainer
+         * @return {object}
+         */
+        constrainer () {
+            const context = this;
+            const oldValueType = typeOf(context.oldValue);
+            const newValueType = typeOf(context.newValue);
+            const result = {
+                verified: true,
+                reject () {
+                    log(`warn1`, `stronglyTyped - Value of key:${context.key} is strongly typed to ${oldValueType}.`);
                 }
-                return result;
+            };
+            if (oldValueType === `null` || newValueType === `null`) {
+                result.verified = true;
+                log(`warn0`, `stronglyTyped - Ignoring type constraint of key:${context.key} as it is null or being set to null.`);
+            } else {
+                result.verified = oldValueType === newValueType;
             }
+            return result;
         }
-    };
-};
+    }
+});
 export default stronglyTypedConstraint;

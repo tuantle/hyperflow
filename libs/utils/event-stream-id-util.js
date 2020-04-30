@@ -53,12 +53,7 @@ export default {
         }
 
         /* helper function to convert dash to uppercase underscore */
-        const dashToUpperCaseUnderscore = (str) => {
-            return str.replace(/-([a-z])/g, (match, word) => {
-                return `_${word}`;
-            }).toUpperCase();
-        };
-
+        const dashToUpperCaseUnderscore = (str) => str.replace(/-([a-z])/g, (match, word) => `_${word}`).toUpperCase();
         const outputEventMap = Object.keys(sourceEventMap).reduce((_outputEventMap, key) => {
             if (ENV.DEVELOPMENT) {
                 if (!sourceEventMap[key].every((_key) => isString(_key))) {
