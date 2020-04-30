@@ -181,69 +181,67 @@ const TaskList = ({
     tasks,
     onEditTask,
     onDeleteTask
-}) => {
-    return (
-        <List> {
-            tasks.map(({
-                timestamp,
-                message,
-                editing,
-                completed
-            }) => {
-                const labelId = `task-list-label-${timestamp}`;
+}) => (
+    <List> {
+        tasks.map(({
+            timestamp,
+            message,
+            editing,
+            completed
+        }) => {
+            const labelId = `task-list-label-${timestamp}`;
 
-                return (
-                    <ListItem
-                        key = { timestamp }
-                        role = { undefined }
-                        button = { false }
-                        divider
-                    >
-                        <ListItemIcon >
-                            <Checkbox
-                                edge = 'start'
-                                checked = { completed }
-                                disabled = { editing }
-                                tabIndex = { -1 }
-                                inputProps = {{
-                                    'aria-labelledby': labelId
-                                }}
-                                onChange = {(event) => {
-                                    onEditTask({
-                                        timestamp,
-                                        completed: event.target.checked
-                                    });
-                                }}
-                            />
-                        </ListItemIcon>
-                        <EditTaskMessageInput
-                            value = { message }
-                            timestamp = { timestamp }
-                            color = { editing ? theme.palette.secondary.main : theme.palette.primary.main }
-                            lineThrough = { completed }
-                            readOnly = { completed }
-                            onSubmit = {(editedMessage) => onEditTask({
-                                timestamp,
-                                message: editedMessage,
-                                editing: false
-                            })}
+            return (
+                <ListItem
+                    key = { timestamp }
+                    role = { undefined }
+                    button = { false }
+                    divider
+                >
+                    <ListItemIcon >
+                        <Checkbox
+                            edge = 'start'
+                            checked = { completed }
+                            disabled = { editing }
+                            tabIndex = { -1 }
+                            inputProps = {{
+                                'aria-labelledby': labelId
+                            }}
+                            onChange = {(event) => {
+                                onEditTask({
+                                    timestamp,
+                                    completed: event.target.checked
+                                });
+                            }}
                         />
-                        <ListItemSecondaryAction>
-                            <IconButton
-                                edge = 'end'
-                                aria-label = 'comments'
-                                onClick = {() => onDeleteTask(timestamp)}
-                            >
-                                <DeleteIcon/>
-                            </IconButton>
-                        </ListItemSecondaryAction>
-                    </ListItem>
-                );
-            })
-        } <
-        /List>
-    );
-};
+                    </ListItemIcon>
+                    <EditTaskMessageInput
+                        value = { message }
+                        timestamp = { timestamp }
+                        color = { editing ? theme.palette.secondary.main : theme.palette.primary.main }
+                        lineThrough = { completed }
+                        readOnly = { completed }
+                        onSubmit = {(editedMessage) => onEditTask({
+                            timestamp,
+                            message: editedMessage,
+                            editing: false
+                        })}
+                    />
+                    <ListItemSecondaryAction>
+                        <IconButton
+                            edge = 'end'
+                            aria-label = 'comments'
+                            onClick = {() => onDeleteTask(timestamp)}
+                        >
+                            <DeleteIcon/>
+                        </IconButton>
+                    </ListItemSecondaryAction>
+                </ListItem>
+            );
+        })
+    } <
+    /List>
+);
 
 const Todo = ({
     setting,

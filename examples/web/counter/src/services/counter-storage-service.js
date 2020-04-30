@@ -6,7 +6,7 @@ import WebStorageServiceComposite from 'hyperflow/libs/composites/services/web-s
 
 import EVENT from '../events/counter-event';
 
-const CounterStorageService = Hf.Service.augment({
+export default Hf.Service.augment({
     composites: [ WebStorageServiceComposite ],
     $init () {
         const service = this;
@@ -28,7 +28,7 @@ const CounterStorageService = Hf.Service.augment({
         service.incoming(EVENT.REQUEST.DATAREAD).handle(() => {
             service.from(`local-storage`, `counter`)
                 .read()
-                .then(results => service.outgoing(EVENT.RESPONSE.TO.DATAREAD.OK).emit(() => results[0]))
+                .then((results) => service.outgoing(EVENT.RESPONSE.TO.DATAREAD.OK).emit(() => results[0]))
                 .catch((error) => {
                     service.outgoing(EVENT.RESPONSE.TO.DATAREAD.ERROR).emit();
                     console.warn(`CounterStorageService - Unable to read from local storage. ${error.message}`);
@@ -46,4 +46,3 @@ const CounterStorageService = Hf.Service.augment({
         done();
     }
 });
-export default CounterStorageService;

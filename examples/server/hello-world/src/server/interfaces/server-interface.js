@@ -30,7 +30,7 @@ const ServerApp = function ({
     );
 };
 
-const ServerInterface = Hf.Interface.augment({
+export default Hf.Interface.augment({
     composites: [
         ReactComponentInterfaceComposite,
         ReactDomServerInterfaceComposite
@@ -56,5 +56,3 @@ const ServerInterface = Hf.Interface.augment({
         done();
     }
 });
-
-export default ServerInterface;

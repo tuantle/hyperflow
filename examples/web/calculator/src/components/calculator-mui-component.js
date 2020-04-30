@@ -111,34 +111,30 @@ const Keypad = ({
     const classes = useStyles();
 
     return (
-        KEY_PAD_LABELS.map((cells, col) => {
-            return (
-                <Grid key = { col } className = { classes.keypad } item xs = { 8 }>{
-                    cells.map((cellLabel, index) => {
-                        return (
-                            <React.Fragment key = { index }>
-                                <Grid item xs = { 8 }>
-                                    <KeypadButton
-                                        label = { cellLabel }
-                                        onClick = {() => {
-                                            if (cellLabel === `C`) {
-                                                onReset();
-                                            } else if (cellLabel === `÷` || cellLabel === `×` || cellLabel === `+` || cellLabel === `-`) {
-                                                onOperation(cellLabel);
-                                            } else if (isNumeric(cellLabel) || cellLabel === `.` || cellLabel === `Pi` || cellLabel === `±`) {
-                                                onPerand(cellLabel);
-                                            } else if (cellLabel === `=`) {
-                                                onCompute();
-                                            }
-                                        }}
-                                    />
-                                </Grid>
-                            </React.Fragment>
-                        );
-                    })
-                }</Grid>
-            );
-        })
+        KEY_PAD_LABELS.map((cells, col) => (
+            <Grid key = { col } className = { classes.keypad } item xs = { 8 }>{
+                cells.map((cellLabel, index) => (
+                    <React.Fragment key = { index }>
+                        <Grid item xs = { 8 }>
+                            <KeypadButton
+                                label = { cellLabel }
+                                onClick = {() => {
+                                    if (cellLabel === `C`) {
+                                        onReset();
+                                    } else if (cellLabel === `÷` || cellLabel === `×` || cellLabel === `+` || cellLabel === `-`) {
+                                        onOperation(cellLabel);
+                                    } else if (isNumeric(cellLabel) || cellLabel === `.` || cellLabel === `Pi` || cellLabel === `±`) {
+                                        onPerand(cellLabel);
+                                    } else if (cellLabel === `=`) {
+                                        onCompute();
+                                    }
+                                }}
+                            />
+                        </Grid>
+                    </React.Fragment>
+                ))
+            }</Grid>
+        ))
     );
 };
 

@@ -6,7 +6,7 @@ import ImmutableStateComposite from 'hyperflow/libs/composites/states/immutable-
 
 import EVENT from '../events/counter-event';
 
-const CounterStore = Hf.Store.augment({
+export default Hf.Store.augment({
     composites: [
         ImmutableStateComposite
     ],
@@ -78,4 +78,3 @@ const CounterStore = Hf.Store.augment({
         done();
     }
 });
-export default CounterStore;

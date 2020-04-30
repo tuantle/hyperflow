@@ -2,6 +2,4 @@
 
 import CalculatorDomain from './domains/calculator-domain';
 
-const CalculatorApp = CalculatorDomain(`calculator`);
-
-export default CalculatorApp;
+export default CalculatorDomain(`calculator`);

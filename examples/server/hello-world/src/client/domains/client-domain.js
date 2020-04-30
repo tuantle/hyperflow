@@ -10,7 +10,7 @@ import AppDomain from '../../app/domains/app-domain';
 
 // import EVENT from '../../common/event';
 
-const ClientDomain = Hf.Domain.augment({
+export default Hf.Domain.augment({
     $init () {
         const domain = this;
         domain.register({
@@ -23,5 +23,3 @@ const ClientDomain = Hf.Domain.augment({
         done();
     }
 });
-
-export default ClientDomain;

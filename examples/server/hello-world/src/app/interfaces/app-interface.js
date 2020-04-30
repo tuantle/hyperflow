@@ -8,7 +8,7 @@ import App from '../components/app-mui-component';
 
 import EVENT from '../../common/event';
 
-const AppInterface = Hf.Interface.augment({
+export default Hf.Interface.augment({
     composites: [
         ReactComponentInterfaceComposite
     ],
@@ -28,5 +28,3 @@ const AppInterface = Hf.Interface.augment({
         intf.outgoing(EVENT.ON.SAY_HELLO_WORLD).emit();
     }
 });
-
-export default AppInterface;

@@ -84,49 +84,47 @@ const Counter = ({
     onDecrease,
     onUndo,
     onChange
-}) => {
-    return (
-        <MuiThemeProvider theme = { theme }>
-            <div
-                style = {{
-                    display: `flex`,
-                    flexDirection: `column`,
-                    justifyContent: `center`,
-                    alignItems: `center`
+}) => (
+    <MuiThemeProvider theme = { theme }>
+        <div
+            style = {{
+                display: `flex`,
+                flexDirection: `column`,
+                justifyContent: `center`,
+                alignItems: `center`
+            }}
+        >
+            <CounterButtons
+                count = { count }
+                undoable = { undoable }
+                onIncrease = { onIncrease }
+                onDecrease = { onDecrease }
+                onUndo = { onUndo }
+            />
+            <TextField
+                label= 'Offset Value'
+                value = { offset }
+                type = 'number'
+                InputLabelProps = {{
+                    shrink: true
                 }}
-            >
-                <CounterButtons
-                    count = { count }
-                    undoable = { undoable }
-                    onIncrease = { onIncrease }
-                    onDecrease = { onDecrease }
-                    onUndo = { onUndo }
-                />
-                <TextField
-                    label= 'Offset Value'
-                    value = { offset }
-                    type = 'number'
-                    InputLabelProps = {{
-                        shrink: true
-                    }}
-                    onChange = {(event) => onChange(parseInt(event.target.value, 10))}
-                />
-                <h1 style = {{
-                    color: `gray`,
-                    fontFamily: `helvetica`,
-                    fontSize: 32,
-                    textAlign: `left`
-                }}> Count = { count } </h1>
-                <h2 style = {{
-                    color: `gray`,
-                    fontFamily: `helvetica`,
-                    fontSize: 12,
-                    textAlign: `left`,
-                    paddingRight: 175
-                }}> Version: 0.6 </h2>
-            </div>
-        </MuiThemeProvider>
-    );
-};
+                onChange = {(event) => onChange(parseInt(event.target.value, 10))}
+            />
+            <h1 style = {{
+                color: `gray`,
+                fontFamily: `helvetica`,
+                fontSize: 32,
+                textAlign: `left`
+            }}> Count = { count } </h1>
+            <h2 style = {{
+                color: `gray`,
+                fontFamily: `helvetica`,
+                fontSize: 12,
+                textAlign: `left`,
+                paddingRight: 175
+            }}> Version: 0.6 </h2>
+        </div>
+    </MuiThemeProvider>
+);
 
 export default Counter;

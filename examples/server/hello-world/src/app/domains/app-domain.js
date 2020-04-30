@@ -18,7 +18,7 @@ function getRandomInt (min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
-const AppDomain = Hf.Domain.augment({
+export default Hf.Domain.augment({
     $init () {
         const domain = this;
         domain.register({
@@ -34,14 +34,12 @@ const AppDomain = Hf.Domain.augment({
 
         domain.incoming(EVENT.RESPONSE.TO.DATAREAD.OK).forward(EVENT.DO.INIT_STORE);
 
-        domain.incoming(EVENT.ON.SAY_HELLO_WORLD).handle(() => {
-            return languages[ getRandomInt(0, languages.length) ];
-        }).relay(EVENT.DO.CHANGE_LANGUAGE);
+        domain.incoming(EVENT.ON.SAY_HELLO_WORLD)
+            .handle(() => languages[ getRandomInt(0, languages.length) ])
+            .relay(EVENT.DO.CHANGE_LANGUAGE);
 
         domain.incoming(EVENT.AS.STORE_MUTATED).forward(EVENT.REQUEST.DATAWRITE);
 
         done();
     }
 });
-
-export default AppDomain;

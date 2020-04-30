@@ -29,7 +29,7 @@ const ClientApp = function ({
     );
 };
 
-const ClientInterface = Hf.Interface.augment({
+export default Hf.Interface.augment({
     composites: [
         ReactComponentInterfaceComposite,
         ReactDomInterfaceComposite
@@ -45,5 +45,3 @@ const ClientInterface = Hf.Interface.augment({
         done();
     }
 });
-
-export default ClientInterface;

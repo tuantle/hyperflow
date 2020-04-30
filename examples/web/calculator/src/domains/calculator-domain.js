@@ -31,7 +31,7 @@ const assignOperand = (nextValue, prevValue) => {
     return `${prevValue}${nextValue}`;
 };
 
-const CalculatorDomain = Hf.Domain.augment({
+export default Hf.Domain.augment({
     $init () {
         const domain = this;
         domain.register({
@@ -156,4 +156,3 @@ const CalculatorDomain = Hf.Domain.augment({
         done();
     }
 });
-export default CalculatorDomain;

@@ -10,7 +10,7 @@ import TodoInterface from '../interfaces/todo-interface';
 
 import EVENT from '../events/todo-event';
 
-const TodoDomain = Hf.Domain.augment({
+export default Hf.Domain.augment({
     $init () {
         const domain = this;
         domain.register({
@@ -62,4 +62,3 @@ const TodoDomain = Hf.Domain.augment({
         done();
     }
 });
-export default TodoDomain;

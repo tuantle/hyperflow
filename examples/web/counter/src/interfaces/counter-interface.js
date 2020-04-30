@@ -12,7 +12,7 @@ import ReactDomInterfaceComposite from 'hyperflow/libs/composites/interfaces/rea
 
 import EVENT from '../events/counter-event';
 
-const CounterInterface = Hf.Interface.augment({
+export default Hf.Interface.augment({
     composites: [
         ReactComponentInterfaceComposite,
         ReactDomInterfaceComposite
@@ -43,4 +43,3 @@ const CounterInterface = Hf.Interface.augment({
         intf.outgoing(EVENT.ON.CHANGE_OFFSET).emit(() => offset);
     }
 });
-export default CounterInterface;

@@ -2,6 +2,4 @@
 
 import TodoDomain from './domains/todo-domain';
 
-const TodoApp = TodoDomain(`todo`);
-
-export default TodoApp;
+export default TodoDomain(`todo`);

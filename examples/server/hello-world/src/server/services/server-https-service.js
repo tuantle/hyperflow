@@ -38,7 +38,7 @@ const {
     HTTP_OK_CODE
 } = CONSTANT;
 
-const AppHttpsService = Hf.Service.augment({
+export default Hf.Service.augment({
     static: {
         private: {
             appKey: ``,
@@ -137,5 +137,3 @@ const AppHttpsService = Hf.Service.augment({
         done();
     }
 });
-
-export default AppHttpsService;

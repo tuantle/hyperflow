@@ -6,7 +6,7 @@ import WebStorageServiceComposite from 'hyperflow/libs/composites/services/web-s
 
 import EVENT from '../../common/event';
 
-const AppStorageService = Hf.Service.augment({
+export default Hf.Service.augment({
     composites: [ WebStorageServiceComposite ],
     $init () {
         const service = this;
@@ -26,7 +26,7 @@ const AppStorageService = Hf.Service.augment({
         service.incoming(EVENT.REQUEST.DATAREAD).handle(() => {
             service.from(`local-storage`, `hello-world`)
                 .read()
-                .then(results => service.outgoing(EVENT.RESPONSE.TO.DATAREAD.OK).emit(() => results[0]))
+                .then((results) => service.outgoing(EVENT.RESPONSE.TO.DATAREAD.OK).emit(() => results[0]))
                 .catch((error) => {
                     service.outgoing(EVENT.RESPONSE.TO.DATAREAD.ERROR).emit();
                     console.warn(`AppStorageService - Unable to read from local storage. ${error.message}`);
@@ -44,4 +44,3 @@ const AppStorageService = Hf.Service.augment({
         done();
     }
 });
-export default AppStorageService;

@@ -2,6 +2,4 @@
 
 import CounterDomain from './domains/counter-domain';
 
-const CounterApp = CounterDomain(`counter`);
-
-export default CounterApp;
+export default CounterDomain(`counter`);

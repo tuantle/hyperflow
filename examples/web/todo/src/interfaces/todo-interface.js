@@ -10,7 +10,7 @@ import ReactDomInterfaceComposite from 'hyperflow/libs/composites/interfaces/rea
 
 import EVENT from '../events/todo-event';
 
-const TodoInterface = Hf.Interface.augment({
+export default Hf.Interface.augment({
     composites: [
         ReactComponentInterfaceComposite,
         ReactDomInterfaceComposite
@@ -45,4 +45,3 @@ const TodoInterface = Hf.Interface.augment({
         intf.outgoing(EVENT.ON.CHANGE_FILTER).emit(() => newFilter);
     }
 });
-export default TodoInterface;

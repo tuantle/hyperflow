@@ -10,7 +10,7 @@ import ReactDomInterfaceComposite from 'hyperflow/libs/composites/interfaces/rea
 
 import EVENT from '../events/calculator-event';
 
-const CalculatorInterface = Hf.Interface.augment({
+export default Hf.Interface.augment({
     composites: [
         ReactComponentInterfaceComposite,
         ReactDomInterfaceComposite
@@ -41,5 +41,3 @@ const CalculatorInterface = Hf.Interface.augment({
         intf.outgoing(EVENT.ON.COMPUTE).emit();
     }
 });
-
-export default CalculatorInterface;

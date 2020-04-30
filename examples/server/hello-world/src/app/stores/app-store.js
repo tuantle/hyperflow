@@ -10,7 +10,7 @@ import EVENT from '../../common/event';
 
 const { MESSAGE } = CONSTANT;
 
-const ClientAppStore = Hf.Store.augment({
+export default Hf.Store.augment({
     composites: [
         ImmutableStateComposite
     ],
@@ -58,4 +58,3 @@ const ClientAppStore = Hf.Store.augment({
         done();
     }
 });
-export default ClientAppStore;

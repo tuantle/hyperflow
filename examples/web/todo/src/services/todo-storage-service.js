@@ -6,7 +6,7 @@ import WebStorageServiceComposite from 'hyperflow/libs/composites/services/web-s
 
 import EVENT from '../events/todo-event';
 
-const TodoStorageService = Hf.Service.augment({
+export default Hf.Service.augment({
     composites: [ WebStorageServiceComposite ],
     $init () {
         const service = this;
@@ -34,7 +34,7 @@ const TodoStorageService = Hf.Service.augment({
         service.incoming(EVENT.REQUEST.DATAREAD).handle((pathId) => {
             service.from(`local-storage`, pathId)
                 .read()
-                .then(results => service.outgoing(EVENT.RESPONSE.TO.DATAREAD.OK).emit(() => results[0]))
+                .then((results) => service.outgoing(EVENT.RESPONSE.TO.DATAREAD.OK).emit(() => results[0]))
                 .catch((error) => {
                     service.outgoing(EVENT.RESPONSE.TO.DATAREAD.ERROR).emit();
                     console.warn(`TodoStorageService - Unable to read from local storage. ${error.message}`);
@@ -55,4 +55,3 @@ const TodoStorageService = Hf.Service.augment({
         done();
     }
 });
-export default TodoStorageService;

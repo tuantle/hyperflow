@@ -10,7 +10,7 @@ import CounterInterface from '../interfaces/counter-interface';
 
 import EVENT from '../events/counter-event';
 
-const CounterDomain = Hf.Domain.augment({
+export default Hf.Domain.augment({
     $init () {
         const domain = this;
         domain.register({
@@ -36,4 +36,3 @@ const CounterDomain = Hf.Domain.augment({
         done();
     }
 });
-export default CounterDomain;

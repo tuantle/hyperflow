@@ -6,7 +6,7 @@ import ImmutableStateComposite from 'hyperflow/libs/composites/states/immutable-
 
 import EVENT from '../events/todo-event';
 
-const TodoStore = Hf.Store.augment({
+export default Hf.Store.augment({
     composites: [ ImmutableStateComposite ],
     state: {
         setting: {
@@ -103,14 +103,12 @@ const TodoStore = Hf.Store.augment({
 
         store.incoming(EVENT.DO.EDIT_TASK).handle((editTask) => {
             if (store.mutate(editTask)) {
-                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => {
-                    return {
-                        bundle: {
-                            tasks: store.tasks
-                        },
-                        pathId: `todo.tasks`
-                    };
-                });
+                store.outgoing(EVENT.AS.STORE_MUTATED).emit(() => ({
+                    bundle: {
+                        tasks: store.tasks
+                    },
+                    pathId: `todo.tasks`
+                }));
                 console.log(`Store mutated.`);
             }
         });
@@ -133,4 +131,3 @@ const TodoStore = Hf.Store.augment({
         done();
     }
 });
-export default TodoStore;
