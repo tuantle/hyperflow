@@ -1,6 +1,6 @@
 {
     "name": "hyperflow",
-    "version": "0.3.0-rc2",
+    "version": "0.3.0-rc3",
     "registry": "github",
     "description": "A javascript state flow and mutation management toolkit & library for developing universal app.",
     "license": "MIT",
@@ -37,32 +37,32 @@
         "npm": ">=5.x"
     },
     "dependencies": {
-        "rxjs": "^6.5.4"
+        "rxjs": "^6.5.5"
     },
     "devDependencies": {
-        "@babel/core": "^7.8.6",
-        "@babel/node": "^7.8.4",
+        "@babel/core": "^7.9.6",
+        "@babel/node": "^7.8.7",
         "@babel/plugin-proposal-class-properties": "^7.8.3",
         "@babel/plugin-proposal-nullish-coalescing-operator": "^7.8.3",
-        "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
-        "@babel/plugin-proposal-optional-chaining": "^7.8.3",
+        "@babel/plugin-proposal-object-rest-spread": "^7.9.6",
+        "@babel/plugin-proposal-optional-chaining": "^7.9.0",
         "@babel/plugin-transform-strict-mode": "^7.8.3",
-        "@babel/preset-env": "^7.8.6",
-        "@babel/preset-react": "^7.8.3",
-        "@babel/register": "^7.8.6",
-        "@babel/runtime": "^7.8.4",
+        "@babel/preset-env": "^7.9.6",
+        "@babel/preset-react": "^7.9.4",
+        "@babel/register": "^7.9.0",
+        "@babel/runtime": "^7.9.6",
         "babel-eslint": "^10.1.0",
-        "babel-jest": "^25.1.0",
+        "babel-jest": "^25.5.1",
         "eslint": "^6.8.0",
-        "eslint-plugin-react": "^7.18.3",
+        "eslint-plugin-react": "^7.19.0",
         "eslint-plugin-react-native": "^3.8.1",
-        "jest": "^25.1.0",
-        "metro-react-native-babel-preset": "^0.58.0",
+        "jest": "^25.5.2",
+        "metro-react-native-babel-preset": "^0.59.0",
         "prop-types": "^15.7.2",
-        "react": "^16.13.0",
-        "react-dom": "^16.13.0",
-        "react-test-renderer": "^16.13.0",
-        "tape": "^4.13.0"
+        "react": "^16.13.1",
+        "react-dom": "^16.13.1",
+        "react-test-renderer": "^16.13.1",
+        "tape": "^5.0.0"
     },
     "scripts": {
         "start-unit-tests": "NODE_ENV=development babel-node ./__tests__/test-suites",
