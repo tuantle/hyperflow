@@ -2,6 +2,19 @@
 ## A javascript state flow and mutation management toolkit & library for developing universal app.
 
 ----
+
+**Development RC Version 0.3.0-rc3 (04/29/2020)**
+```
+Notes:
+New Features:
+Changes:
+    - Updated eslint & eslint rules.
+    - Added incoming.map & incoming filter to EventStreamComposite.
+Breaking Changes:
+Improvements:
+Bug fixes:
+```
+
 **Development RC Version 0.3.0-rc2 (03/05/2020)**
 ```
 Notes:
