@@ -38,12 +38,10 @@ export function runTests () {
             }).recombine();
         },
         operateOutgoingStream (operator) {
-            operator.divert(`event3`).map((payload) => {
-                return {
-                    eventId: `event3`,
-                    value: payload.value[0] + payload.value[1]
-                };
-            }).monitor({
+            operator.divert(`event3`).map((payload) => ({
+                eventId: `event3`,
+                value: payload.value[0] + payload.value[1]
+            })).monitor({
                 logNext: (payload) => {
                     console.log(`Monitor factory A outgoing event stream id:${payload.eventId} -- ${payload.value}`);
                 }
@@ -117,10 +115,13 @@ export function runTests () {
             factory.incoming(`event3`).handle((results) => {
                 console.log(results);
             });
-            factory.incoming(`event5`).handle((value) => {
-                console.log(value);
-                done();
-            });
+            factory.incoming(`event5`)
+                .filter((value) => value > 0)
+                .map((value) => value * value)
+                .handle((value) => {
+                    console.log(value);
+                    done();
+                });
             factory.incoming(`event7`).forward(`event9`);
             factory.incoming(`event8`).forward(`event10`);
             factory.outgoing(`event-final`).emit(() => `DONE!`);
@@ -196,7 +197,7 @@ export function runTests () {
 
             factoryC.outgoing(`cancellable-eventA`).delay(1000).emit(() => `A completed!!!`);
             factoryC.outgoing(`cancellable-eventB`).delay(2000).emit(() => `B completed!!!`);
-            // factoryC.outgoing(`interval-eventC`).delay(3000).periodic(1000, (tick) => tick === 15).emit(() => `C`);
+            factoryC.outgoing(`interval-eventC`).delay(3000).periodic(1000, (tick) => tick === 15).emit(() => `C`);
 
             factoryC.outgoing(`cancellable-eventA`).delay(2500).cancelLatest();
         });
