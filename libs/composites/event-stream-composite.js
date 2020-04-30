@@ -85,6 +85,19 @@ const REPEATING_EVENT = 3;
 const REPEATED_EVENT = 4;
 const LOOPBACK_EVENT = 5;
 
+const DEFAULT_ARBITER = {
+    eventDirectionalState: -1,
+    completed: false,
+    waitTime: 0,
+    period: 0,
+    predicator: null,
+    mapper: null,
+    handler: null,
+    stopper: null,
+    canceller: null,
+    relayer: null
+};
+
 export default Composite({
     template: {
         /**
@@ -164,13 +177,12 @@ export default Composite({
                             eventDirectionalState,
                             completed,
                             waitTime,
+                            predicator,
+                            mapper,
                             handler,
                             canceller,
                             relayer
-                        } = fallback({
-                            completed: false,
-                            waitTime: 0
-                        }).of(_arbiter[eventId]);
+                        } = _arbiter[eventId];
                         /**
                          * @description - Called on cancellation to assign/regsiter a canceller callback.
                          *
@@ -194,13 +206,27 @@ export default Composite({
                          * @return void
                          */
                         const onAsyncHandle = async () => {
-                            const handledValue = isFunction(handler) ? await handler(value, onCancel) : undefined;
                             if (cancellation.confirmed && isFunction(canceller)) {
                                 canceller(cancellation.sourceEventIds);
                             }
-                            if (isFunction(relayer)) {
-                                relayer(handledValue, cancellation);
+
+                            let passed = true;
+                            if (isFunction(predicator)) {
+                                passed = predicator(value);
+                                passed = isBoolean(passed) ? passed : true;
                             }
+                            if (passed) {
+                                let mappedValue;
+                                if (isFunction(mapper)) {
+                                    mappedValue = mapper(value);
+                                }
+
+                                const handledValue = isFunction(handler) ? await handler(mappedValue ?? value, onCancel) : undefined;
+                                if (isFunction(relayer)) {
+                                    relayer(handledValue, cancellation);
+                                }
+                            }
+
                             if (completed) {
                                 delete _arbiter[eventId];
                                 // _arbiter[eventId] = undefined;
@@ -360,37 +386,37 @@ export default Composite({
                      * @description - At observable stream, operates filter.
                      *
                      * @method filter
-                     * @param {function} predicate
+                     * @param {function} predicator
                      * @return {object}
                      */
-                    filter (predicate) {
+                    filter (predicator) {
                         if (ENV.DEVELOPMENT) {
-                            if (!isFunction(predicate)) {
-                                log(`error`, `EventStreamComposite.filter - Input filter predicate function is invalid.`);
+                            if (!isFunction(predicator)) {
+                                log(`error`, `EventStreamComposite.filter - Input filter predicator function is invalid.`);
                             }
                         }
                         switch (direction) {
                         case INCOMING_DIRECTION:
                             _incomingStream = _incomingStream.pipe(
-                                rxFilterOp(predicate),
+                                rxFilterOp(predicator),
                                 rxShareOp()
                             );
                             break;
                         case OUTGOING_DIRECTION:
                             _outgoingStream = _outgoingStream.pipe(
-                                rxFilterOp(predicate),
+                                rxFilterOp(predicator),
                                 rxShareOp()
                             );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
                             _divertedIncomingStream = _divertedIncomingStream.pipe(
-                                rxFilterOp(predicate),
+                                rxFilterOp(predicator),
                                 rxShareOp()
                             );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
                             _divertedOutgoingStream = _divertedOutgoingStream.pipe(
-                                rxFilterOp(predicate),
+                                rxFilterOp(predicator),
                                 rxShareOp()
                             );
                             break;
@@ -404,38 +430,38 @@ export default Composite({
                      * @description - At observable stream, operates map.
                      *
                      * @method map
-                     * @param {function} selector
+                     * @param {function} mapper
                      * @return {object}
                      */
-                    map (selector) {
+                    map (mapper) {
                         if (ENV.DEVELOPMENT) {
-                            if (!isFunction(selector)) {
-                                log(`error`, `EventStreamComposite.map - Input map selector function is invalid.`);
+                            if (!isFunction(mapper)) {
+                                log(`error`, `EventStreamComposite.map - Input map mapper function is invalid.`);
                             }
                         }
 
                         switch (direction) {
                         case INCOMING_DIRECTION:
                             _incomingStream = _incomingStream.pipe(
-                                rxMapOp(selector),
+                                rxMapOp(mapper),
                                 rxShareOp()
                             );
                             break;
                         case OUTGOING_DIRECTION:
                             _outgoingStream = _outgoingStream.pipe(
-                                rxMapOp(selector),
+                                rxMapOp(mapper),
                                 rxShareOp()
                             );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
                             _divertedIncomingStream = _divertedIncomingStream.pipe(
-                                rxMapOp(selector),
+                                rxMapOp(mapper),
                                 rxShareOp()
                             );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
                             _divertedOutgoingStream = _divertedOutgoingStream.pipe(
-                                rxMapOp(selector),
+                                rxMapOp(mapper),
                                 rxShareOp()
                             );
                             break;
@@ -449,41 +475,41 @@ export default Composite({
                      * @description - At observable stream, operates flatten and map.
                      *
                      * @method flatMap
-                     * @param {function} selector
+                     * @param {function} mapper
                      * @param {function} resultSelector
                      * @return {object}
                      */
-                    flatMap (selector, resultSelector) {
+                    flatMap (mapper, resultSelector) {
                         if (ENV.DEVELOPMENT) {
-                            if (!isFunction(selector)) {
-                                log(`error`, `EventStreamComposite.flatMap - Input flat map selector function is invalid.`);
+                            if (!isFunction(mapper)) {
+                                log(`error`, `EventStreamComposite.flatMap - Input flat map mapper function is invalid.`);
                             } else if (!isFunction(resultSelector)) {
-                                log(`error`, `EventStreamComposite.flatMap - Input flat map result selector function is invalid.`);
+                                log(`error`, `EventStreamComposite.flatMap - Input flat map result mapper function is invalid.`);
                             }
                         }
 
                         switch (direction) {
                         case INCOMING_DIRECTION:
                             _incomingStream = _incomingStream.pipe(
-                                rxFlatMapOp(selector, resultSelector),
+                                rxFlatMapOp(mapper, resultSelector),
                                 rxShareOp()
                             );
                             break;
                         case OUTGOING_DIRECTION:
                             _outgoingStream = _outgoingStream.pipe(
-                                rxFlatMapOp(selector, resultSelector),
+                                rxFlatMapOp(mapper, resultSelector),
                                 rxShareOp()
                             );
                             break;
                         case DIVERTED_INCOMING_DIRECTION:
                             _divertedIncomingStream = _divertedIncomingStream.pipe(
-                                rxFlatMapOp(selector, resultSelector),
+                                rxFlatMapOp(mapper, resultSelector),
                                 rxShareOp()
                             );
                             break;
                         case DIVERTED_OUTGOING_DIRECTION:
                             _divertedOutgoingStream = _divertedOutgoingStream.pipe(
-                                rxFlatMapOp(selector, resultSelector),
+                                rxFlatMapOp(mapper, resultSelector),
                                 rxShareOp()
                             );
                             break;
@@ -1122,11 +1148,9 @@ export default Composite({
                                 }
                             } else {
                                 arbiter[eventId] = {
+                                    ...DEFAULT_ARBITER,
                                     eventDirectionalState: OUTGOING_EVENT,
-                                    waitTime: ms,
-                                    handler: null,
-                                    canceller: null,
-                                    relayer: null
+                                    waitTime: ms
                                 };
                             }
                             return arbiter;
@@ -1167,12 +1191,10 @@ export default Composite({
                                 }
                             } else {
                                 arbiter[eventId] = {
+                                    ...DEFAULT_ARBITER,
                                     eventDirectionalState: OUTGOING_EVENT,
                                     period: ms,
-                                    stopper,
-                                    handler: null,
-                                    canceller: null,
-                                    relayer: null
+                                    stopper
                                 };
                             }
                             return arbiter;
@@ -1213,10 +1235,8 @@ export default Composite({
                                         waitTime,
                                         period,
                                         stopper
-                                    } = fallback({
-                                        waitTime: 0,
-                                        period: 0
-                                    }).of(_arbiter[eventId]);
+                                    } = _arbiter[eventId];
+
                                     let sideSubscription;
                                     let sideStream = RxObservable;
                                     const sideObserver = RxSubscriber.create(
@@ -1229,9 +1249,9 @@ export default Composite({
                                          */
                                         function next (tick) {
                                             if (isFunction(stopper)) {
-                                                let periodicStopped = stopper(tick.value);
+                                                let periodicStopped = stopper(tick.value + 1);
 
-                                                periodicStopped = isBoolean(periodicStopped) ? periodicStopped : false;
+                                                periodicStopped = isBoolean(periodicStopped) ? periodicStopped : true;
 
                                                 if (periodicStopped) {
                                                     sideObserver.complete();
@@ -1296,10 +1316,8 @@ export default Composite({
                                     }
                                 } else {
                                     _arbiter[eventId] = {
-                                        eventDirectionalState: OUTGOING_EVENT,
-                                        handler: null,
-                                        canceller: null,
-                                        relayer: null
+                                        ...DEFAULT_ARBITER,
+                                        eventDirectionalState: OUTGOING_EVENT
                                     };
                                     _streamEmitter.next(payload);
                                 }
@@ -1346,10 +1364,7 @@ export default Composite({
                                     const {
                                         waitTime,
                                         period
-                                    } = fallback({
-                                        waitTime: 0,
-                                        period: 0
-                                    }).of(_arbiter[eventId]);
+                                    } = _arbiter[eventId];
 
                                     if (ENV.DEVELOPMENT) {
                                         if (period !== 0) {
@@ -1404,6 +1419,85 @@ export default Composite({
                 });
                 const incomingOperator = {
                     /**
+                     * @description - At event, and after filtering...
+                     *
+                     * @method incoming.filter
+                     * @param {function} predicator
+                     * @return {object}
+                     */
+                    filter (predicator) {
+                        if (ENV.DEVELOPMENT) {
+                            if (!isFunction(predicator)) {
+                                log(`error`, `EventStreamComposite.incoming.validate - Input filter predicator is invalid.`);
+                            }
+                        }
+
+                        _arbiter = eventIds.reduce((arbiter, eventId) => {
+                            if (Object.prototype.hasOwnProperty.call(arbiter, eventId)) {
+                                arbiter[eventId].predicator = predicator;
+                                if (arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
+                                    arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
+                                }
+                            } else {
+                                arbiter[eventId] = {
+                                    ...DEFAULT_ARBITER,
+                                    eventDirectionalState: INCOMING_EVENT,
+                                    predicator
+                                };
+                            }
+                            return arbiter;
+                        }, _arbiter);
+
+                        return {
+                            delay: incomingOperator.delay,
+                            asPromised: incomingOperator.asPromised,
+                            await: incomingOperator.await,
+                            map: incomingOperator.map,
+                            handle: incomingOperator.handle,
+                            forward: incomingOperator.forward,
+                            repeat: incomingOperator.repeat
+                        };
+                    },
+                    /**
+                     * @description - At event, and after mapping...
+                     *
+                     * @method incoming.map
+                     * @param {function} mapper
+                     * @return {object}
+                     */
+                    map (mapper) {
+                        if (ENV.DEVELOPMENT) {
+                            if (!isFunction(mapper)) {
+                                log(`error`, `EventStreamComposite.incoming.validate - Input filter mapper is invalid.`);
+                            }
+                        }
+
+                        _arbiter = eventIds.reduce((arbiter, eventId) => {
+                            if (Object.prototype.hasOwnProperty.call(arbiter, eventId)) {
+                                arbiter[eventId].mapper = mapper;
+                                if (arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
+                                    arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
+                                }
+                            } else {
+                                arbiter[eventId] = {
+                                    ...DEFAULT_ARBITER,
+                                    eventDirectionalState: INCOMING_EVENT,
+                                    mapper
+                                };
+                            }
+                            return arbiter;
+                        }, _arbiter);
+
+                        return {
+                            delay: incomingOperator.delay,
+                            asPromised: incomingOperator.asPromised,
+                            await: incomingOperator.await,
+                            handle: incomingOperator.handle,
+                            forward: incomingOperator.forward,
+                            repeat: incomingOperator.repeat
+                        };
+                    },
+                    /**
                      * @description - At event, and after delay for some time...
                      *
                      * @method incoming.delay
@@ -1430,11 +1524,9 @@ export default Composite({
                                 }
                             } else {
                                 arbiter[eventId] = {
+                                    ...DEFAULT_ARBITER,
                                     eventDirectionalState: INCOMING_EVENT,
-                                    waitTime: ms,
-                                    handler: null,
-                                    canceller: null,
-                                    relayer: null
+                                    waitTime: ms
                                 };
                             }
                             return arbiter;
@@ -1443,6 +1535,7 @@ export default Composite({
                         return {
                             asPromised: incomingOperator.asPromised,
                             await: incomingOperator.await,
+                            validate: incomingOperator.validate,
                             handle: incomingOperator.handle,
                             forward: incomingOperator.forward,
                             repeat: incomingOperator.repeat
@@ -1465,31 +1558,27 @@ export default Composite({
                                     }
                                 } else {
                                     _arbiter[eventId] = {
+                                        ...DEFAULT_ARBITER,
                                         eventDirectionalState: INCOMING_EVENT,
-                                        handler: (value) => resolve(value),
-                                        canceller: null,
-                                        relayer: null
+                                        handler: (value) => resolve(value)
                                     };
                                 }
                             });
                         }
-                        return eventIds.map((eventId) => {
-                            return new Promise((resolve) => {
-                                if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
-                                    _arbiter[eventId].handler = (value) => resolve(value);
-                                    if (_arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
-                                        _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
-                                    }
-                                } else {
-                                    _arbiter[eventId] = {
-                                        eventDirectionalState: INCOMING_EVENT,
-                                        handler: (value) => resolve(value),
-                                        canceller: null,
-                                        relayer: null
-                                    };
+                        return eventIds.map((eventId) => new Promise((resolve) => {
+                            if (Object.prototype.hasOwnProperty.call(_arbiter, eventId)) {
+                                _arbiter[eventId].handler = (value) => resolve(value);
+                                if (_arbiter[eventId].eventDirectionalState === OUTGOING_EVENT) {
+                                    _arbiter[eventId].eventDirectionalState = LOOPBACK_EVENT;
                                 }
-                            });
-                        });
+                            } else {
+                                _arbiter[eventId] = {
+                                    ...DEFAULT_ARBITER,
+                                    eventDirectionalState: INCOMING_EVENT,
+                                    handler: (value) => resolve(value)
+                                };
+                            }
+                        }));
                     },
                     /**
                      * @description - Wait for all events to arrive...
@@ -1513,7 +1602,10 @@ export default Composite({
                             let timeoutId = null;
                             let timedout = false;
                             const awaitedEventId = eventIds.reduce((_awaitedEventId, eventId) => {
-                                return isEmpty(_awaitedEventId) ? eventId : `${_awaitedEventId},${eventId}`;
+                                if (isEmpty(_awaitedEventId)) {
+                                    return eventId;
+                                }
+                                return `${_awaitedEventId},${eventId}`;
                             }, ``);
                             const incomingAwaitOperator = factory.incoming(awaitedEventId);
                             const sideObserver = RxSubscriber.create(
@@ -1531,9 +1623,8 @@ export default Composite({
 
                                         if (awaitedBundleEventIds.length === eventIds.length &&
                                             awaitedBundleEventIds.every((eventId) => eventIds.includes(eventId))) {
-                                            factory.outgoing(awaitedEventId).emit(() => {
-                                                return awaitedBundleEventIds.map((awaitedBundleEventId) => awaitedPayloadBundle[awaitedBundleEventId].value);
-                                            });
+                                            factory.outgoing(awaitedEventId)
+                                                .emit(() => awaitedBundleEventIds.map((awaitedBundleEventId) => awaitedPayloadBundle[awaitedBundleEventId].value));
                                             if (timeoutId !== null) {
                                                 timedout = false;
                                                 clearTimeout(timeoutId);
@@ -1630,10 +1721,9 @@ export default Composite({
                                 }
                             } else {
                                 arbiter[eventId] = {
+                                    ...DEFAULT_ARBITER,
                                     eventDirectionalState: INCOMING_EVENT,
-                                    handler,
-                                    canceller: null,
-                                    relayer: null
+                                    handler
                                 };
                             }
                             return arbiter;
@@ -1714,9 +1804,9 @@ export default Composite({
                                 };
                             } else {
                                 arbiter[eventId] = {
+                                    ...DEFAULT_ARBITER,
                                     eventDirectionalState: REPEATING_EVENT,
                                     handler: (value) => value,
-                                    canceller: null,
                                     relayer: (handledValue, cancellation) => {
                                         if (!cancellation.confirmed) {
                                             factory.outgoing(eventId).emit(() => handledValue);
@@ -1873,11 +1963,10 @@ export default Composite({
                     _outgoingStreamActivated = true;
 
                     /* emit all the un-emitted payloads that were pushed to queue before activation */
-                    _unemitPayloads.forEach((unemitPayload) => {
-                        const {
-                            eventId,
-                            value
-                        } = unemitPayload;
+                    _unemitPayloads.forEach(({
+                        eventId,
+                        value
+                    }) => {
                         // FIXME: unemitPayloads are being emitted multiple times.
                         factory.outgoing(eventId).emit(() => value);
                     });
@@ -1961,41 +2050,37 @@ export default Composite({
                 if (ENV.DEVELOPMENT) {
                     if (!isNonEmptyArray(sources)) {
                         log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source array is empty.`);
-                    } else if (sources.some((source) => {
-                        return !isSchema({
-                            name: `string`,
-                            type: `string`,
-                            registerStream: `function`
-                        }).of(source);
-                    })) {
+                    } else if (sources.some((source) => !isSchema({
+                        name: `string`,
+                        type: `string`,
+                        registerStream: `function`
+                    }).of(source))) {
                         log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
                     }
                 }
 
-                sources.map((source) => {
-                    /**
-                     * @description -
-                     *
-                     * @method streamConnect
-                     * @return void
-                     */
-                    const streamConnect = (sourceOutgoingStream) => {
-                        if (ENV.DEVELOPMENT) {
-                            if (!isDefined(sourceOutgoingStream)) {
-                                log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
-                            }
+                /**
+                 * @description -
+                 *
+                 * @method streamConnect
+                 * @return void
+                 */
+                const streamConnect = (sourceOutgoingStream) => {
+                    if (ENV.DEVELOPMENT) {
+                        if (!isDefined(sourceOutgoingStream)) {
+                            log(`error`, `EventStreamComposite.observe - Factory:${factory.name} input source objects are invalid.`);
                         }
-                        /* merge all external incoming event streams into one */
-                        _incomingStream = rxMerge(sourceOutgoingStream, _incomingStream).pipe(
-                            rxShareOp()
-                        );
-                    };
+                    }
+                    /* merge all external incoming event streams into one */
+                    _incomingStream = rxMerge(sourceOutgoingStream, _incomingStream).pipe(
+                        rxShareOp()
+                    );
+                };
 
-                    source.registerStream({
-                        streamId: `${source.type}-${source.name}`,
-                        streamConnect: streamConnect.bind(source)
-                    });
-                });
+                sources.forEach((source) => source.registerStream({
+                    streamId: `${source.type}-${source.name}`,
+                    streamConnect: streamConnect.bind(source)
+                }));
 
                 return _createStreamOperatorFor.call(factory, INCOMING_DIRECTION);
             };
