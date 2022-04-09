@@ -40,7 +40,7 @@
     "@material-ui/icons": "^4.9.1",
     "hyperflow": "file:../../../hyperflow-0.3.0-rc3.tgz",
     "jss": "^10.1.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }
